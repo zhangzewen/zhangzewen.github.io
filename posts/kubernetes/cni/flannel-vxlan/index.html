@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>flannel 源码分析之 vxlan 模式 &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="flannel 源码分析之 vxlan 模式">
+  <meta itemprop="description" content="注册和创建 vxlan Network 实例 结构体 VXLANBackend 实现了接口 Backend 和 Network。 vxlan 注册到 flannel 的流程如下:">
+  <meta itemprop="datePublished" content="2025-07-21T23:43:31+08:00">
+  <meta itemprop="dateModified" content="2025-07-21T23:43:31+08:00">
+  <meta itemprop="wordCount" content="1704">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="Cni,Flannel">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="flannel 源码分析之 vxlan 模式">
+  <meta name="twitter:description" content="注册和创建 vxlan Network 实例 结构体 VXLANBackend 实现了接口 Backend 和 Network。 vxlan 注册到 flannel 的流程如下:">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="flannel 源码分析之 vxlan 模式">
+  <meta property="og:description" content="注册和创建 vxlan Network 实例 结构体 VXLANBackend 实现了接口 Backend 和 Network。 vxlan 注册到 flannel 的流程如下:">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-07-21T23:43:31+08:00">
+    <meta property="article:modified_time" content="2025-07-21T23:43:31+08:00">
+    <meta property="article:tag" content="Cni">
+    <meta property="article:tag" content="Flannel">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/#webpage",
+      "url": "https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/",
+      "name": "flannel 源码分析之 vxlan 模式",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2025-07-21T23:43:31+08:00",
+      "dateModified": "2025-07-21T23:43:31+08:00",
+      "description": "\u003ch2 id=\"注册和创建-vxlan-network-实例\"\u003e注册和创建 vxlan Network 实例\u003c/h2\u003e\n\u003cp\u003e结构体 VXLANBackend 实现了接口 Backend 和 Network。\nvxlan 注册到 flannel 的流程如下:\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/#webpage"
+      },
+      "headline": "flannel 源码分析之 vxlan 模式",
+      "datePublished": "2025-07-21T23:43:31+08:00",
+      "dateModified": "2025-07-21T23:43:31+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "Cni",
+        "Flannel"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#注册和创建-vxlan-network-实例">注册和创建 vxlan Network 实例</a></li>
+        <li><a href="#启动-vxlan-network-实例">启动 vxlan Network 实例</a></li>
+        <li><a href="#vxlan-网络实现">vxlan 网络实现</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">flannel 源码分析之 vxlan 模式</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2025-07-21T23:43:31&#43;0800">Created: Jul 21, 2025</time>
+    <span class="readtime">&middot; 8 min read</span>
+  </div>
+
+  <div>
+    <h2 id="注册和创建-vxlan-network-实例">注册和创建 vxlan Network 实例</h2>
+<p>结构体 VXLANBackend 实现了接口 Backend 和 Network。
+vxlan 注册到 flannel 的流程如下:</p>
+<ul>
+<li>创建 vxlan 设备.</li>
+<li>完成 lease 地址配置租约.</li>
+<li>为 flannel device 设备添加 ip 地址.</li>
+<li>创建 Network 实例.</li>
+</ul>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (be <span style="color:#ff79c6">*</span>VXLANBackend) <span style="color:#50fa7b">RegisterNetwork</span>(ctx context.Context, wg <span style="color:#ff79c6">*</span>sync.WaitGroup, config <span style="color:#ff79c6">*</span>subnet.Config) (backend.Network, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Parse our configuration</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 默认的cfg{VNI: 1, Port: 0, GBP: false, Learning: false, DirectRouting: false}</span>
+</span></span><span style="display:flex;"><span>	cfg <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>		VNI           <span style="color:#8be9fd">int</span>
+</span></span><span style="display:flex;"><span>		Port          <span style="color:#8be9fd">int</span>
+</span></span><span style="display:flex;"><span>		MTU           <span style="color:#8be9fd">int</span>
+</span></span><span style="display:flex;"><span>		GBP           <span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span>		Learning      <span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span>		DirectRouting <span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span>	}{
+</span></span><span style="display:flex;"><span>		VNI: defaultVNI,
+</span></span><span style="display:flex;"><span>		MTU: be.extIface.Iface.MTU,
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(config.Backend) &gt; <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> json.<span style="color:#50fa7b">Unmarshal</span>(config.Backend, <span style="color:#ff79c6">&amp;</span>cfg); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;error decoding VXLAN backend config: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;VXLAN config: VNI=%d Port=%d GBP=%v Learning=%v DirectRouting=%v&#34;</span>, cfg.VNI, cfg.Port, cfg.GBP, cfg.Learning, cfg.DirectRouting)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> dev, v6Dev <span style="color:#ff79c6">*</span>vxlanDevice
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> err <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// When flannel is restarted, it will get the MAC address from the node annotations to set flannel.1 MAC address</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> hwAddr, hwAddrv6 net.HardwareAddr
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	macStr, macStrv6 <span style="color:#ff79c6">:=</span> be.subnetMgr.<span style="color:#50fa7b">GetStoredMacAddresses</span>(ctx)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> macStr <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>		hwAddr, err = net.<span style="color:#50fa7b">ParseMAC</span>(macStr)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Failed to parse mac addr(%s): %v&#34;</span>, macStr, err)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Interface flannel.%d mac address set to: %s&#34;</span>, cfg.VNI, macStr)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> config.EnableIPv4 {
+</span></span><span style="display:flex;"><span>		devAttrs <span style="color:#ff79c6">:=</span> vxlanDeviceAttrs{
+</span></span><span style="display:flex;"><span>			vni:       <span style="color:#8be9fd;font-style:italic">uint32</span>(cfg.VNI),
+</span></span><span style="display:flex;"><span>			name:      fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;flannel.%d&#34;</span>, cfg.VNI), <span style="color:#6272a4">//  ip addr上可以看到是flannel.1</span>
+</span></span><span style="display:flex;"><span>			MTU:       cfg.MTU, 
+</span></span><span style="display:flex;"><span>			vtepIndex: be.extIface.Iface.Index,
+</span></span><span style="display:flex;"><span>			vtepAddr:  be.extIface.IfaceAddr,
+</span></span><span style="display:flex;"><span>			vtepPort:  cfg.Port,
+</span></span><span style="display:flex;"><span>			gbp:       cfg.GBP,
+</span></span><span style="display:flex;"><span>			learning:  cfg.Learning,
+</span></span><span style="display:flex;"><span>			hwAddr:    hwAddr,
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 创建 vxlan 设备</span>
+</span></span><span style="display:flex;"><span>		dev, err = <span style="color:#50fa7b">newVXLANDevice</span>(<span style="color:#ff79c6">&amp;</span>devAttrs)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, err
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		dev.directRouting = cfg.DirectRouting
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> macStrv6 <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>		hwAddrv6, err = net.<span style="color:#50fa7b">ParseMAC</span>(macStrv6)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Failed to parse mac addr(%s): %v&#34;</span>, macStrv6, err)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Interface flannel-v6.%d mac address set to: %s&#34;</span>, cfg.VNI, macStrv6)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> config.EnableIPv6 {
+</span></span><span style="display:flex;"><span>		v6DevAttrs <span style="color:#ff79c6">:=</span> vxlanDeviceAttrs{
+</span></span><span style="display:flex;"><span>			vni:       <span style="color:#8be9fd;font-style:italic">uint32</span>(cfg.VNI),
+</span></span><span style="display:flex;"><span>			name:      fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;flannel-v6.%d&#34;</span>, cfg.VNI),
+</span></span><span style="display:flex;"><span>			MTU:       cfg.MTU,
+</span></span><span style="display:flex;"><span>			vtepIndex: be.extIface.Iface.Index,
+</span></span><span style="display:flex;"><span>			vtepAddr:  be.extIface.IfaceV6Addr,
+</span></span><span style="display:flex;"><span>			vtepPort:  cfg.Port,
+</span></span><span style="display:flex;"><span>			gbp:       cfg.GBP,
+</span></span><span style="display:flex;"><span>			learning:  cfg.Learning,
+</span></span><span style="display:flex;"><span>			hwAddr:    hwAddrv6,
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		v6Dev, err = <span style="color:#50fa7b">newVXLANDevice</span>(<span style="color:#ff79c6">&amp;</span>v6DevAttrs)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, err
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		v6Dev.directRouting = cfg.DirectRouting
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 构建 subnetAttrs 对象, 后用来申请租约.</span>
+</span></span><span style="display:flex;"><span>	subnetAttrs, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">newSubnetAttrs</span>(be.extIface.ExtAddr, be.extIface.ExtV6Addr, <span style="color:#8be9fd;font-style:italic">uint32</span>(cfg.VNI), dev, v6Dev)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 申请lease 地址配置租约</span>
+</span></span><span style="display:flex;"><span>	lease, err <span style="color:#ff79c6">:=</span> be.subnetMgr.<span style="color:#50fa7b">AcquireLease</span>(ctx, subnetAttrs)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">switch</span> err {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">nil</span>:
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> context.Canceled, context.DeadlineExceeded:
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, err
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">default</span>:
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to acquire lease: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Ensure that the device has a /32 address so that no broadcast routes are created.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// This IP is just used as a source address for host to workload traffic (so</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// the return path for the traffic has an address on the flannel network to use as the destination)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> config.EnableIPv4 {
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 获取 flannel 地址信息.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> lease.Subnet.<span style="color:#50fa7b">Empty</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to configure interface %s: IPv4 is enabled but the lease has no IPv4&#34;</span>, dev.link.<span style="color:#50fa7b">Attrs</span>().Name)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">//  设置 node资源中的.spec.podCIDR的值, 就是说给xvlan绑定ip地址</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> dev.<span style="color:#50fa7b">Configure</span>(ip.IP4Net{IP: lease.Subnet.IP, PrefixLen: <span style="color:#bd93f9">32</span>}, config.Network); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to configure interface %s: %w&#34;</span>, dev.link.<span style="color:#50fa7b">Attrs</span>().Name, err)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> config.EnableIPv6 {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> lease.IPv6Subnet.<span style="color:#50fa7b">Empty</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to configure interface %s: IPv6 is enabled but the lease has no IPv6&#34;</span>, v6Dev.link.<span style="color:#50fa7b">Attrs</span>().Name)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> v6Dev.<span style="color:#50fa7b">ConfigureIPv6</span>(ip.IP6Net{IP: lease.IPv6Subnet.IP, PrefixLen: <span style="color:#bd93f9">128</span>}, config.IPv6Network); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to configure interface %s: %w&#34;</span>, v6Dev.link.<span style="color:#50fa7b">Attrs</span>().Name, err)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建 vxlan network, 内部会监听集群变化, 按照变化事件做出增删改 vxlan 操作.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#50fa7b">newNetwork</span>(be.subnetMgr, be.extIface, dev, v6Dev, ip.IP4Net{}, lease, cfg.MTU)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<h2 id="启动-vxlan-network-实例">启动 vxlan Network 实例</h2>
+<p>vxlan 通过 Run 启动, 其在后台运行两个协程，一个是监听租约的变化事件，一个是处理事件:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (nw <span style="color:#ff79c6">*</span>network) <span style="color:#50fa7b">Run</span>(ctx context.Context) {
+</span></span><span style="display:flex;"><span>	wg <span style="color:#ff79c6">:=</span> sync.WaitGroup{}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	log.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">0</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;watching for new subnet leases&#34;</span>)
+</span></span><span style="display:flex;"><span>	events <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> []lease.Event)
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#50fa7b">Add</span>(<span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// subnet manager 监听集群内所有 node 的网络变化.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 收到变更事件后, 传入 evnets 管道中，由 vxlan 消费</span>
+</span></span><span style="display:flex;"><span>		subnet.<span style="color:#50fa7b">WatchLeases</span>(ctx, nw.subnetMgr, nw.SubnetLease, events)
+</span></span><span style="display:flex;"><span>		log.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">1</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;WatchLeases exited&#34;</span>)
+</span></span><span style="display:flex;"><span>		wg.<span style="color:#50fa7b">Done</span>()
+</span></span><span style="display:flex;"><span>	}()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> wg.<span style="color:#50fa7b">Wait</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 消费事件</span>
+</span></span><span style="display:flex;"><span>		evtBatch, ok <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>events
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !ok {
+</span></span><span style="display:flex;"><span>			log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;evts chan closed&#34;</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 进行 vxlan 网络配置</span>
+</span></span><span style="display:flex;"><span>		nw.<span style="color:#50fa7b">handleSubnetEvents</span>(evtBatch)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="vxlan-网络实现">vxlan 网络实现</h2>
+<p>vxlan 会调用 handleSubnetEvents 来配置网络, 根据flannel subnet manager 传入的事件来添加或删除 vxlan 的 arp, fdb, route 配置：</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (nw <span style="color:#ff79c6">*</span>network) <span style="color:#50fa7b">handleSubnetEvents</span>(batch []lease.Event) {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, event <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> batch {
+</span></span><span style="display:flex;"><span>		sn <span style="color:#ff79c6">:=</span> event.Lease.Subnet
+</span></span><span style="display:flex;"><span>		v6Sn <span style="color:#ff79c6">:=</span> event.Lease.IPv6Subnet
+</span></span><span style="display:flex;"><span>		attrs <span style="color:#ff79c6">:=</span> event.Lease.Attrs
+</span></span><span style="display:flex;"><span>		log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Received Subnet Event with VxLan: %s&#34;</span>, attrs.<span style="color:#50fa7b">String</span>())
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 只处理 vxlan 类型, 其他类型直接跳过.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> attrs.BackendType <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;vxlan&#34;</span> {
+</span></span><span style="display:flex;"><span>			log.<span style="color:#50fa7b">Warningf</span>(<span style="color:#f1fa8c">&#34;ignoring non-vxlan v4Subnet(%s) v6Subnet(%s): type=%v&#34;</span>, sn, v6Sn, attrs.BackendType)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">var</span> (
+</span></span><span style="display:flex;"><span>			vxlanAttrs, v6VxlanAttrs           vxlanLeaseAttrs
+</span></span><span style="display:flex;"><span>			directRoutingOK, v6DirectRoutingOK <span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span>			directRoute, v6DirectRoute         netlink.Route
+</span></span><span style="display:flex;"><span>			vxlanRoute, v6VxlanRoute           netlink.Route
+</span></span><span style="display:flex;"><span>		)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> event.Lease.EnableIPv4 <span style="color:#ff79c6">&amp;&amp;</span> nw.dev <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 获取属性信息</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> json.<span style="color:#50fa7b">Unmarshal</span>(attrs.BackendData, <span style="color:#ff79c6">&amp;</span>vxlanAttrs); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;error decoding subnet lease JSON: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// This route is used when traffic should be vxlan encapsulated</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 构建 vxlan 路由</span>
+</span></span><span style="display:flex;"><span>			vxlanRoute = netlink.Route{
+</span></span><span style="display:flex;"><span>				LinkIndex: nw.dev.link.<span style="color:#50fa7b">Attrs</span>().Index,
+</span></span><span style="display:flex;"><span>				Scope:     netlink.SCOPE_UNIVERSE,
+</span></span><span style="display:flex;"><span>				Dst:       sn.<span style="color:#50fa7b">ToIPNet</span>(),
+</span></span><span style="display:flex;"><span>				Gw:        sn.IP.<span style="color:#50fa7b">ToIP</span>(),
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			vxlanRoute.<span style="color:#50fa7b">SetFlag</span>(syscall.RTNH_F_ONLINK)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// directRouting is where the remote host is on the same subnet so vxlan isn&#39;t required.</span>
+</span></span><span style="display:flex;"><span>			directRoute = netlink.Route{
+</span></span><span style="display:flex;"><span>				Dst: sn.<span style="color:#50fa7b">ToIPNet</span>(),
+</span></span><span style="display:flex;"><span>				Gw:  attrs.PublicIP.<span style="color:#50fa7b">ToIP</span>(),
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> nw.dev.directRouting {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> dr, err <span style="color:#ff79c6">:=</span> ip.<span style="color:#50fa7b">DirectRouting</span>(attrs.PublicIP.<span style="color:#50fa7b">ToIP</span>()); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>					log.<span style="color:#50fa7b">Error</span>(err)
+</span></span><span style="display:flex;"><span>				} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>					directRoutingOK = dr
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> event.Lease.EnableIPv6 <span style="color:#ff79c6">&amp;&amp;</span> nw.v6Dev <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> json.<span style="color:#50fa7b">Unmarshal</span>(attrs.BackendV6Data, <span style="color:#ff79c6">&amp;</span>v6VxlanAttrs); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;error decoding v6 subnet lease JSON: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> v6Sn.IP <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> nw.v6Dev <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				v6VxlanRoute = netlink.Route{
+</span></span><span style="display:flex;"><span>					LinkIndex: nw.v6Dev.link.<span style="color:#50fa7b">Attrs</span>().Index,
+</span></span><span style="display:flex;"><span>					Scope:     netlink.SCOPE_UNIVERSE,
+</span></span><span style="display:flex;"><span>					Dst:       v6Sn.<span style="color:#50fa7b">ToIPNet</span>(),
+</span></span><span style="display:flex;"><span>					Gw:        v6Sn.IP.<span style="color:#50fa7b">ToIP</span>(),
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>				v6VxlanRoute.<span style="color:#50fa7b">SetFlag</span>(syscall.RTNH_F_ONLINK)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// directRouting is where the remote host is on the same subnet so vxlan isn&#39;t required.</span>
+</span></span><span style="display:flex;"><span>				v6DirectRoute = netlink.Route{
+</span></span><span style="display:flex;"><span>					Dst: v6Sn.<span style="color:#50fa7b">ToIPNet</span>(),
+</span></span><span style="display:flex;"><span>					Gw:  attrs.PublicIPv6.<span style="color:#50fa7b">ToIP</span>(),
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> nw.v6Dev.directRouting {
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> v6Dr, err <span style="color:#ff79c6">:=</span> ip.<span style="color:#50fa7b">DirectRouting</span>(attrs.PublicIPv6.<span style="color:#50fa7b">ToIP</span>()); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Error</span>(err)
+</span></span><span style="display:flex;"><span>					} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>						v6DirectRoutingOK = v6Dr
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">switch</span> event.Type {
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// add 类型事件时，配置子网路由</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> lease.EventAdded:
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> event.Lease.EnableIPv4 {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> directRoutingOK {
+</span></span><span style="display:flex;"><span>					log.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Adding direct route to subnet: %s PublicIP: %s&#34;</span>, sn, attrs.PublicIP)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> netlink.<span style="color:#50fa7b">RouteReplace</span>(<span style="color:#ff79c6">&amp;</span>directRoute)
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Error adding route to %v via %v: %v&#34;</span>, sn, attrs.PublicIP, err)
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>				} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>                    <span style="color:#ff79c6">/// 添加 arp 记录</span>
+</span></span><span style="display:flex;"><span>					log.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;adding subnet: %s PublicIP: %s VtepMAC: %s&#34;</span>, sn, attrs.PublicIP, net.<span style="color:#50fa7b">HardwareAddr</span>(vxlanAttrs.VtepMAC))
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> nw.dev.<span style="color:#50fa7b">AddARP</span>(neighbor{IP: sn.IP, MAC: net.<span style="color:#50fa7b">HardwareAddr</span>(vxlanAttrs.VtepMAC)})
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;AddARP failed: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>                        <span style="color:#6272a4">// 添加 fdb 记录</span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> nw.dev.<span style="color:#50fa7b">AddFDB</span>(neighbor{IP: attrs.PublicIP, MAC: net.<span style="color:#50fa7b">HardwareAddr</span>(vxlanAttrs.VtepMAC)})
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;AddFDB failed: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>						<span style="color:#6272a4">// Try to clean up the ARP entry then continue</span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>							<span style="color:#ff79c6">return</span> nw.dev.<span style="color:#50fa7b">DelARP</span>(neighbor{IP: event.Lease.Subnet.IP, MAC: net.<span style="color:#50fa7b">HardwareAddr</span>(vxlanAttrs.VtepMAC)})
+</span></span><span style="display:flex;"><span>						}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>							log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;DelARP failed: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>						}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// Set the route - the kernel would ARP for the Gw IP address if it hadn&#39;t already been set above so make sure</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// this is done last.</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>                        <span style="color:#6272a4">// 添加和更新 vxlan route 路由配置.</span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> netlink.<span style="color:#50fa7b">RouteReplace</span>(<span style="color:#ff79c6">&amp;</span>vxlanRoute)
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to add vxlanRoute (%s -&gt; %s): %v&#34;</span>, vxlanRoute.Dst, vxlanRoute.Gw, err)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>						<span style="color:#6272a4">// Try to clean up both the ARP and FDB entries then continue</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#6272a4">// 如果发生失败, 则尝试回收 arp 配置.</span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> nw.dev.<span style="color:#50fa7b">DelARP</span>(neighbor{IP: event.Lease.Subnet.IP, MAC: net.<span style="color:#50fa7b">HardwareAddr</span>(vxlanAttrs.VtepMAC)}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>							log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;DelARP failed: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>						}
+</span></span><span style="display:flex;"><span>                        <span style="color:#6272a4">// 如果发生失败, 则尝试回收 fdb 配置.</span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> nw.dev.<span style="color:#50fa7b">DelFDB</span>(neighbor{IP: event.Lease.Attrs.PublicIP, MAC: net.<span style="color:#50fa7b">HardwareAddr</span>(vxlanAttrs.VtepMAC)}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>							log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;DelFDB failed: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>						}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> event.Lease.EnableIPv6 {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> v6DirectRoutingOK {
+</span></span><span style="display:flex;"><span>					log.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Adding v6 direct route to v6 subnet: %s PublicIPv6: %s&#34;</span>, v6Sn, attrs.PublicIPv6)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> netlink.<span style="color:#50fa7b">RouteReplace</span>(<span style="color:#ff79c6">&amp;</span>v6DirectRoute)
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Error adding v6 route to %v via %v: %v&#34;</span>, v6Sn, attrs.PublicIPv6, err)
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>				} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>					log.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;adding v6 subnet: %s PublicIPv6: %s VtepMAC: %s&#34;</span>, v6Sn, attrs.PublicIPv6, net.<span style="color:#50fa7b">HardwareAddr</span>(v6VxlanAttrs.VtepMAC))
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> nw.v6Dev.<span style="color:#50fa7b">AddV6ARP</span>(neighbor{IP6: v6Sn.IP, MAC: net.<span style="color:#50fa7b">HardwareAddr</span>(v6VxlanAttrs.VtepMAC)})
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;AddV6ARP failed: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> nw.v6Dev.<span style="color:#50fa7b">AddV6FDB</span>(neighbor{IP6: attrs.PublicIPv6, MAC: net.<span style="color:#50fa7b">HardwareAddr</span>(v6VxlanAttrs.VtepMAC)})
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;AddV6FDB failed: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>						<span style="color:#6272a4">// Try to clean up the ARP entry then continue</span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> nw.v6Dev.<span style="color:#50fa7b">DelV6ARP</span>(neighbor{IP6: event.Lease.IPv6Subnet.IP, MAC: net.<span style="color:#50fa7b">HardwareAddr</span>(v6VxlanAttrs.VtepMAC)}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>							log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;DelV6ARP failed: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>						}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// Set the route - the kernel would ARP for the Gw IP address if it hadn&#39;t already been set above so make sure</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// this is done last.</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> netlink.<span style="color:#50fa7b">RouteReplace</span>(<span style="color:#ff79c6">&amp;</span>v6VxlanRoute)
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to add v6 vxlanRoute (%s -&gt; %s): %v&#34;</span>, v6VxlanRoute.Dst, v6VxlanRoute.Gw, err)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>						<span style="color:#6272a4">// Try to clean up both the ARP and FDB entries then continue</span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>							<span style="color:#ff79c6">return</span> nw.v6Dev.<span style="color:#50fa7b">DelV6ARP</span>(neighbor{IP6: event.Lease.IPv6Subnet.IP, MAC: net.<span style="color:#50fa7b">HardwareAddr</span>(v6VxlanAttrs.VtepMAC)})
+</span></span><span style="display:flex;"><span>						}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>							log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;DelV6ARP failed: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>						}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>							<span style="color:#ff79c6">return</span> nw.v6Dev.<span style="color:#50fa7b">DelV6FDB</span>(neighbor{IP6: event.Lease.Attrs.PublicIPv6, MAC: net.<span style="color:#50fa7b">HardwareAddr</span>(v6VxlanAttrs.VtepMAC)})
+</span></span><span style="display:flex;"><span>						}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>							log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;DelV6FDB failed: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>						}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 直接路由模式, 只需要删除路由，无需删除 arp 和 fdb.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> lease.EventRemoved:
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> event.Lease.EnableIPv4 {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> directRoutingOK {
+</span></span><span style="display:flex;"><span>					log.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Removing direct route to subnet: %s PublicIP: %s&#34;</span>, sn, attrs.PublicIP)
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> netlink.<span style="color:#50fa7b">RouteDel</span>(<span style="color:#ff79c6">&amp;</span>directRoute)
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Error deleting route to %v via %v: %v&#34;</span>, sn, attrs.PublicIP, err)
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>				} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>					log.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;removing subnet: %s PublicIP: %s VtepMAC: %s&#34;</span>, sn, attrs.PublicIP, net.<span style="color:#50fa7b">HardwareAddr</span>(vxlanAttrs.VtepMAC))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// Try to remove all entries - don&#39;t bail out if one of them fails.</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>                        <span style="color:#6272a4">// 先删除 arp 配置</span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> nw.dev.<span style="color:#50fa7b">DelARP</span>(neighbor{IP: sn.IP, MAC: net.<span style="color:#50fa7b">HardwareAddr</span>(vxlanAttrs.VtepMAC)})
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;DelARP failed: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>                        <span style="color:#6272a4">// 再删除 fdb 配置</span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> nw.dev.<span style="color:#50fa7b">DelFDB</span>(neighbor{IP: attrs.PublicIP, MAC: net.<span style="color:#50fa7b">HardwareAddr</span>(vxlanAttrs.VtepMAC)})
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;DelFDB failed: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>                        <span style="color:#6272a4">// 删除 vxlan 路由信息.</span>
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> netlink.<span style="color:#50fa7b">RouteDel</span>(<span style="color:#ff79c6">&amp;</span>vxlanRoute)
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to delete vxlanRoute (%s -&gt; %s): %v&#34;</span>, vxlanRoute.Dst, vxlanRoute.Gw, err)
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> event.Lease.EnableIPv6 {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> v6DirectRoutingOK {
+</span></span><span style="display:flex;"><span>					log.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Removing v6 direct route to subnet: %s PublicIP: %s&#34;</span>, sn, attrs.PublicIPv6)
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> netlink.<span style="color:#50fa7b">RouteDel</span>(<span style="color:#ff79c6">&amp;</span>directRoute)
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Error deleting v6 route to %v via %v: %v&#34;</span>, v6Sn, attrs.PublicIPv6, err)
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>				} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>					log.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;removing v6subnet: %s PublicIPv6: %s VtepMAC: %s&#34;</span>, v6Sn, attrs.PublicIPv6, net.<span style="color:#50fa7b">HardwareAddr</span>(v6VxlanAttrs.VtepMAC))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// Try to remove all entries - don&#39;t bail out if one of them fails.</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> nw.v6Dev.<span style="color:#50fa7b">DelV6ARP</span>(neighbor{IP6: v6Sn.IP, MAC: net.<span style="color:#50fa7b">HardwareAddr</span>(v6VxlanAttrs.VtepMAC)})
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;DelV6ARP failed: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> nw.v6Dev.<span style="color:#50fa7b">DelV6FDB</span>(neighbor{IP6: attrs.PublicIPv6, MAC: net.<span style="color:#50fa7b">HardwareAddr</span>(v6VxlanAttrs.VtepMAC)})
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;DelV6FDB failed: &#34;</span>, err)
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> retry.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span> netlink.<span style="color:#50fa7b">RouteDel</span>(<span style="color:#ff79c6">&amp;</span>v6VxlanRoute)
+</span></span><span style="display:flex;"><span>					}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to delete v6 vxlanRoute (%s -&gt; %s): %v&#34;</span>, v6VxlanRoute.Dst, v6VxlanRoute.Gw, err)
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">default</span>:
+</span></span><span style="display:flex;"><span>			log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;internal error: unknown event type: &#34;</span>, <span style="color:#8be9fd;font-style:italic">int</span>(event.Type))
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/cni/" class="tag-link">Cni</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/flannel/" class="tag-link">Flannel</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

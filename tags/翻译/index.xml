@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>翻译 on What a Life!</title>
+    <link>https://www.zhangzewen.net/tags/%E7%BF%BB%E8%AF%91/</link>
+    <description>Recent content in 翻译 on What a Life!</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sat, 17 Aug 2024 08:13:34 +0800</lastBuildDate>
+    <atom:link href="https://www.zhangzewen.net/tags/%E7%BF%BB%E8%AF%91/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>[译]BPF CO-RE reference guide</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-bpf-co-re-reference-guide/</link>
+      <pubDate>Sat, 17 Aug 2024 08:13:34 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-bpf-co-re-reference-guide/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文：&lt;a href=&#34;https://nakryiko.com/posts/bpf-core-reference-guide/&#34;&gt;BPF CO-RE reference guide&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;h2 id=&#34;缺失的手册&#34;&gt;缺失的手册&lt;/h2&gt;&#xA;&lt;p&gt;BPF CO-RE（编译一次-到处运行）是编写可移植BPF应用程序的现代方法，应用程序可以在不同的内核版本和配置上运行，而无需在目标机器上修改和编译运行时源代码。这与&lt;a href=&#34;https://github.com/iovisor/bcc&#34;&gt;BCC&lt;/a&gt;框架提供的更传统的方法有很大的区别，在BCC框架中，BPF应用程序源代码编译被延迟到目标主机上，其携带了一个重量级的编译器工具链来实现这一点。请阅读&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/&#34;&gt;[译]BPF CO-RE (Compile Once – Run Everywhere)&lt;/a&gt;这篇文章，该文章介绍了 BPF CO-RE 的概念，并解释了为什么 BPF CO-RE对这些现实世界的 BPF 应用程序来说都是重要且必要的，以及在没有&lt;a href=&#34;https://nakryiko.com/posts/btf-dedup/&#34;&gt;内核BTF&lt;/a&gt;的情况下变得困难的原因。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/</link>
+      <pubDate>Fri, 17 May 2024 08:13:34 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&#xA;原文: &lt;strong&gt;&lt;a href=&#34;https://nakryiko.com/posts/bpf-tips-printk/&#34;&gt;BPF tips &amp;amp; tricks: the guide to bpf_trace_printk() and bpf_printk()&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]Building BPF applications with libbpf-bootstrap</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-building-bpf-applications-with-libbpf-bootstrap/</link>
+      <pubDate>Fri, 10 May 2024 08:13:34 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-building-bpf-applications-with-libbpf-bootstrap/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文: &lt;strong&gt;&lt;a href=&#34;https://nakryiko.com/posts/libbpf-bootstrap/&#34;&gt;Building BPF applications with libbpf-bootstrap&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/libbpf/libbpf-bootstrap&#34;&gt;libbpf-bootstrap&lt;/a&gt;脚手架能快速轻松地让您构建自己的BPF应用程序，该脚手架负责所有让人乏味的设置步骤，并最大限度地减少必要的样板，让您直接沉浸在 BPF 的乐趣中。我们将看看 libbpf-bootstrap 提供了什么，以及所有内容是如何联系在一起的。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]BPF ring buffer</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-bpf-ring-buffer/</link>
+      <pubDate>Sun, 24 Mar 2024 21:42:07 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-bpf-ring-buffer/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文: &lt;strong&gt;&lt;a href=&#34;https://nakryiko.com/posts/bpf-ringbuf/&#34;&gt;BPF ring buffer&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲区（当前用于从内核向用户态发送数据的标准）的内存效率和事件重新排序问题，同时达到或超过了其性能。它提供了perfbuf兼容性以便于轻松迁移，但也有新的reserve/submit API，具有更好的可用性。此外，合成和实际基准测试都表明，在几乎所有情况下，考虑将其作为从BPF程序发送数据到用户态的默认选择。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/</link>
+      <pubDate>Thu, 21 Mar 2024 15:03:02 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;这是一个系列文章：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/&#34;&gt;[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/&#34;&gt;[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;&lt;strong&gt;原文：&lt;a href=&#34;https://blog.px.dev/ebpf-openssl-tracing/&#34;&gt;Debugging with eBPF Part 3: Tracing SSL/TLS connections&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/</link>
+      <pubDate>Wed, 13 Mar 2024 21:03:01 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;这是一个系列文章：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/&#34;&gt;[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/&#34;&gt;[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;原文：&lt;a href=&#34;https://blog.px.dev/ebpf-http-tracing/&#34;&gt;Debugging with eBPF Part 2: Tracing full body HTTP request/responses&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/</link>
+      <pubDate>Sat, 09 Mar 2024 15:03:00 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;这是一个系列文章：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/&#34;&gt;[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/&#34;&gt;[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;原文: &lt;strong&gt;&lt;a href=&#34;https://blog.px.dev/ebpf-function-tracing/&#34;&gt;Debugging with eBPF Part 1: Tracing Go function arguments in prod&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译] Lifetime of BPF objects</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/</link>
+      <pubDate>Mon, 04 Mar 2024 21:42:07 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文链接: &lt;a href=&#34;https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html&#34;&gt;Lifetime of BPF objects&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;BPF验证器保证程序本身能够被内核安全地执行，但为了安全地且无意外地使用整个BPF，用户需要理解 BPF 程序和 Maps 的生命周期。本文深入介绍了这些细节。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]BPF CO-RE (Compile Once – Run Everywhere)</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/</link>
+      <pubDate>Sat, 17 Feb 2024 08:13:34 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文：&lt;a href=&#34;https://nakryiko.com/posts/bpf-portability-and-co-re/&#34;&gt;BPF CO-RE (Compile Once – Run Everywhere)&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一次 - 到处运行（CO-RE）**的情况下实现这一点实际上很困难？在这篇文章中，我们将探讨编写可以在多个内核版本上运行的BPF程序的挑战，以及BPF CO-RE如何帮助解决这个问题。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

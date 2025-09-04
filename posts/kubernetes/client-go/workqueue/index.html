@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>client-go 源码分析之 workqueue &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="client-go 源码分析之 workqueue">
+  <meta itemprop="description" content="本篇文章基于 client-go release-1.25 分支
+client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑实现在k8s.io/client-go/util/workqueue 目录下。
+基础：去重队列 基础队列接口 Interface 的定义如下：">
+  <meta itemprop="datePublished" content="2024-07-03T21:43:31+08:00">
+  <meta itemprop="dateModified" content="2024-07-03T21:43:31+08:00">
+  <meta itemprop="wordCount" content="699">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="源码分析,Kubernetes,Client-Go">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="client-go 源码分析之 workqueue">
+  <meta name="twitter:description" content="本篇文章基于 client-go release-1.25 分支
+client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑实现在k8s.io/client-go/util/workqueue 目录下。
+基础：去重队列 基础队列接口 Interface 的定义如下：">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="client-go 源码分析之 workqueue">
+  <meta property="og:description" content="本篇文章基于 client-go release-1.25 分支
+client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑实现在k8s.io/client-go/util/workqueue 目录下。
+基础：去重队列 基础队列接口 Interface 的定义如下：">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-07-03T21:43:31+08:00">
+    <meta property="article:modified_time" content="2024-07-03T21:43:31+08:00">
+    <meta property="article:tag" content="源码分析">
+    <meta property="article:tag" content="Kubernetes">
+    <meta property="article:tag" content="Client-Go">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/#webpage",
+      "url": "https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/",
+      "name": "client-go 源码分析之 workqueue",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2024-07-03T21:43:31+08:00",
+      "dateModified": "2024-07-03T21:43:31+08:00",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 client-go release-1.25 分支\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eclient-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑实现在\u003ccode\u003ek8s.io/client-go/util/workqueue\u003c/code\u003e 目录下。\u003c/p\u003e\n\u003ch2 id=\"基础去重队列\"\u003e基础：去重队列\u003c/h2\u003e\n\u003cp\u003e基础队列接口 Interface 的定义如下：\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/#webpage"
+      },
+      "headline": "client-go 源码分析之 workqueue",
+      "datePublished": "2024-07-03T21:43:31+08:00",
+      "dateModified": "2024-07-03T21:43:31+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "源码分析",
+        "Kubernetes",
+        "Client-Go"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#基础去重队列">基础：去重队列</a></li>
+        <li><a href="#扩展延迟队列">扩展：延迟队列</a></li>
+        <li><a href="#扩展限速队列">扩展：限速队列</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">client-go 源码分析之 workqueue</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2024-07-03T21:43:31&#43;0800">Created: Jul 3, 2024</time>
+    <span class="readtime">&middot; 4 min read</span>
+  </div>
+
+  <div>
+    <blockquote>
+<p>本篇文章基于 client-go release-1.25 分支</p></blockquote>
+<p>client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑实现在<code>k8s.io/client-go/util/workqueue</code> 目录下。</p>
+<h2 id="基础去重队列">基础：去重队列</h2>
+<p>基础队列接口 Interface 的定义如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Interface <span style="color:#8be9fd;font-style:italic">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 添加元素</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Add</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{})
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取队列的长度</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Len</span>() <span style="color:#8be9fd">int</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 从队列中获取元素</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Get</span>() (item <span style="color:#8be9fd;font-style:italic">interface</span>{}, shutdown <span style="color:#8be9fd">bool</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 标记 item 处理完毕</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Done</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{})
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 关闭</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">ShutDown</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 消费完成后关闭</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">ShutDownWithDrain</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 是否关闭</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">ShuttingDown</span>() <span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Type 结构体实现了上述接口：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Type <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>	queue []t
+</span></span><span style="display:flex;"><span>	dirty set
+</span></span><span style="display:flex;"><span>	processing set
+</span></span><span style="display:flex;"><span>	cond <span style="color:#ff79c6">*</span>sync.Cond
+</span></span><span style="display:flex;"><span>	shuttingDown <span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span>	drain        <span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span>	metrics queueMetrics
+</span></span><span style="display:flex;"><span>	unfinishedWorkUpdatePeriod time.Duration
+</span></span><span style="display:flex;"><span>	clock                      clock.WithTicker
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Type 结构体中的有三个比较重要的字段：</p>
+<ul>
+<li>queue，实际存储队列元素</li>
+<li>dirty, 确保去重，即在处理一个队列元素之前，尽管被添加再次多次（包括并发情况下），也只会被处理一次</li>
+<li>processing，标记一个队列元素是否正在被处理</li>
+</ul>
+<p>dirty 保证串行化的唯一，processing 保证并行化的唯一， 这里主要看看 Add/Get/Done 这三个方法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (q <span style="color:#ff79c6">*</span>Type) <span style="color:#50fa7b">Add</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
+</span></span><span style="display:flex;"><span>	q.cond.L.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> q.cond.L.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> q.shuttingDown {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 在 dirty 中已存在, 则直接返回, dirty 是为了实现待消费元素的去重</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> q.dirty.<span style="color:#50fa7b">has</span>(item) {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	q.metrics.<span style="color:#50fa7b">add</span>(item)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	q.dirty.<span style="color:#50fa7b">insert</span>(item)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 如果正在处理，直接返回</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> q.processing.<span style="color:#50fa7b">has</span>(item) {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	q.queue = <span style="color:#8be9fd;font-style:italic">append</span>(q.queue, item)
+</span></span><span style="display:flex;"><span>	q.cond.<span style="color:#50fa7b">Signal</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (q <span style="color:#ff79c6">*</span>Type) <span style="color:#50fa7b">Get</span>() (item <span style="color:#8be9fd;font-style:italic">interface</span>{}, shutdown <span style="color:#8be9fd">bool</span>) {
+</span></span><span style="display:flex;"><span>	q.cond.L.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> q.cond.L.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> <span style="color:#8be9fd;font-style:italic">len</span>(q.queue) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> <span style="color:#ff79c6">&amp;&amp;</span> !q.shuttingDown {
+</span></span><span style="display:flex;"><span>		q.cond.<span style="color:#50fa7b">Wait</span>()
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(q.queue) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// We must be shutting down.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	item = q.queue[<span style="color:#bd93f9">0</span>]
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// The underlying array still exists and reference this object, so the object will not be garbage collected.</span>
+</span></span><span style="display:flex;"><span>	q.queue[<span style="color:#bd93f9">0</span>] = <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	q.queue = q.queue[<span style="color:#bd93f9">1</span>:]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	q.metrics.<span style="color:#50fa7b">get</span>(item)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 把元素打上正在处理的标志</span>
+</span></span><span style="display:flex;"><span>	q.processing.<span style="color:#50fa7b">insert</span>(item)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 从dirty 中删除</span>
+</span></span><span style="display:flex;"><span>	q.dirty.<span style="color:#8be9fd;font-style:italic">delete</span>(item)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> item, <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (q <span style="color:#ff79c6">*</span>Type) <span style="color:#50fa7b">Done</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
+</span></span><span style="display:flex;"><span>	q.cond.L.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> q.cond.L.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	q.metrics.<span style="color:#50fa7b">done</span>(item)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 删除元素正在处理的标志</span>
+</span></span><span style="display:flex;"><span>	q.processing.<span style="color:#8be9fd;font-style:italic">delete</span>(item)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> q.dirty.<span style="color:#50fa7b">has</span>(item) { <span style="color:#6272a4">// 后续的加入，因为正在处理肯定是没有进入到queue中，具体可以看 Add 的逻辑</span>
+</span></span><span style="display:flex;"><span>		q.queue = <span style="color:#8be9fd;font-style:italic">append</span>(q.queue, item)
+</span></span><span style="display:flex;"><span>		q.cond.<span style="color:#50fa7b">Signal</span>()
+</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> q.processing.<span style="color:#8be9fd;font-style:italic">len</span>() <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>		q.cond.<span style="color:#50fa7b">Signal</span>()
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="扩展延迟队列">扩展：延迟队列</h2>
+<p>接口 DelayingInterface 在基础队列 Interface 的基础上，扩展了延迟的功能：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> DelayingInterface <span style="color:#8be9fd;font-style:italic">interface</span> {
+</span></span><span style="display:flex;"><span>	Interface
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">AddAfter</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}, duration time.Duration)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>delayingType 结构体实现了该接口：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> delayingType <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>	Interface
+</span></span><span style="display:flex;"><span>	clock clock.Clock
+</span></span><span style="display:flex;"><span>	stopCh <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}
+</span></span><span style="display:flex;"><span>	stopOnce sync.Once
+</span></span><span style="display:flex;"><span>	heartbeat clock.Ticker
+</span></span><span style="display:flex;"><span>	waitingForAddCh <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>waitFor
+</span></span><span style="display:flex;"><span>	metrics retryMetrics
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>delayingType 结构体中的有两个比较重要的字段：</p>
+<ul>
+<li>heartbeat，心跳定时器，周期性判断是否存在延迟元素是否过期。</li>
+<li>waitingForAddCh，用于接受打包后的延迟对象，供协程 waitingLoop 来消费，通过 AddAfter 来生产 延迟对象：
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (q <span style="color:#ff79c6">*</span>delayingType) <span style="color:#50fa7b">AddAfter</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}, duration time.Duration) {
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">//  queue 正在关闭，直接返回</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> q.<span style="color:#50fa7b">ShuttingDown</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	q.metrics.<span style="color:#50fa7b">retry</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// immediately add things with no delay</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 无须延迟处理，直接添加到queue中</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> duration <span style="color:#ff79c6">&lt;=</span> <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>		q.<span style="color:#50fa7b">Add</span>(item)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 若正在退出，则退出</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>q.stopCh:
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建一个延迟对象, 推到 waitingForAddCh 管道中, 等待 waitingLoop 处理</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> q.waitingForAddCh <span style="color:#ff79c6">&lt;-</span> <span style="color:#ff79c6">&amp;</span>waitFor{data: item, readyAt: q.clock.<span style="color:#50fa7b">Now</span>().<span style="color:#50fa7b">Add</span>(duration)}:
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div></li>
+</ul>
+<p>delayingType 在实例话的时候会拉起来一个协程：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">newDelayingQueue</span>(clock clock.WithTicker, q Interface, name <span style="color:#8be9fd">string</span>) <span style="color:#ff79c6">*</span>delayingType {
+</span></span><span style="display:flex;"><span>	ret <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>delayingType{
+</span></span><span style="display:flex;"><span>		Interface:       q,
+</span></span><span style="display:flex;"><span>		clock:           clock,
+</span></span><span style="display:flex;"><span>		heartbeat:       clock.<span style="color:#50fa7b">NewTicker</span>(maxWait),
+</span></span><span style="display:flex;"><span>		stopCh:          <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}),
+</span></span><span style="display:flex;"><span>		waitingForAddCh: <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>waitFor, <span style="color:#bd93f9">1000</span>),
+</span></span><span style="display:flex;"><span>		metrics:         <span style="color:#50fa7b">newRetryMetrics</span>(name),
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> ret.<span style="color:#50fa7b">waitingLoop</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> ret
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>waitingLoop 的作用如下：</p>
+<ul>
+<li>维护着一个循环</li>
+<li>heartbeat 定时器周期性地取走 waitingForAddCh 中的延迟对象来构建和更新最小堆</li>
+<li>根据最小堆的堆顶元素设置定时器，当定时器触发的时候，会把延迟到期的元素添加到queue中，然后重新更新定时器</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (q <span style="color:#ff79c6">*</span>delayingType) <span style="color:#50fa7b">waitingLoop</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> utilruntime.<span style="color:#50fa7b">HandleCrash</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Make a placeholder channel to use when there are no items in our list</span>
+</span></span><span style="display:flex;"><span>	never <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> time.Time)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Make a timer that expires when the item at the head of the waiting queue is ready</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> nextReadyAtTimer clock.Timer
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// // 初始化最小堆</span>
+</span></span><span style="display:flex;"><span>	waitingForQueue <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>waitForPriorityQueue{}
+</span></span><span style="display:flex;"><span>	heap.<span style="color:#50fa7b">Init</span>(waitingForQueue)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	waitingEntryByData <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">map</span>[t]<span style="color:#ff79c6">*</span>waitFor{}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 如果 queue 已经被关闭, 则退出</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> q.Interface.<span style="color:#50fa7b">ShuttingDown</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		now <span style="color:#ff79c6">:=</span> q.clock.<span style="color:#50fa7b">Now</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Add ready entries</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> waitingForQueue.<span style="color:#50fa7b">Len</span>() &gt; <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 如果最小堆不为空, 则获取堆顶的元素.</span>
+</span></span><span style="display:flex;"><span>			entry <span style="color:#ff79c6">:=</span> waitingForQueue.<span style="color:#50fa7b">Peek</span>().(<span style="color:#ff79c6">*</span>waitFor)
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 堆顶元素没有过期，跳出</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> entry.readyAt.<span style="color:#50fa7b">After</span>(now) {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">break</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 弹出堆顶元素，加入到queue中</span>
+</span></span><span style="display:flex;"><span>			entry = heap.<span style="color:#50fa7b">Pop</span>(waitingForQueue).(<span style="color:#ff79c6">*</span>waitFor)
+</span></span><span style="display:flex;"><span>			q.<span style="color:#50fa7b">Add</span>(entry.data)
+</span></span><span style="display:flex;"><span>			<span style="color:#8be9fd;font-style:italic">delete</span>(waitingEntryByData, entry.data)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Set up a wait for the first item&#39;s readyAt (if one exists)</span>
+</span></span><span style="display:flex;"><span>		nextReadyAt <span style="color:#ff79c6">:=</span> never
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 如果 最小堆不为空, 设置堆顶元素的时间为定时器的时间，即最近过期时间</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> waitingForQueue.<span style="color:#50fa7b">Len</span>() &gt; <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> nextReadyAtTimer <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				nextReadyAtTimer.<span style="color:#50fa7b">Stop</span>()
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			entry <span style="color:#ff79c6">:=</span> waitingForQueue.<span style="color:#50fa7b">Peek</span>().(<span style="color:#ff79c6">*</span>waitFor)
+</span></span><span style="display:flex;"><span>			nextReadyAtTimer = q.clock.<span style="color:#50fa7b">NewTimer</span>(entry.readyAt.<span style="color:#50fa7b">Sub</span>(now))
+</span></span><span style="display:flex;"><span>			nextReadyAt = nextReadyAtTimer.<span style="color:#50fa7b">C</span>()
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>q.stopCh:
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 心跳</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>q.heartbeat.<span style="color:#50fa7b">C</span>():
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// continue the loop, which will add ready items</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 最近过期元素的时间到了</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>nextReadyAt:
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// continue the loop, which will add ready items</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 收到新的需要延迟处理的元素</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> waitEntry <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>q.waitingForAddCh:
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// // 如果新元素还未到期, 则放到最小堆中.</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> waitEntry.readyAt.<span style="color:#50fa7b">After</span>(q.clock.<span style="color:#50fa7b">Now</span>()) {
+</span></span><span style="display:flex;"><span>				<span style="color:#50fa7b">insert</span>(waitingForQueue, waitingEntryByData, waitEntry)
+</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// 到期了，直接添加到queue中</span>
+</span></span><span style="display:flex;"><span>				q.<span style="color:#50fa7b">Add</span>(waitEntry.data)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 单次循环尽量取完所有的需要延迟的元素 </span>
+</span></span><span style="display:flex;"><span>			drained <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">for</span> !drained {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">case</span> waitEntry <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>q.waitingForAddCh:
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> waitEntry.readyAt.<span style="color:#50fa7b">After</span>(q.clock.<span style="color:#50fa7b">Now</span>()) {
+</span></span><span style="display:flex;"><span>						<span style="color:#50fa7b">insert</span>(waitingForQueue, waitingEntryByData, waitEntry)
+</span></span><span style="display:flex;"><span>					} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>						q.<span style="color:#50fa7b">Add</span>(waitEntry.data)
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">default</span>:
+</span></span><span style="display:flex;"><span>					drained = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="扩展限速队列">扩展：限速队列</h2>
+<p>接口 RateLimitingInterface 在延迟队列 RateLimitingInterface 的基础上，扩展了限速的功能：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> RateLimitingInterface <span style="color:#8be9fd;font-style:italic">interface</span> {
+</span></span><span style="display:flex;"><span>	DelayingInterface
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">AddRateLimited</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{})
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Forget</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{})
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">NumRequeues</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">int</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>rateLimitingType 结构体实现了该接口：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> rateLimitingType <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>	DelayingInterface
+</span></span><span style="display:flex;"><span>	rateLimiter RateLimiter
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>在实例化 rateLimitingType 时, 需要创建 DelayingInterface 实例 和 Ratelimiter 实例，且rateLimitingType 也实现了 Ratelimiter接口。RateLimiter 接口的定义如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> RateLimiter <span style="color:#8be9fd;font-style:italic">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 根据算法判断元素应该等待多长时间</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">When</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}) time.Duration
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 释放该元素，清空该元素的排队数</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Forget</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{})
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取该元素的排队数</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">NumRequeues</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">int</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>AddRateLimited 方法是通过限速器计算出需要等待的时长, 然后调用 <code>delayingQueue.AddAfter()</code> 方法来决定把对象扔到延迟队里还是队列里：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (q <span style="color:#ff79c6">*</span>rateLimitingType) <span style="color:#50fa7b">AddRateLimited</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
+</span></span><span style="display:flex;"><span>	q.DelayingInterface.<span style="color:#50fa7b">AddAfter</span>(item, q.rateLimiter.<span style="color:#50fa7b">When</span>(item))
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>workqueue 提供了如下几种限速算法：</p>
+<ul>
+<li>BucketRateLimiter</li>
+<li>ItemExponentialFailureRateLimiter</li>
+<li>ItemFastSlowRateLimiter</li>
+<li>MaxOfRateLimiter</li>
+<li>WithMaxWaitRateLimiter</li>
+</ul>
+<p>其中 BucketRateLimiter 是令牌通算法，值得一看，感兴趣的可以看源码<code>k8s.io/client-go/util/workqueue/default_rate_limiters.go</code>，本片文章不涉及限速算法的讲解。</p>
+
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/client-go/" class="tag-link">Client-Go</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

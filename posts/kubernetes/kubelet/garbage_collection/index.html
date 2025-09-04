@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>kubernetes 源码分析之 kubelet 镜像回收和容器回收 &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="kubernetes 源码分析之 kubelet 镜像回收和容器回收">
+  <meta itemprop="description" content="本篇文章基于 Kubernetes v1.25.1
+kubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资源不会被消耗殆尽。本片文章从源码角度来分析 kubelet 的垃圾回收功能，即清理不需要的容器和镜像。
+启动切入点 垃圾回收是在 kubelet 对象初始化完成后启动的，在 createAndInitKubelet 方法中首先调用 NewMainKubelet 初始化 Kubelet 实例，随后调用 Kubelet.StartGarbageCollection 启动了 GarbageCollect。">
+  <meta itemprop="datePublished" content="2025-01-27T22:44:45+08:00">
+  <meta itemprop="dateModified" content="2025-01-27T22:44:45+08:00">
+  <meta itemprop="wordCount" content="1585">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="源码分析,Kubernetes,Kubelet">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="kubernetes 源码分析之 kubelet 镜像回收和容器回收">
+  <meta name="twitter:description" content="本篇文章基于 Kubernetes v1.25.1
+kubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资源不会被消耗殆尽。本片文章从源码角度来分析 kubelet 的垃圾回收功能，即清理不需要的容器和镜像。
+启动切入点 垃圾回收是在 kubelet 对象初始化完成后启动的，在 createAndInitKubelet 方法中首先调用 NewMainKubelet 初始化 Kubelet 实例，随后调用 Kubelet.StartGarbageCollection 启动了 GarbageCollect。">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="kubernetes 源码分析之 kubelet 镜像回收和容器回收">
+  <meta property="og:description" content="本篇文章基于 Kubernetes v1.25.1
+kubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资源不会被消耗殆尽。本片文章从源码角度来分析 kubelet 的垃圾回收功能，即清理不需要的容器和镜像。
+启动切入点 垃圾回收是在 kubelet 对象初始化完成后启动的，在 createAndInitKubelet 方法中首先调用 NewMainKubelet 初始化 Kubelet 实例，随后调用 Kubelet.StartGarbageCollection 启动了 GarbageCollect。">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-01-27T22:44:45+08:00">
+    <meta property="article:modified_time" content="2025-01-27T22:44:45+08:00">
+    <meta property="article:tag" content="源码分析">
+    <meta property="article:tag" content="Kubernetes">
+    <meta property="article:tag" content="Kubelet">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/#webpage",
+      "url": "https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/",
+      "name": "kubernetes 源码分析之 kubelet 镜像回收和容器回收",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2025-01-27T22:44:45+08:00",
+      "dateModified": "2025-01-27T22:44:45+08:00",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ekubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资源不会被消耗殆尽。本片文章从源码角度来分析 kubelet 的垃圾回收功能，即清理不需要的容器和镜像。\u003c/p\u003e\n\u003ch2 id=\"启动切入点\"\u003e启动切入点\u003c/h2\u003e\n\u003cp\u003e垃圾回收是在 kubelet 对象初始化完成后启动的，在 createAndInitKubelet 方法中首先调用 NewMainKubelet 初始化 Kubelet 实例，随后调用 \u003ccode\u003eKubelet.StartGarbageCollection\u003c/code\u003e 启动了 GarbageCollect。\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/#webpage"
+      },
+      "headline": "kubernetes 源码分析之 kubelet 镜像回收和容器回收",
+      "datePublished": "2025-01-27T22:44:45+08:00",
+      "dateModified": "2025-01-27T22:44:45+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "源码分析",
+        "Kubernetes",
+        "Kubelet"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#启动切入点">启动切入点</a></li>
+        <li><a href="#镜像回收">镜像回收</a>
+          <ul>
+            <li><a href="#回收镜像">回收镜像</a></li>
+            <li><a href="#获取正在使用中的镜像">获取正在使用中的镜像</a></li>
+            <li><a href="#本地缓存">本地缓存</a></li>
+          </ul>
+        </li>
+        <li><a href="#容器回收">容器回收</a>
+          <ul>
+            <li><a href="#驱逐容器">驱逐容器</a></li>
+            <li><a href="#驱逐-sandbox">驱逐 sandbox</a></li>
+            <li><a href="#清除pod的日志目录">清除pod的日志目录</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">kubernetes 源码分析之 kubelet 镜像回收和容器回收</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2025-01-27T22:44:45&#43;0800">Created: Jan 27, 2025</time>
+    <span class="readtime">&middot; 8 min read</span>
+  </div>
+
+  <div>
+    <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>kubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资源不会被消耗殆尽。本片文章从源码角度来分析 kubelet 的垃圾回收功能，即清理不需要的容器和镜像。</p>
+<h2 id="启动切入点">启动切入点</h2>
+<p>垃圾回收是在 kubelet 对象初始化完成后启动的，在 createAndInitKubelet 方法中首先调用 NewMainKubelet 初始化 Kubelet 实例，随后调用 <code>Kubelet.StartGarbageCollection</code> 启动了 GarbageCollect。</p>
+<p>在 <code>Kubelet.StartGarbageCollection</code> 方法中会启动容器和镜像垃圾回收两个任务，其主要逻辑为：</p>
+<ul>
+<li>启动 containerGC 协程，ContainerGC 间隔时间默认为 1 分钟。</li>
+<li>检查 <code>--image-gc-high-threshold</code> 参数的值，若为 100 则禁用 imageGC。</li>
+<li>启动 imageGC goroutine，imageGC 间隔时间默认为 5 分钟。</li>
+</ul>
+<p>代码在 <code>k8s.io/kubernetes/pkg/kubelet/kubelet.go</code> 中，请自行查阅。 在驱逐的实现中也会调用相关的垃圾回收功能，这里忽略，不影响阅读本篇文章。</p>
+<h2 id="镜像回收">镜像回收</h2>
+<p>镜像回收流程大致如下：</p>
+<ul>
+<li>获取磁盘状态，这里主要是获取磁盘的总量和可用容量。</li>
+<li>通过磁盘的总量和可用容量计算出磁盘使用率百分比。</li>
+<li>使用率超过参数 <code>--image-gc-high-threshold</code> 中配置的阈值就执行镜像回收。</li>
+<li>根据 <code>--image-gc-low-threshold</code> 和当前使用率计算出需要清除的空间大小。</li>
+<li>执行镜像回收，直到清理出上一步中中计算出来的空间，如果不能达成则记录时间并返回。</li>
+</ul>
+<p>上述流程的具体代码逻辑如下：</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (im <span style="color:#ff79c6">*</span>realImageGCManager) <span style="color:#50fa7b">GarbageCollect</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取节点磁盘状态</span>
+</span></span><span style="display:flex;"><span>	fsStats, err <span style="color:#ff79c6">:=</span> im.statsProvider.<span style="color:#50fa7b">ImageFsStats</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> capacity, available <span style="color:#8be9fd">int64</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 计算节点的容量和可用量</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> fsStats.CapacityBytes <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		capacity = <span style="color:#8be9fd;font-style:italic">int64</span>(<span style="color:#ff79c6">*</span>fsStats.CapacityBytes)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> fsStats.AvailableBytes <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		available = <span style="color:#8be9fd;font-style:italic">int64</span>(<span style="color:#ff79c6">*</span>fsStats.AvailableBytes)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 计算磁盘使用量，超过--image-gc-high-threshold 设定的阈值则进行镜像回收</span>
+</span></span><span style="display:flex;"><span>	usagePercent <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">100</span> <span style="color:#ff79c6">-</span> <span style="color:#8be9fd;font-style:italic">int</span>(available<span style="color:#ff79c6">*</span><span style="color:#bd93f9">100</span><span style="color:#ff79c6">/</span>capacity)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> usagePercent <span style="color:#ff79c6">&gt;=</span> im.policy.HighThresholdPercent {
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 根据启动时候配置参数--image-gc-low-threshold 计算出需要清除的空间大小</span>
+</span></span><span style="display:flex;"><span>		amountToFree <span style="color:#ff79c6">:=</span> capacity<span style="color:#ff79c6">*</span><span style="color:#8be9fd;font-style:italic">int64</span>(<span style="color:#bd93f9">100</span><span style="color:#ff79c6">-</span>im.policy.LowThresholdPercent)<span style="color:#ff79c6">/</span><span style="color:#bd93f9">100</span> <span style="color:#ff79c6">-</span> available
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Disk usage on image filesystem is over the high threshold, trying to free bytes down to the low threshold&#34;</span>, <span style="color:#f1fa8c">&#34;usage&#34;</span>, usagePercent, <span style="color:#f1fa8c">&#34;highThreshold&#34;</span>, im.policy.HighThresholdPercent, <span style="color:#f1fa8c">&#34;amountToFree&#34;</span>, amountToFree, <span style="color:#f1fa8c">&#34;lowThreshold&#34;</span>, im.policy.LowThresholdPercent)
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 执行镜像回收操作</span>
+</span></span><span style="display:flex;"><span>		freed, err <span style="color:#ff79c6">:=</span> im.<span style="color:#50fa7b">freeSpace</span>(amountToFree, time.<span style="color:#50fa7b">Now</span>())
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 如果最后清除空间小于目标值则记录并返回错误</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> freed &lt; amountToFree {
+</span></span><span style="display:flex;"><span>			err <span style="color:#ff79c6">:=</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to garbage collect required amount of images. Wanted to free %d bytes, but freed %d bytes&#34;</span>, amountToFree, freed)
+</span></span><span style="display:flex;"><span>			im.recorder.<span style="color:#50fa7b">Eventf</span>(im.nodeRef, v1.EventTypeWarning, events.FreeDiskSpaceFailed, err.<span style="color:#50fa7b">Error</span>())
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<h3 id="回收镜像">回收镜像</h3>
+<p>主要流程：</p>
+<ul>
+<li>拿到当前正在使用的镜像列表。</li>
+<li>找到可以清理的镜像列表，实际就是从所有镜像里过滤出用到的镜像， 那么剩下的就是可以清理的。</li>
+<li>对可以清理的镜像按照上次时间时间排序，优先清理最久未使用的镜像。</li>
+<li>清理时跳过本轮检测到的新镜像和没有到最短存活时间的镜像。</li>
+<li>调用 runtime 接口移除镜像，并记录已经腾出的空间大小。</li>
+<li>如果已经腾出的空间达到目标就直接退出。</li>
+</ul>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (im <span style="color:#ff79c6">*</span>realImageGCManager) <span style="color:#50fa7b">freeSpace</span>(bytesToFree <span style="color:#8be9fd">int64</span>, freeTime time.Time) (<span style="color:#8be9fd">int64</span>, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 拿到当前在使用的镜像列表</span>
+</span></span><span style="display:flex;"><span>	imagesInUse, err <span style="color:#ff79c6">:=</span> im.<span style="color:#50fa7b">detectImages</span>(freeTime)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>, err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	im.imageRecordsLock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> im.imageRecordsLock.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Get all images in eviction order.</span>
+</span></span><span style="display:flex;"><span>	images <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>([]evictionInfo, <span style="color:#bd93f9">0</span>, <span style="color:#8be9fd;font-style:italic">len</span>(im.imageRecords))
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 过滤掉正在使用的镜像</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> image, record <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> im.imageRecords {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> <span style="color:#50fa7b">isImageUsed</span>(image, imagesInUse) {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Image ID is being used&#34;</span>, <span style="color:#f1fa8c">&#34;imageID&#34;</span>, image)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		images = <span style="color:#8be9fd;font-style:italic">append</span>(images, evictionInfo{
+</span></span><span style="display:flex;"><span>			id:          image,
+</span></span><span style="display:flex;"><span>			imageRecord: <span style="color:#ff79c6">*</span>record,
+</span></span><span style="display:flex;"><span>		})
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 根据上次使用时间排个序，优先清理最久未使用的</span>
+</span></span><span style="display:flex;"><span>	sort.<span style="color:#50fa7b">Sort</span>(<span style="color:#50fa7b">byLastUsedAndDetected</span>(images))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Delete unused images until we&#39;ve freed up enough space.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> deletionErrors []<span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>	spaceFreed <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">int64</span>(<span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, image <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> images {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Evaluating image ID for possible garbage collection&#34;</span>, <span style="color:#f1fa8c">&#34;imageID&#34;</span>, image.id)
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Images that are currently in used were given a newer lastUsed.</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 如果是新镜像(由前面的 detectImages 方法才发现的镜像)就跳过，本轮不清理</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> image.lastUsed.<span style="color:#50fa7b">Equal</span>(freeTime) <span style="color:#ff79c6">||</span> image.lastUsed.<span style="color:#50fa7b">After</span>(freeTime) {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Image ID was used too recently, not eligible for garbage collection&#34;</span>, <span style="color:#f1fa8c">&#34;imageID&#34;</span>, image.id, <span style="color:#f1fa8c">&#34;lastUsed&#34;</span>, image.lastUsed, <span style="color:#f1fa8c">&#34;freeTime&#34;</span>, freeTime)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Avoid garbage collect the image if the image is not old enough.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// In such a case, the image may have just been pulled down, and will be used by a container right away.</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 再次判断如果镜像的存活时间没有达到配置值也不清理</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> freeTime.<span style="color:#50fa7b">Sub</span>(image.firstDetected) &lt; im.policy.MinAge {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Image ID&#39;s age is less than the policy&#39;s minAge, not eligible for garbage collection&#34;</span>, <span style="color:#f1fa8c">&#34;imageID&#34;</span>, image.id, <span style="color:#f1fa8c">&#34;age&#34;</span>, freeTime.<span style="color:#50fa7b">Sub</span>(image.firstDetected), <span style="color:#f1fa8c">&#34;minAge&#34;</span>, im.policy.MinAge)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Remove image. Continue despite errors.</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 走到这里的都是需要清理的镜像了，调用 containerruntime 移除镜像</span>
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Removing image to free bytes&#34;</span>, <span style="color:#f1fa8c">&#34;imageID&#34;</span>, image.id, <span style="color:#f1fa8c">&#34;size&#34;</span>, image.size)
+</span></span><span style="display:flex;"><span>		err <span style="color:#ff79c6">:=</span> im.runtime.<span style="color:#50fa7b">RemoveImage</span>(container.ImageSpec{Image: image.id})
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			deletionErrors = <span style="color:#8be9fd;font-style:italic">append</span>(deletionErrors, err)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 从镜像记录中删除</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">delete</span>(im.imageRecords, image.id)
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 累计已经腾出的空间</span>
+</span></span><span style="display:flex;"><span>		spaceFreed <span style="color:#ff79c6">+=</span> image.size
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 如果本轮已经清理到了目标值就返回了，不在继续清理</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> spaceFreed <span style="color:#ff79c6">&gt;=</span> bytesToFree {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">break</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(deletionErrors) &gt; <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> spaceFreed, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;wanted to free %d bytes, but freed %d bytes space with errors in image deletion: %v&#34;</span>, bytesToFree, spaceFreed, errors.<span style="color:#50fa7b">NewAggregate</span>(deletionErrors))
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> spaceFreed, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<h3 id="获取正在使用中的镜像">获取正在使用中的镜像</h3>
+<p>获取正在使用中的镜像的逻辑还是很简单的，即获取到该节点上所有的 pods 进而获取到正在使用的镜像，这期间顺带更新下本地缓存 imageRecords：</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (im <span style="color:#ff79c6">*</span>realImageGCManager) <span style="color:#50fa7b">detectImages</span>(detectTime time.Time) (sets.String, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>	imagesInUse <span style="color:#ff79c6">:=</span> sets.<span style="color:#50fa7b">NewString</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// pod 的 sandbox 镜像只要存在，就默认其正在使用</span>
+</span></span><span style="display:flex;"><span>	imageRef, err <span style="color:#ff79c6">:=</span> im.runtime.<span style="color:#50fa7b">GetImageRef</span>(container.ImageSpec{Image: im.sandboxImage})
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> imageRef <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>		imagesInUse.<span style="color:#50fa7b">Insert</span>(imageRef)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 获取node上的所有的镜像</span>
+</span></span><span style="display:flex;"><span>	images, err <span style="color:#ff79c6">:=</span> im.runtime.<span style="color:#50fa7b">ListImages</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> imagesInUse, err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 获取node上的所有的pod</span>
+</span></span><span style="display:flex;"><span>	pods, err <span style="color:#ff79c6">:=</span> im.runtime.<span style="color:#50fa7b">GetPods</span>(<span style="color:#ff79c6">true</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> imagesInUse, err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 把pod用到的镜像都添加到使用集合中</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, pod <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> pods {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, container <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> pod.Containers {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Container uses image&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KRef</span>(pod.Namespace, pod.Name), <span style="color:#f1fa8c">&#34;containerName&#34;</span>, container.Name, <span style="color:#f1fa8c">&#34;containerImage&#34;</span>, container.Image, <span style="color:#f1fa8c">&#34;imageID&#34;</span>, container.ImageID)
+</span></span><span style="display:flex;"><span>			imagesInUse.<span style="color:#50fa7b">Insert</span>(container.ImageID)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	now <span style="color:#ff79c6">:=</span> time.<span style="color:#50fa7b">Now</span>()
+</span></span><span style="display:flex;"><span>	currentImages <span style="color:#ff79c6">:=</span> sets.<span style="color:#50fa7b">NewString</span>()
+</span></span><span style="display:flex;"><span>	im.imageRecordsLock.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> im.imageRecordsLock.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, image <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> images {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Adding image ID to currentImages&#34;</span>, <span style="color:#f1fa8c">&#34;imageID&#34;</span>, image.ID)
+</span></span><span style="display:flex;"><span>		currentImages.<span style="color:#50fa7b">Insert</span>(image.ID)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 如果镜像不在本地缓存，就认为是新镜像，添加一个新记录</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> _, ok <span style="color:#ff79c6">:=</span> im.imageRecords[image.ID]; !ok {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Image ID is new&#34;</span>, <span style="color:#f1fa8c">&#34;imageID&#34;</span>, image.ID)
+</span></span><span style="display:flex;"><span>			im.imageRecords[image.ID] = <span style="color:#ff79c6">&amp;</span>imageRecord{
+</span></span><span style="display:flex;"><span>				firstDetected: detectTime,
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 如果镜像正在使用就更新上次使用时间</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> <span style="color:#50fa7b">isImageUsed</span>(image.ID, imagesInUse) {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Setting Image ID lastUsed&#34;</span>, <span style="color:#f1fa8c">&#34;imageID&#34;</span>, image.ID, <span style="color:#f1fa8c">&#34;lastUsed&#34;</span>, now)
+</span></span><span style="display:flex;"><span>			im.imageRecords[image.ID].lastUsed = now
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 更新一下镜像的大小</span>
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Image ID has size&#34;</span>, <span style="color:#f1fa8c">&#34;imageID&#34;</span>, image.ID, <span style="color:#f1fa8c">&#34;size&#34;</span>, image.Size)
+</span></span><span style="display:flex;"><span>		im.imageRecords[image.ID].size = image.Size
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 更新本地缓存，即本地缓存有记录，但现实没有，删除本地缓存中的记录</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> image <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> im.imageRecords {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !currentImages.<span style="color:#50fa7b">Has</span>(image) {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Image ID is no longer present; removing from imageRecords&#34;</span>, <span style="color:#f1fa8c">&#34;imageID&#34;</span>, image)
+</span></span><span style="display:flex;"><span>			<span style="color:#8be9fd;font-style:italic">delete</span>(im.imageRecords, image)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 最后返回当前正在使用的镜像列表</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> imagesInUse, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<h3 id="本地缓存">本地缓存</h3>
+<p>本地缓存 imageRecords 的数据类型是一个字典，键为镜像ID，值的类型为：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> imageRecord <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 第一次检测的时间</span>
+</span></span><span style="display:flex;"><span>	firstDetected time.Time
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 最后被使用的时间</span>
+</span></span><span style="display:flex;"><span>	lastUsed time.Time
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 镜像的大小</span>
+</span></span><span style="display:flex;"><span>	size <span style="color:#8be9fd">int64</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>有两个协程会协同更新本地缓存 imageRecords，一个周期性全量拉取节点上的镜像，一个周期性的调用<a href="#获取正在使用中的镜像">上述所讲的 detectImages</a> 来更新本地缓存。</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (im <span style="color:#ff79c6">*</span>realImageGCManager) <span style="color:#50fa7b">Start</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">go</span> wait.<span style="color:#50fa7b">Until</span>(<span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Initial detection make detected time &#34;unknown&#34; in the past.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> ts time.Time
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> im.initialized {
+</span></span><span style="display:flex;"><span>      ts = time.<span style="color:#50fa7b">Now</span>()
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    _, err <span style="color:#ff79c6">:=</span> im.<span style="color:#50fa7b">detectImages</span>(ts)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>      klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Failed to monitor images&#34;</span>, <span style="color:#f1fa8c">&#34;err&#34;</span>, err)
+</span></span><span style="display:flex;"><span>    } <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>      im.initialized = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }, <span style="color:#bd93f9">5</span><span style="color:#ff79c6">*</span>time.Minute, wait.NeverStop)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Start a goroutine periodically updates image cache.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">go</span> wait.<span style="color:#50fa7b">Until</span>(<span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>    images, err <span style="color:#ff79c6">:=</span> im.runtime.<span style="color:#50fa7b">ListImages</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>      klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Failed to update image list&#34;</span>, <span style="color:#f1fa8c">&#34;err&#34;</span>, err)
+</span></span><span style="display:flex;"><span>    } <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>      im.imageCache.<span style="color:#50fa7b">set</span>(images)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }, <span style="color:#bd93f9">30</span><span style="color:#ff79c6">*</span>time.Second, wait.NeverStop)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<h2 id="容器回收">容器回收</h2>
+<p>容器回收的逻辑简单来说就三个步骤：</p>
+<ul>
+<li>清理可以驱逐的容器。</li>
+<li>清理可以驱逐的 sandbox。</li>
+<li>清理所有 pod 的日志目录。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (cgc <span style="color:#ff79c6">*</span>containerGC) <span style="color:#50fa7b">GarbageCollect</span>(gcPolicy kubecontainer.GCPolicy, allSourcesReady <span style="color:#8be9fd">bool</span>, evictNotDeletedPods <span style="color:#8be9fd">bool</span>) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>	errors <span style="color:#ff79c6">:=</span> []<span style="color:#8be9fd">error</span>{}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> cgc.<span style="color:#50fa7b">evictContainers</span>(gcPolicy, allSourcesReady, evictNotDeletedPods); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		errors = <span style="color:#8be9fd;font-style:italic">append</span>(errors, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> cgc.<span style="color:#50fa7b">evictSandboxes</span>(evictNotDeletedPods); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		errors = <span style="color:#8be9fd;font-style:italic">append</span>(errors, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> cgc.<span style="color:#50fa7b">evictPodLogsDirectories</span>(allSourcesReady); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		errors = <span style="color:#8be9fd;font-style:italic">append</span>(errors, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> utilerrors.<span style="color:#50fa7b">NewAggregate</span>(errors)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="驱逐容器">驱逐容器</h3>
+<p>驱逐容器的步骤：</p>
+<ul>
+<li>找到所有可以驱逐的容器，即当前状态不是 RUNNING 并且是其存在时间已经超过了<code>--minimum-container-ttl-duration</code> 配置的时间。</li>
+<li>每个pod 中存在已经挂掉的容器满足阀值，即<code>--maximum-dead-containers-per-container</code>，需要驱逐挂掉的容器。</li>
+<li>每个node 中存在已经挂掉的容器满足阀值, 即 <code>--maximum-dead-containers</code>, 需要驱逐挂掉的容器。</li>
+<li>驱逐直到满足条件上述条件。</li>
+</ul>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (cgc <span style="color:#ff79c6">*</span>containerGC) <span style="color:#50fa7b">evictContainers</span>(gcPolicy kubecontainer.GCPolicy, allSourcesReady <span style="color:#8be9fd">bool</span>, evictNotDeletedPods <span style="color:#8be9fd">bool</span>) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 找到所有可以驱逐的容器，判断条件为：当前状态不是 RUNNING 并且其存在时间已经超过了`--minimum-container-ttl-duration` 配置的时间</span>
+</span></span><span style="display:flex;"><span>	evictUnits, err <span style="color:#ff79c6">:=</span> cgc.<span style="color:#50fa7b">evictableContainers</span>(gcPolicy.MinAge)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> allSourcesReady {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> key, unit <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> evictUnits {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> cgc.podStateProvider.<span style="color:#50fa7b">ShouldPodContentBeRemoved</span>(key.uid) <span style="color:#ff79c6">||</span> (evictNonDeletedPods <span style="color:#ff79c6">&amp;&amp;</span> cgc.podStateProvider.<span style="color:#50fa7b">ShouldPodRuntimeBeRemoved</span>(key.uid)) {
+</span></span><span style="display:flex;"><span>				cgc.<span style="color:#50fa7b">removeOldestN</span>(unit, <span style="color:#8be9fd;font-style:italic">len</span>(unit)) <span style="color:#6272a4">// Remove all.</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#8be9fd;font-style:italic">delete</span>(evictUnits, key)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 每个pod最多可以保留几个已经挂掉的容器，&lt;0 表示不做限制，如果&gt;=0, 就需要移除其他挂掉的容器</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 对应配置为 ``--maximum-dead-containers-per-container</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> gcPolicy.MaxPerPodContainer <span style="color:#ff79c6">&gt;=</span> <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>		cgc.<span style="color:#50fa7b">enforceMaxContainersPerEvictUnit</span>(evictUnits, gcPolicy.MaxPerPodContainer)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">//  Pod 累计挂掉的容器数，如果超过了则继续清理</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 每个节点上最多可以保留已经挂掉的容器， &lt;0 表示不做限制， 如果 &gt;=0 就需要移除其他挂掉的容器</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 对应配置为  `--maximum-dead-containers`</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> gcPolicy.MaxContainers <span style="color:#ff79c6">&gt;=</span> <span style="color:#bd93f9">0</span> <span style="color:#ff79c6">&amp;&amp;</span> evictUnits.<span style="color:#50fa7b">NumContainers</span>() &gt; gcPolicy.MaxContainers {
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Leave an equal number of containers per evict unit (min: 1).</span>
+</span></span><span style="display:flex;"><span>		numContainersPerEvictUnit <span style="color:#ff79c6">:=</span> gcPolicy.MaxContainers <span style="color:#ff79c6">/</span> evictUnits.<span style="color:#50fa7b">NumEvictUnits</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> numContainersPerEvictUnit &lt; <span style="color:#bd93f9">1</span> {
+</span></span><span style="display:flex;"><span>			numContainersPerEvictUnit = <span style="color:#bd93f9">1</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		cgc.<span style="color:#50fa7b">enforceMaxContainersPerEvictUnit</span>(evictUnits, numContainersPerEvictUnit)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 如果还不满足条件，则继续清理</span>
+</span></span><span style="display:flex;"><span>		numContainers <span style="color:#ff79c6">:=</span> evictUnits.<span style="color:#50fa7b">NumContainers</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> numContainers &gt; gcPolicy.MaxContainers {
+</span></span><span style="display:flex;"><span>			flattened <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>([]containerGCInfo, <span style="color:#bd93f9">0</span>, numContainers)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">for</span> key <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> evictUnits {
+</span></span><span style="display:flex;"><span>				flattened = <span style="color:#8be9fd;font-style:italic">append</span>(flattened, evictUnits[key]<span style="color:#ff79c6">...</span>)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// 按照创建时间排序</span>
+</span></span><span style="display:flex;"><span>			sort.<span style="color:#50fa7b">Sort</span>(<span style="color:#50fa7b">byCreated</span>(flattened))
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// 删除比较旧的容器</span>
+</span></span><span style="display:flex;"><span>			cgc.<span style="color:#50fa7b">removeOldestN</span>(flattened, numContainers<span style="color:#ff79c6">-</span>gcPolicy.MaxContainers)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<h3 id="驱逐-sandbox">驱逐 sandbox</h3>
+<p>清理已经被删除或者终止的 pod 关联的 sandbox：</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (cgc <span style="color:#ff79c6">*</span>containerGC) <span style="color:#50fa7b">evictSandboxes</span>(evictNotDeletedPods <span style="color:#8be9fd">bool</span>) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 获取节点上所有容器</span>
+</span></span><span style="display:flex;"><span>	containers, err <span style="color:#ff79c6">:=</span> cgc.manager.<span style="color:#50fa7b">getKubeletContainers</span>(<span style="color:#ff79c6">true</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 获取节点上所有sandbox</span>
+</span></span><span style="display:flex;"><span>	sandboxes, err <span style="color:#ff79c6">:=</span> cgc.manager.<span style="color:#50fa7b">getKubeletSandboxes</span>(<span style="color:#ff79c6">true</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">//收集所有 container 的 PodSandboxId</span>
+</span></span><span style="display:flex;"><span>	sandboxIDs <span style="color:#ff79c6">:=</span> sets.<span style="color:#50fa7b">NewString</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, container <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> containers {
+</span></span><span style="display:flex;"><span>		sandboxIDs.<span style="color:#50fa7b">Insert</span>(container.PodSandboxId)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 构建 sandbox 与 pod 的对应关系并将其保存在 sandboxesByPodUID 中</span>
+</span></span><span style="display:flex;"><span>	sandboxesByPod <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(sandboxesByPodUID)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, sandbox <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> sandboxes {
+</span></span><span style="display:flex;"><span>		podUID <span style="color:#ff79c6">:=</span> types.<span style="color:#50fa7b">UID</span>(sandbox.Metadata.Uid)
+</span></span><span style="display:flex;"><span>		sandboxInfo <span style="color:#ff79c6">:=</span> sandboxGCInfo{
+</span></span><span style="display:flex;"><span>			id:         sandbox.Id,
+</span></span><span style="display:flex;"><span>			createTime: time.<span style="color:#50fa7b">Unix</span>(<span style="color:#bd93f9">0</span>, sandbox.CreatedAt),
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Set ready sandboxes to be active.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> sandbox.State <span style="color:#ff79c6">==</span> runtimeapi.PodSandboxState_SANDBOX_READY {
+</span></span><span style="display:flex;"><span>			sandboxInfo.active = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Set sandboxes that still have containers to be active.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> sandboxIDs.<span style="color:#50fa7b">Has</span>(sandbox.Id) {
+</span></span><span style="display:flex;"><span>			sandboxInfo.active = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		sandboxesByPod[podUID] = <span style="color:#8be9fd;font-style:italic">append</span>(sandboxesByPod[podUID], sandboxInfo)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> podUID, sandboxes <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> sandboxesByPod {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> cgc.podStateProvider.<span style="color:#50fa7b">ShouldPodContentBeRemoved</span>(podUID) <span style="color:#ff79c6">||</span> (evictNotDeletedPods <span style="color:#ff79c6">&amp;&amp;</span> cgc.podStateProvider.<span style="color:#50fa7b">ShouldPodRuntimeBeRemoved</span>(podUID)) {
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// 如果与sandbox关联的pod已经删除或者终止，就删除所有的sandbox</span>
+</span></span><span style="display:flex;"><span>			cgc.<span style="color:#50fa7b">removeOldestNSandboxes</span>(sandboxes, <span style="color:#8be9fd;font-style:italic">len</span>(sandboxes))
+</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// 否则就保留一个</span>
+</span></span><span style="display:flex;"><span>			cgc.<span style="color:#50fa7b">removeOldestNSandboxes</span>(sandboxes, <span style="color:#8be9fd;font-style:italic">len</span>(sandboxes)<span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<h3 id="清除pod的日志目录">清除pod的日志目录</h3>
+<p>最后就是 pod 的日志了，pod 删除后（对应前两步，container 和 sandbox 的驱逐），它的日志数据就没有用了，就可以删除了：
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (cgc <span style="color:#ff79c6">*</span>containerGC) <span style="color:#50fa7b">evictPodLogsDirectories</span>(allSourcesReady <span style="color:#8be9fd">bool</span>) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>	osInterface <span style="color:#ff79c6">:=</span> cgc.manager.osInterface
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> allSourcesReady {
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 获取 kubelet 日志目录 /var/log/pods）下的子目录</span>
+</span></span><span style="display:flex;"><span>		dirs, err <span style="color:#ff79c6">:=</span> osInterface.<span style="color:#50fa7b">ReadDir</span>(podLogsRootDirectory)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to read podLogsRootDirectory %q: %v&#34;</span>, podLogsRootDirectory, err)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, dir <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> dirs {
+</span></span><span style="display:flex;"><span>			name <span style="color:#ff79c6">:=</span> dir.<span style="color:#50fa7b">Name</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// pod logs dir 的格式为/var/log/pods/NAMESPACE_NAME_UID, 解析获取podID</span>
+</span></span><span style="display:flex;"><span>			podUID <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">parsePodUIDFromLogsDirectory</span>(name)
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// 判断pod是否已经删除，如果没有删除，继续遍历下一个日志目录</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> !cgc.podStateProvider.<span style="color:#50fa7b">ShouldPodContentBeRemoved</span>(podUID) {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// 否则直接删除对应目录</span>
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Removing pod logs&#34;</span>, <span style="color:#f1fa8c">&#34;podUID&#34;</span>, podUID)
+</span></span><span style="display:flex;"><span>			err <span style="color:#ff79c6">:=</span> osInterface.<span style="color:#50fa7b">RemoveAll</span>(filepath.<span style="color:#50fa7b">Join</span>(podLogsRootDirectory, name))
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to remove pod logs directory&#34;</span>, <span style="color:#f1fa8c">&#34;path&#34;</span>, name)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 删除软链接</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 例如：/var/log/containers/storage-provisioner_kube-system_storage-provisioner-acc8386e409dfb3cc01618cbd14c373d8ac6d7f0aaad9ced018746f31d0081e2.log -&gt; /var/log/pods/kube-system_storage-provisioner_b448e496-eb5d-4d71-b93f-ff7ff77d2348/storage-provisioner/0.log</span>
+</span></span><span style="display:flex;"><span>	logSymlinks, _ <span style="color:#ff79c6">:=</span> osInterface.<span style="color:#50fa7b">Glob</span>(filepath.<span style="color:#50fa7b">Join</span>(legacyContainerLogsDir, fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;*.%s&#34;</span>, legacyLogSuffix)))
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, logSymlink <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> logSymlinks {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> _, err <span style="color:#ff79c6">:=</span> osInterface.<span style="color:#50fa7b">Stat</span>(logSymlink); os.<span style="color:#50fa7b">IsNotExist</span>(err) {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> containerID, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getContainerIDFromLegacyLogSymlink</span>(logSymlink); err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				resp, err <span style="color:#ff79c6">:=</span> cgc.manager.runtimeService.<span style="color:#50fa7b">ContainerStatus</span>(containerID, <span style="color:#ff79c6">false</span>)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// TODO: we should handle container not found (i.e. container was deleted) case differently</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// once https://github.com/kubernetes/kubernetes/issues/63336 is resolved</span>
+</span></span><span style="display:flex;"><span>					klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Error getting ContainerStatus for containerID&#34;</span>, <span style="color:#f1fa8c">&#34;containerID&#34;</span>, containerID, <span style="color:#f1fa8c">&#34;err&#34;</span>, err)
+</span></span><span style="display:flex;"><span>				} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>					status <span style="color:#ff79c6">:=</span> resp.<span style="color:#50fa7b">GetStatus</span>()
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> status <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>						klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Container status is nil&#34;</span>)
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> status.State <span style="color:#ff79c6">!=</span> runtimeapi.ContainerState_CONTAINER_EXITED {
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// Here is how container log rotation works (see containerLogManager#rotateLatestLog):</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">//
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">					// 1. rename current log to rotated log file whose filename contains current timestamp (fmt.Sprintf(&#34;%s.%s&#34;, log, timestamp))</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// 2. reopen the container log</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// 3. if #2 fails, rename rotated log file back to container log</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">//
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">					// There is small but indeterministic amount of time during which log file doesn&#39;t exist (between steps #1 and #2, between #1 and #3).</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// Hence the symlink may be deemed unhealthy during that period.</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// See https://github.com/kubernetes/kubernetes/issues/52172</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">//
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">					// We only remove unhealthy symlink for dead containers</span>
+</span></span><span style="display:flex;"><span>					klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Container is still running, not removing symlink&#34;</span>, <span style="color:#f1fa8c">&#34;containerID&#34;</span>, containerID, <span style="color:#f1fa8c">&#34;path&#34;</span>, logSymlink)
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Unable to obtain container ID&#34;</span>, <span style="color:#f1fa8c">&#34;err&#34;</span>, err)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			err <span style="color:#ff79c6">:=</span> osInterface.<span style="color:#50fa7b">Remove</span>(logSymlink)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to remove container log dead symlink&#34;</span>, <span style="color:#f1fa8c">&#34;path&#34;</span>, logSymlink)
+</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Removed symlink&#34;</span>, <span style="color:#f1fa8c">&#34;path&#34;</span>, logSymlink)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+</p>
+
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kubelet/" class="tag-link">Kubelet</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

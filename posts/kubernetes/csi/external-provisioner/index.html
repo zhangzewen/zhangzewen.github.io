@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>kubernetes csi 之 external-provisioner &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="kubernetes csi 之 external-provisioner">
+  <meta itemprop="description" content="前言 external-provisioner 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 sig-storage-lib-external-provisioner 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 PV Controller 的工作。">
+  <meta itemprop="datePublished" content="2025-08-02T00:43:31+08:00">
+  <meta itemprop="dateModified" content="2025-08-02T00:43:31+08:00">
+  <meta itemprop="wordCount" content="266">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="源码分析,Kubernetes,Kubelet,Csi">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="kubernetes csi 之 external-provisioner">
+  <meta name="twitter:description" content="前言 external-provisioner 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 sig-storage-lib-external-provisioner 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 PV Controller 的工作。">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="kubernetes csi 之 external-provisioner">
+  <meta property="og:description" content="前言 external-provisioner 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 sig-storage-lib-external-provisioner 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 PV Controller 的工作。">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-08-02T00:43:31+08:00">
+    <meta property="article:modified_time" content="2025-08-02T00:43:31+08:00">
+    <meta property="article:tag" content="源码分析">
+    <meta property="article:tag" content="Kubernetes">
+    <meta property="article:tag" content="Kubelet">
+    <meta property="article:tag" content="Csi">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/#webpage",
+      "url": "https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/",
+      "name": "kubernetes csi 之 external-provisioner",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2025-08-02T00:43:31+08:00",
+      "dateModified": "2025-08-02T00:43:31+08:00",
+      "description": "\u003ch2 id=\"前言\"\u003e前言\u003c/h2\u003e\n\u003cp\u003e\u003ca href=\"https://github.com/kubernetes-csi/external-provisioner.git\"\u003eexternal-provisioner\u003c/a\u003e 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 \u003ca href=\"https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/\"\u003esig-storage-lib-external-provisioner\u003c/a\u003e 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 \u003ca href=\"https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/\"\u003ePV Controller\u003c/a\u003e 的工作。\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/#webpage"
+      },
+      "headline": "kubernetes csi 之 external-provisioner",
+      "datePublished": "2025-08-02T00:43:31+08:00",
+      "dateModified": "2025-08-02T00:43:31+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "源码分析",
+        "Kubernetes",
+        "Kubelet",
+        "Csi"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#前言">前言</a></li>
+        <li><a href="#volume-的创建和删除csiprovisioner">Volume 的创建和删除：csiProvisioner</a>
+          <ul>
+            <li><a href="#创建-volume">创建 Volume</a></li>
+            <li><a href="#删除-volume">删除 Volume</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">kubernetes csi 之 external-provisioner</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2025-08-02T00:43:31&#43;0800">Created: Aug 2, 2025</time>
+    <span class="readtime">&middot; 2 min read</span>
+  </div>
+
+  <div>
+    <h2 id="前言">前言</h2>
+<p><a href="https://github.com/kubernetes-csi/external-provisioner.git">external-provisioner</a> 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 <a href="https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/">sig-storage-lib-external-provisioner</a> 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 <a href="https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/">PV Controller</a> 的工作。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Provisioner <span style="color:#8be9fd;font-style:italic">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Provision</span>(context.Context, ProvisionOptions) (<span style="color:#ff79c6">*</span>v1.PersistentVolume, ProvisioningState, <span style="color:#8be9fd">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Delete</span>(context.Context, <span style="color:#ff79c6">*</span>v1.PersistentVolume) <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="volume-的创建和删除csiprovisioner">Volume 的创建和删除：csiProvisioner</h2>
+<h3 id="创建-volume">创建 Volume</h3>
+<p><code>csiProvisioner.Provision</code> 的代码很多，但是流程清晰：</p>
+<ul>
+<li>通过 <a href="https://github.com/container-storage-interface/spec.git">CSI 接口</a> 提供的 Controller Service 和 CSI plugin 通信（调用CreateVolume）来创建 Volume。</li>
+<li>CSI plugin 创建 volume 成功返回后，构建 PV 资源对象。</li>
+<li>把PV 资源对象 交给 <a href="https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/">sig-storage-lib-external-provisioner</a> 处理。</li>
+</ul>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>csiProvisioner) <span style="color:#50fa7b">Provision</span>(ctx context.Context, options controller.ProvisionOptions) (<span style="color:#ff79c6">*</span>v1.PersistentVolume, controller.ProvisioningState, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>	claim <span style="color:#ff79c6">:=</span> options.PVC
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//通过检查PVC的.metadata.annotations的键&#34;volume.kubernetes.io/storage-provisioner&#34;/&#34;volume.beta.kubernetes.io/storage-provisioner&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 来获取provisioner</span>
+</span></span><span style="display:flex;"><span>	provisioner, ok <span style="color:#ff79c6">:=</span> claim.Annotations[annStorageProvisioner]
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok {
+</span></span><span style="display:flex;"><span>		provisioner = claim.Annotations[annBetaStorageProvisioner]
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 需要注意的是p.driverName,在main函数的时候通过CSI gRPC调用来获取的drivername</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 还需要判断.metadata.annotations[&#34;pv.kubernetes.io/migrated-to&#34;]的值是不是driverName</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> provisioner <span style="color:#ff79c6">!=</span> p.driverName <span style="color:#ff79c6">&amp;&amp;</span> claim.Annotations[annMigratedTo] <span style="color:#ff79c6">!=</span> p.driverName {
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// The storage provisioner annotation may not equal driver name but the</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// PVC could have annotation &#34;migrated-to&#34; which is the new way to</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// signal a PVC is migrated (k8s v1.17+)</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, controller.ProvisioningFinished, <span style="color:#ff79c6">&amp;</span>controller.IgnoredError{
+</span></span><span style="display:flex;"><span>			Reason: fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;PVC annotated with external-provisioner name %s does not match provisioner driver name %s. This could mean the PVC is not migrated&#34;</span>,
+</span></span><span style="display:flex;"><span>				provisioner,
+</span></span><span style="display:flex;"><span>				p.driverName),
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// gRPC通信，通过 CSI plugin 创建 Volume</span>
+</span></span><span style="display:flex;"><span>	rep, err <span style="color:#ff79c6">:=</span> p.csiClient.<span style="color:#50fa7b">CreateVolume</span>(createCtx, req)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建成功后，构建 pv 资源对象</span>
+</span></span><span style="display:flex;"><span>	pv <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>v1.PersistentVolume{
+</span></span><span style="display:flex;"><span>		ObjectMeta: metav1.ObjectMeta{
+</span></span><span style="display:flex;"><span>			Name: pvName,
+</span></span><span style="display:flex;"><span>		},
+</span></span><span style="display:flex;"><span>		Spec: v1.PersistentVolumeSpec{
+</span></span><span style="display:flex;"><span>			AccessModes:  options.PVC.Spec.AccessModes,
+</span></span><span style="display:flex;"><span>			MountOptions: options.StorageClass.MountOptions,
+</span></span><span style="display:flex;"><span>			Capacity: v1.ResourceList{
+</span></span><span style="display:flex;"><span>				v1.<span style="color:#50fa7b">ResourceName</span>(v1.ResourceStorage): <span style="color:#50fa7b">bytesToQuantity</span>(respCap),
+</span></span><span style="display:flex;"><span>			},
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// TODO wait for CSI VolumeSource API</span>
+</span></span><span style="display:flex;"><span>			PersistentVolumeSource: v1.PersistentVolumeSource{
+</span></span><span style="display:flex;"><span>				CSI: result.csiPVSource,
+</span></span><span style="display:flex;"><span>			},
+</span></span><span style="display:flex;"><span>		},
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">//  返回该资源对象</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> pv, controller.ProvisioningFinished, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<h3 id="删除-volume">删除 Volume</h3>
+<p><code>csiProvisioner.Delete</code> 通过 <a href="https://github.com/container-storage-interface/spec.git">CSI 接口</a> 提供的 Controller Service 和 CSI plugin 通信（调用DeleteVolume）来删除 Volume：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>csiProvisioner) <span style="color:#50fa7b">Delete</span>(ctx context.Context, volume <span style="color:#ff79c6">*</span>v1.PersistentVolume) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// gRPC通信，通过 CSI plugin 删除 Volume</span>
+</span></span><span style="display:flex;"><span>	_, err = p.csiClient.<span style="color:#50fa7b">DeleteVolume</span>(deleteCtx, <span style="color:#ff79c6">&amp;</span>req)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><img src="/images/kubernetes/csi/external-provisioner.png" alt="external-provisioner"></p>
+
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kubelet/" class="tag-link">Kubelet</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/csi/" class="tag-link">Csi</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

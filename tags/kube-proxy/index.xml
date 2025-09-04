@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Kube-Proxy on What a Life!</title>
+    <link>https://www.zhangzewen.net/tags/kube-proxy/</link>
+    <description>Recent content in Kube-Proxy on What a Life!</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Tue, 21 Jan 2025 21:39:37 +0800</lastBuildDate>
+    <atom:link href="https://www.zhangzewen.net/tags/kube-proxy/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>kubernetes 源码分析之 kube-proxy ipvs 模式</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/ipvs/</link>
+      <pubDate>Tue, 21 Jan 2025 21:39:37 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/ipvs/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/&#34;&gt;上一篇文章&lt;/a&gt; 分析了 kube-proxy 的主流程逻辑实现，本篇文章通过分析核心方法 syncProxyRules 来分析 kube-proxy 的 ipvs 模式的实现。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kube-proxy iptables 模式</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/iptables/</link>
+      <pubDate>Sat, 23 Nov 2024 16:31:39 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/iptables/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/&#34;&gt;上一篇文章&lt;/a&gt; 分析了 kube-proxy 的主流程逻辑实现，本片文章来分析 kube-proxy 的 iptables 模式实现。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kube-proxy</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/</link>
+      <pubDate>Sun, 06 Oct 2024 00:27:07 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部署在集群的每个节点之上，负责在其宿主节点上配置 iptables，ipvs等规则。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes Service 机制</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/services/</link>
+      <pubDate>Sat, 07 Sep 2024 19:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/services/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

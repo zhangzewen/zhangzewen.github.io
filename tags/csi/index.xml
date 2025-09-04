@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Csi on What a Life!</title>
+    <link>https://www.zhangzewen.net/tags/csi/</link>
+    <description>Recent content in Csi on What a Life!</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Fri, 29 Aug 2025 02:43:31 +0800</lastBuildDate>
+    <atom:link href="https://www.zhangzewen.net/tags/csi/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>kubernetes 源码分析之 AttachDetach Controller </title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/</link>
+      <pubDate>Fri, 29 Aug 2025 02:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 PV Controller</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/</link>
+      <pubDate>Fri, 29 Aug 2025 02:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建PersistentVolumeController，NewController 主要做了如下几件事情：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes csi 之 CSI Volume Plugin</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/csi/kubelet-volume-plugins-csi/</link>
+      <pubDate>Sat, 02 Aug 2025 00:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/csi/kubelet-volume-plugins-csi/</guid>
+      <description>&lt;h2 id=&#34;csidriver-注册&#34;&gt;CSIDriver 注册&lt;/h2&gt;&#xA;&lt;p&gt;所有的 CSI Driver 都是通过map来关联存储的：&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; Driver &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;endpoint                &lt;span style=&#34;color:#8be9fd&#34;&gt;string&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;highestSupportedVersion &lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;utilversion.Version&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; DriversStore &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;store&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;sync.RWMutex&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; store &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;map&lt;/span&gt;[&lt;span style=&#34;color:#8be9fd&#34;&gt;string&lt;/span&gt;]Driver&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;具体的增/删/改/查可以看&lt;code&gt;k8s.io/kubernetes/pkg/volume/csi/csi_drivers_store.go&lt;/code&gt;， 全局变量 csiDrivers 就存储了所有注册的CSI Driver：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes csi 之 external-provisioner</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/</link>
+      <pubDate>Sat, 02 Aug 2025 00:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/</guid>
+      <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/kubernetes-csi/external-provisioner.git&#34;&gt;external-provisioner&lt;/a&gt; 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 &lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/&#34;&gt;sig-storage-lib-external-provisioner&lt;/a&gt; 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 &lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/&#34;&gt;PV Controller&lt;/a&gt; 的工作。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes csi 之 node-driver-register</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/csi/node-driver-register/</link>
+      <pubDate>Sat, 02 Aug 2025 00:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/csi/node-driver-register/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://github.com/kubernetes-csi/node-driver-registrar.git&#34;&gt;node-driver-register&lt;/a&gt; 是一个辅助容器，通过 &lt;a href=&#34;https://github.com/container-storage-interface/spec.git&#34;&gt;CSI 接口&lt;/a&gt; 提供的 Identity Service 来获取插件信息，并且通过&lt;a href=&#34;https://github.com/kubernetes/kubelet/blob/master/pkg/apis/pluginregistration/v1/api.proto&#34;&gt;kubelet 插件注册接口&lt;/a&gt; 注册到 kubelet。所以，node-dirver-rigister 即是一个客户端，也是一个服务端。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes csi 之 sig-storage-lib-external-provisioner</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/</link>
+      <pubDate>Sat, 02 Aug 2025 00:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://github.com/kubernetes-sigs/sig-storage-lib-external-provisioner.git&#34;&gt;sig-storage-lib-external-provisioner&lt;/a&gt; 是用来开发的 external provisioners 的工具库，提供了一个通用的控制器，即根据提供的 Provisioner，然后监听 PVC/PV 资源的变化来实现创建/删除 PV。&lt;/p&gt;&#xA;&lt;h2 id=&#34;接口&#34;&gt;接口&lt;/h2&gt;&#xA;&lt;p&gt;sig-storage-lib-external-provisioner 中的接口 Provisioner 提供了 external provisioners 实现创建/删除 PV 的方法 Provision/Delete, 接口 BlockProvisioner 扩展了 Provisioner：能够判断 provisioner是否支持块设备。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 CSI Volume Plugin</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/csi-volume-plugin/</link>
+      <pubDate>Fri, 27 Jun 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/csi-volume-plugin/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;在 kubernetes 中，第三方 CSI Plugin 注册到 kubelet 是通过 CSI Volume Plugin 来完成的。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet volume plugins manager</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/volume_plugins_manager/</link>
+      <pubDate>Wed, 18 Jun 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/volume_plugins_manager/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;在 kubernetes 中存储以插件的形似存在，kubernetes 提供了接口 &lt;a href=&#34;https://github.com/kubernetes/kubernetes/blob/e4d4e1ab7cf1bf15273ef97303551b279f0920a9/pkg/volume/volume.go#L30&#34;&gt;Volume&lt;/a&gt; 极其扩展接口来表示存储卷，使用 &lt;a href=&#34;https://github.com/kubernetes/kubernetes/blob/e4d4e1ab7cf1bf15273ef97303551b279f0920a9/pkg/volume/plugins.go#L134&#34;&gt;VolumePlugin&lt;/a&gt; 接口来表示一个存储卷插件。像常用的 &lt;code&gt;empty/hostpath/configmap/secert/csi&lt;/code&gt; 等都是以插件形式存在的存储卷（这里的 csi 是让 kubernetes 可以使用第三方提供的存储功能），kubelet 使用 volume plugins manager 来管理它们。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

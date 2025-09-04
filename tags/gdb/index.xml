@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Gdb on What a Life!</title>
+    <link>https://www.zhangzewen.net/tags/gdb/</link>
+    <description>Recent content in Gdb on What a Life!</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Tue, 25 Feb 2025 09:43:31 +0800</lastBuildDate>
+    <atom:link href="https://www.zhangzewen.net/tags/gdb/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>gdb init script</title>
+      <link>https://www.zhangzewen.net/posts/linux/gdb_init_script/</link>
+      <pubDate>Tue, 25 Feb 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/linux/gdb_init_script/</guid>
+      <description>&lt;p&gt;.gdbinit 能够将gdb基本命令添加到文件中以避免每次启动gdb 进行 debug 时候输入他们，例如&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;b main&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;r&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;b main.c:56&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;c&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这样就可以避免重复性的劳动。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

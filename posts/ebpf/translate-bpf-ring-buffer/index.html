@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>[译]BPF ring buffer &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="[译]BPF ring buffer">
+  <meta itemprop="description" content="介于能力有限，翻译有不当之处，不吝赐教
+原文: BPF ring buffer
+BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲区（当前用于从内核向用户态发送数据的标准）的内存效率和事件重新排序问题，同时达到或超过了其性能。它提供了perfbuf兼容性以便于轻松迁移，但也有新的reserve/submit API，具有更好的可用性。此外，合成和实际基准测试都表明，在几乎所有情况下，考虑将其作为从BPF程序发送数据到用户态的默认选择。">
+  <meta itemprop="datePublished" content="2024-03-24T21:42:07+08:00">
+  <meta itemprop="dateModified" content="2024-03-24T21:42:07+08:00">
+  <meta itemprop="wordCount" content="958">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="EBPF,Linux,翻译,Kernel">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="[译]BPF ring buffer">
+  <meta name="twitter:description" content="介于能力有限，翻译有不当之处，不吝赐教
+原文: BPF ring buffer
+BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲区（当前用于从内核向用户态发送数据的标准）的内存效率和事件重新排序问题，同时达到或超过了其性能。它提供了perfbuf兼容性以便于轻松迁移，但也有新的reserve/submit API，具有更好的可用性。此外，合成和实际基准测试都表明，在几乎所有情况下，考虑将其作为从BPF程序发送数据到用户态的默认选择。">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/ebpf/translate-bpf-ring-buffer/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="[译]BPF ring buffer">
+  <meta property="og:description" content="介于能力有限，翻译有不当之处，不吝赐教
+原文: BPF ring buffer
+BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲区（当前用于从内核向用户态发送数据的标准）的内存效率和事件重新排序问题，同时达到或超过了其性能。它提供了perfbuf兼容性以便于轻松迁移，但也有新的reserve/submit API，具有更好的可用性。此外，合成和实际基准测试都表明，在几乎所有情况下，考虑将其作为从BPF程序发送数据到用户态的默认选择。">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-03-24T21:42:07+08:00">
+    <meta property="article:modified_time" content="2024-03-24T21:42:07+08:00">
+    <meta property="article:tag" content="EBPF">
+    <meta property="article:tag" content="Linux">
+    <meta property="article:tag" content="翻译">
+    <meta property="article:tag" content="Kernel">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/ebpf/translate-bpf-ring-buffer/#webpage",
+      "url": "https://www.zhangzewen.net/posts/ebpf/translate-bpf-ring-buffer/",
+      "name": "[译]BPF ring buffer",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2024-03-24T21:42:07+08:00",
+      "dateModified": "2024-03-24T21:42:07+08:00",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e原文: \u003cstrong\u003e\u003ca href=\"https://nakryiko.com/posts/bpf-ringbuf/\"\u003eBPF ring buffer\u003c/a\u003e\u003c/strong\u003e\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eBPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲区（当前用于从内核向用户态发送数据的标准）的内存效率和事件重新排序问题，同时达到或超过了其性能。它提供了perfbuf兼容性以便于轻松迁移，但也有新的reserve/submit API，具有更好的可用性。此外，合成和实际基准测试都表明，在几乎所有情况下，考虑将其作为从BPF程序发送数据到用户态的默认选择。\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/ebpf/translate-bpf-ring-buffer/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/ebpf/translate-bpf-ring-buffer/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/ebpf/translate-bpf-ring-buffer/#webpage"
+      },
+      "headline": "[译]BPF ring buffer",
+      "datePublished": "2024-03-24T21:42:07+08:00",
+      "dateModified": "2024-03-24T21:42:07+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "EBPF",
+        "Linux",
+        "翻译",
+        "Kernel"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/ebpf/translate-bpf-ring-buffer/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li><a href="#bpf-ringbuf-vs-bpf-perfbuf">BPF ringbuf vs BPF perfbuf</a>
+      <ul>
+        <li><a href="#内存开销">内存开销</a></li>
+        <li><a href="#事件排序">事件排序</a></li>
+        <li><a href="#浪费的工作和额外的数据复制">浪费的工作和额外的数据复制</a></li>
+        <li><a href="#性能和适用性">性能和适用性</a></li>
+      </ul>
+    </li>
+    <li><a href="#代码展示">代码展示</a>
+      <ul>
+        <li><a href="#bpf-perfbuf-bpf_perf_event_output">BPF perfbuf: bpf_perf_event_output()</a></li>
+        <li><a href="#bpf-ringbuf-bpf_ringbuf_output">BPF ringbuf: bpf_ringbuf_output()</a></li>
+        <li><a href="#bpf-ringbuf-reservesubmit-api">BPF ringbuf: reserve/submit API</a></li>
+        <li><a href="#bpf-ringbuf-data-notification-control-bpf-ringbuf数据通知控制">BPF ringbuf: data notification control BPF ringbuf：数据通知控制</a></li>
+      </ul>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">[译]BPF ring buffer</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2024-03-24T21:42:07&#43;0800">Created: Mar 24, 2024</time>
+    <span class="readtime">&middot; 5 min read</span>
+  </div>
+
+  <div>
+    <blockquote>
+<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
+<p>原文: <strong><a href="https://nakryiko.com/posts/bpf-ringbuf/">BPF ring buffer</a></strong></p></blockquote>
+<p>BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲区（当前用于从内核向用户态发送数据的标准）的内存效率和事件重新排序问题，同时达到或超过了其性能。它提供了perfbuf兼容性以便于轻松迁移，但也有新的reserve/submit API，具有更好的可用性。此外，合成和实际基准测试都表明，在几乎所有情况下，考虑将其作为从BPF程序发送数据到用户态的默认选择。</p>
+<h1 id="bpf-ringbuf-vs-bpf-perfbuf">BPF ringbuf vs BPF perfbuf</h1>
+<p>今天，每当一个BPF程序需要将收集到的数据发送到用户态进行后续处理和记录时，通常会使用BPF perf缓冲区（perfbuf）来实现这一点。Perfbuf是一个由每个CPU的循环缓冲区组成的集合，它允许在内核和用户态之间高效地交换数据。它在实践中表现得很好，但由于其每个CPU的设计，它有两个主要的缺点，这在实践中证明是不便的：内存使用效率低和事件重新排序。</p>
+<p>为了解决这些问题，从Linux 5.8开始，BPF提供了一个新的BPF数据结构（BPF map）：<strong>BPF环形缓冲区</strong>（ringbuf）。它是一个多生产者，单消费者（MPSC）队列，可以在多个CPU之间安全地共享。</p>
+<p>BPF环形缓冲区支持来自BPF perfbuf的相似功能：</p>
+<ul>
+<li>可变长度的数据记录；</li>
+<li>通过内存映射区域从用户态高效地读取数据，无需额外的内存复制和/或系统调用进入内核。</li>
+<li>既支持epoll通知，也支持忙循环以实现绝对最小的延迟。</li>
+</ul>
+<p>与此同时，BPF环形缓冲区解决了BPF perfbuf的以下问题：</p>
+<ul>
+<li>内存开销；</li>
+<li>数据排序；</li>
+<li>浪费的工作和额外的数据复制。</li>
+</ul>
+<h2 id="内存开销">内存开销</h2>
+<p>BPF perfbuf为每个CPU分配一个单独的缓冲区。这通常意味着BPF开发人员必须在为每个CPU分配足够大的缓冲区（以容纳可能出现的数据峰值）和内存效率（在稳态下不浪费多余的内存，但在数据峰值期间丢弃数据）之间做出权衡。对于大部分时间处于空闲状态，但在短时间内经历周期性大量事件的应用程序，这尤其棘手。很难找到恰到好处的平衡，因此BPF应用程序通常要么过度分配perfbuf内存以确保安全，要么不时地遭受不可避免的数据丢失。</p>
+<p>由于所有CPU共享BPF环形缓冲区，因此是可以使用一个大的公共缓冲区来解决这个问题。更大的缓冲区可以吸收更大的峰值，与BPF perfbuf相比也可能需要更少的RAM。BPF环形缓冲区的内存使用量也随着CPU数量的增加而更好地扩展，因为从16个CPU增加到32个CPU并不一定需要两倍大的缓冲区来容纳更多的负载。不幸的是，由于每CPU都有对应的缓冲区的原因，在这方面使用BPF perfbuf你几乎没有选择。</p>
+<h2 id="事件排序">事件排序</h2>
+<p>如果一个BPF应用程序需要跟踪相关事件（例如，进程启动和退出、网络连接生命周期事件等），则事件的正确排序变得至关重要。然而，这在BPF perfbuf中是有问题的。如果相关事件在不同的CPU上迅速发生（在几毫秒内），它们可能会按照错误的顺序传递。这再次是由于BPF perfbuf的每个CPU对应单独缓冲区特性。</p>
+<p>举一个实际的例子，几年前我编写的一个应用程序跟踪进程fork/exec/exit事件并收集每个进程的资源使用统计信息。我的应用程序必须把每一个这样的事件写到BPF perfbuf，但很多时候它们写入的顺序是错误的。对于存续时间短暂的进程，fork()、exec()和exit()由于内核调度程序将它们从一个CPU迁移到另一个CPU，而在非常短的时间内迅速且顺序发生。要解决这个问题，需要显著增加应用程序处理逻辑的复杂性，考虑到问题的本质非常简单，这远远超出了人们的预期。</p>
+<p>这在BPF环形缓冲区中根本不是问题，它通过将事件写到共享缓冲区并保证如果事件A在事件B之前提交，那么它也将在事件B之前被消耗，从而解决了这个问题。这通常会显著简化处理逻辑。</p>
+<h2 id="浪费的工作和额外的数据复制">浪费的工作和额外的数据复制</h2>
+<p>在BPF perfbuf中，BPF程序必须准备一个数据样本，然后将其复制到perf缓冲区以发送到用户态。这意味着相同的数据必须被复制两次：首先复制到一个局部变量或每CPU数组（对于不能放入小BPF栈的大样本），然后复制到perfbuf本身。更糟糕的是，如果perfbuf中没有足够的剩余空间，所有这些工作都可能被浪费。</p>
+<p>BPF环形缓冲区支持一种可选的预留/提交API以避免这一点。可以首先预留数据空间。如果预留成功，BPF程序可以直接使用该内存来准备数据样本。一旦完成，将数据提交到用户态是一个极其高效的操作，不可能失败，也不会进行任何额外的内存复制。如果由于缓冲区空间不足而导致预留失败，至少在您花费所有工作试图记录数据之前，您就知道后续的数据可能会被丢弃。下面的<code>ringbuf-reserve-submit</code>示例将在实践中展示这是如何工作的。</p>
+<h2 id="性能和适用性">性能和适用性</h2>
+<p>BPF环形缓冲区的性能在所有实际应用中都优于BPF perfbuf（特别是考虑到在BCC/libbpf中消费perfbuf数据的默认设置有些不够理想）。如果你喜欢硬数字，你可以在这个<a href="(https://patchwork.ozlabs.org/project/netdev/patch/20200529075424.3139988-5-andriin@fb.com/)">补丁</a>中找到各种场景的基准测试结果。</p>
+<p>BPF perfbuf理论上可以支持更高的数据吞吐量，因为它有per-CPU缓冲区，但这只在我们谈到<em>每秒数百万个事件</em>时才变得相关。但是，用于编写实际高吞吐量应用程序的实验证实，BPF环形缓冲区仍然比BPF perfbuf有更高性能的替代品，如果用作per-CPU缓冲区（与BPF perfbuf类似）。特别是，如果采用手动数据可用性通知。你可以查看内核自测试中的一个基础多环形缓冲区示例（<a href="https://github.com/torvalds/linux/blob/master/tools/testing/selftests/bpf/progs/test_ringbuf_multi.c">BPF 端</a>, <a href="https://github.com/torvalds/linux/blob/master/tools/testing/selftests/bpf/prog_tests/ringbuf_multi.c">用户态端</a>）。稍后我们会查看手动控制数据可用性通知的一个示例。</p>
+<p>唯一需要小心的情况是，当一个BPF程序必须在NMI（不可屏蔽中断）上下文运行（例如，用于处理perf事件，如cpu周期）。BPF环形缓冲区内部使用了一个非常轻量级的自旋锁，这意味着如果在NMI上下文中锁存在竞争，数据预留可能会失败。因此，在NMI上下文中，如果CPU竞争很高，即使环形缓冲区本身还有一些可用空间，也可能会有一些数据丢失。</p>
+<p>在所有其他情况下，新的BPF环形缓冲区都是一个相当明确的选择。BPF环形缓冲区提供了更好的性能和内存效率，更好的排序保证，以及更好的API（内核和用户态）。</p>
+<h1 id="代码展示">代码展示</h1>
+<p>为了展示BPF环形缓冲区API，将它们与BPF perfbuf进行比较，并了解它们在实践中通常如何使用，我编写了一个小的<a href="https://github.com/anakryiko/bpf-ringbuf-examples">bpf-ringbuf-examples project</a>项目，我们将在本文的其余部分中进行详细介绍。</p>
+<p>这个仓库实现了相同BPF应用程序的三个变体，它追踪所有进程的execs，捕获新进程的生成。每一个<code>exec()</code>，进程ID（<code>pid</code>）、进程名称（<code>comm</code>）和可执行文件路径（filename）都被捕获到一个样本中，并发送到用户态进行后续处理（在我们的演示中，仅仅是将所有这些printf()到标准输出）。下面是所有三个示例的输出的结果示例（别忘了用<code>sudo</code>运行它）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>  $ sudo ./ringbuf-reserve-submit    <span style="color:#6272a4"># or ./ringbuf-output, or ./perfbuf-output</span>
+</span></span><span style="display:flex;"><span>  TIME     EVENT PID     COMM             FILENAME
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232062</span> sh               /bin/sh
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232062</span> timeout          /usr/bin/timeout
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232063</span> ipmitool         /usr/bin/ipmitool
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232065</span> env              /usr/bin/env
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232066</span> env              /usr/bin/env
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232065</span> timeout          /bin/timeout
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232066</span> timeout          /bin/timeout
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232067</span> sh               /bin/sh
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232068</span> sh               /bin/sh
+</span></span><span style="display:flex;"><span>  ^C
+</span></span></code></pre></div><p>下面是从BPF程序发送并在用户态应用程序的消费的样本数据的<a href="(https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/common.h#L22-L30)">C结构体定义</a>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">#define TASK_COMM_LEN 16
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>  <span style="color:#ff79c6">#define MAX_FILENAME_LEN 512
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">/* definition of a sample sent to user-space from BPF program */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> event {
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">int</span> pid;
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">char</span> comm[TASK_COMM_LEN];
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">char</span> filename[MAX_FILENAME_LEN];
+</span></span><span style="display:flex;"><span>  };
+</span></span></code></pre></div><h2 id="bpf-perfbuf-bpf_perf_event_output">BPF perfbuf: bpf_perf_event_output()</h2>
+<p>让我们从一个BPF perfbuf用例开始，其BPF部分可以在<a href="(https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/perfbuf-output.bpf.c)">这里</a>找到。</p>
+<p>首先，我们从内核的<code>&lt;linux/bpf.h&gt;</code>中引入一些基础的BPF定义，从libbpf的<code>&lt;bpf/bpf_helpers.h&gt;</code>中引入BPF助手函数，以及从<code>&quot;common.h&quot;</code>中引入应用程序的类型，该文件在BPF和用户态代码之间共享。我们还指定我们的程序在双GPL-2.0/BSD-3许可下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#6272a4">// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">/* Copyright (c) 2020 Andrii Nakryiko */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;linux/bpf.h&gt;</span><span style="color:#ff79c6">
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>  <span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;bpf/bpf_helpers.h&gt;</span><span style="color:#ff79c6">
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>  <span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&#34;common.h&#34;</span><span style="color:#ff79c6">
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">char</span> LICENSE[] <span style="color:#50fa7b">SEC</span>(<span style="color:#f1fa8c">&#34;license&#34;</span>) <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;Dual BSD/GPL&#34;</span>;
+</span></span></code></pre></div><p>接下来，我们将BPF perfbuf定义为一个<code>BPF_MAP_TYPE_PERF_EVENT_ARRAY</code>。无需定义max_entries属性，因为libbpf会负责这个，并会自动将其大小设置为系统上可用的CPU数量。每个per-CPU缓冲区的大小是从用户态单独指定的，我们随后讨论这个问题。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#6272a4">/* BPF perfbuf map */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">__uint</span>(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">__uint</span>(key_size, <span style="color:#ff79c6">sizeof</span>(<span style="color:#8be9fd">int</span>));
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">__uint</span>(value_size, <span style="color:#ff79c6">sizeof</span>(<span style="color:#8be9fd">int</span>));
+</span></span><span style="display:flex;"><span>  } pb <span style="color:#50fa7b">SEC</span>(<span style="color:#f1fa8c">&#34;.maps&#34;</span>);
+</span></span></code></pre></div><p>因为样本（在<a href="https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/common.h#L6-20">common.h</a>中定义的<code>struct event</code>）相当大（&gt;512字节，因为我将捕获的文件名的最大大小设置为512字节），我们不能在栈上准备数据。所以我们使用大小为1的per-CPU数组作为临时存储：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">__uint</span>(type, BPF_MAP_TYPE_PERCPU_ARRAY);
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">__uint</span>(max_entries, <span style="color:#bd93f9">1</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">__type</span>(key, <span style="color:#8be9fd">int</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">__type</span>(value, <span style="color:#ff79c6">struct</span> event);
+</span></span><span style="display:flex;"><span>  } heap <span style="color:#50fa7b">SEC</span>(<span style="color:#f1fa8c">&#34;.maps&#34;</span>);
+</span></span></code></pre></div><p>现在我们定义BPF程序主体，并指定它应该附加到<code>sched:sched_process_exec</code>上，该程序在每次成功的<code>exec()</code>系统调用时触发。<code>struct trace_event_raw_sched_process_exec</code>也在<a href="https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/common.h#L6-20">common.h</a>中定义，只是从Linux源代码中复制/粘贴过来的。它定义了该特定跟踪点的输入数据的布局。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#50fa7b">SEC</span>(<span style="color:#f1fa8c">&#34;tp/sched/sched_process_exec&#34;</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">int</span> <span style="color:#50fa7b">handle_exec</span>(<span style="color:#ff79c6">struct</span> trace_event_raw_sched_process_exec <span style="color:#ff79c6">*</span>ctx)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">unsigned</span> fname_off <span style="color:#ff79c6">=</span> ctx<span style="color:#ff79c6">-&gt;</span>__data_loc_filename <span style="color:#ff79c6">&amp;</span> <span style="color:#bd93f9">0xFFFF</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> event <span style="color:#ff79c6">*</span>e;
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">int</span> zero <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  e <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bpf_map_lookup_elem</span>(<span style="color:#ff79c6">&amp;</span>heap, <span style="color:#ff79c6">&amp;</span>zero);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span>e) <span style="color:#6272a4">/* can&#39;t happen */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  e<span style="color:#ff79c6">-&gt;</span>pid <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bpf_get_current_pid_tgid</span>() <span style="color:#ff79c6">&gt;&gt;</span> <span style="color:#bd93f9">32</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">bpf_get_current_comm</span>(<span style="color:#ff79c6">&amp;</span>e<span style="color:#ff79c6">-&gt;</span>comm, <span style="color:#ff79c6">sizeof</span>(e<span style="color:#ff79c6">-&gt;</span>comm));
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">bpf_probe_read_str</span>(<span style="color:#ff79c6">&amp;</span>e<span style="color:#ff79c6">-&gt;</span>filename, <span style="color:#ff79c6">sizeof</span>(e<span style="color:#ff79c6">-&gt;</span>filename), (<span style="color:#8be9fd">void</span> <span style="color:#ff79c6">*</span>)ctx <span style="color:#ff79c6">+</span> fname_off);
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">bpf_perf_event_output</span>(ctx, <span style="color:#ff79c6">&amp;</span>pb, BPF_F_CURRENT_CPU, e, <span style="color:#ff79c6">sizeof</span>(<span style="color:#ff79c6">*</span>e));
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><p>BPF程序逻辑非常简单直接。它获取样本的临时存储，并用跟踪点上下文中的数据填充它。完成后，它调用<code>bpf_perf_event_output()</code>将样本发送到当前CPU的BPF perfbuf。这个API在当前CPU的perf缓冲区中为<code>struct event</code>预留空间，从<code>e</code>复制<code>sizeof(*e)</code>字节的数据到该预留空间，完成后它将通知用户态新数据可用。此时，epoll子系统将唤醒用户态处理程序，并传递指向该数据副本的指针以进行处理。</p>
+<p>这实际上就是BPF测的全部内容。和其他现代BPF应用程序相比而言已非常简单明了。</p>
+<p>现在让我们快速浏览一下<a href="https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/perfbuf-output.c">用户态代码</a>。它依赖于BPF skeleton（您可以在<a href="https://nakryiko.com/posts/bcc-to-libbpf-howto-guide/#bpf-skeleton-and-bpf-app-lifecycle">这里</a>阅读更多相关信息），所以它非常短而直接。在进行少量的初始设置（设置libbpf日志处理程序，中断处理程序，提升<code>RLIMIT_MEMLOCK</code>限制以供BPF系统使用）后，它只是打开并加载BPF skeleton。如果所有这些都成功，然后我们使用libbpf的用户态API <code>perf_buffer__new()</code> 来创建一个perf缓冲区消费者实例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> perf_buffer <span style="color:#ff79c6">*</span>pb <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">NULL</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> perf_buffer_opts pb_opts <span style="color:#ff79c6">=</span> {};
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> perfbuf_output_bpf <span style="color:#ff79c6">*</span>skel;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  ...
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">/* Set up ring buffer polling */</span>
+</span></span><span style="display:flex;"><span>  pb_opts.sample_cb <span style="color:#ff79c6">=</span> handle_event;
+</span></span><span style="display:flex;"><span>  pb <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">perf_buffer__new</span>(<span style="color:#50fa7b">bpf_map__fd</span>(skel<span style="color:#ff79c6">-&gt;</span>maps.pb), <span style="color:#bd93f9">8</span> <span style="color:#6272a4">/* 32KB per CPU */</span>, <span style="color:#ff79c6">&amp;</span>pb_opts);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (<span style="color:#50fa7b">libbpf_get_error</span>(pb)) {
+</span></span><span style="display:flex;"><span>  err <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">fprintf</span>(stderr, <span style="color:#f1fa8c">&#34;Failed to create perf buffer</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">goto</span> cleanup;
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><p>在这里，我们指定了每个per-CPU缓冲区为32KB（8页x每页4096字节），并且对于每个提交的样本，libbpf将调用我们的handle_event()回调函数，该函数只是用printf()输出数据：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#8be9fd">void</span> <span style="color:#50fa7b">handle_event</span>(<span style="color:#8be9fd">void</span> <span style="color:#ff79c6">*</span>ctx, <span style="color:#8be9fd">int</span> cpu, <span style="color:#8be9fd">void</span> <span style="color:#ff79c6">*</span>data, <span style="color:#8be9fd">unsigned</span> <span style="color:#8be9fd">int</span> data_sz)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">const</span> <span style="color:#ff79c6">struct</span> event <span style="color:#ff79c6">*</span>e <span style="color:#ff79c6">=</span> data;
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> tm <span style="color:#ff79c6">*</span>tm;
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">char</span> ts[<span style="color:#bd93f9">32</span>];
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">time_t</span> t;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">time</span>(<span style="color:#ff79c6">&amp;</span>t);
+</span></span><span style="display:flex;"><span>  tm <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">localtime</span>(<span style="color:#ff79c6">&amp;</span>t);
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">strftime</span>(ts, <span style="color:#ff79c6">sizeof</span>(ts), <span style="color:#f1fa8c">&#34;%H:%M:%S&#34;</span>, tm);
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;%-8s %-5s %-7d %-16s %s</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>, ts, <span style="color:#f1fa8c">&#34;EXEC&#34;</span>, e<span style="color:#ff79c6">-&gt;</span>pid, e<span style="color:#ff79c6">-&gt;</span>comm, e<span style="color:#ff79c6">-&gt;</span>filename);
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><p>最后一步，一旦数据变得可用，就会持续消耗，直到需要退出（例如用户按下<code>Ctrl-C</code>）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#6272a4">/* Process events */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;%-8s %-5s %-7s %-16s %s</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#f1fa8c">&#34;TIME&#34;</span>, <span style="color:#f1fa8c">&#34;EVENT&#34;</span>, <span style="color:#f1fa8c">&#34;PID&#34;</span>, <span style="color:#f1fa8c">&#34;COMM&#34;</span>, <span style="color:#f1fa8c">&#34;FILENAME&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">while</span> (<span style="color:#ff79c6">!</span>exiting) {
+</span></span><span style="display:flex;"><span>  err <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">perf_buffer__poll</span>(pb, <span style="color:#bd93f9">100</span> <span style="color:#6272a4">/* timeout, ms */</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">/* Ctrl-C will cause -EINTR */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">-</span>EINTR) {
+</span></span><span style="display:flex;"><span>  	err <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  	<span style="color:#ff79c6">break</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (err <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0</span>) {
+</span></span><span style="display:flex;"><span>  	<span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;Error polling perf buffer: %d</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>, err);
+</span></span><span style="display:flex;"><span>  	<span style="color:#ff79c6">break</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><h2 id="bpf-ringbuf-bpf_ringbuf_output">BPF ringbuf: bpf_ringbuf_output()</h2>
+<p>BPF ringbuf的<code>bpf_ringbuf_output()</code> API是为了遵循BPF perfbuf的<code>bpf_perf_event_output()</code>的语义而设计的，以使迁移变得非常简单。为了展示使用上有多么相似和接近，我将直接展示<code>perfbuf-output</code>和<code>ringbuf-output</code>示例之间的差异。您可以在Github上查看完整的<a href="https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/ringbuf-output.bpf.c">BPF侧代码</a>和<a href="https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/ringbuf-output.c">用户态代码</a>。</p>
+<p>以下是BPF侧的差异：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>  --src/perfbuf-output.bpf.c	2020-10-25 18:52:22.247019800 -0700
+</span></span><span style="display:flex;"><span>  +++ src/ringbuf-output.bpf.c	2020-10-25 18:44:14.510630322 -0700
+</span></span><span style="display:flex;"><span>  @@ -6,12 +6,11 @@
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  char LICENSE<span style="color:#ff79c6">[]</span> SEC<span style="color:#ff79c6">(</span><span style="color:#f1fa8c">&#34;license&#34;</span><span style="color:#ff79c6">)</span> <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;Dual BSD/GPL&#34;</span>;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  -/* BPF perfbuf map */
+</span></span><span style="display:flex;"><span>  +/* BPF ringbuf map */
+</span></span><span style="display:flex;"><span>  struct <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#ff79c6">(</span>type, BPF_MAP_TYPE_PERF_EVENT_ARRAY<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#ff79c6">(</span>key_size, sizeof<span style="color:#ff79c6">(</span>int<span style="color:#ff79c6">))</span>;
+</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#ff79c6">(</span>value_size, sizeof<span style="color:#ff79c6">(</span>int<span style="color:#ff79c6">))</span>;
+</span></span><span style="display:flex;"><span>  -<span style="color:#ff79c6">}</span> pb SEC<span style="color:#ff79c6">(</span><span style="color:#f1fa8c">&#34;.maps&#34;</span><span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  +	__uint<span style="color:#ff79c6">(</span>type, BPF_MAP_TYPE_RINGBUF<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  +	__uint<span style="color:#ff79c6">(</span>max_entries, <span style="color:#bd93f9">256</span> * <span style="color:#bd93f9">1024</span> /* <span style="color:#bd93f9">256</span> KB */<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  +<span style="color:#ff79c6">}</span> rb SEC<span style="color:#ff79c6">(</span><span style="color:#f1fa8c">&#34;.maps&#34;</span><span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  struct <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>  __uint<span style="color:#ff79c6">(</span>type, BPF_MAP_TYPE_PERCPU_ARRAY<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  @@ -35,7 +34,7 @@
+</span></span><span style="display:flex;"><span>  bpf_get_current_comm<span style="color:#ff79c6">(</span>&amp;e-&gt;comm, sizeof<span style="color:#ff79c6">(</span>e-&gt;comm<span style="color:#ff79c6">))</span>;
+</span></span><span style="display:flex;"><span>  bpf_probe_read_str<span style="color:#ff79c6">(</span>&amp;e-&gt;filename, sizeof<span style="color:#ff79c6">(</span>e-&gt;filename<span style="color:#ff79c6">)</span>, <span style="color:#ff79c6">(</span>void *<span style="color:#ff79c6">)</span>ctx + fname_off<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  -	bpf_perf_event_output<span style="color:#ff79c6">(</span>ctx, &amp;pb, BPF_F_CURRENT_CPU, e, sizeof<span style="color:#ff79c6">(</span>*e<span style="color:#ff79c6">))</span>;
+</span></span><span style="display:flex;"><span>  +	bpf_ringbuf_output<span style="color:#ff79c6">(</span>&amp;rb, e, sizeof<span style="color:#ff79c6">(</span>*e<span style="color:#ff79c6">)</span>, 0<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> 0;
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">}</span>
+</span></span></code></pre></div><p>只有两个简单的更改：</p>
+<ol>
+<li>
+<p>BPF ringbuf map的定义略有不同。现在它的大小（所有CPU共享的缓冲区的大小）<strong>可以</strong>在BPF侧定义。请记住，仍然可以在BPF侧定义中省略它，并用<code>bpf_map__set_max_entries()</code> API在用户态侧指定（在BPF侧指定时，则覆盖）。另一个不同之处是，大小（<code>max_entries</code>属性）以字节数为单位，唯一的限制是它应该是内核页大小的倍数（几乎总是4096字节）并且是2的幂（与perfbuf的页数量类似，也必须是2的幂）。BPF perfbuf的大小是从用户态侧指定的，并且代表的是内存页的数量。</p>
+</li>
+<li>
+<p><code>bpf_perf_event_output()</code>被非常相似的<code>bpf_ringbuf_output()</code>取代，唯一的不同之处在于ringbuf API不需要BPF程序上下文的引用。</p>
+</li>
+</ol>
+<p>这是BPF侧唯一的两个不同之处。</p>
+<p>在用户态侧，改动也很小。忽略<code>perf_buffer</code> &lt;-&gt; <code>ring_buffer</code>的重命名，它归结为仅仅两个更改。首先，事件处理程序回调的定义现在可以返回一个错误（这将终止消费者循环），并且它不接受产生事件的CPU的索引：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>  -void handle_event<span style="color:#ff79c6">(</span>void *ctx, int cpu, void *data, unsigned int data_sz<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>  +int handle_event<span style="color:#ff79c6">(</span>void *ctx, void *data, size_t data_sz<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>  const struct event *e <span style="color:#ff79c6">=</span> data;
+</span></span><span style="display:flex;"><span>  struct tm *tm;
+</span></span></code></pre></div><p>如果需要知道CPU索引的话，你需要在BPF侧程序明确在样本中记录。另外，<code>ring_buffer</code> API没有提供对丢失样本的回调函数，而<code>perf_buffer</code>是有的。如果有必要，这也需要在BPF侧明确地处理。这样做是为了减小在一个共享（跨多个CPU）的环形缓冲区中的锁竞争，并且在不需要的时候不付出额外的代价。实际上，除了报告这个情况，往往没什么实际操作能做，可以通过明确的BPF代码更有效和方便地完成。</p>
+<p>第二个不同点是一个稍微简洁些的 <code>ring_buffer__new()</code> API，它允许指定回调而不求助于额外的选项结构。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#6272a4">/* Set up ring buffer polling */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">-</span>	pb_opts.sample_cb <span style="color:#ff79c6">=</span> handle_event;
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">-</span>	pb <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">perf_buffer__new</span>(<span style="color:#50fa7b">bpf_map__fd</span>(skel<span style="color:#ff79c6">-&gt;</span>maps.pb), <span style="color:#bd93f9">8</span> <span style="color:#6272a4">/* 32KB per CPU */</span>, <span style="color:#ff79c6">&amp;</span>pb_opts);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">-</span>	<span style="color:#ff79c6">if</span> (<span style="color:#50fa7b">libbpf_get_error</span>(pb)) {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">+</span>	rb <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">ring_buffer__new</span>(<span style="color:#50fa7b">bpf_map__fd</span>(skel<span style="color:#ff79c6">-&gt;</span>maps.rb), handle_event, <span style="color:#8be9fd;font-style:italic">NULL</span>, <span style="color:#8be9fd;font-style:italic">NULL</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">+</span>	<span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span>rb) {
+</span></span><span style="display:flex;"><span>  	err <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">-</span>		<span style="color:#50fa7b">fprintf</span>(stderr, <span style="color:#f1fa8c">&#34;Failed to create perf buffer</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">+</span>		<span style="color:#50fa7b">fprintf</span>(stderr, <span style="color:#f1fa8c">&#34;Failed to create ring buffer</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>);
+</span></span><span style="display:flex;"><span>  	<span style="color:#ff79c6">goto</span> cleanup;
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><p>通过这样做，简单地用 <code>ring_buffer__poll()</code> 替换 <code>perf_buffer__poll()</code> 就能让你以完全相同的方式开始消费环形缓冲区的数据。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;%-8s %-5s %-7s %-16s %s</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>,
+</span></span><span style="display:flex;"><span>         <span style="color:#f1fa8c">&#34;TIME&#34;</span>, <span style="color:#f1fa8c">&#34;EVENT&#34;</span>, <span style="color:#f1fa8c">&#34;PID&#34;</span>, <span style="color:#f1fa8c">&#34;COMM&#34;</span>, <span style="color:#f1fa8c">&#34;FILENAME&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">while</span> (<span style="color:#ff79c6">!</span>exiting) {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">-</span>		err <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">perf_buffer__poll</span>(pb, <span style="color:#bd93f9">100</span> <span style="color:#6272a4">/* timeout, ms */</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">+</span>		err <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">ring_buffer__poll</span>(rb, <span style="color:#bd93f9">100</span> <span style="color:#6272a4">/* timeout, ms */</span>);
+</span></span><span style="display:flex;"><span>  	<span style="color:#6272a4">/* Ctrl-C will cause -EINTR */</span>
+</span></span><span style="display:flex;"><span>  	<span style="color:#ff79c6">if</span> (err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">-</span>EINTR) {
+</span></span><span style="display:flex;"><span>  		err <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  		<span style="color:#ff79c6">break</span>;
+</span></span><span style="display:flex;"><span>  	}
+</span></span><span style="display:flex;"><span>  	<span style="color:#ff79c6">if</span> (err <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">-</span>			<span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;Error polling perf buffer: %d</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>, err);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">+</span>			<span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;Error polling ring buffer: %d</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>, err);
+</span></span><span style="display:flex;"><span>  		<span style="color:#ff79c6">break</span>;
+</span></span><span style="display:flex;"><span>  	}
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><h2 id="bpf-ringbuf-reservesubmit-api">BPF ringbuf: reserve/submit API</h2>
+<p>该 <code>bpf_ringbuf_output()</code> API 的目标是允许从 BPF perfbuf 平滑过渡到 BPF ringbuf，而无需对 BPF 代码进行任何实质性的更改。但这也意味着它与 BPF perfbuf API 共享一些缺点：额外的内存复制和非常晚的数据预留。前者意味着在将其复制到缓冲区之前，您需要额外的空间来构建样本。这既效率较低，且通常还需要额外的单元素的per-CPU 数组。后者意味着由于用户态的延迟或因快速涌入的事件溢出缓冲区，构建样本所做的所有工作都可能被浪费。但如果您知道数据无论如何都会被丢弃，您可以一开始就跳过收集它，并为消费者端节省一些资源以更快地赶上。但<code>xxx_output()</code> 类型的 API 不可能做到这一点。</p>
+<p>这就是 bpf_ringbuf_reserve()/bpf_ringbuf_submit() API 派上用场的地方。Reserve 允许您做到这一点：尽早预留空间或确定这是不可能的（在这种情况下返回 <code>NULL</code>）。如果我们无法获得足够的数据来提交样本，我们可以跳过捕获所有数据的资源消耗。但如果预留成功，那么我们有一个保证，即一旦完成数据收集，将其发布到用户态永远不会失败。也就是说，如果 <code>bpf_ringbuf_reserve()</code> 返回一个非 NULL 指针，后续的 <code>bpf_ringbuf_submit()</code> 总是会成功。</p>
+<p>此外，环形缓冲区本身中的预留空间在提交之前对用户态是不可见的，因此可以自由地用于构建样本，无论这是多么复杂和多步骤的操作。并且它消除了额外内存复制和临时存储空间的需要。唯一的限制是预留大小必须在验证时对 BPF 验证器来说是已知的，因此具有动态大小的样本将必须使用 <code>bpf_ringbuf_output()</code> 进行处理，并支付额外复制的代价。</p>
+<p>但在大多数情况下，您应该更倾向于使用 reserve/submit。以下是 BPF 测程序代码的差异（完整的 <a href="https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/ringbuf-reserve-submit.bpf.c">BPF侧代码</a>  和 <a href="https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/ringbuf-reserve-submit.c">用户态代码</a> 在 Github 上）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>  --src/ringbuf-output.bpf.c	2020-10-25 18:44:14.510630322 -0700
+</span></span><span style="display:flex;"><span>  +++ src/ringbuf-reserve-submit.bpf.c	2020-10-25 18:36:53.409470270 -0700
+</span></span><span style="display:flex;"><span>  @@ -12,29 +12,21 @@
+</span></span><span style="display:flex;"><span>  __uint<span style="color:#ff79c6">(</span>max_entries, <span style="color:#bd93f9">256</span> * <span style="color:#bd93f9">1024</span> /* <span style="color:#bd93f9">256</span> KB */<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">}</span> rb SEC<span style="color:#ff79c6">(</span><span style="color:#f1fa8c">&#34;.maps&#34;</span><span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  -struct <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#ff79c6">(</span>type, BPF_MAP_TYPE_PERCPU_ARRAY<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#ff79c6">(</span>max_entries, 1<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  -	__type<span style="color:#ff79c6">(</span>key, int<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  -	__type<span style="color:#ff79c6">(</span>value, struct event<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  -<span style="color:#ff79c6">}</span> heap SEC<span style="color:#ff79c6">(</span><span style="color:#f1fa8c">&#34;.maps&#34;</span><span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  -
+</span></span><span style="display:flex;"><span>  SEC<span style="color:#ff79c6">(</span><span style="color:#f1fa8c">&#34;tp/sched/sched_process_exec&#34;</span><span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>  int handle_exec<span style="color:#ff79c6">(</span>struct trace_event_raw_sched_process_exec *ctx<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>  unsigned <span style="color:#8be9fd;font-style:italic">fname_off</span> <span style="color:#ff79c6">=</span> ctx-&gt;__data_loc_filename &amp; 0xFFFF;
+</span></span><span style="display:flex;"><span>  struct event *e;
+</span></span><span style="display:flex;"><span>  -	int <span style="color:#8be9fd;font-style:italic">zero</span> <span style="color:#ff79c6">=</span> 0;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  -	<span style="color:#8be9fd;font-style:italic">e</span> <span style="color:#ff79c6">=</span> bpf_map_lookup_elem<span style="color:#ff79c6">(</span>&amp;heap, &amp;zero<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  -	<span style="color:#ff79c6">if</span> <span style="color:#ff79c6">(</span>!e<span style="color:#ff79c6">)</span> /* can&#39;t happen */
+</span></span><span style="display:flex;"><span>  +	<span style="color:#8be9fd;font-style:italic">e</span> <span style="color:#ff79c6">=</span> bpf_ringbuf_reserve<span style="color:#ff79c6">(</span>&amp;rb, sizeof<span style="color:#ff79c6">(</span>*e<span style="color:#ff79c6">)</span>, 0<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  +	<span style="color:#ff79c6">if</span> <span style="color:#ff79c6">(</span>!e<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>  	<span style="color:#ff79c6">return</span> 0;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  e-&gt;pid <span style="color:#ff79c6">=</span> bpf_get_current_pid_tgid<span style="color:#ff79c6">()</span> &gt;&gt; 32;
+</span></span><span style="display:flex;"><span>  bpf_get_current_comm<span style="color:#ff79c6">(</span>&amp;e-&gt;comm, sizeof<span style="color:#ff79c6">(</span>e-&gt;comm<span style="color:#ff79c6">))</span>;
+</span></span><span style="display:flex;"><span>  bpf_probe_read_str<span style="color:#ff79c6">(</span>&amp;e-&gt;filename, sizeof<span style="color:#ff79c6">(</span>e-&gt;filename<span style="color:#ff79c6">)</span>, <span style="color:#ff79c6">(</span>void *<span style="color:#ff79c6">)</span>ctx + fname_off<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  -	bpf_ringbuf_output<span style="color:#ff79c6">(</span>&amp;rb, e, sizeof<span style="color:#ff79c6">(</span>*e<span style="color:#ff79c6">)</span>, 0<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  +	bpf_ringbuf_submit<span style="color:#ff79c6">(</span>e, 0<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> 0;
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">}</span>
+</span></span></code></pre></div><p>per-CPU数组被弃用，取而代之的是我们使用 <code>bpf_ringbuf_reserve()</code> 的结果来填充数据样本。</p>
+<p>The user-space part is exactly the same (modulo the name of the BPF skeleton object), which makes sense because in the end you are consuming exactly the same data from the BPF ring buffer.</p>
+<p>用户态测代码完全相同（模数为 BPF 骨架对象的名称），因为最终你从 BPF 环形缓冲区中消耗的是完全相同的数据。</p>
+<h2 id="bpf-ringbuf-data-notification-control-bpf-ringbuf数据通知控制">BPF ringbuf: data notification control BPF ringbuf：数据通知控制</h2>
+<p>在处理高吞吐量情况时，最大的开销通常来自内核中数据可用性的信号传输，当一个样本被提交时（这使得内核的 poll/epoll 系统唤醒因等待新数据而阻塞的用户态处理程序）。这对于 perfbuf 和 ringbuf 都是如此。</p>
+<p>Perfbuf 使用设置采样通知的能力来处理这个问题，在这种情况下，只有每第 N 个样本才会发送通知。您可以在从用户态创建 BPF perfbuf map 时这样做。并且您需要确保直到第 N 个样本到达前您都不会看到前面的 N-1 个样本这对您来说是可行的。这对于特定的情况来说可能是或者不是一个大问题。</p>
+<p>BPF ringbuf 采取了不同的方式来处理这个问题。<code>bpf_ringbuf_output()</code> 和 <code>bpf_ringbuf_submit()</code> 接受一个额外的标志参数，您可以指定 <code>BPF_RB_NO_WAKEUP</code> 或 <code>BPF_RB_FORCE_WAKEUP</code> 标志。指定 <code>BPF_RB_NO_WAKEUP</code> 将抑制发送内核中数据可用性通知。而 <code>BPF_RB_FORCE_WAKEUP</code> 将强制发送通知。这允许进行精确的手动控制，如果有必要。要查看如何实现这一点，请查看 <a href="https://github.com/torvalds/linux/blob/master/tools/testing/selftests/bpf/progs/ringbuf_bench.c#L22-L31">BPF ringbuf 基准测试</a>，在该测试中环形缓冲区中压入了可配置数量的数据时才发送通知。</p>
+<p>默认情况下，如果没有指定标志，BPF ringbuf 代码将根据用户态消费者是否滞后进行自适应通知，从而导致用户态消费者永远不会错过单个样本通知，但也不会支付不必要的开销。没有标志是一个好而安全的默认值，但是如果您需要获得额外的性能，根据您的自定义标准（例如，缓冲区中排队的数据量）手动控制数据通知可能会给您带来很大的性能提升。</p>
+<h1 id="总结">总结</h1>
+<p>这篇文章解释了 BPF 环形缓冲区正在解决的问题以及 API 选择背后的动机。希望代码示例和内核自检和基准测试的链接能让您很好地掌握 BPF ringbuf API，并演示如何简单和更高级地使用 API 来满足应用程序的需求。</p>
+
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/ebpf/" class="tag-link">EBPF</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/linux/" class="tag-link">Linux</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E7%BF%BB%E8%AF%91/" class="tag-link">翻译</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kernel/" class="tag-link">Kernel</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

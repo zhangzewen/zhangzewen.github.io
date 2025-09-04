@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>Effective Modern C&#43;&#43; 读书笔记之第四章 &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="Effective Modern C&#43;&#43; 读书笔记之第四章">
+  <meta itemprop="description" content="Item 18: std::unique_ptr管理独占资源 std::unique_ptr有着几乎和指针几乎相同的性能，大小几乎差不多，且std::unique_ptr不能被赋值，它只有移动语义。对于管理独占资源，std::unique_ptr是一个不错的选择，在工厂模式下，它可以管理生成的对象。 当std::unique_ptr对象是释放的时候，它会释放它所管理的资源，这是它的默认行为。可以为其制定释放它所管理资源的方法，需要实现一个deleter：
+class A { public: A() {std::cout &lt;&lt; &#34;Call A::A()&#34; &lt;&lt; std::endl;} ~() {std::cout &lt;&lt; &#34;Call A::~A()&#34; &lt;&lt; std::endl;} }; auto DeleterOfA = [](A* a) {if (a != nullptr){delete a;}}; std::unique_ptr&lt;A, DeleterOfA&gt; ptrA(new a()); } 需要注意的是，在使用自定义的deleter的时候，如果deleter是普通的函数的话，那么std::unique_ptr&lt;T, deleter&gt;的大小就是双倍的原始指针的大小(raw pointer，一个指针的大小通常是一个word的大小)。如果是函数对象，没有状态的函数对象，如不捕获任何变量的lambda表达式，std::unique_ptr的大小不变的。但是如果delete是函数的时候，std::unique_ptr增加的一个函数指针的大小，所以在delete的使用上，更推荐使用lambda表达式。">
+  <meta itemprop="datePublished" content="2025-02-17T18:34:42+08:00">
+  <meta itemprop="dateModified" content="2025-02-17T18:34:42+08:00">
+  <meta itemprop="wordCount" content="450">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="C&#43;&#43;,读书笔记">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="Effective Modern C&#43;&#43; 读书笔记之第四章">
+  <meta name="twitter:description" content="Item 18: std::unique_ptr管理独占资源 std::unique_ptr有着几乎和指针几乎相同的性能，大小几乎差不多，且std::unique_ptr不能被赋值，它只有移动语义。对于管理独占资源，std::unique_ptr是一个不错的选择，在工厂模式下，它可以管理生成的对象。 当std::unique_ptr对象是释放的时候，它会释放它所管理的资源，这是它的默认行为。可以为其制定释放它所管理资源的方法，需要实现一个deleter：
+class A { public: A() {std::cout &lt;&lt; &#34;Call A::A()&#34; &lt;&lt; std::endl;} ~() {std::cout &lt;&lt; &#34;Call A::~A()&#34; &lt;&lt; std::endl;} }; auto DeleterOfA = [](A* a) {if (a != nullptr){delete a;}}; std::unique_ptr&lt;A, DeleterOfA&gt; ptrA(new a()); } 需要注意的是，在使用自定义的deleter的时候，如果deleter是普通的函数的话，那么std::unique_ptr&lt;T, deleter&gt;的大小就是双倍的原始指针的大小(raw pointer，一个指针的大小通常是一个word的大小)。如果是函数对象，没有状态的函数对象，如不捕获任何变量的lambda表达式，std::unique_ptr的大小不变的。但是如果delete是函数的时候，std::unique_ptr增加的一个函数指针的大小，所以在delete的使用上，更推荐使用lambda表达式。">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="Effective Modern C&#43;&#43; 读书笔记之第四章">
+  <meta property="og:description" content="Item 18: std::unique_ptr管理独占资源 std::unique_ptr有着几乎和指针几乎相同的性能，大小几乎差不多，且std::unique_ptr不能被赋值，它只有移动语义。对于管理独占资源，std::unique_ptr是一个不错的选择，在工厂模式下，它可以管理生成的对象。 当std::unique_ptr对象是释放的时候，它会释放它所管理的资源，这是它的默认行为。可以为其制定释放它所管理资源的方法，需要实现一个deleter：
+class A { public: A() {std::cout &lt;&lt; &#34;Call A::A()&#34; &lt;&lt; std::endl;} ~() {std::cout &lt;&lt; &#34;Call A::~A()&#34; &lt;&lt; std::endl;} }; auto DeleterOfA = [](A* a) {if (a != nullptr){delete a;}}; std::unique_ptr&lt;A, DeleterOfA&gt; ptrA(new a()); } 需要注意的是，在使用自定义的deleter的时候，如果deleter是普通的函数的话，那么std::unique_ptr&lt;T, deleter&gt;的大小就是双倍的原始指针的大小(raw pointer，一个指针的大小通常是一个word的大小)。如果是函数对象，没有状态的函数对象，如不捕获任何变量的lambda表达式，std::unique_ptr的大小不变的。但是如果delete是函数的时候，std::unique_ptr增加的一个函数指针的大小，所以在delete的使用上，更推荐使用lambda表达式。">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-02-17T18:34:42+08:00">
+    <meta property="article:modified_time" content="2025-02-17T18:34:42+08:00">
+    <meta property="article:tag" content="C&#43;&#43;">
+    <meta property="article:tag" content="读书笔记">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/#webpage",
+      "url": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/",
+      "name": "Effective Modern C++ 读书笔记之第四章",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2025-02-17T18:34:42+08:00",
+      "dateModified": "2025-02-17T18:34:42+08:00",
+      "description": "\u003ch2 id=\"item-18-stdunique_ptr管理独占资源\"\u003eItem 18: std::unique_ptr管理独占资源\u003c/h2\u003e\n\u003cp\u003e\u003ccode\u003estd::unique_ptr\u003c/code\u003e有着几乎和指针几乎相同的性能，大小几乎差不多，且\u003ccode\u003estd::unique_ptr\u003c/code\u003e不能被赋值，它只有移动语义。对于管理独占资源，\u003ccode\u003estd::unique_ptr\u003c/code\u003e是一个不错的选择，在工厂模式下，它可以管理生成的对象。\n当\u003ccode\u003estd::unique_ptr\u003c/code\u003e对象是释放的时候，它会释放它所管理的资源，这是它的默认行为。可以为其制定释放它所管理资源的方法，需要实现一个\u003ccode\u003edeleter\u003c/code\u003e：\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-cpp\" data-lang=\"cpp\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#ff79c6\"\u003eclass\u003c/span\u003e \u003cspan style=\"color:#50fa7b\"\u003eA\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e{\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e \u003cspan style=\"color:#ff79c6\"\u003epublic\u003c/span\u003e\u003cspan style=\"color:#ff79c6\"\u003e:\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e   A() {std\u003cspan style=\"color:#ff79c6\"\u003e::\u003c/span\u003ecout \u003cspan style=\"color:#ff79c6\"\u003e\u0026lt;\u0026lt;\u003c/span\u003e \u003cspan style=\"color:#f1fa8c\"\u003e\u0026#34;Call A::A()\u0026#34;\u003c/span\u003e \u003cspan style=\"color:#ff79c6\"\u003e\u0026lt;\u0026lt;\u003c/span\u003e std\u003cspan style=\"color:#ff79c6\"\u003e::\u003c/span\u003eendl;}\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e   \u003cspan style=\"color:#ff79c6\"\u003e~\u003c/span\u003e() {std\u003cspan style=\"color:#ff79c6\"\u003e::\u003c/span\u003ecout \u003cspan style=\"color:#ff79c6\"\u003e\u0026lt;\u0026lt;\u003c/span\u003e \u003cspan style=\"color:#f1fa8c\"\u003e\u0026#34;Call A::~A()\u0026#34;\u003c/span\u003e \u003cspan style=\"color:#ff79c6\"\u003e\u0026lt;\u0026lt;\u003c/span\u003e std\u003cspan style=\"color:#ff79c6\"\u003e::\u003c/span\u003eendl;}\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e};\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#ff79c6\"\u003eauto\u003c/span\u003e DeleterOfA \u003cspan style=\"color:#ff79c6\"\u003e=\u003c/span\u003e [](A\u003cspan style=\"color:#ff79c6\"\u003e*\u003c/span\u003e a) {\u003cspan style=\"color:#ff79c6\"\u003eif\u003c/span\u003e (a \u003cspan style=\"color:#ff79c6\"\u003e!=\u003c/span\u003e \u003cspan style=\"color:#ff79c6\"\u003enullptr\u003c/span\u003e){\u003cspan style=\"color:#ff79c6\"\u003edelete\u003c/span\u003e a;}};\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003estd\u003cspan style=\"color:#ff79c6\"\u003e::\u003c/span\u003eunique_ptr\u003cspan style=\"color:#ff79c6\"\u003e\u0026lt;\u003c/span\u003eA, DeleterOfA\u003cspan style=\"color:#ff79c6\"\u003e\u0026gt;\u003c/span\u003e ptrA(\u003cspan style=\"color:#ff79c6\"\u003enew\u003c/span\u003e a());\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003e需要注意的是，在使用自定义的\u003ccode\u003edeleter\u003c/code\u003e的时候，如果\u003ccode\u003edeleter\u003c/code\u003e是普通的函数的话，那么\u003ccode\u003estd::unique_ptr\u0026lt;T, deleter\u0026gt;\u003c/code\u003e的大小就是双倍的原始指针的大小(raw pointer，一个指针的大小通常是一个word的大小)。如果是函数对象，没有状态的函数对象，如不捕获任何变量的\u003ccode\u003elambda\u003c/code\u003e表达式，\u003ccode\u003estd::unique_ptr\u003c/code\u003e的大小不变的。但是如果\u003ccode\u003edelete\u003c/code\u003e是函数的时候，\u003ccode\u003estd::unique_ptr\u003c/code\u003e增加的一个函数指针的大小，所以在\u003ccode\u003edelete\u003c/code\u003e的使用上，更推荐使用\u003ccode\u003elambda\u003c/code\u003e表达式。\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/#webpage"
+      },
+      "headline": "Effective Modern C++ 读书笔记之第四章",
+      "datePublished": "2025-02-17T18:34:42+08:00",
+      "dateModified": "2025-02-17T18:34:42+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "C++",
+        "读书笔记"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#item-18-stdunique_ptr管理独占资源">Item 18: std::unique_ptr管理独占资源</a></li>
+        <li><a href="#item-19-stdshared_ptr管理共享资源">Item 19: std::shared_ptr管理共享资源</a></li>
+        <li><a href="#item-20-使用stdweak_ptr协助stdshared_ptr管理共享资源">Item 20: 使用std::weak_ptr协助std::shared_ptr管理共享资源</a></li>
+        <li><a href="#item-21-优先使用stdmake_unique和stdmake_shared来创建智能指针避免使用new">Item 21: 优先使用std::make_unique和std::make_shared来创建智能指针，避免使用new</a></li>
+        <li><a href="#item-22-在使用pimpl-idiom技巧时把特殊的成员函数实现放到cpp文件中">Item 22: 在使用Pimpl Idiom技巧时，把特殊的成员函数实现放到cpp文件中</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">Effective Modern C&#43;&#43; 读书笔记之第四章</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2025-02-17T18:34:42&#43;0800">Created: Feb 17, 2025</time>
+    <span class="readtime">&middot; 3 min read</span>
+  </div>
+
+  <div>
+    <h2 id="item-18-stdunique_ptr管理独占资源">Item 18: std::unique_ptr管理独占资源</h2>
+<p><code>std::unique_ptr</code>有着几乎和指针几乎相同的性能，大小几乎差不多，且<code>std::unique_ptr</code>不能被赋值，它只有移动语义。对于管理独占资源，<code>std::unique_ptr</code>是一个不错的选择，在工厂模式下，它可以管理生成的对象。
+当<code>std::unique_ptr</code>对象是释放的时候，它会释放它所管理的资源，这是它的默认行为。可以为其制定释放它所管理资源的方法，需要实现一个<code>deleter</code>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">A</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span> <span style="color:#ff79c6">public</span><span style="color:#ff79c6">:</span>
+</span></span><span style="display:flex;"><span>   A() {std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;Call A::A()&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;}
+</span></span><span style="display:flex;"><span>   <span style="color:#ff79c6">~</span>() {std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;Call A::~A()&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;}
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">auto</span> DeleterOfA <span style="color:#ff79c6">=</span> [](A<span style="color:#ff79c6">*</span> a) {<span style="color:#ff79c6">if</span> (a <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nullptr</span>){<span style="color:#ff79c6">delete</span> a;}};
+</span></span><span style="display:flex;"><span>std<span style="color:#ff79c6">::</span>unique_ptr<span style="color:#ff79c6">&lt;</span>A, DeleterOfA<span style="color:#ff79c6">&gt;</span> ptrA(<span style="color:#ff79c6">new</span> a());
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>需要注意的是，在使用自定义的<code>deleter</code>的时候，如果<code>deleter</code>是普通的函数的话，那么<code>std::unique_ptr&lt;T, deleter&gt;</code>的大小就是双倍的原始指针的大小(raw pointer，一个指针的大小通常是一个word的大小)。如果是函数对象，没有状态的函数对象，如不捕获任何变量的<code>lambda</code>表达式，<code>std::unique_ptr</code>的大小不变的。但是如果<code>delete</code>是函数的时候，<code>std::unique_ptr</code>增加的一个函数指针的大小，所以在<code>delete</code>的使用上，更推荐使用<code>lambda</code>表达式。</p>
+<h2 id="item-19-stdshared_ptr管理共享资源">Item 19: std::shared_ptr管理共享资源</h2>
+<p><code>std::shared_ptr</code>维护的资源为共享资源，对于共享资源，这个在<code>C</code>语言代码里面相当常见，比如指针在不同的结构里面指向的都是同一块内存等。<code>std::shared_ptr</code>管理资源时，维护一个叫<code>引用计数</code>的东西，当<code>引用计数</code>为<code>0</code>的时候，说明该资源已经没有被共享，可以进行释放，这也是<code>std::shared_ptr</code>的逻辑。<code>std::shared_ptr</code>的引用计数是分配在对空间上的，并且对引用计数的增加和减少都必须是原子的，<code>std::shared_ptr</code>本身对多线程是安全的，但是其指向的资源在多线程的环境下不一定安全，需要使用锁机制来保证资源访访问和修改的安全。</p>
+<p><code>std::shared_ptr</code>默认的释放资源方式是<code>delete</code>，这个和<code>std::unqiue_ptr</code>是一样的，但是<code>std::shared_ptr</code>的默认模式下<code>delete</code>是只能释放一个资源，但是<code>std::unqiue_ptr</code>可以根据其管理资源的不同，在默认的情况下可以是<code>delete</code>（管理一个资源）或者是<code>delete []</code>（管理的是数组资源）。当然，<code>std::shared_ptr</code>也可以自定义用户自己的释放资源逻辑，在这一点上和<code>std::unqiue_ptr</code>不同的是，在构造<code>std::unique_ptr</code>的时候，必须要同时指定<code>所管理资源的类型</code>和<code>释放资源函数的类型</code>。在构造<code>std::shared_ptr</code>的时候只需要<code>所管理资源的类型</code>,用户自定的释放函数是通过参数传递给<code>std::shared_ptr</code>的构造函数。</p>
+<p>与<code>std::unique_ptr</code>还有不同的是：用户自定义的<code>Deleter</code>并不占用<code>std::shared_ptr</code>的空间，<code>Deleter</code>可能占用空间(如带有捕获参数列表<code>lambda</code>表达式)，但是其空间是不分配在<code>std::shared_ptr</code>的空间上的，其分配在控制块(<code>Control Block</code>)的空间上，上面说的<code>引用计数</code>也是分配在控制块(<code>Control Block</code>)空间上。<code>std::shared_ptr</code>就是通过这个控制块(<code>Control Block</code>)来管理资源的。
+<code>std::shared_ptr</code>的结构如下图：</p>
+<p><img src="/images/effective-modern-cpp/effective-modern-cpp-unit-four_01.png" alt="shared_ptr结构图"></p>
+<p>在如下三种情况下回生成控制块(<code>Control Block</code>)：</p>
+<ol>
+<li>使用<code>std::make_shared</code>来构造<code>std::shared_ptr</code>会生成控制块(<code>Control Block</code>)</li>
+<li>使用普通指针(<code>raw pointer</code>)来构造<code>std::shared_ptr</code>会生成控制块(<code>Control Block</code>)</li>
+<li>使用<code>std::unique_ptr</code>来构造<code>std::shared_ptr</code>会生成控制块(<code>Control Block</code>)</li>
+</ol>
+<p>通过已经存在<code>std::shared_ptr</code>或者<code>std::weak_ptr</code>来构造<code>std::shared_ptr</code>是不会构造生成控制块(<code>Control Block</code>)，只会增加<code>std::shared_ptr</code>的<code>引用计数</code>。</p>
+<p>由上面的可以知道，当通过普通指针来构造多个<code>std::shared_ptr</code>的话，就会生成多个控制块(<code>Control Block</code>),， 也会有多个引用计数作用于该指针指向的内存， 这样会存在一个弊端，就是当<code>std::shared_ptr</code>在要进行释放的时候(引用计数为0)，会对该指针指向的内存进行多次释放，这样会带来未定义的错误。所以，在使用的时候需要尽可能的仔细。可以通过<code>std::make_shared</code>来构造<code>std::shared_ptr</code>，唯一的不足就是通过该方法构造<code>std::shared_ptr</code>不能指定<code>Deleter</code>。</p>
+<p>当使用<code>std::shared_ptr</code>来管理自定义类的一个实例对象的时候，如果在成员函数里面需要使用<code>this</code>来创建<code>std::shared_ptr</code>的话，如果是直接创建的话，如上面所说，就会创建新的控制块(<code>Control Block</code>)，这显然不是想要的结果，可以继承<code>std::enable_shared_from_this</code>模板类，然后使用其成员函数<code>shared_from_this</code>来生成一个<code>std::shared_ptr</code>从而避免生成多个控制块(&lsquo;Control Block&rsquo;)。如：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">A</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span> <span style="color:#ff79c6">public</span><span style="color:#ff79c6">:</span>
+</span></span><span style="display:flex;"><span>   A() {std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;Call A::A()&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;}
+</span></span><span style="display:flex;"><span>   <span style="color:#ff79c6">~</span>() {std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;Call A::~A()&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;}
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="item-20-使用stdweak_ptr协助stdshared_ptr管理共享资源">Item 20: 使用std::weak_ptr协助std::shared_ptr管理共享资源</h2>
+<p><code>std::weak_ptr</code>没有引用计数的概念，如其名，是一个弱指针。</p>
+<p>可以通过其成员函数<code>expired()</code>来判断其指向的是不是一个合法的对象，通过<code>lock()</code>来创建一个<code>std::shared_ptr</code>指向该对象。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">auto</span> spw <span style="color:#ff79c6">=</span>                           <span style="color:#6272a4">// after spw is constructed,
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>     std<span style="color:#ff79c6">::</span>make_shared<span style="color:#ff79c6">&lt;</span>Widget<span style="color:#ff79c6">&gt;</span>();    <span style="color:#6272a4">// the pointed-to Widget&#39;s
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>																		<span style="color:#6272a4">// ref count (RC) is 1. (See
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>                                    <span style="color:#6272a4">// Item 21 for info on
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>                                    <span style="color:#6272a4">// std::make_shared.)
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>std<span style="color:#ff79c6">::</span>weak_ptr<span style="color:#ff79c6">&lt;</span>Widget<span style="color:#ff79c6">&gt;</span> wpw(spw);     <span style="color:#6272a4">// wpw points to same Widget
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>                                    <span style="color:#6272a4">// as spw. RC remains 1
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span>spw <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">nullptr</span>;                      <span style="color:#6272a4">// RC goes to 0, and the
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>                                    <span style="color:#6272a4">// Widget is destroyed.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>                                    <span style="color:#6272a4">// wpw now dangles
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">if</span> (wpw.expired())                  <span style="color:#6272a4">// if wpw doesn&#39;t point
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>                                    <span style="color:#6272a4">// to an object...
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  
+</span></span><span style="display:flex;"><span>std<span style="color:#ff79c6">::</span>shared_ptr<span style="color:#ff79c6">&lt;</span>Widget<span style="color:#ff79c6">&gt;</span> spw1 <span style="color:#ff79c6">=</span> wpw.lock(); <span style="color:#6272a4">// if wpw&#39;s expired,
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>                                           <span style="color:#6272a4">// spw1 is null  
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span>std<span style="color:#ff79c6">::</span>shared_ptr<span style="color:#ff79c6">&lt;</span>Widget<span style="color:#ff79c6">&gt;</span> spw3(wpw); <span style="color:#6272a4">// if wpw&#39;s expired,
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>                                   <span style="color:#6272a4">// throw std::bad_weak_ptr
+</span></span></span></code></pre></div><p><code>std::weak_ptr</code>和<code>std::shared_ptr</code>组合使用，避免两个<code>std::shared_ptr</code>互相指向导致的引用计数永远不可能为0而回收不了内存空间以致内存泄漏。</p>
+<h2 id="item-21-优先使用stdmake_unique和stdmake_shared来创建智能指针避免使用new">Item 21: 优先使用std::make_unique和std::make_shared来创建智能指针，避免使用new</h2>
+<p>优先使用智能指针，这样可以借助引用计数和RAII 来帮助释放内存，减少编码以及异常的情况下，new和delete的逻辑不配对的情况导致内存泄漏。</p>
+<h2 id="item-22-在使用pimpl-idiom技巧时把特殊的成员函数实现放到cpp文件中">Item 22: 在使用Pimpl Idiom技巧时，把特殊的成员函数实现放到cpp文件中</h2>
+<p><code>Pimpl Idiom</code> 编程技巧， 减少头文件变动：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#6272a4">// widget.h
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">Widget</span> {  <span style="color:#6272a4">// still in header &#34;widget.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#ff79c6">public</span><span style="color:#ff79c6">:</span>
+</span></span><span style="display:flex;"><span>   Widget();
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">~</span>Widget();    <span style="color:#6272a4">// dtor is needed—see below
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  ...
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">private</span><span style="color:#ff79c6">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">Impl</span>;  <span style="color:#6272a4">// declare implementation struct
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  Impl <span style="color:#ff79c6">*</span>pImpl;  <span style="color:#6272a4">// and pointer to it
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// widget.cpp  
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&#34;widget.h&#34;</span><span style="color:#ff79c6">                       </span><span style="color:#6272a4">// in impl. file &#34;widget.cpp&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&#34;gadget.h&#34;</span><span style="color:#ff79c6">
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;string&gt;</span><span style="color:#ff79c6">
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;vector&gt;</span><span style="color:#ff79c6">
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">Widget</span><span style="color:#ff79c6">::</span>Impl {                     <span style="color:#6272a4">// definition of Widget::Impl
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  std<span style="color:#ff79c6">::</span>string name;                       <span style="color:#6272a4">// with data members formerly
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  std<span style="color:#ff79c6">::</span>vector<span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">double</span><span style="color:#ff79c6">&gt;</span> data;               <span style="color:#6272a4">// in Widget
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  Gadget g1, g2, g3;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>Widget<span style="color:#ff79c6">::</span>Widget() <span style="color:#ff79c6">:</span> pImpl(<span style="color:#ff79c6">new</span> Impl) {}     <span style="color:#6272a4">// allocate data members for
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>                                          <span style="color:#6272a4">// this Widget object
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>Widget<span style="color:#ff79c6">::~</span>Widget() { <span style="color:#ff79c6">delete</span> pImpl; }       <span style="color:#6272a4">// destroy data members for
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>                                          <span style="color:#6272a4">// this object
+</span></span></span></code></pre></div><p>这个 Item 说的意思是因为<code>std::unique_ptr</code>的 deleter的特殊性(使用的是默认的delete，所以编译其在生成代码的时候会使用static_cast进行类型转换)， 形如上面的代码，直接替换成<code>std::unique_ptr</code>会导致 <code>struct Impl</code>的类型不完整，所以会出错， 解决的办法是，在生成<code>std::unique_ptr&lt;Widget::Impl&gt;</code>的析构代码之前，确保<code>Widget::Impl</code>是一个完整的类型。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">Widget</span> {        <span style="color:#6272a4">// in &#34;widget.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#ff79c6">public</span><span style="color:#ff79c6">:</span>
+</span></span><span style="display:flex;"><span>	Widget();
+</span></span><span style="display:flex;"><span>  ...
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">private</span><span style="color:#ff79c6">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">Impl</span>;            
+</span></span><span style="display:flex;"><span>	std<span style="color:#ff79c6">::</span>unique_ptr<span style="color:#ff79c6">&lt;</span>Impl<span style="color:#ff79c6">&gt;</span> pImpl;     <span style="color:#6272a4">// use smart pointer
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>};                                 <span style="color:#6272a4">// instead of raw pointer
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&#34;widget.h&#34;</span><span style="color:#ff79c6">                </span><span style="color:#6272a4">// in &#34;widget.cpp&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&#34;gadget.h&#34;</span><span style="color:#ff79c6">
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;string&gt;</span><span style="color:#ff79c6">
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;vector&gt;</span><span style="color:#ff79c6">
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">Widget</span><span style="color:#ff79c6">::</span>Impl {              <span style="color:#6272a4">// as before
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	std<span style="color:#ff79c6">::</span>string name;
+</span></span><span style="display:flex;"><span>	std<span style="color:#ff79c6">::</span>vector<span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">double</span><span style="color:#ff79c6">&gt;</span> data;
+</span></span><span style="display:flex;"><span>	Gadget g1, g2, g3;
+</span></span><span style="display:flex;"><span>};   
+</span></span><span style="display:flex;"><span>Widget<span style="color:#ff79c6">::</span>Widget()                        <span style="color:#6272a4">// per Item 21, create
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>	<span style="color:#ff79c6">:</span> pImpl(std<span style="color:#ff79c6">::</span>make_unique<span style="color:#ff79c6">&lt;</span>Impl<span style="color:#ff79c6">&gt;</span>()) {}  <span style="color:#6272a4">// std::unique_ptr
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>                                        <span style="color:#6272a4">// via std::make_unique
+</span></span></span></code></pre></div><p>看如下代码：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span> <span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&#34;widget.h&#34;</span><span style="color:#ff79c6">
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span> Widget w;                           <span style="color:#6272a4">// error!
+</span></span></span></code></pre></div><p>正确的做法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">Widget</span> {    <span style="color:#6272a4">// as before, in &#34;widget.h&#34; 
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#ff79c6">public</span><span style="color:#ff79c6">:</span>
+</span></span><span style="display:flex;"><span>Widget();
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">~</span>Widget();        <span style="color:#6272a4">// declaration only
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>...
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">private</span><span style="color:#ff79c6">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">Impl</span>;    <span style="color:#6272a4">// as before
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  std<span style="color:#ff79c6">::</span>unique_ptr<span style="color:#ff79c6">&lt;</span>Impl<span style="color:#ff79c6">&gt;</span> pImpl;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&#34;widget.h&#34;</span><span style="color:#ff79c6">        </span><span style="color:#6272a4">// as before, in &#34;widget.cpp&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&#34;gadget.h&#34;</span><span style="color:#ff79c6">
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;string&gt;</span><span style="color:#ff79c6">
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;vector&gt;</span><span style="color:#ff79c6">
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">Widget</span><span style="color:#ff79c6">::</span>Impl {      <span style="color:#6272a4">// as before, definition of
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  std<span style="color:#ff79c6">::</span>string name;        <span style="color:#6272a4">// Widget::Impl
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  std<span style="color:#ff79c6">::</span>vector<span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">double</span><span style="color:#ff79c6">&gt;</span> data;
+</span></span><span style="display:flex;"><span>  Gadget g1, g2, g3;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>Widget<span style="color:#ff79c6">::</span>Widget()               <span style="color:#6272a4">// as before
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#ff79c6">:</span> pImpl(std<span style="color:#ff79c6">::</span>make_unique<span style="color:#ff79c6">&lt;</span>Impl<span style="color:#ff79c6">&gt;</span>())
+</span></span><span style="display:flex;"><span>{}
+</span></span><span style="display:flex;"><span>Widget<span style="color:#ff79c6">::~</span>Widget()              <span style="color:#6272a4">// ~Widget definition
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>{}
+</span></span></code></pre></div>
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/c&#43;&#43;/" class="tag-link">C&#43;&#43;</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="tag-link">读书笔记</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

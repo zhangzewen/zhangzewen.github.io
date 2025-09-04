@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>kubernetes csi 之 CSI Volume Plugin &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="kubernetes csi 之 CSI Volume Plugin">
+  <meta itemprop="description" content="CSIDriver 注册 所有的 CSI Driver 都是通过map来关联存储的：
+type Driver struct { endpoint string highestSupportedVersion *utilversion.Version } type DriversStore struct { store sync.RWMutex } type store map[string]Driver 具体的增/删/改/查可以看k8s.io/kubernetes/pkg/volume/csi/csi_drivers_store.go， 全局变量 csiDrivers 就存储了所有注册的CSI Driver：">
+  <meta itemprop="datePublished" content="2025-08-02T00:43:31+08:00">
+  <meta itemprop="dateModified" content="2025-08-02T00:43:31+08:00">
+  <meta itemprop="wordCount" content="1838">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="源码分析,Kubernetes,Kubelet,Csi">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="kubernetes csi 之 CSI Volume Plugin">
+  <meta name="twitter:description" content="CSIDriver 注册 所有的 CSI Driver 都是通过map来关联存储的：
+type Driver struct { endpoint string highestSupportedVersion *utilversion.Version } type DriversStore struct { store sync.RWMutex } type store map[string]Driver 具体的增/删/改/查可以看k8s.io/kubernetes/pkg/volume/csi/csi_drivers_store.go， 全局变量 csiDrivers 就存储了所有注册的CSI Driver：">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/csi/kubelet-volume-plugins-csi/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="kubernetes csi 之 CSI Volume Plugin">
+  <meta property="og:description" content="CSIDriver 注册 所有的 CSI Driver 都是通过map来关联存储的：
+type Driver struct { endpoint string highestSupportedVersion *utilversion.Version } type DriversStore struct { store sync.RWMutex } type store map[string]Driver 具体的增/删/改/查可以看k8s.io/kubernetes/pkg/volume/csi/csi_drivers_store.go， 全局变量 csiDrivers 就存储了所有注册的CSI Driver：">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-08-02T00:43:31+08:00">
+    <meta property="article:modified_time" content="2025-08-02T00:43:31+08:00">
+    <meta property="article:tag" content="源码分析">
+    <meta property="article:tag" content="Kubernetes">
+    <meta property="article:tag" content="Kubelet">
+    <meta property="article:tag" content="Csi">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/kubernetes/csi/kubelet-volume-plugins-csi/#webpage",
+      "url": "https://www.zhangzewen.net/posts/kubernetes/csi/kubelet-volume-plugins-csi/",
+      "name": "kubernetes csi 之 CSI Volume Plugin",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2025-08-02T00:43:31+08:00",
+      "dateModified": "2025-08-02T00:43:31+08:00",
+      "description": "\u003ch2 id=\"csidriver-注册\"\u003eCSIDriver 注册\u003c/h2\u003e\n\u003cp\u003e所有的 CSI Driver 都是通过map来关联存储的：\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-go\" data-lang=\"go\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#8be9fd;font-style:italic\"\u003etype\u003c/span\u003e Driver \u003cspan style=\"color:#8be9fd;font-style:italic\"\u003estruct\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\tendpoint                \u003cspan style=\"color:#8be9fd\"\u003estring\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\thighestSupportedVersion \u003cspan style=\"color:#ff79c6\"\u003e*\u003c/span\u003eutilversion.Version\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#8be9fd;font-style:italic\"\u003etype\u003c/span\u003e DriversStore \u003cspan style=\"color:#8be9fd;font-style:italic\"\u003estruct\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\tstore\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\tsync.RWMutex\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#8be9fd;font-style:italic\"\u003etype\u003c/span\u003e store \u003cspan style=\"color:#8be9fd;font-style:italic\"\u003emap\u003c/span\u003e[\u003cspan style=\"color:#8be9fd\"\u003estring\u003c/span\u003e]Driver\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003e具体的增/删/改/查可以看\u003ccode\u003ek8s.io/kubernetes/pkg/volume/csi/csi_drivers_store.go\u003c/code\u003e， 全局变量 csiDrivers 就存储了所有注册的CSI Driver：\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/csi/kubelet-volume-plugins-csi/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/csi/kubelet-volume-plugins-csi/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/csi/kubelet-volume-plugins-csi/#webpage"
+      },
+      "headline": "kubernetes csi 之 CSI Volume Plugin",
+      "datePublished": "2025-08-02T00:43:31+08:00",
+      "dateModified": "2025-08-02T00:43:31+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "源码分析",
+        "Kubernetes",
+        "Kubelet",
+        "Csi"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/csi/kubelet-volume-plugins-csi/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#csidriver-注册">CSIDriver 注册</a></li>
+        <li><a href="#csi-volume-plugin功能">CSI Volume Plugin功能</a>
+          <ul>
+            <li><a href="#attachdetach">Attach&amp;Detach</a>
+              <ul>
+                <li><a href="#attach方法的实现">Attach方法的实现</a></li>
+                <li><a href="#detach方法的实现">Detach方法的实现</a></li>
+                <li><a href="#mountdevice方法的实现">MountDevice方法的实现</a></li>
+                <li><a href="#unmountdevice方法的实现">UnmountDevice方法的实现</a></li>
+                <li><a href="#总结">总结</a></li>
+              </ul>
+            </li>
+            <li><a href="#mountunmount">Mount/UnMount</a></li>
+          </ul>
+        </li>
+        <li><a href="#kubelet--csi-volume-plugin-源码分析之csi-client">kubelet  csi volume plugin 源码分析之csi client</a>
+          <ul>
+            <li><a href="#csidriverclient">csiDriverClient</a></li>
+            <li><a href="#csiclientgetter">csiClientGetter</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">kubernetes csi 之 CSI Volume Plugin</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2025-08-02T00:43:31&#43;0800">Created: Aug 2, 2025</time>
+    <span class="readtime">&middot; 9 min read</span>
+  </div>
+
+  <div>
+    <h2 id="csidriver-注册">CSIDriver 注册</h2>
+<p>所有的 CSI Driver 都是通过map来关联存储的：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Driver <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>	endpoint                <span style="color:#8be9fd">string</span>
+</span></span><span style="display:flex;"><span>	highestSupportedVersion <span style="color:#ff79c6">*</span>utilversion.Version
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> DriversStore <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>	store
+</span></span><span style="display:flex;"><span>	sync.RWMutex
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> store <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]Driver
+</span></span></code></pre></div><p>具体的增/删/改/查可以看<code>k8s.io/kubernetes/pkg/volume/csi/csi_drivers_store.go</code>， 全局变量 csiDrivers 就存储了所有注册的CSI Driver：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">var</span> csiDrivers = <span style="color:#ff79c6">&amp;</span>DriversStore{}
+</span></span></code></pre></div><p>当新的 CSI Driver 要注册到或者从注销 kubelet 时候，需要</p>
+<ul>
+<li><strong>ValidatePlugin</strong>： 校验</li>
+<li><strong>RegisterPlugin</strong>：  注册CSI Driver</li>
+<li><strong>DeRegisterPlugin</strong>： 注销CSI Driver</li>
+</ul>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// RegistrationHandler is the handler which is fed to the pluginwatcher API.</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> RegistrationHandler <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">var</span> PluginHandler = <span style="color:#ff79c6">&amp;</span>RegistrationHandler{}
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// ValidatePlugin is called by kubelet&#39;s plugin watcher upon detection</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// of a new registration socket opened by CSI Driver registrar side car.</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (h <span style="color:#ff79c6">*</span>RegistrationHandler) <span style="color:#50fa7b">ValidatePlugin</span>(pluginName <span style="color:#8be9fd">string</span>, endpoint <span style="color:#8be9fd">string</span>, versions []<span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Infof</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;Trying to validate a new CSI Driver with name: %s endpoint: %s versions: %s&#34;</span>,
+</span></span><span style="display:flex;"><span>        pluginName, endpoint, strings.<span style="color:#50fa7b">Join</span>(versions, <span style="color:#f1fa8c">&#34;,&#34;</span>)))
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 校验</span>
+</span></span><span style="display:flex;"><span>    _, err <span style="color:#ff79c6">:=</span> h.<span style="color:#50fa7b">validateVersions</span>(<span style="color:#f1fa8c">&#34;ValidatePlugin&#34;</span>, pluginName, endpoint, versions)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 校验不成功，直接返回错误</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;validation failed for CSI Driver %s at endpoint %s: %v&#34;</span>, pluginName, endpoint, err)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// RegisterPlugin is called when a plugin can be registered</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (h <span style="color:#ff79c6">*</span>RegistrationHandler) <span style="color:#50fa7b">RegisterPlugin</span>(pluginName <span style="color:#8be9fd">string</span>, endpoint <span style="color:#8be9fd">string</span>, versions []<span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Infof</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;Register new plugin with name: %s at endpoint: %s&#34;</span>, pluginName, endpoint))
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 校验并返回最高版本号</span>
+</span></span><span style="display:flex;"><span>    highestSupportedVersion, err <span style="color:#ff79c6">:=</span> h.<span style="color:#50fa7b">validateVersions</span>(<span style="color:#f1fa8c">&#34;RegisterPlugin&#34;</span>, pluginName, endpoint, versions)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Storing endpoint of newly registered CSI driver into the map, where CSI driver name will be the key</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// all other CSI components will be able to get the actual socket of CSI drivers by its name.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 构建CSI Driver</span>
+</span></span><span style="display:flex;"><span>    csiDrivers.<span style="color:#50fa7b">Set</span>(pluginName, Driver{
+</span></span><span style="display:flex;"><span>        endpoint:                endpoint,
+</span></span><span style="display:flex;"><span>        highestSupportedVersion: highestSupportedVersion,
+</span></span><span style="display:flex;"><span>    })
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Get node info from the driver.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建CSI Driver client， 这里就涉及到了CSI gRPC client相关的东西了</span>
+</span></span><span style="display:flex;"><span>    csi, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">newCsiDriverClient</span>(<span style="color:#50fa7b">csiDriverName</span>(pluginName))
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    ctx, cancel <span style="color:#ff79c6">:=</span> context.<span style="color:#50fa7b">WithTimeout</span>(context.<span style="color:#50fa7b">Background</span>(), csiTimeout)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> <span style="color:#50fa7b">cancel</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 通过调用CSI gRPC call 来获取CSI Driver信息</span>
+</span></span><span style="display:flex;"><span>    driverNodeID, maxVolumePerNode, accessibleTopology, err <span style="color:#ff79c6">:=</span> csi.<span style="color:#50fa7b">NodeGetInfo</span>(ctx)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> unregErr <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">unregisterDriver</span>(pluginName); unregErr <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>            klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;registrationHandler.RegisterPlugin failed to unregister plugin due to previous error: %v&#34;</span>, unregErr))
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 注册CSI Driver</span>
+</span></span><span style="display:flex;"><span>    err = nim.<span style="color:#50fa7b">InstallCSIDriver</span>(pluginName, driverNodeID, maxVolumePerNode, accessibleTopology)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> unregErr <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">unregisterDriver</span>(pluginName); unregErr <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>            klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;registrationHandler.RegisterPlugin failed to unregister plugin due to previous error: %v&#34;</span>, unregErr))
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (h <span style="color:#ff79c6">*</span>RegistrationHandler) <span style="color:#50fa7b">validateVersions</span>(callerName, pluginName <span style="color:#8be9fd">string</span>, endpoint <span style="color:#8be9fd">string</span>, versions []<span style="color:#8be9fd">string</span>) (<span style="color:#ff79c6">*</span>utilversion.Version, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// CSI Driver的版本不能为空</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(versions) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;%s for CSI driver %q failed. Plugin returned an empty list for supported versions&#34;</span>, callerName, pluginName))
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Validate version</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 找到CSI Driver最高支持的版本号</span>
+</span></span><span style="display:flex;"><span>    newDriverHighestVersion, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">highestSupportedVersion</span>(versions)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;%s for CSI driver %q failed. None of the versions specified %q are supported. err=%v&#34;</span>, callerName, pluginName, versions, err))
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 查看CSI Driver库中是否以及存在了该CSI Driver， 如果存在，需要比较传入的CSI Driver和库中的CSI Driver的版本号，如果新的比旧的高，返回错误</span>
+</span></span><span style="display:flex;"><span>    existingDriver, driverExists <span style="color:#ff79c6">:=</span> csiDrivers.<span style="color:#50fa7b">Get</span>(pluginName)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> driverExists {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> !existingDriver.highestSupportedVersion.<span style="color:#50fa7b">LessThan</span>(newDriverHighestVersion) {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;%s for CSI driver %q failed. Another driver with the same name is already registered with a higher supported version: %q&#34;</span>, callerName, pluginName, existingDriver.highestSupportedVersion))
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 返回支持的最高版本号</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> newDriverHighestVersion, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// DeRegisterPlugin is called when a plugin removed its socket, signaling</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// it is no longer available</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 注销CSI Driver</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (h <span style="color:#ff79c6">*</span>RegistrationHandler) <span style="color:#50fa7b">DeRegisterPlugin</span>(pluginName <span style="color:#8be9fd">string</span>) {
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;registrationHandler.DeRegisterPlugin request for plugin %s&#34;</span>, pluginName))
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">unregisterDriver</span>(pluginName); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;registrationHandler.DeRegisterPlugin failed: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">unregisterDriver</span>(driverName <span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>  	<span style="color:#6272a4">// 首先从CSI Driver库中删除</span>
+</span></span><span style="display:flex;"><span>    csiDrivers.<span style="color:#50fa7b">Delete</span>(driverName)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> nim.<span style="color:#50fa7b">UninstallCSIDriver</span>(driverName); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;Error uninstalling CSI driver: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<h2 id="csi-volume-plugin功能">CSI Volume Plugin功能</h2>
+<h3 id="attachdetach">Attach&amp;Detach</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/volume/csi/csi_plugins.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// volume.AttachableVolumePlugin methods      </span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">var</span> _ volume.AttachableVolumePlugin = <span style="color:#ff79c6">&amp;</span>csiPlugin{}      
+</span></span><span style="display:flex;"><span>     
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">var</span> _ volume.DeviceMountableVolumePlugin = <span style="color:#ff79c6">&amp;</span>csiPlugin{}      
+</span></span><span style="display:flex;"><span>     
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>csiPlugin) <span style="color:#50fa7b">NewAttacher</span>() (volume.Attacher, <span style="color:#8be9fd">error</span>) {      
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> p.<span style="color:#50fa7b">newAttacherDetacher</span>()       
+</span></span><span style="display:flex;"><span>}      
+</span></span><span style="display:flex;"><span>     
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>csiPlugin) <span style="color:#50fa7b">NewDeviceMounter</span>() (volume.DeviceMounter, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> p.<span style="color:#50fa7b">NewAttacher</span>()      
+</span></span><span style="display:flex;"><span>}      
+</span></span><span style="display:flex;"><span>     
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>csiPlugin) <span style="color:#50fa7b">NewDetacher</span>() (volume.Detacher, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> p.<span style="color:#50fa7b">newAttacherDetacher</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="attach方法的实现">Attach方法的实现</h4>
+<p>Attach 的实现就是判断 VolumeAttachment 资源是否存在，如果不存在就创建 VolumeAttachment 资源，然后一直循环判断这个 VolumeAttachment 资源的 <code>Status.Attached</code> 是否是 true 来判断 PV attach 到节点上是否已经完成：</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>csiAttacher) <span style="color:#50fa7b">Attach</span>(spec <span style="color:#ff79c6">*</span>volume.Spec, nodeName types.NodeName) (<span style="color:#8be9fd">string</span>, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> spec <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;attacher.Attach missing volume.Spec&#34;</span>))
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#34;&#34;</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;missing spec&#34;</span>)
+</span></span><span style="display:flex;"><span>    }   
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    pvSrc, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getPVSourceFromSpec</span>(spec)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#34;&#34;</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;attacher.Attach failed to get CSIPersistentVolumeSource: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>    }   
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    node <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">string</span>(nodeName)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 生成VolumeAttachment 的Name</span>
+</span></span><span style="display:flex;"><span>    attachID <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getAttachmentName</span>(pvSrc.VolumeHandle, pvSrc.Driver, node)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 从informer cache中查找 VolumeAttachment</span>
+</span></span><span style="display:flex;"><span>    attachment, err <span style="color:#ff79c6">:=</span> c.plugin.volumeAttachmentLister.<span style="color:#50fa7b">Get</span>(attachID)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> !apierrors.<span style="color:#50fa7b">IsNotFound</span>(err) {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#34;&#34;</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;failed to get volume attachment from lister: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>    }   
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> attachment <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {<span style="color:#6272a4">//  没有找到</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 构建VolumeAttachment</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#8be9fd;font-style:italic">var</span> vaSrc storage.VolumeAttachmentSource
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> spec.InlineVolumeSpecForCSIMigration {
+</span></span><span style="display:flex;"><span>            vaSrc = storage.VolumeAttachmentSource{
+</span></span><span style="display:flex;"><span>                InlineVolumeSpec: <span style="color:#ff79c6">&amp;</span>spec.PersistentVolume.Spec,
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        } <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>            pvName <span style="color:#ff79c6">:=</span> spec.PersistentVolume.<span style="color:#50fa7b">GetName</span>()
+</span></span><span style="display:flex;"><span>            vaSrc = storage.VolumeAttachmentSource{
+</span></span><span style="display:flex;"><span>                PersistentVolumeName: <span style="color:#ff79c6">&amp;</span>pvName,
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        attachment <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>storage.VolumeAttachment{
+</span></span><span style="display:flex;"><span>            ObjectMeta: meta.ObjectMeta{
+</span></span><span style="display:flex;"><span>                Name: attachID,
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            Spec: storage.VolumeAttachmentSpec{
+</span></span><span style="display:flex;"><span>                NodeName: node,
+</span></span><span style="display:flex;"><span>                Attacher: pvSrc.Driver,
+</span></span><span style="display:flex;"><span>                Source:   vaSrc,
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 通过APIServer写入到ETCD</span>
+</span></span><span style="display:flex;"><span>        _, err = c.k8s.<span style="color:#50fa7b">StorageV1</span>().<span style="color:#50fa7b">VolumeAttachments</span>().<span style="color:#50fa7b">Create</span>(context.<span style="color:#50fa7b">TODO</span>(), attachment, metav1.CreateOptions{})
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> !apierrors.<span style="color:#50fa7b">IsAlreadyExists</span>(err) {
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#34;&#34;</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;attacher.Attach failed: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;attachment [%v] for volume [%v] already exists (will not be recreated)&#34;</span>, attachID, pvSrc.VolumeHandle))
+</span></span><span style="display:flex;"><span>        } <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>            klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;attachment [%v] for volume [%v] created successfully&#34;</span>, attachID, pvSrc.VolumeHandle))
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }   
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 如果集群中已经存在(或者是新创建的) VolumeAttachment，就等 attach 完成</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> c.<span style="color:#50fa7b">waitForVolumeAttachmentWithLister</span>(pvSrc.VolumeHandle, attachID, c.watchTimeout); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#34;&#34;</span>, err 
+</span></span><span style="display:flex;"><span>    }   
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;attacher.Attach finished OK with VolumeAttachment object [%s]&#34;</span>, attachID))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Don&#39;t return attachID as a devicePath. We can reconstruct the attachID using getAttachmentName()</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#34;&#34;</span>, <span style="color:#ff79c6">nil</span> 
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>csiAttacher) <span style="color:#50fa7b">waitForVolumeAttachmentWithLister</span>(volumeHandle, attachID <span style="color:#8be9fd">string</span>, timeout time.Duration) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;probing VolumeAttachment [id=%v]&#34;</span>, attachID))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    verifyStatus <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">func</span>() (<span style="color:#8be9fd">bool</span>, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>        volumeAttachment, err <span style="color:#ff79c6">:=</span> c.plugin.volumeAttachmentLister.<span style="color:#50fa7b">Get</span>(attachID)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// Ignore &#34;not found&#34; errors in case the VolumeAttachment was just created and hasn&#39;t yet made it into the lister.</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> !apierrors.<span style="color:#50fa7b">IsNotFound</span>(err) {
+</span></span><span style="display:flex;"><span>                klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;unexpected error waiting for volume attachment, %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, err
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// The VolumeAttachment is not available yet and we will have to try again.</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        successful, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">verifyAttachmentStatus</span>(volumeAttachment, volumeHandle)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, err
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> successful, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> c.<span style="color:#50fa7b">waitForVolumeAttachDetachStatusWithLister</span>(volumeHandle, attachID, timeout, verifyStatus, <span style="color:#f1fa8c">&#34;Attach&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">verifyAttachmentStatus</span>(attachment <span style="color:#ff79c6">*</span>storage.VolumeAttachment, volumeHandle <span style="color:#8be9fd">string</span>) (<span style="color:#8be9fd">bool</span>, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// when we received a deleted event during attachment, fail fast</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> attachment <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;VolumeAttachment [%s] has been deleted, will not continue to wait for attachment&#34;</span>, volumeHandle))
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;volume attachment has been deleted&#34;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// if being deleted, fail fast</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> attachment.<span style="color:#50fa7b">GetDeletionTimestamp</span>() <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;VolumeAttachment [%s] has deletion timestamp, will not continue to wait for attachment&#34;</span>, attachment.Name))
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;volume attachment is being deleted&#34;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// attachment OK</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> attachment.Status.Attached {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// driver reports attach error</span>
+</span></span><span style="display:flex;"><span>    attachErr <span style="color:#ff79c6">:=</span> attachment.Status.AttachError
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> attachErr <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;attachment for %v failed: %v&#34;</span>, volumeHandle, attachErr.Message))
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, errors.<span style="color:#50fa7b">New</span>(attachErr.Message)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<h4 id="detach方法的实现">Detach方法的实现</h4>
+<p>Detach 的实现就是删除 VolumeAttachment 资源，然后一直循环判断这个资源不存在来判断是不是 PV 从节点上 detach 是否已经完成。
+需要注意的是这个循环判断是 backoff 的方式，可以具体看实现，backoff 的 handler 就是 verifyStatus，可以重点看下，代码贴在下面，没有啥好分析的。</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>csiAttacher) <span style="color:#50fa7b">Detach</span>(volumeName <span style="color:#8be9fd">string</span>, nodeName types.NodeName) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 获取到AttachVolumement的Name</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> attachID <span style="color:#8be9fd">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> volID <span style="color:#8be9fd">string</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> volumeName <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;detacher.Detach missing value for parameter volumeName&#34;</span>))
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;missing expected parameter volumeName&#34;</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#50fa7b">isAttachmentName</span>(volumeName) {
+</span></span><span style="display:flex;"><span>		attachID = volumeName
+</span></span><span style="display:flex;"><span>		volID = volumeName
+</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>		parts <span style="color:#ff79c6">:=</span> strings.<span style="color:#50fa7b">Split</span>(volumeName, volNameSep)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(parts) <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">2</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;detacher.Detach insufficient info encoded in volumeName&#34;</span>))
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;volumeName missing expected data&#34;</span>)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		driverName <span style="color:#ff79c6">:=</span> parts[<span style="color:#bd93f9">0</span>]
+</span></span><span style="display:flex;"><span>		volID = parts[<span style="color:#bd93f9">1</span>]
+</span></span><span style="display:flex;"><span>		attachID = <span style="color:#50fa7b">getAttachmentName</span>(volID, driverName, <span style="color:#8be9fd;font-style:italic">string</span>(nodeName))
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 通过APIServer删除VolumeAttachment资源  </span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> c.k8s.<span style="color:#50fa7b">StorageV1</span>().<span style="color:#50fa7b">VolumeAttachments</span>().<span style="color:#50fa7b">Delete</span>(context.<span style="color:#50fa7b">TODO</span>(), attachID, metav1.DeleteOptions{}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> apierrors.<span style="color:#50fa7b">IsNotFound</span>(err) {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;VolumeAttachment object [%v] for volume [%v] not found, object deleted&#34;</span>, attachID, volID))
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;detacher.Detach failed to delete VolumeAttachment [%s]: %v&#34;</span>, attachID, err))
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;detacher deleted ok VolumeAttachment.ID=%s&#34;</span>, attachID))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> c.<span style="color:#50fa7b">waitForVolumeDetachmentWithLister</span>(volID, attachID, c.watchTimeout)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<h4 id="mountdevice方法的实现">MountDevice方法的实现</h4>
+<h4 id="unmountdevice方法的实现">UnmountDevice方法的实现</h4>
+<h4 id="总结">总结</h4>
+<p>由此可见， csi volume plugin并不会直接参与PV的Attach和Detach， 而是</p>
+<ul>
+<li>在 Attach 的时候，创建 VolumeAttachment 资源，然后循环校验 VolumeAttachment 资源的 Status.Attached 的值是不是 true 来判断 PV 与 node 是不是 Attach 成功。</li>
+<li>在 Detach 的时候，会删除 VolumeAttachment 资源，然后循环查询 VolumeAttachment 资源是否存在来判断 PV 与 node 誓死不是 Detach 成功。</li>
+<li>至于真正做这个 Attach 和 Detach 的是 external-attacher 和 kubelet volume manager 这个后面会讲道。</li>
+</ul>
+<h3 id="mountunmount">Mount/UnMount</h3>
+<h2 id="kubelet--csi-volume-plugin-源码分析之csi-client">kubelet  csi volume plugin 源码分析之csi client</h2>
+<p><strong>CSI Volume Plugin</strong>需要通过CSI gRPC来和<strong>remote CSI Driver gRPC Server</strong>通信, 在这里<strong>CSI Volume Plugin</strong>就是一个CSI gRPC Client。</p>
+<h3 id="csidriverclient">csiDriverClient</h3>
+<p>下面是<strong>csi Plugin gRPC Client</strong>需要实现的接口<strong>csiClient</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> csiClient <span style="color:#8be9fd;font-style:italic">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">NodeGetInfo</span>(ctx context.Context) (
+</span></span><span style="display:flex;"><span>        nodeID <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        maxVolumePerNode <span style="color:#8be9fd">int64</span>,
+</span></span><span style="display:flex;"><span>        accessibleTopology <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        err <span style="color:#8be9fd">error</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">NodePublishVolume</span>(
+</span></span><span style="display:flex;"><span>        ctx context.Context,
+</span></span><span style="display:flex;"><span>        volumeid <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        readOnly <span style="color:#8be9fd">bool</span>,
+</span></span><span style="display:flex;"><span>        stagingTargetPath <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        targetPath <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        accessMode api.PersistentVolumeAccessMode,
+</span></span><span style="display:flex;"><span>        publishContext <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        volumeContext <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        secrets <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        fsType <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        mountOptions []<span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>    ) <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">NodeExpandVolume</span>(ctx context.Context, rsOpts csiResizeOptions) (resource.Quantity, <span style="color:#8be9fd">error</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">NodeUnpublishVolume</span>(
+</span></span><span style="display:flex;"><span>        ctx context.Context,
+</span></span><span style="display:flex;"><span>        volID <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        targetPath <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>    ) <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">NodeStageVolume</span>(ctx context.Context,
+</span></span><span style="display:flex;"><span>        volID <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        publishVolumeInfo <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        stagingTargetPath <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        fsType <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        accessMode api.PersistentVolumeAccessMode,
+</span></span><span style="display:flex;"><span>        secrets <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        volumeContext <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        mountOptions []<span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>    ) <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">NodeGetVolumeStats</span>(
+</span></span><span style="display:flex;"><span>        ctx context.Context,
+</span></span><span style="display:flex;"><span>        volID <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>        targetPath <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>    ) (<span style="color:#ff79c6">*</span>volume.Metrics, <span style="color:#8be9fd">error</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">NodeUnstageVolume</span>(ctx context.Context, volID, stagingTargetPath <span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">NodeSupportsStageUnstage</span>(ctx context.Context) (<span style="color:#8be9fd">bool</span>, <span style="color:#8be9fd">error</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">NodeSupportsNodeExpand</span>(ctx context.Context) (<span style="color:#8be9fd">bool</span>, <span style="color:#8be9fd">error</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">NodeSupportsVolumeStats</span>(ctx context.Context) (<span style="color:#8be9fd">bool</span>, <span style="color:#8be9fd">error</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>是不是和觉得把<strong>CSI的Node节点服务</strong>给封装了一下？</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-protobuf" data-lang="protobuf"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">service</span> Node {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">rpc</span> NodeStageVolume (NodeStageVolumeRequest)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">returns</span> (NodeStageVolumeResponse) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">rpc</span> NodeUnstageVolume (NodeUnstageVolumeRequest)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">returns</span> (NodeUnstageVolumeResponse) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">rpc</span> NodePublishVolume (NodePublishVolumeRequest)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">returns</span> (NodePublishVolumeResponse) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">rpc</span> NodeUnpublishVolume (NodeUnpublishVolumeRequest)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">returns</span> (NodeUnpublishVolumeResponse) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">rpc</span> NodeGetVolumeStats (NodeGetVolumeStatsRequest)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">returns</span> (NodeGetVolumeStatsResponse) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">rpc</span> NodeExpandVolume(NodeExpandVolumeRequest)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">returns</span> (NodeExpandVolumeResponse) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">rpc</span> NodeGetCapabilities (NodeGetCapabilitiesRequest)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">returns</span> (NodeGetCapabilitiesResponse) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">rpc</span> NodeGetInfo (NodeGetInfoRequest)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">returns</span> (NodeGetInfoResponse) {}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>CSI Plugin的CSI gRPC client实现的结构体定义如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// csiClient encapsulates all csi-plugin methods</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> csiDriverClient <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>    driverName          csiDriverName
+</span></span><span style="display:flex;"><span>    addr                csiAddr
+</span></span><span style="display:flex;"><span>    metricsManager      <span style="color:#ff79c6">*</span>MetricsManager
+</span></span><span style="display:flex;"><span>    nodeV1ClientCreator nodeV1ClientCreator
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 创建csi gRPC connection 的函数签名</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> nodeV1ClientCreator <span style="color:#8be9fd;font-style:italic">func</span>(addr csiAddr, metricsManager <span style="color:#ff79c6">*</span>MetricsManager) (
+</span></span><span style="display:flex;"><span>    nodeClient csipbv1.NodeClient,
+</span></span><span style="display:flex;"><span>    closer io.Closer,
+</span></span><span style="display:flex;"><span>    err <span style="color:#8be9fd">error</span>,
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">newGrpcConn</span>(addr csiAddr, metricsManager <span style="color:#ff79c6">*</span>MetricsManager) (<span style="color:#ff79c6">*</span>grpc.ClientConn, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>    network <span style="color:#ff79c6">:=</span> <span style="color:#f1fa8c">&#34;unix&#34;</span>
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;creating new gRPC connection for [%s://%s]&#34;</span>, network, addr))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> grpc.<span style="color:#50fa7b">Dial</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#8be9fd;font-style:italic">string</span>(addr),
+</span></span><span style="display:flex;"><span>        grpc.<span style="color:#50fa7b">WithInsecure</span>(),
+</span></span><span style="display:flex;"><span>        grpc.<span style="color:#50fa7b">WithContextDialer</span>(<span style="color:#8be9fd;font-style:italic">func</span>(ctx context.Context, target <span style="color:#8be9fd">string</span>) (net.Conn, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> (<span style="color:#ff79c6">&amp;</span>net.Dialer{}).<span style="color:#50fa7b">DialContext</span>(ctx, network, target)
+</span></span><span style="display:flex;"><span>        }),
+</span></span><span style="display:flex;"><span>        grpc.<span style="color:#50fa7b">WithChainUnaryInterceptor</span>(metricsManager.RecordMetricsInterceptor),
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>}newCsiDriverClient
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// newV1NodeClient creates a new NodeClient with the internally used gRPC</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// connection set up. It also returns a closer which must to be called to close</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// the gRPC connection when the NodeClient is not used anymore.</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// This is the default implementation for the nodeV1ClientCreator, used in</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// newCsiDriverClient.</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 创建csi gRPC connection</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">newV1NodeClient</span>(addr csiAddr, metricsManager <span style="color:#ff79c6">*</span>MetricsManager) (nodeClient csipbv1.NodeClient, closer io.Closer, err <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> conn <span style="color:#ff79c6">*</span>grpc.ClientConn
+</span></span><span style="display:flex;"><span>    conn, err = <span style="color:#50fa7b">newGrpcConn</span>(addr, metricsManager)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, <span style="color:#ff79c6">nil</span>, err
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    nodeClient = csipbv1.<span style="color:#50fa7b">NewNodeClient</span>(conn)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> nodeClient, conn, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>newCsiDriverClient</strong>负责创建制定driverName的csi gRPC Client, 需要注意的是<strong>csiDrivers</strong>这个是全局数据， 里面存储了(driverName, driverInfo)记录， 是一个map结构</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">newCsiDriverClient</span>(driverName csiDriverName) (<span style="color:#ff79c6">*</span>csiDriverClient, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> driverName <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;&#34;</span> {<span style="color:#6272a4">// driverName不能为空</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;driver name is empty&#34;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 从CSI Driver库中获取名为driverName的信息</span>
+</span></span><span style="display:flex;"><span>    existingDriver, driverExists <span style="color:#ff79c6">:=</span> csiDrivers.<span style="color:#50fa7b">Get</span>(<span style="color:#8be9fd;font-style:italic">string</span>(driverName))
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> !driverExists {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;driver name %s not found in the list of registered CSI drivers&#34;</span>, driverName)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    nodeV1ClientCreator <span style="color:#ff79c6">:=</span> newV1NodeClient
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 实例化csiDriverClient并赋值</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>csiDriverClient{
+</span></span><span style="display:flex;"><span>        driverName:          driverName,
+</span></span><span style="display:flex;"><span>        addr:                <span style="color:#50fa7b">csiAddr</span>(existingDriver.endpoint),
+</span></span><span style="display:flex;"><span>        nodeV1ClientCreator: nodeV1ClientCreator,
+</span></span><span style="display:flex;"><span>        metricsManager:      <span style="color:#50fa7b">NewCSIMetricsManager</span>(<span style="color:#8be9fd;font-style:italic">string</span>(driverName)),
+</span></span><span style="display:flex;"><span>    }, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="csiclientgetter">csiClientGetter</h3>
+<p><strong>csiClientGetter</strong>实现了一个多goroutine安全获取<strong>csiDriverClient</strong>实例的方法</p>
+<ul>
+<li>使用了读写锁</li>
+<li>第一次Get操作会创建实例，后续的Get都可以使用第一次创建的实例</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// CSI client getter with cache.</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// This provides a method to initialize CSI client with driver name and caches</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// it for later use. When CSI clients have not been discovered yet (e.g.</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// on kubelet restart), client initialization will fail. Users of CSI client (e.g.</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// mounter manager and block mapper) can use this to delay CSI client</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// initialization until needed.</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> csiClientGetter <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>    sync.RWMutex
+</span></span><span style="display:flex;"><span>    csiClient  csiClient
+</span></span><span style="display:flex;"><span>    driverName csiDriverName
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>csiClientGetter) <span style="color:#50fa7b">Get</span>() (csiClient, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>    c.<span style="color:#50fa7b">RLock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> c.csiClient <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        c.<span style="color:#50fa7b">RUnlock</span>()
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> c.csiClient, <span style="color:#ff79c6">nil</span> 
+</span></span><span style="display:flex;"><span>    }   
+</span></span><span style="display:flex;"><span>    c.<span style="color:#50fa7b">RUnlock</span>()
+</span></span><span style="display:flex;"><span>    c.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> c.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Double-checking locking criterion.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> c.csiClient <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> c.csiClient, <span style="color:#ff79c6">nil</span> 
+</span></span><span style="display:flex;"><span>    }   
+</span></span><span style="display:flex;"><span>    csi, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">newCsiDriverClient</span>(c.driverName)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, err 
+</span></span><span style="display:flex;"><span>    }   
+</span></span><span style="display:flex;"><span>    c.csiClient = csi 
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> c.csiClient, <span style="color:#ff79c6">nil</span> 
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kubelet/" class="tag-link">Kubelet</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/csi/" class="tag-link">Csi</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Kubelet on What a Life!</title>
+    <link>https://www.zhangzewen.net/tags/kubelet/</link>
+    <description>Recent content in Kubelet on What a Life!</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Fri, 29 Aug 2025 02:43:31 +0800</lastBuildDate>
+    <atom:link href="https://www.zhangzewen.net/tags/kubelet/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>kubernetes 源码分析之 AttachDetach Controller </title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/</link>
+      <pubDate>Fri, 29 Aug 2025 02:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 PV Controller</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/</link>
+      <pubDate>Fri, 29 Aug 2025 02:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建PersistentVolumeController，NewController 主要做了如下几件事情：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes csi 之 CSI Volume Plugin</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/csi/kubelet-volume-plugins-csi/</link>
+      <pubDate>Sat, 02 Aug 2025 00:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/csi/kubelet-volume-plugins-csi/</guid>
+      <description>&lt;h2 id=&#34;csidriver-注册&#34;&gt;CSIDriver 注册&lt;/h2&gt;&#xA;&lt;p&gt;所有的 CSI Driver 都是通过map来关联存储的：&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; Driver &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;endpoint                &lt;span style=&#34;color:#8be9fd&#34;&gt;string&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;highestSupportedVersion &lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;utilversion.Version&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; DriversStore &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;store&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;sync.RWMutex&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; store &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;map&lt;/span&gt;[&lt;span style=&#34;color:#8be9fd&#34;&gt;string&lt;/span&gt;]Driver&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;具体的增/删/改/查可以看&lt;code&gt;k8s.io/kubernetes/pkg/volume/csi/csi_drivers_store.go&lt;/code&gt;， 全局变量 csiDrivers 就存储了所有注册的CSI Driver：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes csi 之 external-provisioner</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/</link>
+      <pubDate>Sat, 02 Aug 2025 00:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/</guid>
+      <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/kubernetes-csi/external-provisioner.git&#34;&gt;external-provisioner&lt;/a&gt; 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 &lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/&#34;&gt;sig-storage-lib-external-provisioner&lt;/a&gt; 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 &lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/&#34;&gt;PV Controller&lt;/a&gt; 的工作。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes csi 之 node-driver-register</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/csi/node-driver-register/</link>
+      <pubDate>Sat, 02 Aug 2025 00:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/csi/node-driver-register/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://github.com/kubernetes-csi/node-driver-registrar.git&#34;&gt;node-driver-register&lt;/a&gt; 是一个辅助容器，通过 &lt;a href=&#34;https://github.com/container-storage-interface/spec.git&#34;&gt;CSI 接口&lt;/a&gt; 提供的 Identity Service 来获取插件信息，并且通过&lt;a href=&#34;https://github.com/kubernetes/kubelet/blob/master/pkg/apis/pluginregistration/v1/api.proto&#34;&gt;kubelet 插件注册接口&lt;/a&gt; 注册到 kubelet。所以，node-dirver-rigister 即是一个客户端，也是一个服务端。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes csi 之 sig-storage-lib-external-provisioner</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/</link>
+      <pubDate>Sat, 02 Aug 2025 00:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://github.com/kubernetes-sigs/sig-storage-lib-external-provisioner.git&#34;&gt;sig-storage-lib-external-provisioner&lt;/a&gt; 是用来开发的 external provisioners 的工具库，提供了一个通用的控制器，即根据提供的 Provisioner，然后监听 PVC/PV 资源的变化来实现创建/删除 PV。&lt;/p&gt;&#xA;&lt;h2 id=&#34;接口&#34;&gt;接口&lt;/h2&gt;&#xA;&lt;p&gt;sig-storage-lib-external-provisioner 中的接口 Provisioner 提供了 external provisioners 实现创建/删除 PV 的方法 Provision/Delete, 接口 BlockProvisioner 扩展了 Provisioner：能够判断 provisioner是否支持块设备。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 CSI Volume Plugin</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/csi-volume-plugin/</link>
+      <pubDate>Fri, 27 Jun 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/csi-volume-plugin/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;在 kubernetes 中，第三方 CSI Plugin 注册到 kubelet 是通过 CSI Volume Plugin 来完成的。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet volume plugins manager</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/volume_plugins_manager/</link>
+      <pubDate>Wed, 18 Jun 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/volume_plugins_manager/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;在 kubernetes 中存储以插件的形似存在，kubernetes 提供了接口 &lt;a href=&#34;https://github.com/kubernetes/kubernetes/blob/e4d4e1ab7cf1bf15273ef97303551b279f0920a9/pkg/volume/volume.go#L30&#34;&gt;Volume&lt;/a&gt; 极其扩展接口来表示存储卷，使用 &lt;a href=&#34;https://github.com/kubernetes/kubernetes/blob/e4d4e1ab7cf1bf15273ef97303551b279f0920a9/pkg/volume/plugins.go#L134&#34;&gt;VolumePlugin&lt;/a&gt; 接口来表示一个存储卷插件。像常用的 &lt;code&gt;empty/hostpath/configmap/secert/csi&lt;/code&gt; 等都是以插件形式存在的存储卷（这里的 csi 是让 kubernetes 可以使用第三方提供的存储功能），kubelet 使用 volume plugins manager 来管理它们。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet pod 的创建和启动</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-create-and-start/</link>
+      <pubDate>Sun, 25 May 2025 16:33:16 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-create-and-start/</guid>
+      <description>&lt;p&gt;接口 SyncHandler 定义了一系列管理 Pod 的方法：&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; SyncHandler &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;interface&lt;/span&gt; {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#6272a4&#34;&gt;// 新增&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;&lt;span style=&#34;color:#50fa7b&#34;&gt;HandlePodAdditions&lt;/span&gt;(pods []&lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;v1.Pod)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#6272a4&#34;&gt;// 更新&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;&lt;span style=&#34;color:#50fa7b&#34;&gt;HandlePodUpdates&lt;/span&gt;(pods []&lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;v1.Pod)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#6272a4&#34;&gt;// 删除&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;&lt;span style=&#34;color:#50fa7b&#34;&gt;HandlePodRemoves&lt;/span&gt;(pods []&lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;v1.Pod)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#6272a4&#34;&gt;// 协调&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;&lt;span style=&#34;color:#50fa7b&#34;&gt;HandlePodReconcile&lt;/span&gt;(pods []&lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;v1.Pod)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#6272a4&#34;&gt;// 同步&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;&lt;span style=&#34;color:#50fa7b&#34;&gt;HandlePodSyncs&lt;/span&gt;(pods []&lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;v1.Pod)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#6272a4&#34;&gt;// 清理&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;&lt;span style=&#34;color:#50fa7b&#34;&gt;HandlePodCleanups&lt;/span&gt;() &lt;span style=&#34;color:#8be9fd&#34;&gt;error&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;结构体 Kubelet 实现了该方法。&lt;code&gt;Kubelet.HandlePodAdditions&lt;/code&gt; 的流程如下：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet syncLoop</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/syncloop/</link>
+      <pubDate>Sun, 25 May 2025 16:31:39 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/syncloop/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubelet 是由多个生产者和多个消费者组成的后台服务，其内部实现是一个控制循环，由事件驱动着控制循环的运行，如下图所示：&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/kubernetes/kubelet/syncLoop.png&#34; alt=&#34;syncLoop&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;这个图片是展示的组件和本篇分析所使用的kubernetes 版本已经有所不同，但是其设计理念没有变法，依旧是 syncLoop 驱动着整个控制循环的运行。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet pleg</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/pleg/</link>
+      <pubDate>Tue, 06 May 2025 01:27:07 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/pleg/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;PLEG 是 &amp;ldquo;Pod Lifecycle Event Generator&amp;rdquo; 的缩写，监控运行在集群各个节点上的容器状态变化，并将这些变化事件推送给 kubelet，kubelet 处理后同步到 apiserver。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 container 探针以及探针管理</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/probe-manager/</link>
+      <pubDate>Tue, 22 Apr 2025 21:27:07 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/probe-manager/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubernetes 支持三种 container 探针：startupProbe、readinessProbe、livenessProbe。 livenessProbe 决定是否要重启容器，readinessProbe 确认是服务是否可用，startupProbe 是为了避免 container 启动时间过长使得 liveness 失败而造成无限重启的场景。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet plugin manager</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/</link>
+      <pubDate>Tue, 11 Mar 2025 00:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 的能力: CSI 和 Device。得益于 gRPC 和 Linux 的 inotify 实现了插件的动态管理。本片文章将详细讲解 kubelet 管理插件的逻辑，至于 CSI 和 Device 这两种类型的插件的详细内容，不在本片文章讨论范围之内，本片文章会在需要的地方提及一下，不会对理解本片文章造成困难。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet eviction manager</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/eviction-manager/</link>
+      <pubDate>Thu, 27 Feb 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/eviction-manager/</guid>
+      <description>&lt;p&gt;在分析 eviction manager 的实现之前，先要说一下工具类-阀值触发器的实现，对 eviction manager 的理解还是有帮助的。&lt;/p&gt;&#xA;&lt;h2 id=&#34;阀值触发器&#34;&gt;阀值触发器&lt;/h2&gt;&#xA;&lt;p&gt;接口 CgroupNotifier 定义了阀值触发器的功能，其实现是 linuxCgroupNotifier。 而接口 NotifierFactor 提供的方法 NewCgroupNotifier 是生成 CgroupNotifier 实例的，重点是其实例 memoryThresholdNotifier 中的字段 factory 和 notifier， factory 是用来生成阀值触发器实例工厂函数, notifier 是 factory 生产的具体阀值触发器实例。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 Kubernetes Resource QoS Classes </title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/resource-qos/</link>
+      <pubDate>Mon, 10 Feb 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/resource-qos/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;Kubernetes 根据 Pod 中 Containers Resource 的 &lt;code&gt;request&lt;/code&gt; 和 &lt;code&gt;limit&lt;/code&gt; 的值来定义 Pod 的 QoS Class。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 Pause 容器</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/pause/</link>
+      <pubDate>Mon, 27 Jan 2025 23:16:45 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/pause/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;Pod 是 kubernetes 里最小调度单元，一个 Pod 里面可以包含由多个容器。 这些容器之间通过 linux namespace 来共享资源以及和宿主节点环境隔离。Pod 里面最基础的容器是 pause 容器，它是 Pod 启动的时候，首先创建的容器，其他的业务容器都依赖该 pause 容器，毕竟它提供了可共享的 linux namspace。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet 镜像回收和容器回收</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/</link>
+      <pubDate>Mon, 27 Jan 2025 22:44:45 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资源不会被消耗殆尽。本片文章从源码角度来分析 kubelet 的垃圾回收功能，即清理不需要的容器和镜像。&lt;/p&gt;&#xA;&lt;h2 id=&#34;启动切入点&#34;&gt;启动切入点&lt;/h2&gt;&#xA;&lt;p&gt;垃圾回收是在 kubelet 对象初始化完成后启动的，在 createAndInitKubelet 方法中首先调用 NewMainKubelet 初始化 Kubelet 实例，随后调用 &lt;code&gt;Kubelet.StartGarbageCollection&lt;/code&gt; 启动了 GarbageCollect。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

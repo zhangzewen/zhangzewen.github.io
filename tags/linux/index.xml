@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Linux on What a Life!</title>
+    <link>https://www.zhangzewen.net/tags/linux/</link>
+    <description>Recent content in Linux on What a Life!</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Wed, 20 Aug 2025 09:43:31 +0800</lastBuildDate>
+    <atom:link href="https://www.zhangzewen.net/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>MIT 公开课 6.S081 实现总结</title>
+      <link>https://www.zhangzewen.net/posts/os/xv6/6.s081_summary/</link>
+      <pubDate>Wed, 20 Aug 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/os/xv6/6.s081_summary/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;6.S081&lt;/strong&gt; 是非常著名的 MIT 操作系统课程。该公开课链接的年份后缀的是可以更改的，这个课程提供的可编程 lab 每年都稍微有些不同，每个 lab 的自评测中的 answers-*.txt 和 time.txt 需要自行填写。 本篇文章对应的是&lt;a href=&#34;https://pdos.csail.mit.edu/6.828/2024/&#34;&gt; 2024 年度课程&lt;/a&gt;的实现总结。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>xv6 之 进程调度</title>
+      <link>https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/</link>
+      <pubDate>Sun, 10 Aug 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/</guid>
+      <description>&lt;p&gt;本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。 请结合 &lt;a href=&#34;https://www.zhangzewen.net/posts/os/xv6/xv6_trap/&#34;&gt;xv6 trap 机制&lt;/a&gt; 来查阅本篇笔记。&lt;/p&gt;&#xA;&lt;p&gt;xv6 进程间切换发生在如下两种情况：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;系统中断， 比如 time interrupt， 会调用 yield 进行切换。&lt;/li&gt;&#xA;&lt;li&gt;调用 xv6 的 sleep 和 wakeup 。&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h2 id=&#34;寄存器&#34;&gt;寄存器&lt;/h2&gt;&#xA;&lt;table&gt;&#xA;  &lt;thead&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;th style=&#34;text-align: center&#34;&gt;寄存器&lt;/th&gt;&#xA;          &lt;th style=&#34;text-align: center&#34;&gt;描述&lt;/th&gt;&#xA;      &lt;/tr&gt;&#xA;  &lt;/thead&gt;&#xA;  &lt;tbody&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;x0/zero&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;始终为0&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;ra&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存 return address&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;sp&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存栈顶地址&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;t0-t6&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存临时数据，这些数据会在函数调用返回后失效，调用函数作用域内的数据&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;s0-s11&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存数据，这些数据在函数调用返回后不失效，调用幻术作用域外的数据&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;a0-a1&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存参数列表中的前两个/保存返回值&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;a2-a7&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存参数列表前两位之后的参数&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;  &lt;/tbody&gt;&#xA;&lt;/table&gt;&#xA;&lt;h2 id=&#34;上下文切换&#34;&gt;上下文切换&lt;/h2&gt;&#xA;&lt;p&gt;xv6 中上下文切换是通过 swtch 完成的， swtch 是一段汇编代码， 其实就是保存要保存出让cpu进程的寄存器，加载获取cpu进程的寄存器：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>xv6 之 trap 机制</title>
+      <link>https://www.zhangzewen.net/posts/os/xv6/xv6_trap/</link>
+      <pubDate>Tue, 05 Aug 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/os/xv6/xv6_trap/</guid>
+      <description>&lt;p&gt;本片文章结合 xv6 的代码、配套 xv6-book 和 RISC-V 的文档，根据自己理解总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。如果错误，望不吝赐教。&lt;/p&gt;&#xA;&lt;h2 id=&#34;trap-机制&#34;&gt;trap 机制&lt;/h2&gt;&#xA;&lt;p&gt;根据 xv6 book 所述，以下三种状况会导致从用户态到内核态的切换：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>xv6 之 内存管理</title>
+      <link>https://www.zhangzewen.net/posts/os/xv6/xv6_memory_management/</link>
+      <pubDate>Mon, 28 Jul 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/os/xv6/xv6_memory_management/</guid>
+      <description>&lt;p&gt;本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃和不连贯，请见谅。&lt;/p&gt;&#xA;&lt;h2 id=&#34;xv6-page-table&#34;&gt;xv6 page table&lt;/h2&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/os/xv6/risc-v-pagetable.png&#34; alt=&#34;risc-v page table&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;上图是 &lt;code&gt;RISC-V&lt;/code&gt; 多种虚拟内存布局中的一种 — &lt;code&gt;Sv39&lt;/code&gt;。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Stanford 公开课 CS144 2025版 通关指南</title>
+      <link>https://www.zhangzewen.net/posts/linux/cs144_simple_summary/</link>
+      <pubDate>Tue, 15 Jul 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/linux/cs144_simple_summary/</guid>
+      <description>&lt;h2 id=&#34;环境准备&#34;&gt;环境准备&lt;/h2&gt;&#xA;&lt;p&gt;我的机器是 2020 年的 intel mbp， 该项目在 mac 下是跑不通的，需要安装虚拟机，这里提供一个 lima 的虚拟机配置：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>gdb init script</title>
+      <link>https://www.zhangzewen.net/posts/linux/gdb_init_script/</link>
+      <pubDate>Tue, 25 Feb 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/linux/gdb_init_script/</guid>
+      <description>&lt;p&gt;.gdbinit 能够将gdb基本命令添加到文件中以避免每次启动gdb 进行 debug 时候输入他们，例如&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;b main&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;r&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;b main.c:56&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;c&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这样就可以避免重复性的劳动。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]BPF CO-RE reference guide</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-bpf-co-re-reference-guide/</link>
+      <pubDate>Sat, 17 Aug 2024 08:13:34 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-bpf-co-re-reference-guide/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文：&lt;a href=&#34;https://nakryiko.com/posts/bpf-core-reference-guide/&#34;&gt;BPF CO-RE reference guide&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;h2 id=&#34;缺失的手册&#34;&gt;缺失的手册&lt;/h2&gt;&#xA;&lt;p&gt;BPF CO-RE（编译一次-到处运行）是编写可移植BPF应用程序的现代方法，应用程序可以在不同的内核版本和配置上运行，而无需在目标机器上修改和编译运行时源代码。这与&lt;a href=&#34;https://github.com/iovisor/bcc&#34;&gt;BCC&lt;/a&gt;框架提供的更传统的方法有很大的区别，在BCC框架中，BPF应用程序源代码编译被延迟到目标主机上，其携带了一个重量级的编译器工具链来实现这一点。请阅读&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/&#34;&gt;[译]BPF CO-RE (Compile Once – Run Everywhere)&lt;/a&gt;这篇文章，该文章介绍了 BPF CO-RE 的概念，并解释了为什么 BPF CO-RE对这些现实世界的 BPF 应用程序来说都是重要且必要的，以及在没有&lt;a href=&#34;https://nakryiko.com/posts/btf-dedup/&#34;&gt;内核BTF&lt;/a&gt;的情况下变得困难的原因。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/</link>
+      <pubDate>Fri, 17 May 2024 08:13:34 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&#xA;原文: &lt;strong&gt;&lt;a href=&#34;https://nakryiko.com/posts/bpf-tips-printk/&#34;&gt;BPF tips &amp;amp; tricks: the guide to bpf_trace_printk() and bpf_printk()&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]Building BPF applications with libbpf-bootstrap</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-building-bpf-applications-with-libbpf-bootstrap/</link>
+      <pubDate>Fri, 10 May 2024 08:13:34 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-building-bpf-applications-with-libbpf-bootstrap/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文: &lt;strong&gt;&lt;a href=&#34;https://nakryiko.com/posts/libbpf-bootstrap/&#34;&gt;Building BPF applications with libbpf-bootstrap&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/libbpf/libbpf-bootstrap&#34;&gt;libbpf-bootstrap&lt;/a&gt;脚手架能快速轻松地让您构建自己的BPF应用程序，该脚手架负责所有让人乏味的设置步骤，并最大限度地减少必要的样板，让您直接沉浸在 BPF 的乐趣中。我们将看看 libbpf-bootstrap 提供了什么，以及所有内容是如何联系在一起的。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]BPF ring buffer</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-bpf-ring-buffer/</link>
+      <pubDate>Sun, 24 Mar 2024 21:42:07 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-bpf-ring-buffer/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文: &lt;strong&gt;&lt;a href=&#34;https://nakryiko.com/posts/bpf-ringbuf/&#34;&gt;BPF ring buffer&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲区（当前用于从内核向用户态发送数据的标准）的内存效率和事件重新排序问题，同时达到或超过了其性能。它提供了perfbuf兼容性以便于轻松迁移，但也有新的reserve/submit API，具有更好的可用性。此外，合成和实际基准测试都表明，在几乎所有情况下，考虑将其作为从BPF程序发送数据到用户态的默认选择。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/</link>
+      <pubDate>Thu, 21 Mar 2024 15:03:02 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;这是一个系列文章：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/&#34;&gt;[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/&#34;&gt;[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;&lt;strong&gt;原文：&lt;a href=&#34;https://blog.px.dev/ebpf-openssl-tracing/&#34;&gt;Debugging with eBPF Part 3: Tracing SSL/TLS connections&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/</link>
+      <pubDate>Wed, 13 Mar 2024 21:03:01 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;这是一个系列文章：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/&#34;&gt;[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/&#34;&gt;[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;原文：&lt;a href=&#34;https://blog.px.dev/ebpf-http-tracing/&#34;&gt;Debugging with eBPF Part 2: Tracing full body HTTP request/responses&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/</link>
+      <pubDate>Sat, 09 Mar 2024 15:03:00 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;这是一个系列文章：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/&#34;&gt;[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/&#34;&gt;[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;原文: &lt;strong&gt;&lt;a href=&#34;https://blog.px.dev/ebpf-function-tracing/&#34;&gt;Debugging with eBPF Part 1: Tracing Go function arguments in prod&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译] Lifetime of BPF objects</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/</link>
+      <pubDate>Mon, 04 Mar 2024 21:42:07 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文链接: &lt;a href=&#34;https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html&#34;&gt;Lifetime of BPF objects&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;BPF验证器保证程序本身能够被内核安全地执行，但为了安全地且无意外地使用整个BPF，用户需要理解 BPF 程序和 Maps 的生命周期。本文深入介绍了这些细节。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]BPF CO-RE (Compile Once – Run Everywhere)</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/</link>
+      <pubDate>Sat, 17 Feb 2024 08:13:34 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文：&lt;a href=&#34;https://nakryiko.com/posts/bpf-portability-and-co-re/&#34;&gt;BPF CO-RE (Compile Once – Run Everywhere)&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一次 - 到处运行（CO-RE）**的情况下实现这一点实际上很困难？在这篇文章中，我们将探讨编写可以在多个内核版本上运行的BPF程序的挑战，以及BPF CO-RE如何帮助解决这个问题。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

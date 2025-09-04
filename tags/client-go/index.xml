@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Client-Go on What a Life!</title>
+    <link>https://www.zhangzewen.net/tags/client-go/</link>
+    <description>Recent content in Client-Go on What a Life!</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Thu, 29 Aug 2024 23:48:15 +0800</lastBuildDate>
+    <atom:link href="https://www.zhangzewen.net/tags/client-go/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>client-go 源码分析之 controller</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/client-go/controller/</link>
+      <pubDate>Thu, 29 Aug 2024 23:48:15 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/client-go/controller/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;&lt;code&gt;Controller&lt;/code&gt;是一个接口，该接口的实例的主要作用是构建和启动 &lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/&#34;&gt;reflector&lt;/a&gt;。&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; Controller &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;interface&lt;/span&gt; {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#50fa7b&#34;&gt;Run&lt;/span&gt;(stopCh &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;-&lt;/span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;chan&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt;{})&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#50fa7b&#34;&gt;HasSynced&lt;/span&gt;() &lt;span style=&#34;color:#8be9fd&#34;&gt;bool&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#50fa7b&#34;&gt;LastSyncResourceVersion&lt;/span&gt;() &lt;span style=&#34;color:#8be9fd&#34;&gt;string&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; controller &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  config         Config&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  reflector      &lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;Reflector&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  reflectorMutex sync.RWMutex&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  clock          clock.Clock&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;controller 实现了上述的 Controller，Config 存储的是配置信息， 通过调用 New 构造 controller 实例：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>client-go 源码分析之 informer</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/client-go/informer/</link>
+      <pubDate>Tue, 13 Aug 2024 23:42:19 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/client-go/informer/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;h2 id=&#34;变更事件分发和消费&#34;&gt;变更事件分发和消费&lt;/h2&gt;&#xA;&lt;p&gt;在讲解 Informer 机制之前，先来简单了解两个数据结构，这两个数据结构设计到变更事件的监听，事件分发，事件消费。&lt;/p&gt;&#xA;&lt;h3 id=&#34;processorlistener&#34;&gt;processorListener&lt;/h3&gt;&#xA;&lt;p&gt;processorListener 是用户对特定资源对象变更事件的回调处理逻辑接口 ResourceEventHandler 的封装，其监听变更事件以及调用用户注册的回调逻辑来消费这些变更事件。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>client-go 源码分析之 reflector</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/</link>
+      <pubDate>Sat, 27 Jul 2024 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取目标资源数据，然后再监听目标资源的变更事件, 并将数据同步到本地缓存。下面来具体说细节之处。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>client-go 源码分析之 实现 cache 的关键数据结构</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/client-go/cache/</link>
+      <pubDate>Sat, 13 Jul 2024 21:45:30 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/client-go/cache/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubernetes 的 client-go 提供了一种基于客户端缓存机制的工具，该工具把目标数据都缓存在内存中，旨在减少对服务器端的拉取数据请求调用次数，代码在 &lt;code&gt;tools/cache&lt;/code&gt; 目录下。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>client-go 源码分析之 workqueue</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/</link>
+      <pubDate>Wed, 03 Jul 2024 21:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑实现在&lt;code&gt;k8s.io/client-go/util/workqueue&lt;/code&gt; 目录下。&lt;/p&gt;&#xA;&lt;h2 id=&#34;基础去重队列&#34;&gt;基础：去重队列&lt;/h2&gt;&#xA;&lt;p&gt;基础队列接口 Interface 的定义如下：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>client-go 源码分析之 Event 机制</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/client-go/event/</link>
+      <pubDate>Sat, 01 Jun 2024 23:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/client-go/event/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubernetes 的事件（Event）是一种资源对象，用于展示集群内发生的情况，kubernetes 系统中的各个组件会将运行时发生的各种事件上报给 kubernetes apiserver。由于事件是一种资源，因此他们存储在 etcd 集群中。为了避免磁盘空间被填满，故强制执行保留策略：在最后一次的事件发生后，删除1小时之前发生的事件。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

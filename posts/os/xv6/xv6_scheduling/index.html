@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>xv6 之 进程调度 &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="xv6 之 进程调度">
+  <meta itemprop="description" content="本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。 请结合 xv6 trap 机制 来查阅本篇笔记。
+xv6 进程间切换发生在如下两种情况：
+系统中断， 比如 time interrupt， 会调用 yield 进行切换。 调用 xv6 的 sleep 和 wakeup 。 寄存器 寄存器 描述 x0/zero 始终为0 ra 保存 return address sp 保存栈顶地址 t0-t6 保存临时数据，这些数据会在函数调用返回后失效，调用函数作用域内的数据 s0-s11 保存数据，这些数据在函数调用返回后不失效，调用幻术作用域外的数据 a0-a1 保存参数列表中的前两个/保存返回值 a2-a7 保存参数列表前两位之后的参数 上下文切换 xv6 中上下文切换是通过 swtch 完成的， swtch 是一段汇编代码， 其实就是保存要保存出让cpu进程的寄存器，加载获取cpu进程的寄存器：">
+  <meta itemprop="datePublished" content="2025-08-10T09:43:31+08:00">
+  <meta itemprop="dateModified" content="2025-08-10T09:43:31+08:00">
+  <meta itemprop="wordCount" content="470">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="公开课,操作系统,Linux,Mit,Xv6">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="xv6 之 进程调度">
+  <meta name="twitter:description" content="本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。 请结合 xv6 trap 机制 来查阅本篇笔记。
+xv6 进程间切换发生在如下两种情况：
+系统中断， 比如 time interrupt， 会调用 yield 进行切换。 调用 xv6 的 sleep 和 wakeup 。 寄存器 寄存器 描述 x0/zero 始终为0 ra 保存 return address sp 保存栈顶地址 t0-t6 保存临时数据，这些数据会在函数调用返回后失效，调用函数作用域内的数据 s0-s11 保存数据，这些数据在函数调用返回后不失效，调用幻术作用域外的数据 a0-a1 保存参数列表中的前两个/保存返回值 a2-a7 保存参数列表前两位之后的参数 上下文切换 xv6 中上下文切换是通过 swtch 完成的， swtch 是一段汇编代码， 其实就是保存要保存出让cpu进程的寄存器，加载获取cpu进程的寄存器：">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="xv6 之 进程调度">
+  <meta property="og:description" content="本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。 请结合 xv6 trap 机制 来查阅本篇笔记。
+xv6 进程间切换发生在如下两种情况：
+系统中断， 比如 time interrupt， 会调用 yield 进行切换。 调用 xv6 的 sleep 和 wakeup 。 寄存器 寄存器 描述 x0/zero 始终为0 ra 保存 return address sp 保存栈顶地址 t0-t6 保存临时数据，这些数据会在函数调用返回后失效，调用函数作用域内的数据 s0-s11 保存数据，这些数据在函数调用返回后不失效，调用幻术作用域外的数据 a0-a1 保存参数列表中的前两个/保存返回值 a2-a7 保存参数列表前两位之后的参数 上下文切换 xv6 中上下文切换是通过 swtch 完成的， swtch 是一段汇编代码， 其实就是保存要保存出让cpu进程的寄存器，加载获取cpu进程的寄存器：">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-08-10T09:43:31+08:00">
+    <meta property="article:modified_time" content="2025-08-10T09:43:31+08:00">
+    <meta property="article:tag" content="公开课">
+    <meta property="article:tag" content="操作系统">
+    <meta property="article:tag" content="Linux">
+    <meta property="article:tag" content="Mit">
+    <meta property="article:tag" content="Xv6">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/#webpage",
+      "url": "https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/",
+      "name": "xv6 之 进程调度",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2025-08-10T09:43:31+08:00",
+      "dateModified": "2025-08-10T09:43:31+08:00",
+      "description": "\u003cp\u003e本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。 请结合 \u003ca href=\"https://www.zhangzewen.net/posts/os/xv6/xv6_trap/\"\u003exv6 trap 机制\u003c/a\u003e 来查阅本篇笔记。\u003c/p\u003e\n\u003cp\u003exv6 进程间切换发生在如下两种情况：\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e系统中断， 比如 time interrupt， 会调用 yield 进行切换。\u003c/li\u003e\n\u003cli\u003e调用 xv6 的 sleep 和 wakeup 。\u003c/li\u003e\n\u003c/ul\u003e\n\u003ch2 id=\"寄存器\"\u003e寄存器\u003c/h2\u003e\n\u003ctable\u003e\n  \u003cthead\u003e\n      \u003ctr\u003e\n          \u003cth style=\"text-align: center\"\u003e寄存器\u003c/th\u003e\n          \u003cth style=\"text-align: center\"\u003e描述\u003c/th\u003e\n      \u003c/tr\u003e\n  \u003c/thead\u003e\n  \u003ctbody\u003e\n      \u003ctr\u003e\n          \u003ctd style=\"text-align: center\"\u003ex0/zero\u003c/td\u003e\n          \u003ctd style=\"text-align: center\"\u003e始终为0\u003c/td\u003e\n      \u003c/tr\u003e\n      \u003ctr\u003e\n          \u003ctd style=\"text-align: center\"\u003era\u003c/td\u003e\n          \u003ctd style=\"text-align: center\"\u003e保存 return address\u003c/td\u003e\n      \u003c/tr\u003e\n      \u003ctr\u003e\n          \u003ctd style=\"text-align: center\"\u003esp\u003c/td\u003e\n          \u003ctd style=\"text-align: center\"\u003e保存栈顶地址\u003c/td\u003e\n      \u003c/tr\u003e\n      \u003ctr\u003e\n          \u003ctd style=\"text-align: center\"\u003et0-t6\u003c/td\u003e\n          \u003ctd style=\"text-align: center\"\u003e保存临时数据，这些数据会在函数调用返回后失效，调用函数作用域内的数据\u003c/td\u003e\n      \u003c/tr\u003e\n      \u003ctr\u003e\n          \u003ctd style=\"text-align: center\"\u003es0-s11\u003c/td\u003e\n          \u003ctd style=\"text-align: center\"\u003e保存数据，这些数据在函数调用返回后不失效，调用幻术作用域外的数据\u003c/td\u003e\n      \u003c/tr\u003e\n      \u003ctr\u003e\n          \u003ctd style=\"text-align: center\"\u003ea0-a1\u003c/td\u003e\n          \u003ctd style=\"text-align: center\"\u003e保存参数列表中的前两个/保存返回值\u003c/td\u003e\n      \u003c/tr\u003e\n      \u003ctr\u003e\n          \u003ctd style=\"text-align: center\"\u003ea2-a7\u003c/td\u003e\n          \u003ctd style=\"text-align: center\"\u003e保存参数列表前两位之后的参数\u003c/td\u003e\n      \u003c/tr\u003e\n  \u003c/tbody\u003e\n\u003c/table\u003e\n\u003ch2 id=\"上下文切换\"\u003e上下文切换\u003c/h2\u003e\n\u003cp\u003exv6 中上下文切换是通过 swtch 完成的， swtch 是一段汇编代码， 其实就是保存要保存出让cpu进程的寄存器，加载获取cpu进程的寄存器：\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/#webpage"
+      },
+      "headline": "xv6 之 进程调度",
+      "datePublished": "2025-08-10T09:43:31+08:00",
+      "dateModified": "2025-08-10T09:43:31+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "公开课",
+        "操作系统",
+        "Linux",
+        "Mit",
+        "Xv6"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#寄存器">寄存器</a></li>
+        <li><a href="#上下文切换">上下文切换</a></li>
+        <li><a href="#yield-和-sched">yield 和 sched</a></li>
+        <li><a href="#scheduler-切换到-用户进程">scheduler 切换到 用户进程</a></li>
+        <li><a href="#sleep-和-wake">sleep 和 wake</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">xv6 之 进程调度</h1>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+
+  <div class="post-date">
+    <time datetime=" 2025-08-10T09:43:31&#43;0800">Created: Aug 10, 2025</time>
+    <span class="readtime">&middot; 3 min read</span>
+  </div>
+
+  <div>
+    <p>本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。 请结合 <a href="https://www.zhangzewen.net/posts/os/xv6/xv6_trap/">xv6 trap 机制</a> 来查阅本篇笔记。</p>
+<p>xv6 进程间切换发生在如下两种情况：</p>
+<ul>
+<li>系统中断， 比如 time interrupt， 会调用 yield 进行切换。</li>
+<li>调用 xv6 的 sleep 和 wakeup 。</li>
+</ul>
+<h2 id="寄存器">寄存器</h2>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">寄存器</th>
+          <th style="text-align: center">描述</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center">x0/zero</td>
+          <td style="text-align: center">始终为0</td>
+      </tr>
+      <tr>
+          <td style="text-align: center">ra</td>
+          <td style="text-align: center">保存 return address</td>
+      </tr>
+      <tr>
+          <td style="text-align: center">sp</td>
+          <td style="text-align: center">保存栈顶地址</td>
+      </tr>
+      <tr>
+          <td style="text-align: center">t0-t6</td>
+          <td style="text-align: center">保存临时数据，这些数据会在函数调用返回后失效，调用函数作用域内的数据</td>
+      </tr>
+      <tr>
+          <td style="text-align: center">s0-s11</td>
+          <td style="text-align: center">保存数据，这些数据在函数调用返回后不失效，调用幻术作用域外的数据</td>
+      </tr>
+      <tr>
+          <td style="text-align: center">a0-a1</td>
+          <td style="text-align: center">保存参数列表中的前两个/保存返回值</td>
+      </tr>
+      <tr>
+          <td style="text-align: center">a2-a7</td>
+          <td style="text-align: center">保存参数列表前两位之后的参数</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="上下文切换">上下文切换</h2>
+<p>xv6 中上下文切换是通过 swtch 完成的， swtch 是一段汇编代码， 其实就是保存要保存出让cpu进程的寄存器，加载获取cpu进程的寄存器：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#6272a4"># Context switch
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">#
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">#   void swtch(struct context *old, struct context *new);
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"># 
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"># Save current registers in old. Load from new.	
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">.globl</span> swtch
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">swtch:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> ra, <span style="color:#bd93f9">0</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> sp, <span style="color:#bd93f9">8</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s0, <span style="color:#bd93f9">16</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s1, <span style="color:#bd93f9">24</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s2, <span style="color:#bd93f9">32</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s3, <span style="color:#bd93f9">40</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s4, <span style="color:#bd93f9">48</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s5, <span style="color:#bd93f9">56</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s6, <span style="color:#bd93f9">64</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s7, <span style="color:#bd93f9">72</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s8, <span style="color:#bd93f9">80</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s9, <span style="color:#bd93f9">88</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s10, <span style="color:#bd93f9">96</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s11, <span style="color:#bd93f9">104</span>(a0)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> ra, <span style="color:#bd93f9">0</span>(a1)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> sp, <span style="color:#bd93f9">8</span>(a1)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s0, <span style="color:#bd93f9">16</span>(a1)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s1, <span style="color:#bd93f9">24</span>(a1)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s2, <span style="color:#bd93f9">32</span>(a1)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s3, <span style="color:#bd93f9">40</span>(a1)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s4, <span style="color:#bd93f9">48</span>(a1)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s5, <span style="color:#bd93f9">56</span>(a1)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s6, <span style="color:#bd93f9">64</span>(a1)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s7, <span style="color:#bd93f9">72</span>(a1)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s8, <span style="color:#bd93f9">80</span>(a1)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s9, <span style="color:#bd93f9">88</span>(a1)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s10, <span style="color:#bd93f9">96</span>(a1)
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s11, <span style="color:#bd93f9">104</span>(a1)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ret</span>
+</span></span></code></pre></div><h2 id="yield-和-sched">yield 和 sched</h2>
+<p>sched 切换到 scheduler 的上下文，yield 修改进程状态： RUNNING -&gt; RUNNABLE ,并调用 sched 切换到 scheduler。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">sched</span>(<span style="color:#8be9fd">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">int</span> intena;
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proc <span style="color:#ff79c6">*</span>p <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">myproc</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">!</span><span style="color:#50fa7b">holding</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock))
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">panic</span>(<span style="color:#f1fa8c">&#34;sched p-&gt;lock&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(<span style="color:#50fa7b">mycpu</span>()<span style="color:#ff79c6">-&gt;</span>noff <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">panic</span>(<span style="color:#f1fa8c">&#34;sched locks&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">==</span> RUNNING)
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">panic</span>(<span style="color:#f1fa8c">&#34;sched RUNNING&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(<span style="color:#50fa7b">intr_get</span>())
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">panic</span>(<span style="color:#f1fa8c">&#34;sched interruptible&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  intena <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">mycpu</span>()<span style="color:#ff79c6">-&gt;</span>intena;
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">swtch</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>context, <span style="color:#ff79c6">&amp;</span><span style="color:#50fa7b">mycpu</span>()<span style="color:#ff79c6">-&gt;</span>context);
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">mycpu</span>()<span style="color:#ff79c6">-&gt;</span>intena <span style="color:#ff79c6">=</span> intena;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// Give up the CPU for one scheduling round.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#8be9fd">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">yield</span>(<span style="color:#8be9fd">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proc <span style="color:#ff79c6">*</span>p <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">myproc</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">acquire</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">=</span> RUNNABLE;
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">sched</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">release</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="scheduler-切换到-用户进程">scheduler 切换到 用户进程</h2>
+<p>在<code>kernel/main.c</code> 的 main 函数最后，会在每个 hart 执行进程的调度 scheduler：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">main</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#50fa7b">scheduler</span>();        
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>scheduler 其内部是一个死循环，其遍历 proc，寻找状态为 RNNABLE 的进程，通过调用 swtch 来进行进程切换， 如果没有合适的进程，则执行 wfi 指令进入到低功耗待机状态，等待中断的到来。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">scheduler</span>(<span style="color:#8be9fd">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proc <span style="color:#ff79c6">*</span>p;
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> cpu <span style="color:#ff79c6">*</span>c <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">mycpu</span>();
+</span></span><span style="display:flex;"><span>  c<span style="color:#ff79c6">-&gt;</span>proc <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">for</span>(;;){
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">intr_on</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">int</span> found <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span>(p <span style="color:#ff79c6">=</span> proc; p <span style="color:#ff79c6">&lt;</span> <span style="color:#ff79c6">&amp;</span>proc[NPROC]; p<span style="color:#ff79c6">++</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">acquire</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">if</span>(p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">==</span> RUNNABLE) {
+</span></span><span style="display:flex;"><span>        p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">=</span> RUNNING;
+</span></span><span style="display:flex;"><span>        c<span style="color:#ff79c6">-&gt;</span>proc <span style="color:#ff79c6">=</span> p;
+</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">swtch</span>(<span style="color:#ff79c6">&amp;</span>c<span style="color:#ff79c6">-&gt;</span>context, <span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>context);
+</span></span><span style="display:flex;"><span>        c<span style="color:#ff79c6">-&gt;</span>proc <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>        found <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">release</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(found <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">intr_on</span>();
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">asm</span> <span style="color:#ff79c6">volatile</span>(<span style="color:#f1fa8c">&#34;wfi&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>在 scheduler 中最重要的两行代码：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>        <span style="color:#50fa7b">swtch</span>(<span style="color:#ff79c6">&amp;</span>c<span style="color:#ff79c6">-&gt;</span>context, <span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>context);
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// Process is done running for now.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4">// It should have changed its p-&gt;state before coming back.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        c<span style="color:#ff79c6">-&gt;</span>proc <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
+</span></span></code></pre></div><p>如果单看注释，会云里雾里。从 swtch 的汇编代码中可以看出，并没有寄存器 pc 的变更，但是需要注意的是，在 allocproc 这个函数里面有如下代码：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>context.ra <span style="color:#ff79c6">=</span> (uint64)forkret;
+</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>context.sp <span style="color:#ff79c6">=</span> p<span style="color:#ff79c6">-&gt;</span>kstack <span style="color:#ff79c6">+</span> PGSIZE;
+</span></span></code></pre></div><p>在 调用 swtch 的时候， forkret 的地址会写入寄存器 ra， 当 swtch 返回的时候，ra 的值会写入到寄存器 pc，所以会从 forkret 开始执行。最终会调用 prepare_return ：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">prepare_return</span>(<span style="color:#8be9fd">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// set S Exception Program Counter to the saved user pc.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#50fa7b">w_sepc</span>(p<span style="color:#ff79c6">-&gt;</span>trapframe<span style="color:#ff79c6">-&gt;</span>epc);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>最终会切换到用户进程执行。</p>
+<h2 id="sleep-和-wake">sleep 和 wake</h2>
+<p>sleep  调用 sched 出让 cpu， wake 修改下进程的状态：SLEEPING -&gt; RUNNABLE：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">sleep</span>(<span style="color:#8be9fd">void</span> <span style="color:#ff79c6">*</span>chan, <span style="color:#ff79c6">struct</span> spinlock <span style="color:#ff79c6">*</span>lk)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proc <span style="color:#ff79c6">*</span>p <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">myproc</span>();
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">acquire</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">release</span>(lk);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>chan <span style="color:#ff79c6">=</span> chan;
+</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">=</span> SLEEPING;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">sched</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>chan <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">release</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">acquire</span>(lk);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">wakeup</span>(<span style="color:#8be9fd">void</span> <span style="color:#ff79c6">*</span>chan)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proc <span style="color:#ff79c6">*</span>p;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">for</span>(p <span style="color:#ff79c6">=</span> proc; p <span style="color:#ff79c6">&lt;</span> <span style="color:#ff79c6">&amp;</span>proc[NPROC]; p<span style="color:#ff79c6">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(p <span style="color:#ff79c6">!=</span> <span style="color:#50fa7b">myproc</span>()){
+</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">acquire</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">if</span>(p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">==</span> SLEEPING <span style="color:#ff79c6">&amp;&amp;</span> p<span style="color:#ff79c6">-&gt;</span>chan <span style="color:#ff79c6">==</span> chan) {
+</span></span><span style="display:flex;"><span>        p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">=</span> RUNNABLE;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">release</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E5%85%AC%E5%BC%80%E8%AF%BE/" class="tag-link">公开课</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" class="tag-link">操作系统</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/linux/" class="tag-link">Linux</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/mit/" class="tag-link">Mit</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/xv6/" class="tag-link">Xv6</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

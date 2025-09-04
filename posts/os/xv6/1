@@ -1,0 +1,43 @@
+
+
+### trampoline.S - uservec
+
+简单来说，当调用 `ecall` 时，会把寄存器 `pc` 存储到寄存器 `SEPC` 上，然后从用户态提升到内核态，然后把寄存器`STVEC`的值赋值给寄存器`pc`。
+
+![ecall](/images/os/xv6/ecall_process.png)
+
+看如下代码，这个理解从用户态到内核态的关键起点：
+
+```c
+// kernel/trap.c
+void
+usertrapret(void)
+{
+  //...
+  // send syscalls, interrupts, and exceptions to uservec in trampoline.S
+  printf("uservec: %p, trampoline: %p\n", (void*)uservec, (void*)trampoline);
+  uint64 trampoline_uservec = TRAMPOLINE + (uservec - trampoline);
+  w_stvec(trampoline_uservec);  
+  //...
+}
+
+```
+
+这段代码的意思是给寄存器`STVEC`赋值，其值就是 `TRAMPOLINE` 所代表的虚拟地址，也就是 `tampoline.S` 中的 `uservec`：
+
+```c
+// kernel/vm.c
+pagetable_t
+kvmmake(void)
+{
+  // ...
+  // map the trampoline for trap entry/exit to
+  // the highest virtual address in the kernel.
+  kvmmap(kpgtbl, TRAMPOLINE, (uint64)trampoline, PGSIZE, PTE_R | PTE_X);
+  // ...
+}
+
+```
+
+
+

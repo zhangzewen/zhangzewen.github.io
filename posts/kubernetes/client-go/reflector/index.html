@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>client-go 源码分析之 reflector &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="client-go 源码分析之 reflector">
+  <meta itemprop="description" content="本篇文章基于 client-go release-1.25 分支
+reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取目标资源数据，然后再监听目标资源的变更事件, 并将数据同步到本地缓存。下面来具体说细节之处。">
+  <meta itemprop="datePublished" content="2024-07-27T09:43:31+08:00">
+  <meta itemprop="dateModified" content="2024-07-27T09:43:31+08:00">
+  <meta itemprop="wordCount" content="1260">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="源码分析,Kubernetes,Client-Go">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="client-go 源码分析之 reflector">
+  <meta name="twitter:description" content="本篇文章基于 client-go release-1.25 分支
+reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取目标资源数据，然后再监听目标资源的变更事件, 并将数据同步到本地缓存。下面来具体说细节之处。">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="client-go 源码分析之 reflector">
+  <meta property="og:description" content="本篇文章基于 client-go release-1.25 分支
+reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取目标资源数据，然后再监听目标资源的变更事件, 并将数据同步到本地缓存。下面来具体说细节之处。">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-07-27T09:43:31+08:00">
+    <meta property="article:modified_time" content="2024-07-27T09:43:31+08:00">
+    <meta property="article:tag" content="源码分析">
+    <meta property="article:tag" content="Kubernetes">
+    <meta property="article:tag" content="Client-Go">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/#webpage",
+      "url": "https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/",
+      "name": "client-go 源码分析之 reflector",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2024-07-27T09:43:31+08:00",
+      "dateModified": "2024-07-27T09:43:31+08:00",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 client-go release-1.25 分支\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ereflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取目标资源数据，然后再监听目标资源的变更事件, 并将数据同步到本地缓存。下面来具体说细节之处。\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/#webpage"
+      },
+      "headline": "client-go 源码分析之 reflector",
+      "datePublished": "2024-07-27T09:43:31+08:00",
+      "dateModified": "2024-07-27T09:43:31+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "源码分析",
+        "Kubernetes",
+        "Client-Go"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#list从-apiserver-获取目标资源">list：从 apiserver 获取目标资源</a></li>
+        <li><a href="#resync本地缓存和全量数据之间的定时同步">resync：本地缓存和全量数据之间的定时同步</a></li>
+        <li><a href="#watch监听目标资源的变化事件">watch：监听目标资源的变化事件</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">client-go 源码分析之 reflector</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2024-07-27T09:43:31&#43;0800">Created: Jul 27, 2024</time>
+    <span class="readtime">&middot; 6 min read</span>
+  </div>
+
+  <div>
+    <blockquote>
+<p>本篇文章基于 client-go release-1.25 分支</p></blockquote>
+<p>reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取目标资源数据，然后再监听目标资源的变更事件, 并将数据同步到本地缓存。下面来具体说细节之处。</p>
+<p>reflector 提供了一个 Run 的方法让 reflector 组件运行起来 :</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// Run repeatedly uses the reflector&#39;s ListAndWatch to fetch all the</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// objects and subsequent deltas.</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// Run will exit when stopCh is closed.</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (r <span style="color:#ff79c6">*</span>Reflector) <span style="color:#50fa7b">Run</span>(stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}) {
+</span></span><span style="display:flex;"><span>  klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Starting reflector %s (%s) from %s&#34;</span>, r.expectedTypeName, r.resyncPeriod, r.name)
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 周期性执行r.ListAndWatch， 当stopch close的时候停止, 当ListAndWatch内部的逻辑错误返回的时候， 会通过r.backoffManager选定下次运行的时间并等待下次运行的时间间隔再次运行r.ListAndWatch逻辑， 直到stopCh close发生</span>
+</span></span><span style="display:flex;"><span>  wait.<span style="color:#50fa7b">BackoffUntil</span>(<span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> r.<span style="color:#50fa7b">ListAndWatch</span>(stopCh); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>      r.<span style="color:#50fa7b">watchErrorHandler</span>(r, err)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }, r.backoffManager, <span style="color:#ff79c6">true</span>, stopCh)
+</span></span><span style="display:flex;"><span>  klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Stopping reflector %s (%s) from %s&#34;</span>, r.expectedTypeName, r.resyncPeriod, r.name)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>这段代码中的 <code>wait.BackoffUntil</code> 是一个帮助函数，其作用是周期性地调用执行传入的 <code>Reflector.ListAndWatch</code>，如果 <code>Reflector.ListAndWatch</code> 错误返回的话，会等待通过 <code>Reflector.backoffManager</code> 选定下次运行的时间间隔，然后再次调用执行 <code>Reflector.ListAndWatch</code>，直到 stopCh 这个 channel 发来消息要 stop 了，才会停止， 这个 stopCh 作用在 <code>wait.BackoffUntil</code> 上是退出，<code>Reflector.ListAndWatch</code> 上是终止函数的执行。<code>Reflector.ListAndWatch</code> 是 Reflector 的核心逻辑，这个函数比较长，接下来把这个函数拆分成3个部分来讲。</p>
+<h2 id="list从-apiserver-获取目标资源">list：从 apiserver 获取目标资源</h2>
+<p>首先，通过调用传入的 ListerWatcher 实例的 List 方法从 apiserver 获取目标资源数据， 然后获取的 ResourceVersion, 并把数据存储到 <code>Reflector.store</code> 中，具体的可以看代码注释，这里面少说了很多细节，比如怎么拉取的以及怎么存储。这个可以看看 <code>k8s.io/client-go/tools/pager</code>。至于 <code>Reflector.store</code> 它其实是一个 DeltaFIFO，获取到的 ResourceVersion 和资源会更新替换到 DeltaFIFO 中。并更新最新的 ResouceVersion 记录，以供后面的监听资源变化事件使用。 关于 DeltaFIFO 可以看<a href="https://www.zhangzewen.net/posts/kubernetes/client-go/cache/#Indexer">clien-go 源码分析之 cache</a>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (r <span style="color:#ff79c6">*</span>Reflector) <span style="color:#50fa7b">list</span>(stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>	options <span style="color:#ff79c6">:=</span> metav1.ListOptions{ResourceVersion: r.<span style="color:#50fa7b">relistResourceVersion</span>()}
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 启动一个新的goroutine去作拉取数据的工作</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">defer</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> r <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">recover</span>(); r <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				panicCh <span style="color:#ff79c6">&lt;-</span> r
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}()
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// pager.New 产生的 pager.ListPager 是一个分页查询工具</span>
+</span></span><span style="display:flex;"><span>		pager <span style="color:#ff79c6">:=</span> pager.<span style="color:#50fa7b">New</span>(pager.<span style="color:#50fa7b">SimplePageFunc</span>(<span style="color:#8be9fd;font-style:italic">func</span>(opts metav1.ListOptions) (runtime.Object, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> r.listerWatcher.<span style="color:#50fa7b">List</span>(opts)
+</span></span><span style="display:flex;"><span>		}))
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">switch</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> r.WatchListPageSize <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">0</span>:
+</span></span><span style="display:flex;"><span>			pager.PageSize = r.WatchListPageSize
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> r.paginatedResult:
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> options.ResourceVersion <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;&#34;</span> <span style="color:#ff79c6">&amp;&amp;</span> options.ResourceVersion <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;0&#34;</span>:
+</span></span><span style="display:flex;"><span>			pager.PageSize = <span style="color:#bd93f9">0</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// 真正的从apiserver开始拉取数据了</span>
+</span></span><span style="display:flex;"><span>		list, paginatedResult, err = pager.<span style="color:#50fa7b">List</span>(context.<span style="color:#50fa7b">Background</span>(), options)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> <span style="color:#50fa7b">isExpiredError</span>(err) <span style="color:#ff79c6">||</span> <span style="color:#50fa7b">isTooLargeResourceVersionError</span>(err) {
+</span></span><span style="display:flex;"><span>			r.<span style="color:#50fa7b">setIsLastSyncResourceVersionUnavailable</span>(<span style="color:#ff79c6">true</span>)
+</span></span><span style="display:flex;"><span>			list, paginatedResult, err = pager.<span style="color:#50fa7b">List</span>(context.<span style="color:#50fa7b">Background</span>(), metav1.ListOptions{ResourceVersion: r.<span style="color:#50fa7b">relistResourceVersion</span>()})
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">close</span>(listCh)
+</span></span><span style="display:flex;"><span>	}()
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 阻塞的过程</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>stopCh: <span style="color:#6272a4">// 停止信号，立即返回</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> r <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>panicCh: <span style="color:#6272a4">// 出错了</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">panic</span>(r)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>listCh: <span style="color:#6272a4">// 数据拉取(list) 成功</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	initTrace.<span style="color:#50fa7b">Step</span>(<span style="color:#f1fa8c">&#34;Objects listed&#34;</span>, trace.Field{Key: <span style="color:#f1fa8c">&#34;error&#34;</span>, Value: err})
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">Warningf</span>(<span style="color:#f1fa8c">&#34;%s: failed to list %v: %v&#34;</span>, r.name, r.expectedTypeName, err)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to list %v: %w&#34;</span>, r.expectedTypeName, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> options.ResourceVersion <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;0&#34;</span> <span style="color:#ff79c6">&amp;&amp;</span> paginatedResult {
+</span></span><span style="display:flex;"><span>		r.paginatedResult = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	r.<span style="color:#50fa7b">setIsLastSyncResourceVersionUnavailable</span>(<span style="color:#ff79c6">false</span>) <span style="color:#6272a4">// list was successful</span>
+</span></span><span style="display:flex;"><span>	listMetaInterface, err <span style="color:#ff79c6">:=</span> meta.<span style="color:#50fa7b">ListAccessor</span>(list)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unable to understand list result %#v: %v&#34;</span>, list, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 到这一步，表示数据拉取成功了，现在要开始处理数据</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 获取 resourceversion</span>
+</span></span><span style="display:flex;"><span>	resourceVersion = listMetaInterface.<span style="color:#50fa7b">GetResourceVersion</span>()
+</span></span><span style="display:flex;"><span>	initTrace.<span style="color:#50fa7b">Step</span>(<span style="color:#f1fa8c">&#34;Resource version extracted&#34;</span>)
+</span></span><span style="display:flex;"><span>	items, err <span style="color:#ff79c6">:=</span> meta.<span style="color:#50fa7b">ExtractList</span>(list)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unable to understand list result %#v (%v)&#34;</span>, list, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	initTrace.<span style="color:#50fa7b">Step</span>(<span style="color:#f1fa8c">&#34;Objects extracted&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 资源和resourceversion 更新到 Reflector.store 也就是 DeltaFIFO</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> r.<span style="color:#50fa7b">syncWith</span>(items, resourceVersion); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unable to sync list result: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	initTrace.<span style="color:#50fa7b">Step</span>(<span style="color:#f1fa8c">&#34;SyncWith done&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 更新 resourceversion</span>
+</span></span><span style="display:flex;"><span>	r.<span style="color:#50fa7b">setLastSyncResourceVersion</span>(resourceVersion)
+</span></span><span style="display:flex;"><span>	initTrace.<span style="color:#50fa7b">Step</span>(<span style="color:#f1fa8c">&#34;Resource version updated&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="resync本地缓存和全量数据之间的定时同步">resync：本地缓存和全量数据之间的定时同步</h2>
+<p>同步的话，也是单独启动了一个goroutine，主要执行的方法是是 <code>Reflector.store.Resync</code>，其主要作用是把全量的数据更新到 reflector 的本地存储 DeltaFIFO 中。 具体可以看<a href="https://www.zhangzewen.net/posts/kubernetes/client-go/informer/">client-go 源码分析之 informer</a>;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (r <span style="color:#ff79c6">*</span>Reflector) <span style="color:#50fa7b">ListAndWatch</span>(stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>	resyncerrc <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">error</span>, <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>	cancelCh <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{})
+</span></span><span style="display:flex;"><span>         <span style="color:#6272a4">// 只有当watch结束后ListAndWatch才会返回， cancelCh就会关闭保证这个goroutine也会结束</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> <span style="color:#8be9fd;font-style:italic">close</span>(cancelCh)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 同步timer，</span>
+</span></span><span style="display:flex;"><span>		resyncCh, cleanup <span style="color:#ff79c6">:=</span> r.<span style="color:#50fa7b">resyncChan</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">defer</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#50fa7b">cleanup</span>() <span style="color:#6272a4">// Call the last one written into cleanup</span>
+</span></span><span style="display:flex;"><span>		}()
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>resyncCh:<span style="color:#6272a4">// 需要开始同步了</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>stopCh: <span style="color:#6272a4">// 停止信号，直接返回</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>cancelCh: <span style="color:#6272a4">// 这个是watch退出的信号</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> r.ShouldResync <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">||</span> r.<span style="color:#50fa7b">ShouldResync</span>() {
+</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// 开始进行同步</span>
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;%s: forcing resync&#34;</span>, r.name)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> r.store.<span style="color:#50fa7b">Resync</span>(); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>					resyncerrc <span style="color:#ff79c6">&lt;-</span> err
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#50fa7b">cleanup</span>()
+</span></span><span style="display:flex;"><span>			resyncCh, cleanup = r.<span style="color:#50fa7b">resyncChan</span>()
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}()
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>然后就是<code>Reflector.resyncChan</code>, 结合上面的代码就是其返回一个时间间隔为<code>Reflector.resyncPeriod</code>的定时器，每隔这么长的时间间隔执行同步操作，这个可以结合下面的代码一起看。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// resyncChan returns a channel which will receive something when a resync is</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// required, and a cleanup function.</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (r <span style="color:#ff79c6">*</span>Reflector) <span style="color:#50fa7b">resyncChan</span>() (<span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> time.Time, <span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">bool</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> r.resyncPeriod <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> neverExitWatch, <span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">bool</span> { <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span> }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// The cleanup function is required: imagine the scenario where watches</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// always fail so we end up listing frequently. Then, if we don&#39;t</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// manually stop the timer, we could end up with many timers active</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// concurrently.</span>
+</span></span><span style="display:flex;"><span>    t <span style="color:#ff79c6">:=</span> r.clock.<span style="color:#50fa7b">NewTimer</span>(r.resyncPeriod)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> t.<span style="color:#50fa7b">C</span>(), t.Stop
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="watch监听目标资源的变化事件">watch：监听目标资源的变化事件</h2>
+<p>watch 阶段结合下面代码的注释很好理解， watch 是基于 list 获取的最新的 ResourceVersion 来发起 watch 请求的，然后就是根据监听到的事件的类别作相应的处理(<code>Reflect.watchHandler</code>)直到错误返回，然后再开始新的一轮的list &amp; watch。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (r <span style="color:#ff79c6">*</span>Reflector) <span style="color:#50fa7b">ListAndWatch</span>(stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// give the stopCh a chance to stop the loop, even in case of continue statements further down on errors</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>stopCh:
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">default</span>:
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		timeoutSeconds <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">int64</span>(minWatchTimeout.<span style="color:#50fa7b">Seconds</span>() <span style="color:#ff79c6">*</span> (rand.<span style="color:#50fa7b">Float64</span>() <span style="color:#ff79c6">+</span> <span style="color:#bd93f9">1.0</span>))
+</span></span><span style="display:flex;"><span>		options = metav1.ListOptions{
+</span></span><span style="display:flex;"><span>                        <span style="color:#6272a4">// 基于list阶段获得的ResourceVersion来watch</span>
+</span></span><span style="display:flex;"><span>			ResourceVersion: resourceVersion, 
+</span></span><span style="display:flex;"><span>			TimeoutSeconds: <span style="color:#ff79c6">&amp;</span>timeoutSeconds,
+</span></span><span style="display:flex;"><span>			AllowWatchBookmarks: <span style="color:#ff79c6">true</span>,
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		start <span style="color:#ff79c6">:=</span> r.clock.<span style="color:#50fa7b">Now</span>()
+</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// 生成监听器</span>
+</span></span><span style="display:flex;"><span>		w, err <span style="color:#ff79c6">:=</span> r.listerWatcher.<span style="color:#50fa7b">Watch</span>(options)
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 处理出错信息</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// 如果是 网络抖动或者请求过多，可以先等待一段时间重试 否则返回出错</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> utilnet.<span style="color:#50fa7b">IsConnectionRefused</span>(err) <span style="color:#ff79c6">||</span> apierrors.<span style="color:#50fa7b">IsTooManyRequests</span>(err) {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">&lt;-</span>r.initConnBackoffManager.<span style="color:#50fa7b">Backoff</span>().<span style="color:#50fa7b">C</span>()
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// 从监听其获取变更事件并处理</span>
+</span></span><span style="display:flex;"><span>		err = <span style="color:#50fa7b">watchHandler</span>(start, w, r.store, r.expectedType, r.expectedGVK, r.name, r.expectedTypeName, r.setLastSyncResourceVersion, r.clock, resyncerrc, stopCh)
+</span></span><span style="display:flex;"><span>		retry.<span style="color:#50fa7b">After</span>(err)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> errorStopRequested {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">switch</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">case</span> <span style="color:#50fa7b">isExpiredError</span>(err):
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// Don&#39;t set LastSyncResourceVersionUnavailable - LIST call with ResourceVersion=RV already</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// has a semantic that it returns data at least as fresh as provided RV.</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// So first try to LIST with setting RV to resource version of last observed object.</span>
+</span></span><span style="display:flex;"><span>					klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;%s: watch of %v closed with: %v&#34;</span>, r.name, r.expectedTypeName, err)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">case</span> apierrors.<span style="color:#50fa7b">IsTooManyRequests</span>(err):
+</span></span><span style="display:flex;"><span>					klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;%s: watch of %v returned 429 - backing off&#34;</span>, r.name, r.expectedTypeName)
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">&lt;-</span>r.initConnBackoffManager.<span style="color:#50fa7b">Backoff</span>().<span style="color:#50fa7b">C</span>()
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">case</span> apierrors.<span style="color:#50fa7b">IsInternalError</span>(err) <span style="color:#ff79c6">&amp;&amp;</span> retry.<span style="color:#50fa7b">ShouldRetry</span>():
+</span></span><span style="display:flex;"><span>					klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;%s: retrying watch of %v internal error: %v&#34;</span>, r.name, r.expectedTypeName, err)
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">default</span>:
+</span></span><span style="display:flex;"><span>					klog.<span style="color:#50fa7b">Warningf</span>(<span style="color:#f1fa8c">&#34;%s: watch of %v ended with: %v&#34;</span>, r.name, r.expectedTypeName, err)
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>watchHandler 处理目标资源变化的事件，即 Added/Updated/Deleted，将变更更新到本地的 <code>Reflector.store</code>(DeltaFIFO) 中，并更新 ResourceVersion。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// watchHandler watches w and keeps *resourceVersion up to date.</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">watchHandler</span>(start time.Time,
+</span></span><span style="display:flex;"><span>	w watch.Interface,
+</span></span><span style="display:flex;"><span>	store Store,
+</span></span><span style="display:flex;"><span>	expectedType reflect.Type,
+</span></span><span style="display:flex;"><span>	expectedGVK <span style="color:#ff79c6">*</span>schema.GroupVersionKind,
+</span></span><span style="display:flex;"><span>	name <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>	expectedTypeName <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>	setLastSyncResourceVersion <span style="color:#8be9fd;font-style:italic">func</span>(<span style="color:#8be9fd">string</span>),
+</span></span><span style="display:flex;"><span>	clock clock.Clock,
+</span></span><span style="display:flex;"><span>	errc <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">error</span>,
+</span></span><span style="display:flex;"><span>	stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{},
+</span></span><span style="display:flex;"><span>) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>	eventCount <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Stopping the watcher should be idempotent and if we return from this function there&#39;s no way</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// we&#39;re coming back in with the same watch interface.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> w.<span style="color:#50fa7b">Stop</span>()
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 循环处理</span>
+</span></span><span style="display:flex;"><span>loop:
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>stopCh: <span style="color:#6272a4">// 停止信号</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> errorStopRequested
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> err <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>errc: <span style="color:#6272a4">// 同步失败也立即返回</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> event, ok <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>w.<span style="color:#50fa7b">ResultChan</span>():  <span style="color:#6272a4">// 获取到变更事件</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> !ok {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">break</span> loop
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> event.Type <span style="color:#ff79c6">==</span> watch.Error {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span> apierrs.<span style="color:#50fa7b">FromObject</span>(event.Object)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> expectedType <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> e, a <span style="color:#ff79c6">:=</span> expectedType, reflect.<span style="color:#50fa7b">TypeOf</span>(event.Object); e <span style="color:#ff79c6">!=</span> a {
+</span></span><span style="display:flex;"><span>					utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;%s: expected type %v, but watch event object had type %v&#34;</span>, name, e, a))
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> expectedGVK <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> e, a <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">*</span>expectedGVK, event.Object.<span style="color:#50fa7b">GetObjectKind</span>().<span style="color:#50fa7b">GroupVersionKind</span>(); e <span style="color:#ff79c6">!=</span> a {
+</span></span><span style="display:flex;"><span>					utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;%s: expected gvk %v, but watch event object had gvk %v&#34;</span>, name, e, a))
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			meta, err <span style="color:#ff79c6">:=</span> meta.<span style="color:#50fa7b">Accessor</span>(event.Object)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;%s: unable to understand watch event %#v&#34;</span>, r.name, event))
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			newResourceVersion <span style="color:#ff79c6">:=</span> meta.<span style="color:#50fa7b">GetResourceVersion</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">switch</span> event.Type {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> watch.Added: <span style="color:#6272a4">// add事件， 调用Reflector.store.Add方法</span>
+</span></span><span style="display:flex;"><span>				err <span style="color:#ff79c6">:=</span> r.store.<span style="color:#50fa7b">Add</span>(event.Object)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>					utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;%s: unable to add watch event object (%#v) to store: %v&#34;</span>, r.name, event.Object, err))
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> watch.Modified: <span style="color:#6272a4">// 更新事件</span>
+</span></span><span style="display:flex;"><span>				err <span style="color:#ff79c6">:=</span> r.store.<span style="color:#50fa7b">Update</span>(event.Object)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>					utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;%s: unable to update watch event object (%#v) to store: %v&#34;</span>, r.name, event.Object, err))
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> watch.Deleted: <span style="color:#6272a4">// 删除事件</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// TODO: Will any consumers need access to the &#34;last known</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// state&#34;, which is passed in event.Object? If so, may need</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// to change this.</span>
+</span></span><span style="display:flex;"><span>				err <span style="color:#ff79c6">:=</span> r.store.<span style="color:#50fa7b">Delete</span>(event.Object)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>					utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;%s: unable to delete watch event object (%#v) from store: %v&#34;</span>, r.name, event.Object, err))
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> watch.Bookmark:
+</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// A `Bookmark` means watch has synced here, just update the resourceVersion</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">default</span>:
+</span></span><span style="display:flex;"><span>				utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;%s: unable to understand watch event %#v&#34;</span>, r.name, event))
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// 更新 resourceversion</span>
+</span></span><span style="display:flex;"><span>			r.<span style="color:#50fa7b">setLastSyncResourceVersion</span>(newResourceVersion)
+</span></span><span style="display:flex;"><span>			<span style="color:#50fa7b">setLastSyncResourceVersion</span>(resourceVersion)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> rvu, ok <span style="color:#ff79c6">:=</span> store.(ResourceVersionUpdater); ok {
+</span></span><span style="display:flex;"><span>				rvu.<span style="color:#50fa7b">UpdateResourceVersion</span>(resourceVersion)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			eventCount<span style="color:#ff79c6">++</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	watchDuration <span style="color:#ff79c6">:=</span> r.clock.<span style="color:#50fa7b">Since</span>(start)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> watchDuration &lt; <span style="color:#bd93f9">1</span><span style="color:#ff79c6">*</span>time.Second <span style="color:#ff79c6">&amp;&amp;</span> eventCount <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;very short watch: %s: Unexpected watch close - watch lasted less than a second and no items received&#34;</span>, r.name)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;%s: Watch close - %v total %v items received&#34;</span>, r.name, r.expectedType, eventCount)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>综上所述，整个逻辑就是：watch 请求开始之前，先发起一次 list 请求，获取集群中当前目标数据(同时得到最新的 ResourceVersion)，之后基于最新的 ResourceVersion 发起 watch 请求, 当 watch 出错时 (比如说网络问题造成客户端和服务端数据不同步)，重新发起一次 list 请求获取所有数据，再重新基于最新 ResourceVersion 来 watch，如此反复，且定时做本地缓存和全量的数据缓存之间的同步操作。</p>
+<p><img src="/images/kubernetes/client-go/reflector/reflector-01.png" alt="reflector-01"></p>
+
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/client-go/" class="tag-link">Client-Go</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

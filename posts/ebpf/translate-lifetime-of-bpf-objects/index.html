@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>[译] Lifetime of BPF objects &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="[译] Lifetime of BPF objects">
+  <meta itemprop="description" content="介于能力有限，翻译有不当之处，不吝赐教
+原文链接: Lifetime of BPF objects
+BPF验证器保证程序本身能够被内核安全地执行，但为了安全地且无意外地使用整个BPF，用户需要理解 BPF 程序和 Maps 的生命周期。本文深入介绍了这些细节。">
+  <meta itemprop="datePublished" content="2024-03-04T21:42:07+08:00">
+  <meta itemprop="dateModified" content="2024-03-04T21:42:07+08:00">
+  <meta itemprop="wordCount" content="164">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="EBPF,Linux,翻译,Kernel">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="[译] Lifetime of BPF objects">
+  <meta name="twitter:description" content="介于能力有限，翻译有不当之处，不吝赐教
+原文链接: Lifetime of BPF objects
+BPF验证器保证程序本身能够被内核安全地执行，但为了安全地且无意外地使用整个BPF，用户需要理解 BPF 程序和 Maps 的生命周期。本文深入介绍了这些细节。">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="[译] Lifetime of BPF objects">
+  <meta property="og:description" content="介于能力有限，翻译有不当之处，不吝赐教
+原文链接: Lifetime of BPF objects
+BPF验证器保证程序本身能够被内核安全地执行，但为了安全地且无意外地使用整个BPF，用户需要理解 BPF 程序和 Maps 的生命周期。本文深入介绍了这些细节。">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-03-04T21:42:07+08:00">
+    <meta property="article:modified_time" content="2024-03-04T21:42:07+08:00">
+    <meta property="article:tag" content="EBPF">
+    <meta property="article:tag" content="Linux">
+    <meta property="article:tag" content="翻译">
+    <meta property="article:tag" content="Kernel">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/#webpage",
+      "url": "https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/",
+      "name": "[译] Lifetime of BPF objects",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2024-03-04T21:42:07+08:00",
+      "dateModified": "2024-03-04T21:42:07+08:00",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e原文链接: \u003ca href=\"https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html\"\u003eLifetime of BPF objects\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eBPF验证器保证程序本身能够被内核安全地执行，但为了安全地且无意外地使用整个BPF，用户需要理解 BPF 程序和 Maps 的生命周期。本文深入介绍了这些细节。\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/#webpage"
+      },
+      "headline": "[译] Lifetime of BPF objects",
+      "datePublished": "2024-03-04T21:42:07+08:00",
+      "dateModified": "2024-03-04T21:42:07+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "EBPF",
+        "Linux",
+        "翻译",
+        "Kernel"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#文件描述符和引用计数">文件描述符和引用计数</a></li>
+        <li><a href="#bpf文件系统">BPF文件系统</a></li>
+        <li><a href="#卸载和替换">卸载和替换</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">[译] Lifetime of BPF objects</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2024-03-04T21:42:07&#43;0800">Created: Mar 4, 2024</time>
+    <span class="readtime">&middot; 1 min read</span>
+  </div>
+
+  <div>
+    <blockquote>
+<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
+<p>原文链接: <a href="https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html">Lifetime of BPF objects</a></p></blockquote>
+<p>BPF验证器保证程序本身能够被内核安全地执行，但为了安全地且无意外地使用整个BPF，用户需要理解 BPF 程序和 Maps 的生命周期。本文深入介绍了这些细节。</p>
+<h2 id="文件描述符和引用计数">文件描述符和引用计数</h2>
+<p>BPF对象（程序、Maps 和调试信息）通过文件描述符（FD）由用户空间访问，每个对象都有一个引用计数器。例如，当使用<code>bpf_create_map()</code>调用创建 Map 时，内核会分配一个<code>struct bpf_map</code>对象。然后内核将其refcnt初始化为1，并返回文件描述符给用户空间进程。如果该进程退出或崩溃，则关联的文件描述符(FD) 会被关闭释放，则bpf map对象的refcnt将被减少。当refcnt降为零时，将在RCU宽限期过后触发内存释放。</p>
+<p>使用BPF Maps 的 BPF 程序分两个阶段加载。首先，创建 Maps 并将它们的FD（文件描述符）作为BPF_LD_IMM64指令的“imm”字段的一部分存储在BPF程序中。当内核验证程序时，它会增加程序使用的 Maps 的refcnt，并将程序的refcnt初始化为1。此时，用户空间可以关闭与 Maps 相关联的FD，但是由于程序正在“使用”它们（尽管该程序尚未附加到任何位置），因此这些 Maps 也不会消失。当程序的 FD (文件描述符)关闭且refcnt达到零时，销毁逻辑将遍历该程序使用的所有映射，并减少其refcnts。这种方案允许同一个Map 同时被多个不同类型的程序使用。例如，在跟踪点上附加了跟踪程序可以收集数据到bpf map中，而网络编程则利用该信息进行转发决策。</p>
+<p>当程序附加到某个钩子时，程序的refcnt会增加。最初创建BPF maps + 程序的用户空间进程，然后加载并最终将程序附加到钩子上，现在可以退出了。此时由用户空间创建的maps+程序因为refcnt大于0，因而状态活跃。这是BPF对象生命周期！只要BPF对象（程序或 Maps）的refcnt 大于 0，则内核将使其保持活动状态。</p>
+<p>但并非所有的附加点都是相等的。XDP、tc 的 clsact 和基于 cgroup 的钩子是全局的。只要这些对象存在，程序就会一直保持连接到全局附加点。在 clsact 的情况下，程序被连接到一个入口或出口 qdisc 上。如果没有任何操作（例如 <code>tc qdisc del</code>），即使没有对应的用户空间进程，该程序也将处理入口或出口数据包。另一方面，您可能有连接到跟踪钩子上的程序，它们仅在持有 FD 到跟踪事件的进程生命周期内运行。例如说你从 <code>perf_event_open()</code> 获取了一个 FD 然后执行 <code>ioctl(perf_event_fd, IOC_SET_BPF, bpf_prog_fd)</code>（或者从 <code>bpf_raw_tracepoint_open(“tracepoint_name”, bpf_prog_fd)</code> 获取了一个 FD）。这些 FD 是本地进程专用的，因此如果该进程崩溃，则 perf_event_fd 或 bpf_raw_tracepoint_fd 将被关闭。在这种情况下，内核将分离 BPF 程序并减少其引用计数器值。</p>
+<p>总之：xdp、tc、lwt、cgroup钩子是“全局”的，而kprobe、uprobe、tracepoint、perf_event、raw_tracepoint、socket过滤器和so_reuseport钩子是“本地的”，因为它们通过FD访问。请注意，人们已经要求引入一种基于FD的新类型的cgroup对象，因此在未来可能会出现cgroup-bpf既是“全局”又是“本地”的情况。接下来。基于FD的接口的主要优点是自动清理，这意味着如果用户空间进程出现任何问题，则内核将自动清理所有对象。最初BPF API就是基于FD的。然而，在生产中部署kprobe/uprobe + bpf时，使用[ku]probe的全局接口太麻烦了。因此，在内核中引入了一个基于FD的[ku]probe API。类似情况很快也可能发生在cgroup API上。可能有一个进程持有带有FD 的 cgroup 对象，并将 BPF 程序附加到该 FD（对象）上，而不是附加到全局 cgroup 实体上 。 基于 FD 的网络API 也非常有用 。不久前 Facebook 广泛部署二进制文件 (WDB) 出现了一个错误 ，其中 &lsquo;忘记&rsquo; 清除 tc&rsquo;s clsact bpf程序 。结果，在多个守护程序重新启动后，有数千个 bpf 程序附加到相同的 clsact 出口钩子上执行相同的工作。除一个之外，所有这些程序都没有对应的用户空间进程，并浪费 CPU 周期。最终，在整体系统性能逐渐下降时才注意到这个问题。使用基于FD 的网络API可以防止出现这种情况 。请注意，正在进行引入一种新的tc类似API的工作 ，该API将在网络设备的入口和出口路径中添加钩子，但实际上并不是基于tc而且同时具有基于FD 和自动清理属性。</p>
+<h2 id="bpf文件系统">BPF文件系统</h2>
+<p>还有一种方法可以保持 BPF 程序和 Maps 的活动状态。它被称为 BPFFS 或者&quot;BPF文件系统&quot;。用户空间进程可以使用任意名称在 BPFFS 中“钉住” BPF 程序或 Maps。将BPF对象固定在 BPFFS 中会增加对象的refcnt，这将导致即使未连接到任何地方或未被任何程序使用，BPF 对象仍然保持活动状态。比如网络，您可能有能够执行数据包处理职责而无需用户空间守护程序的 BPF 程序，但系统管理员可能希望时不时登录主机并查看 Maps。管理员可以 从 BPFFS 获取<code>bpf_obj_get(&quot;path&quot;)</code>对象，这将返回一个新的且与之关联的文件描述符(FD)。要取消该“钉住”的对象，请使用<code>unlink()</code>删除 BPFFS 中的文件，并且内核将减少相应的refcnt。总之：</p>
+<ul>
+<li>obj create→ refcnt = 1</li>
+<li>attach → refcnt ++</li>
+<li>detach → refcnt&ndash;</li>
+<li>obj_pin → refcnt ++</li>
+<li>unlink → refcnt&ndash;</li>
+<li>close→refcnt&ndash;</li>
+</ul>
+<h2 id="卸载和替换">卸载和替换</h2>
+<p>了解BPF程序的生命周期的一个重要部分是detach。detach钩子将阻止以后任何事件执行先前附加的程序。已经在执行的程序将在detach命令返回后完成。程序生命周期的另一个重要方面是replace。cgroup-bpf钩允许替换程序。内核保证旧或新程序中的一个将处理事件，但有一个窗口，在该窗口中，旧程序正在一个CPU上执行，并且相同挂钩的新程序正在另一CPU上执行。没有“原子”替换。为了关闭此窗口，一些复杂的BPF开发人员使用以下方案：使用与旧程序相同地图加载新程序，因此在替换时操作数据相同，因此只更改了编程文本内容而不更改数据结构等其他内容。当旧/新足够相似并且新项目不引入新数据结构时，这种方法非常有效果例如可以关闭调试功能编译老版本代码而用带调试功能编译更新版本代码.尽管两个进程同时运行于不同cpu上,但进行这样安全可靠地进行替换.</p>
+
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/ebpf/" class="tag-link">EBPF</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/linux/" class="tag-link">Linux</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E7%BF%BB%E8%AF%91/" class="tag-link">翻译</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kernel/" class="tag-link">Kernel</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

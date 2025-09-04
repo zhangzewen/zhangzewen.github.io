@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tracing on What a Life!</title>
+    <link>https://www.zhangzewen.net/tags/tracing/</link>
+    <description>Recent content in Tracing on What a Life!</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Thu, 21 Mar 2024 15:03:02 +0800</lastBuildDate>
+    <atom:link href="https://www.zhangzewen.net/tags/tracing/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/</link>
+      <pubDate>Thu, 21 Mar 2024 15:03:02 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;这是一个系列文章：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/&#34;&gt;[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/&#34;&gt;[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;&lt;strong&gt;原文：&lt;a href=&#34;https://blog.px.dev/ebpf-openssl-tracing/&#34;&gt;Debugging with eBPF Part 3: Tracing SSL/TLS connections&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/</link>
+      <pubDate>Wed, 13 Mar 2024 21:03:01 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;这是一个系列文章：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/&#34;&gt;[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/&#34;&gt;[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;原文：&lt;a href=&#34;https://blog.px.dev/ebpf-http-tracing/&#34;&gt;Debugging with eBPF Part 2: Tracing full body HTTP request/responses&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/</link>
+      <pubDate>Sat, 09 Mar 2024 15:03:00 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;这是一个系列文章：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/&#34;&gt;[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/&#34;&gt;[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;原文: &lt;strong&gt;&lt;a href=&#34;https://blog.px.dev/ebpf-function-tracing/&#34;&gt;Debugging with eBPF Part 1: Tracing Go function arguments in prod&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

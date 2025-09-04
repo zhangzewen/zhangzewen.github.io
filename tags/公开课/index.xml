@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>公开课 on What a Life!</title>
+    <link>https://www.zhangzewen.net/tags/%E5%85%AC%E5%BC%80%E8%AF%BE/</link>
+    <description>Recent content in 公开课 on What a Life!</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Wed, 20 Aug 2025 09:43:31 +0800</lastBuildDate>
+    <atom:link href="https://www.zhangzewen.net/tags/%E5%85%AC%E5%BC%80%E8%AF%BE/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>MIT 公开课 6.S081 实现总结</title>
+      <link>https://www.zhangzewen.net/posts/os/xv6/6.s081_summary/</link>
+      <pubDate>Wed, 20 Aug 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/os/xv6/6.s081_summary/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;6.S081&lt;/strong&gt; 是非常著名的 MIT 操作系统课程。该公开课链接的年份后缀的是可以更改的，这个课程提供的可编程 lab 每年都稍微有些不同，每个 lab 的自评测中的 answers-*.txt 和 time.txt 需要自行填写。 本篇文章对应的是&lt;a href=&#34;https://pdos.csail.mit.edu/6.828/2024/&#34;&gt; 2024 年度课程&lt;/a&gt;的实现总结。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>xv6 之 进程调度</title>
+      <link>https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/</link>
+      <pubDate>Sun, 10 Aug 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/</guid>
+      <description>&lt;p&gt;本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。 请结合 &lt;a href=&#34;https://www.zhangzewen.net/posts/os/xv6/xv6_trap/&#34;&gt;xv6 trap 机制&lt;/a&gt; 来查阅本篇笔记。&lt;/p&gt;&#xA;&lt;p&gt;xv6 进程间切换发生在如下两种情况：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;系统中断， 比如 time interrupt， 会调用 yield 进行切换。&lt;/li&gt;&#xA;&lt;li&gt;调用 xv6 的 sleep 和 wakeup 。&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h2 id=&#34;寄存器&#34;&gt;寄存器&lt;/h2&gt;&#xA;&lt;table&gt;&#xA;  &lt;thead&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;th style=&#34;text-align: center&#34;&gt;寄存器&lt;/th&gt;&#xA;          &lt;th style=&#34;text-align: center&#34;&gt;描述&lt;/th&gt;&#xA;      &lt;/tr&gt;&#xA;  &lt;/thead&gt;&#xA;  &lt;tbody&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;x0/zero&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;始终为0&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;ra&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存 return address&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;sp&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存栈顶地址&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;t0-t6&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存临时数据，这些数据会在函数调用返回后失效，调用函数作用域内的数据&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;s0-s11&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存数据，这些数据在函数调用返回后不失效，调用幻术作用域外的数据&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;a0-a1&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存参数列表中的前两个/保存返回值&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;a2-a7&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存参数列表前两位之后的参数&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;  &lt;/tbody&gt;&#xA;&lt;/table&gt;&#xA;&lt;h2 id=&#34;上下文切换&#34;&gt;上下文切换&lt;/h2&gt;&#xA;&lt;p&gt;xv6 中上下文切换是通过 swtch 完成的， swtch 是一段汇编代码， 其实就是保存要保存出让cpu进程的寄存器，加载获取cpu进程的寄存器：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>xv6 之 trap 机制</title>
+      <link>https://www.zhangzewen.net/posts/os/xv6/xv6_trap/</link>
+      <pubDate>Tue, 05 Aug 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/os/xv6/xv6_trap/</guid>
+      <description>&lt;p&gt;本片文章结合 xv6 的代码、配套 xv6-book 和 RISC-V 的文档，根据自己理解总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。如果错误，望不吝赐教。&lt;/p&gt;&#xA;&lt;h2 id=&#34;trap-机制&#34;&gt;trap 机制&lt;/h2&gt;&#xA;&lt;p&gt;根据 xv6 book 所述，以下三种状况会导致从用户态到内核态的切换：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>xv6 之 内存管理</title>
+      <link>https://www.zhangzewen.net/posts/os/xv6/xv6_memory_management/</link>
+      <pubDate>Mon, 28 Jul 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/os/xv6/xv6_memory_management/</guid>
+      <description>&lt;p&gt;本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃和不连贯，请见谅。&lt;/p&gt;&#xA;&lt;h2 id=&#34;xv6-page-table&#34;&gt;xv6 page table&lt;/h2&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/os/xv6/risc-v-pagetable.png&#34; alt=&#34;risc-v page table&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;上图是 &lt;code&gt;RISC-V&lt;/code&gt; 多种虚拟内存布局中的一种 — &lt;code&gt;Sv39&lt;/code&gt;。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Stanford 公开课 CS144 2025版 通关指南</title>
+      <link>https://www.zhangzewen.net/posts/linux/cs144_simple_summary/</link>
+      <pubDate>Tue, 15 Jul 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/linux/cs144_simple_summary/</guid>
+      <description>&lt;h2 id=&#34;环境准备&#34;&gt;环境准备&lt;/h2&gt;&#xA;&lt;p&gt;我的机器是 2020 年的 intel mbp， 该项目在 mac 下是跑不通的，需要安装虚拟机，这里提供一个 lima 的虚拟机配置：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>cmu15445 实现踩坑不完全指北</title>
+      <link>https://www.zhangzewen.net/posts/database/cmu15445/summary/</link>
+      <pubDate>Sat, 14 Jun 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/database/cmu15445/summary/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

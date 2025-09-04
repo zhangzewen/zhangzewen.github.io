@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>flannel 源码分析 &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="flannel 源码分析">
+  <meta itemprop="description" content="flannel 的配置一般如下：
+{ &#34;Network&#34;:&#34;10.0.0.0/16&#34;, &#34;SubnetLen&#34;:24, &#34;SubnetMin&#34;:&#34;10.0.1.0&#34;, &#34;SubnetMax&#34;:&#34;10.0.20.0&#34;, &#34;Backend&#34;:{ &#34;Type&#34;:&#34;vxlan&#34; } } Network：用于指定Flannel地址池。 SubnetLen：用于指定分配给单个宿主机的docker0的ip段的子网掩码的长度。 SubnetMin：用于指定最小能够分配的ip段。 SudbnetMax：用于指定最大能够分配的ip段，在上面的示例中，表示每个宿主机可以分配一个24位掩码长度的子网，可以分配的子网从10.0.1.0/24到10.0.20.0/24，也就意味着在这个网段中，最多只能有20台宿主机。 Backend：，用于在跨主机通信时指定数据包以什么方式转发，如vxlan/host-gw/udp等。 flannel 中比较重要的概念">
+  <meta itemprop="datePublished" content="2025-07-21T23:43:31+08:00">
+  <meta itemprop="dateModified" content="2025-07-21T23:43:31+08:00">
+  <meta itemprop="wordCount" content="1689">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="源码分析,Cni,Flannel">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="flannel 源码分析">
+  <meta name="twitter:description" content="flannel 的配置一般如下：
+{ &#34;Network&#34;:&#34;10.0.0.0/16&#34;, &#34;SubnetLen&#34;:24, &#34;SubnetMin&#34;:&#34;10.0.1.0&#34;, &#34;SubnetMax&#34;:&#34;10.0.20.0&#34;, &#34;Backend&#34;:{ &#34;Type&#34;:&#34;vxlan&#34; } } Network：用于指定Flannel地址池。 SubnetLen：用于指定分配给单个宿主机的docker0的ip段的子网掩码的长度。 SubnetMin：用于指定最小能够分配的ip段。 SudbnetMax：用于指定最大能够分配的ip段，在上面的示例中，表示每个宿主机可以分配一个24位掩码长度的子网，可以分配的子网从10.0.1.0/24到10.0.20.0/24，也就意味着在这个网段中，最多只能有20台宿主机。 Backend：，用于在跨主机通信时指定数据包以什么方式转发，如vxlan/host-gw/udp等。 flannel 中比较重要的概念">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/cni/flannel/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="flannel 源码分析">
+  <meta property="og:description" content="flannel 的配置一般如下：
+{ &#34;Network&#34;:&#34;10.0.0.0/16&#34;, &#34;SubnetLen&#34;:24, &#34;SubnetMin&#34;:&#34;10.0.1.0&#34;, &#34;SubnetMax&#34;:&#34;10.0.20.0&#34;, &#34;Backend&#34;:{ &#34;Type&#34;:&#34;vxlan&#34; } } Network：用于指定Flannel地址池。 SubnetLen：用于指定分配给单个宿主机的docker0的ip段的子网掩码的长度。 SubnetMin：用于指定最小能够分配的ip段。 SudbnetMax：用于指定最大能够分配的ip段，在上面的示例中，表示每个宿主机可以分配一个24位掩码长度的子网，可以分配的子网从10.0.1.0/24到10.0.20.0/24，也就意味着在这个网段中，最多只能有20台宿主机。 Backend：，用于在跨主机通信时指定数据包以什么方式转发，如vxlan/host-gw/udp等。 flannel 中比较重要的概念">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-07-21T23:43:31+08:00">
+    <meta property="article:modified_time" content="2025-07-21T23:43:31+08:00">
+    <meta property="article:tag" content="源码分析">
+    <meta property="article:tag" content="Cni">
+    <meta property="article:tag" content="Flannel">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/kubernetes/cni/flannel/#webpage",
+      "url": "https://www.zhangzewen.net/posts/kubernetes/cni/flannel/",
+      "name": "flannel 源码分析",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2025-07-21T23:43:31+08:00",
+      "dateModified": "2025-07-21T23:43:31+08:00",
+      "description": "\u003cp\u003eflannel 的配置一般如下：\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-json\" data-lang=\"json\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e{\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#ff79c6\"\u003e\u0026#34;Network\u0026#34;\u003c/span\u003e:\u003cspan style=\"color:#f1fa8c\"\u003e\u0026#34;10.0.0.0/16\u0026#34;\u003c/span\u003e,\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#ff79c6\"\u003e\u0026#34;SubnetLen\u0026#34;\u003c/span\u003e:\u003cspan style=\"color:#bd93f9\"\u003e24\u003c/span\u003e,\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#ff79c6\"\u003e\u0026#34;SubnetMin\u0026#34;\u003c/span\u003e:\u003cspan style=\"color:#f1fa8c\"\u003e\u0026#34;10.0.1.0\u0026#34;\u003c/span\u003e,\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#ff79c6\"\u003e\u0026#34;SubnetMax\u0026#34;\u003c/span\u003e:\u003cspan style=\"color:#f1fa8c\"\u003e\u0026#34;10.0.20.0\u0026#34;\u003c/span\u003e,\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#ff79c6\"\u003e\u0026#34;Backend\u0026#34;\u003c/span\u003e:{\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e        \u003cspan style=\"color:#ff79c6\"\u003e\u0026#34;Type\u0026#34;\u003c/span\u003e:\u003cspan style=\"color:#f1fa8c\"\u003e\u0026#34;vxlan\u0026#34;\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    }\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cul\u003e\n\u003cli\u003eNetwork：用于指定Flannel地址池。\u003c/li\u003e\n\u003cli\u003eSubnetLen：用于指定分配给单个宿主机的docker0的ip段的子网掩码的长度。\u003c/li\u003e\n\u003cli\u003eSubnetMin：用于指定最小能够分配的ip段。\u003c/li\u003e\n\u003cli\u003eSudbnetMax：用于指定最大能够分配的ip段，在上面的示例中，表示每个宿主机可以分配一个24位掩码长度的子网，可以分配的子网从10.0.1.0/24到10.0.20.0/24，也就意味着在这个网段中，最多只能有20台宿主机。\u003c/li\u003e\n\u003cli\u003eBackend：，用于在跨主机通信时指定数据包以什么方式转发，如vxlan/host-gw/udp等。\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eflannel 中比较重要的概念\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/cni/flannel/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/cni/flannel/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/cni/flannel/#webpage"
+      },
+      "headline": "flannel 源码分析",
+      "datePublished": "2025-07-21T23:43:31+08:00",
+      "dateModified": "2025-07-21T23:43:31+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "源码分析",
+        "Cni",
+        "Flannel"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/cni/flannel/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#子网管理">子网管理</a></li>
+        <li><a href="#后端网络管理">后端网络管理</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">flannel 源码分析</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2025-07-21T23:43:31&#43;0800">Created: Jul 21, 2025</time>
+    <span class="readtime">&middot; 8 min read</span>
+  </div>
+
+  <div>
+    <p>flannel 的配置一般如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;Network&#34;</span>:<span style="color:#f1fa8c">&#34;10.0.0.0/16&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;SubnetLen&#34;</span>:<span style="color:#bd93f9">24</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;SubnetMin&#34;</span>:<span style="color:#f1fa8c">&#34;10.0.1.0&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;SubnetMax&#34;</span>:<span style="color:#f1fa8c">&#34;10.0.20.0&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&#34;Backend&#34;</span>:{
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">&#34;Type&#34;</span>:<span style="color:#f1fa8c">&#34;vxlan&#34;</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><ul>
+<li>Network：用于指定Flannel地址池。</li>
+<li>SubnetLen：用于指定分配给单个宿主机的docker0的ip段的子网掩码的长度。</li>
+<li>SubnetMin：用于指定最小能够分配的ip段。</li>
+<li>SudbnetMax：用于指定最大能够分配的ip段，在上面的示例中，表示每个宿主机可以分配一个24位掩码长度的子网，可以分配的子网从10.0.1.0/24到10.0.20.0/24，也就意味着在这个网段中，最多只能有20台宿主机。</li>
+<li>Backend：，用于在跨主机通信时指定数据包以什么方式转发，如vxlan/host-gw/udp等。</li>
+</ul>
+<p>flannel 中比较重要的概念</p>
+<ul>
+<li>网络（Network）：整个集群中分配给 flannel 要管理的网络地址范围。</li>
+<li>子网（Subnet）：flannel 所在的每台主机都会管理 network 中一个子网，子网的掩码和范围是可配置的。</li>
+<li>后端（Backend）：使用什么样的后端网络模型，比如默认的 udp，还是 vxlan 等。</li>
+<li>租约 （Lease）：子网信息和主机关联信息的管理，至于问什么叫租约，可以理解为主机是租用subnet， 如果到了一定的时间不进行更新，该subnet就会过期从而会把该subnet分配给其他的主机。</li>
+</ul>
+<h2 id="子网管理">子网管理</h2>
+<p>subnet manager, 即子网 ip 的管理。接口 Manager 定义了 subnet manager 需要实现的方法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Manager <span style="color:#8be9fd;font-style:italic">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">GetNetworkConfig</span>(ctx context.Context) (<span style="color:#ff79c6">*</span>Config, <span style="color:#8be9fd">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">HandleSubnetFile</span>(path <span style="color:#8be9fd">string</span>, config <span style="color:#ff79c6">*</span>Config, ipMasq <span style="color:#8be9fd">bool</span>, sn ip.IP4Net, ipv6sn ip.IP6Net, mtu <span style="color:#8be9fd">int</span>) <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">AcquireLease</span>(ctx context.Context, attrs <span style="color:#ff79c6">*</span>lease.LeaseAttrs) (<span style="color:#ff79c6">*</span>lease.Lease, <span style="color:#8be9fd">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">RenewLease</span>(ctx context.Context, lease <span style="color:#ff79c6">*</span>lease.Lease) <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">WatchLease</span>(ctx context.Context, sn ip.IP4Net, sn6 ip.IP6Net, receiver <span style="color:#8be9fd;font-style:italic">chan</span> []lease.LeaseWatchResult) <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">WatchLeases</span>(ctx context.Context, receiver <span style="color:#8be9fd;font-style:italic">chan</span> []lease.LeaseWatchResult) <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">CompleteLease</span>(ctx context.Context, lease <span style="color:#ff79c6">*</span>lease.Lease, wg <span style="color:#ff79c6">*</span>sync.WaitGroup) <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">GetStoredMacAddresses</span>(ctx context.Context) (<span style="color:#8be9fd">string</span>, <span style="color:#8be9fd">string</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">GetStoredPublicIP</span>(ctx context.Context) (<span style="color:#8be9fd">string</span>, <span style="color:#8be9fd">string</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Name</span>() <span style="color:#8be9fd">string</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>在 flannel 实现了两种 subnet manager： kubernetes 和 etcd， 分别在 <code>pkg/subnet/etcd</code> 和 <code>pkg/subnet/kube</code>。 本篇文章只分析后者。</p>
+<p>需要知道是，在部署 kubernetes 时，kubernetes 已经把子网分配好了，可以执行<code>kubectl describe</code> 看下任意node节点的信息，这里给出个示例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#6272a4"># kubectl get   node  node-1   -o  yaml</span>
+</span></span><span style="display:flex;"><span>apiVersion: v1
+</span></span><span style="display:flex;"><span>kind: Node
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  annotations:
+</span></span><span style="display:flex;"><span>    flannel.alpha.coreos.com/backend-data: <span style="color:#f1fa8c">&#39;{&#34;VtepMAC&#34;:&#34;36:c1:8c:2f:a1:6b&#34;}&#39;</span>
+</span></span><span style="display:flex;"><span>    flannel.alpha.coreos.com/backend-type: vxlan
+</span></span><span style="display:flex;"><span>    flannel.alpha.coreos.com/kube-subnet-manager: <span style="color:#f1fa8c">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>    flannel.alpha.coreos.com/public-ip: 172.xxx.xxx.163
+</span></span><span style="display:flex;"><span>    kubeadm.alpha.kubernetes.io/cri-socket: /var/run/dockershim.sock
+</span></span><span style="display:flex;"><span>    node.alpha.kubernetes.io/ttl: <span style="color:#f1fa8c">&#34;0&#34;</span>
+</span></span><span style="display:flex;"><span>    volumes.kubernetes.io/controller-managed-attach-detach: <span style="color:#f1fa8c">&#34;true&#34;</span>
+</span></span><span style="display:flex;"><span>  creationTimestamp: <span style="color:#f1fa8c">&#34;2020-12-14T07:13:17Z&#34;</span>
+</span></span><span style="display:flex;"><span>  labels:
+</span></span><span style="display:flex;"><span>    beta.kubernetes.io/arch: amd64
+</span></span><span style="display:flex;"><span>    beta.kubernetes.io/os: linux
+</span></span><span style="display:flex;"><span>    gpu: <span style="color:#f1fa8c">&#34;no&#34;</span>
+</span></span><span style="display:flex;"><span>    kubernetes.io/arch: amd64
+</span></span><span style="display:flex;"><span>    kubernetes.io/hostname: pg-k8s-16
+</span></span><span style="display:flex;"><span>    kubernetes.io/os: linux
+</span></span><span style="display:flex;"><span>    node-role.kubernetes.io/worker: <span style="color:#f1fa8c">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>  name: pg-k8s-16
+</span></span><span style="display:flex;"><span>  resourceVersion: <span style="color:#f1fa8c">&#34;133974888&#34;</span>
+</span></span><span style="display:flex;"><span>  selfLink: /api/v1/nodes/pg-k8s-16
+</span></span><span style="display:flex;"><span>  uid: d6938cfa-3ddb-11eb-9309-e4434bdfa6ca
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  podCIDR: 10.244.5.0/24
+</span></span><span style="display:flex;"><span>status:
+</span></span><span style="display:flex;"><span>  addresses:
+</span></span><span style="display:flex;"><span>  - address: 172.16.191.163
+</span></span><span style="display:flex;"><span>    type: InternalIP
+</span></span><span style="display:flex;"><span>  - address: pg-k8s-16
+</span></span><span style="display:flex;"><span>    type: Hostname
+</span></span><span style="display:flex;"><span>  allocatable:
+</span></span><span style="display:flex;"><span>    cpu: <span style="color:#f1fa8c">&#34;32&#34;</span>
+</span></span><span style="display:flex;"><span>    ephemeral-storage: <span style="color:#f1fa8c">&#34;538365220792&#34;</span>
+</span></span><span style="display:flex;"><span>    hugepages-1Gi: <span style="color:#f1fa8c">&#34;0&#34;</span>
+</span></span></code></pre></div><p><code>.metadata.annotations</code> 中的 &ldquo;flannel.alpha.coreos.com/xxx&rdquo; 都是在 flannel 成功部署到 kubernetes 后更新上去的，<code>spec.podCIDR</code> 即上述所说的 kubernetes把子网都分配，该节点上的所有的 pod 的 ip 都在这个子网内分配。</p>
+<p>结构体 kubeSubnetManager 实现了 Manager 接口。</p>
+<p>调用 NewSubnetManager 来创建 kubeSubnetManager：</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewSubnetManager</span>(ctx context.Context, apiUrl, kubeconfig, prefix, netConfPath <span style="color:#8be9fd">string</span>, setNodeNetworkUnavailable <span style="color:#8be9fd">bool</span>) (subnet.Manager, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> cfg <span style="color:#ff79c6">*</span>rest.Config
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> err <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>	cfg, err = clientcmd.<span style="color:#50fa7b">BuildConfigFromFlags</span>(apiUrl, kubeconfig)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;fail to create kubernetes config: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	c, err <span style="color:#ff79c6">:=</span> clientset.<span style="color:#50fa7b">NewForConfig</span>(cfg)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unable to initialize client: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 客户端已经创建好了</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取到 flannel 所在节点的 hostname/nodename</span>
+</span></span><span style="display:flex;"><span>	nodeName <span style="color:#ff79c6">:=</span> os.<span style="color:#50fa7b">Getenv</span>(<span style="color:#f1fa8c">&#34;NODE_NAME&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> nodeName <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>		podName <span style="color:#ff79c6">:=</span> os.<span style="color:#50fa7b">Getenv</span>(<span style="color:#f1fa8c">&#34;POD_NAME&#34;</span>)
+</span></span><span style="display:flex;"><span>		podNamespace <span style="color:#ff79c6">:=</span> os.<span style="color:#50fa7b">Getenv</span>(<span style="color:#f1fa8c">&#34;POD_NAMESPACE&#34;</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> podName <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;&#34;</span> <span style="color:#ff79c6">||</span> podNamespace <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;env variables POD_NAME and POD_NAMESPACE must be set&#34;</span>)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		pod, err <span style="color:#ff79c6">:=</span> c.<span style="color:#50fa7b">CoreV1</span>().<span style="color:#50fa7b">Pods</span>(podNamespace).<span style="color:#50fa7b">Get</span>(ctx, podName, metav1.GetOptions{})
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;error retrieving pod spec for &#39;%s/%s&#39;: %v&#34;</span>, podNamespace, podName, err)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		nodeName = pod.Spec.NodeName
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> nodeName <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;node name not present in pod spec &#39;%s/%s&#39;&#34;</span>, podNamespace, podName)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	netConf, err <span style="color:#ff79c6">:=</span> os.<span style="color:#50fa7b">ReadFile</span>(netConfPath)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to read net conf: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 解析flannel的配置， 这个是通过configmap挂载上来的配置文件, kube-flannel-cfg -n  kube-system</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 这里获取到 Network 和 Backend.Type, 10.244.0.0/16, xvlan</span>
+</span></span><span style="display:flex;"><span>	sc, err <span style="color:#ff79c6">:=</span> subnet.<span style="color:#50fa7b">ParseConfig</span>(<span style="color:#8be9fd;font-style:italic">string</span>(netConf))
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;error parsing subnet config: %s&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建subnetmanager</span>
+</span></span><span style="display:flex;"><span>	sm, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">newKubeSubnetManager</span>(ctx, c, sc, nodeName, prefix)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;error creating network manager: %s&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	sm.setNodeNetworkUnavailable = setNodeNetworkUnavailable
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> sm.disableNodeInformer {
+</span></span><span style="display:flex;"><span>		log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Node controller skips sync&#34;</span>)
+</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 启动</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">go</span> sm.<span style="color:#50fa7b">Run</span>(ctx)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Waiting %s for node controller to sync&#34;</span>, nodeControllerSyncTimeout)
+</span></span><span style="display:flex;"><span>		err = wait.<span style="color:#50fa7b">PollUntilContextTimeout</span>(ctx, time.Second, nodeControllerSyncTimeout, <span style="color:#ff79c6">true</span>, <span style="color:#8be9fd;font-style:italic">func</span>(context.Context) (<span style="color:#8be9fd">bool</span>, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>			ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd">bool</span>, <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>				ch <span style="color:#ff79c6">&lt;-</span> sm.nodeController.<span style="color:#50fa7b">HasSynced</span>()
+</span></span><span style="display:flex;"><span>			}()
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> synced <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>ch:
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span> synced, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>ctx.<span style="color:#50fa7b">Done</span>():
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, ctx.<span style="color:#50fa7b">Err</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>time.<span style="color:#50fa7b">After</span>(time.Second):
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, <span style="color:#ff79c6">nil</span> <span style="color:#6272a4">// or error to break</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Node controller sync not completed within 1s: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> sm, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;error waiting for nodeController to sync state: %w&#34;</span>, err)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Node controller sync successful&#34;</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> sm, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">newKubeSubnetManager</span>(ctx context.Context, c clientset.Interface, sc <span style="color:#ff79c6">*</span>subnet.Config, nodeName, prefix <span style="color:#8be9fd">string</span>) (<span style="color:#ff79c6">*</span>kubeSubnetManager, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> err <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> ksm kubeSubnetManager
+</span></span><span style="display:flex;"><span>	ksm.annotationPrefix = prefix
+</span></span><span style="display:flex;"><span>	ksm.annotations, err = <span style="color:#50fa7b">newAnnotations</span>(prefix)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ipv4 开关</span>
+</span></span><span style="display:flex;"><span>	ksm.enableIPv4 = sc.EnableIPv4
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ipv6 开关</span>
+</span></span><span style="display:flex;"><span>	ksm.enableIPv6 = sc.EnableIPv6
+</span></span><span style="display:flex;"><span>	ksm.client = c
+</span></span><span style="display:flex;"><span>	ksm.nodeName = nodeName
+</span></span><span style="display:flex;"><span>	ksm.subnetConf = sc
+</span></span><span style="display:flex;"><span>	scale <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">5000</span>
+</span></span><span style="display:flex;"><span>	scaleStr <span style="color:#ff79c6">:=</span> os.<span style="color:#50fa7b">Getenv</span>(<span style="color:#f1fa8c">&#34;EVENT_QUEUE_DEPTH&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> scaleStr <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>		n, err <span style="color:#ff79c6">:=</span> strconv.<span style="color:#50fa7b">Atoi</span>(scaleStr)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;env EVENT_QUEUE_DEPTH=%s format error: %v&#34;</span>, scaleStr, err)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> n &gt; <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>			scale = n
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 事件通知</span>
+</span></span><span style="display:flex;"><span>	ksm.events = <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> lease.Event, scale)
+</span></span><span style="display:flex;"><span>	ksm.asyncSendSemaphore = semaphore.<span style="color:#50fa7b">NewWeighted</span>(<span style="color:#bd93f9">100</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// when backend type is alloc, someone else (e.g. cloud-controller-managers) is taking care of the routing, thus we do not need informer</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// See https://github.com/flannel-io/flannel/issues/1617</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> sc.BackendType <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;alloc&#34;</span> {
+</span></span><span style="display:flex;"><span>		ksm.disableNodeInformer = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 设置 informer,以及钩子函数, 监听 Node 资源的变化</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ksm.disableNodeInformer {
+</span></span><span style="display:flex;"><span>		listerWatcher <span style="color:#ff79c6">:=</span> cache.<span style="color:#50fa7b">NewListWatchFromClient</span>(
+</span></span><span style="display:flex;"><span>			ksm.client.<span style="color:#50fa7b">CoreV1</span>().<span style="color:#50fa7b">RESTClient</span>(),
+</span></span><span style="display:flex;"><span>			<span style="color:#f1fa8c">&#34;nodes&#34;</span>,
+</span></span><span style="display:flex;"><span>			<span style="color:#f1fa8c">&#34;&#34;</span>,
+</span></span><span style="display:flex;"><span>			fields.<span style="color:#50fa7b">Everything</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		handler <span style="color:#ff79c6">:=</span> cache.ResourceEventHandlerFuncs{
+</span></span><span style="display:flex;"><span>			AddFunc: <span style="color:#8be9fd;font-style:italic">func</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
+</span></span><span style="display:flex;"><span>				ksm.<span style="color:#50fa7b">handleAddLeaseEvent</span>(ctx, lease.EventAdded, obj)
+</span></span><span style="display:flex;"><span>			},
+</span></span><span style="display:flex;"><span>			UpdateFunc: <span style="color:#8be9fd;font-style:italic">func</span>(oldObj, newObj <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
+</span></span><span style="display:flex;"><span>				ksm.<span style="color:#50fa7b">handleUpdateLeaseEvent</span>(ctx, oldObj, newObj)
+</span></span><span style="display:flex;"><span>			},
+</span></span><span style="display:flex;"><span>			DeleteFunc: <span style="color:#8be9fd;font-style:italic">func</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
+</span></span><span style="display:flex;"><span>				_, isNode <span style="color:#ff79c6">:=</span> obj.(<span style="color:#ff79c6">*</span>v1.Node)
+</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// We can get DeletedFinalStateUnknown instead of *api.Node here and we need to handle that correctly.</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> !isNode {
+</span></span><span style="display:flex;"><span>					deletedState, ok <span style="color:#ff79c6">:=</span> obj.(cache.DeletedFinalStateUnknown)
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> !ok {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Error received unexpected object: %v&#34;</span>, obj)
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>					node, ok <span style="color:#ff79c6">:=</span> deletedState.Obj.(<span style="color:#ff79c6">*</span>v1.Node)
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> !ok {
+</span></span><span style="display:flex;"><span>						log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Error deletedFinalStateUnknown contained non-Node object: %v&#34;</span>, deletedState.Obj)
+</span></span><span style="display:flex;"><span>						<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>					}
+</span></span><span style="display:flex;"><span>					obj = node
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>				ksm.<span style="color:#50fa7b">handleAddLeaseEvent</span>(ctx, lease.EventRemoved, obj)
+</span></span><span style="display:flex;"><span>			},
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		store, controller <span style="color:#ff79c6">:=</span> cache.<span style="color:#50fa7b">NewInformerWithOptions</span>(cache.InformerOptions{
+</span></span><span style="display:flex;"><span>			ListerWatcher: listerWatcher,
+</span></span><span style="display:flex;"><span>			ObjectType:    <span style="color:#ff79c6">&amp;</span>v1.Node{},
+</span></span><span style="display:flex;"><span>			ResyncPeriod:  resyncPeriod,
+</span></span><span style="display:flex;"><span>			Handler:       handler,
+</span></span><span style="display:flex;"><span>			Indexers:      cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc},
+</span></span><span style="display:flex;"><span>		})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		ksm.nodeController = controller
+</span></span><span style="display:flex;"><span>		ksm.nodeStore = store
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>ksm, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<p>上述代码的流程如下：</p>
+<ul>
+<li>
+<p>创建客户端实例。</p>
+</li>
+<li>
+<p>获取该 flannel 调度到的节点的 hostname。</p>
+</li>
+<li>
+<p>解析 flannel 的配置文件 <code>/etc/kube-flannel/net-conf.json</code>，这个一般是通过 configmap : kube-flannel-cfg 来挂载：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#6272a4"># kubectl  get configmap  kube-flannel-cfg   -n  kube-system  -o  yaml</span>
+</span></span><span style="display:flex;"><span>apiVersion: v1
+</span></span><span style="display:flex;"><span>data:
+</span></span><span style="display:flex;"><span>  cni-conf.json: |
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f1fa8c">&#34;name&#34;</span>: <span style="color:#f1fa8c">&#34;cbr0&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f1fa8c">&#34;plugins&#34;</span>: <span style="color:#ff79c6">[</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f1fa8c">&#34;type&#34;</span>: <span style="color:#f1fa8c">&#34;flannel&#34;</span>,
+</span></span><span style="display:flex;"><span>          <span style="color:#f1fa8c">&#34;delegate&#34;</span>: <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f1fa8c">&#34;hairpinMode&#34;</span>: true,
+</span></span><span style="display:flex;"><span>            <span style="color:#f1fa8c">&#34;isDefaultGateway&#34;</span>: <span style="color:#8be9fd;font-style:italic">true</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">}</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#f1fa8c">&#34;type&#34;</span>: <span style="color:#f1fa8c">&#34;portmap&#34;</span>,
+</span></span><span style="display:flex;"><span>          <span style="color:#f1fa8c">&#34;capabilities&#34;</span>: <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#f1fa8c">&#34;portMappings&#34;</span>: <span style="color:#8be9fd;font-style:italic">true</span>
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">}</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">}</span>
+</span></span><span style="display:flex;"><span>  net-conf.json: |
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f1fa8c">&#34;Network&#34;</span>: <span style="color:#f1fa8c">&#34;10.244.0.0/16&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#f1fa8c">&#34;Backend&#34;</span>: <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f1fa8c">&#34;Type&#34;</span>: <span style="color:#f1fa8c">&#34;vxlan&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">}</span>
+</span></span><span style="display:flex;"><span>kind: ConfigMap
+</span></span></code></pre></div></li>
+<li>
+<p>调用 newKubeSubnetManager ，创建 Node 资源的 informer 监听对象，以及注册回调函数。</p>
+</li>
+<li>
+<p>启动 kubeSubnetManager 。</p>
+</li>
+<li>
+<p>等待 node 资源的 informer 同步完成。</p>
+</li>
+</ul>
+<p>上述代码中的回调方法 handleAddLeaseEvent, 会根据 Node 资源对象中的 <code>spec.PodCIDR</code> 等字段来构建 lease 租约结构, 然后把 lease 写入到管道里：</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (ksm <span style="color:#ff79c6">*</span>kubeSubnetManager) <span style="color:#50fa7b">handleAddLeaseEvent</span>(ctx context.Context, et lease.EventType, obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
+</span></span><span style="display:flex;"><span>	n <span style="color:#ff79c6">:=</span> obj.(<span style="color:#ff79c6">*</span>v1.Node)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 当不是kubernetes负责分配子网的时候，直接返回</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> s, ok <span style="color:#ff79c6">:=</span> n.Annotations[ksm.annotations.SubnetKubeManaged]; !ok <span style="color:#ff79c6">||</span> s <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;true&#34;</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 根据 node 对象中的 spec.PodCIDR 等字段来构建 lease 租约结构.</span>
+</span></span><span style="display:flex;"><span>	l, err <span style="color:#ff79c6">:=</span> ksm.<span style="color:#50fa7b">nodeToLease</span>(<span style="color:#ff79c6">*</span>n)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Error turning node %q to lease: %v&#34;</span>, n.ObjectMeta.Name, err)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 把 lease 推送到管道</span>
+</span></span><span style="display:flex;"><span>	ksm.<span style="color:#50fa7b">enqueueLeaseEvent</span>(ctx, lease.Event{Type: et, Lease: l}, n.ObjectMeta.Name)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (ksm <span style="color:#ff79c6">*</span>kubeSubnetManager) <span style="color:#50fa7b">nodeToLease</span>(n v1.Node) (l lease.Lease, err <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> ksm.enableIPv4 {
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 获取到节点的host ip</span>
+</span></span><span style="display:flex;"><span>		l.Attrs.PublicIP, err = ip.<span style="color:#50fa7b">ParseIP4</span>(n.Annotations[ksm.annotations.BackendPublicIP])
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> l, err
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// {&#34;VtepMAC&#34;:&#34;4e:1c:80:6d:0c:3b&#34;}</span>
+</span></span><span style="display:flex;"><span>		l.Attrs.BackendData = json.<span style="color:#50fa7b">RawMessage</span>(n.Annotations[ksm.annotations.BackendData])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">var</span> cidr <span style="color:#ff79c6">*</span>net.IPNet
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">switch</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#8be9fd;font-style:italic">len</span>(n.Spec.PodCIDRs) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 获取pod的网段</span>
+</span></span><span style="display:flex;"><span>			_, cidr, err = net.<span style="color:#50fa7b">ParseCIDR</span>(n.Spec.PodCIDR)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span> l, err
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#8be9fd;font-style:italic">len</span>(n.Spec.PodCIDRs) &lt; <span style="color:#bd93f9">3</span>:
+</span></span><span style="display:flex;"><span>			log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Creating the node lease for IPv4. This is the n.Spec.PodCIDRs: %v&#34;</span>, n.Spec.PodCIDRs)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">for</span> _, podCidr <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> n.Spec.PodCIDRs {
+</span></span><span style="display:flex;"><span>				_, parseCidr, err <span style="color:#ff79c6">:=</span> net.<span style="color:#50fa7b">ParseCIDR</span>(podCidr)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">return</span> l, err
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(parseCidr.IP) <span style="color:#ff79c6">==</span> net.IPv4len {
+</span></span><span style="display:flex;"><span>					cidr = parseCidr
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">break</span>
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">default</span>:
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> l, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;node %q pod cidrs should be IPv4/IPv6 only or dualstack&#34;</span>, ksm.nodeName)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> cidr <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> l, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;missing IPv4 address on n.Spec.PodCIDRs&#34;</span>)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 把 cidr 转成 IP4Net 格式, 记录 ip 和 size</span>
+</span></span><span style="display:flex;"><span>		l.Subnet = ip.<span style="color:#50fa7b">FromIPNet</span>(cidr)
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 当前 subnet 为 ipv4</span>
+</span></span><span style="display:flex;"><span>		l.EnableIPv4 = ksm.enableIPv4
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> ksm.enableIPv6 {
+</span></span><span style="display:flex;"><span>		l.Attrs.PublicIPv6, err = ip.<span style="color:#50fa7b">ParseIP6</span>(n.Annotations[ksm.annotations.BackendPublicIPv6])
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> l, err
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		l.Attrs.BackendV6Data = json.<span style="color:#50fa7b">RawMessage</span>(n.Annotations[ksm.annotations.BackendV6Data])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">var</span> ipv6Cidr <span style="color:#ff79c6">*</span>net.IPNet
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">switch</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#8be9fd;font-style:italic">len</span>(n.Spec.PodCIDRs) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span>:
+</span></span><span style="display:flex;"><span>			_, ipv6Cidr, err = net.<span style="color:#50fa7b">ParseCIDR</span>(n.Spec.PodCIDR)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span> l, err
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#8be9fd;font-style:italic">len</span>(n.Spec.PodCIDRs) &lt; <span style="color:#bd93f9">3</span>:
+</span></span><span style="display:flex;"><span>			log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Creating the node lease for IPv6. This is the n.Spec.PodCIDRs: %v&#34;</span>, n.Spec.PodCIDRs)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">for</span> _, podCidr <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> n.Spec.PodCIDRs {
+</span></span><span style="display:flex;"><span>				_, parseCidr, err <span style="color:#ff79c6">:=</span> net.<span style="color:#50fa7b">ParseCIDR</span>(podCidr)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">return</span> l, err
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(parseCidr.IP) <span style="color:#ff79c6">==</span> net.IPv6len {
+</span></span><span style="display:flex;"><span>					ipv6Cidr = parseCidr
+</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">break</span>
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">default</span>:
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> l, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;node %q pod cidrs should be IPv4/IPv6 only or dualstack&#34;</span>, ksm.nodeName)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> ipv6Cidr <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> l, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;missing IPv6 address on n.Spec.PodCIDRs&#34;</span>)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		l.IPv6Subnet = ip.<span style="color:#50fa7b">FromIP6Net</span>(ipv6Cidr)
+</span></span><span style="display:flex;"><span>		l.EnableIPv6 = ksm.enableIPv6
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取到backend的类型，xvlan/udp/host-gw</span>
+</span></span><span style="display:flex;"><span>	l.Attrs.BackendType = n.Annotations[ksm.annotations.BackendType]
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> l, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<p>subnet manager 和接下来要分析的 backend 之间的交互是通过 <code>kubeSubnetManager.events</code> 管道，flannel 所支持的网络插件会消费 subnet manager 所生产的事件：</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (ksm <span style="color:#ff79c6">*</span>kubeSubnetManager) <span style="color:#50fa7b">WatchLeases</span>(ctx context.Context, receiver <span style="color:#8be9fd;font-style:italic">chan</span> []lease.LeaseWatchResult) <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">select</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> event <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>ksm.events:
+</span></span><span style="display:flex;"><span>			receiver <span style="color:#ff79c6">&lt;-</span> []lease.LeaseWatchResult{
+</span></span><span style="display:flex;"><span>				{
+</span></span><span style="display:flex;"><span>					Events: []lease.Event{event},
+</span></span><span style="display:flex;"><span>				}}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>ctx.<span style="color:#50fa7b">Done</span>():
+</span></span><span style="display:flex;"><span>			<span style="color:#8be9fd;font-style:italic">close</span>(receiver)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> ctx.<span style="color:#50fa7b">Err</span>()
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// flannel 支持的 网络插件会调用该 WatchLease 函数</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">WatchLease</span>(ctx context.Context, sm Manager, sn ip.IP4Net, sn6 ip.IP6Net, receiver <span style="color:#8be9fd;font-style:italic">chan</span> lease.Event) {
+</span></span><span style="display:flex;"><span>	leaseWatchChan <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> []lease.LeaseWatchResult)
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> closeOnce sync.Once
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Helper function to close the receiver channel safely</span>
+</span></span><span style="display:flex;"><span>	closeReceiver <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>		closeOnce.<span style="color:#50fa7b">Do</span>(<span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#8be9fd;font-style:italic">close</span>(receiver)
+</span></span><span style="display:flex;"><span>		})
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>		err <span style="color:#ff79c6">:=</span> sm.<span style="color:#50fa7b">WatchLease</span>(ctx, sn, sn6, leaseWatchChan)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">==</span> context.Canceled <span style="color:#ff79c6">||</span> err <span style="color:#ff79c6">==</span> context.DeadlineExceeded {
+</span></span><span style="display:flex;"><span>				log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;%v, close receiver chan&#34;</span>, err)
+</span></span><span style="display:flex;"><span>				<span style="color:#50fa7b">closeReceiver</span>()
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>			log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Subnet watch failed: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>			<span style="color:#50fa7b">closeReceiver</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	}()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> watchResults <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> leaseWatchChan {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, wr <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> watchResults {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(wr.Snapshot) &gt; <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>				receiver <span style="color:#ff79c6">&lt;-</span> lease.Event{
+</span></span><span style="display:flex;"><span>					Type:  lease.EventAdded,
+</span></span><span style="display:flex;"><span>					Lease: wr.Snapshot[<span style="color:#bd93f9">0</span>],
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(wr.Events) &gt; <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>				receiver <span style="color:#ff79c6">&lt;-</span> wr.Events[<span style="color:#bd93f9">0</span>]
+</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>				log.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;WatchLease: empty event received&#34;</span>)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	log.<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;leaseWatchChan channel closed&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">closeReceiver</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<h2 id="后端网络管理">后端网络管理</h2>
+<p>flannel 通过接口 Network 来表示其支持的网络模式应该实现的通用方法集：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Network <span style="color:#8be9fd;font-style:italic">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Lease</span>() <span style="color:#ff79c6">*</span>lease.Lease
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">MTU</span>() <span style="color:#8be9fd">int</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Run</span>(ctx context.Context)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>且其支持的网络模式都实现了接口 Backend，以实现其支持的网络模式可以注册到 flannel backend manager:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Backend <span style="color:#8be9fd;font-style:italic">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">RegisterNetwork</span>(ctx context.Context, wg <span style="color:#ff79c6">*</span>sync.WaitGroup, config <span style="color:#ff79c6">*</span>subnet.Config) (Network, <span style="color:#8be9fd">error</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>这里只展示 flannel 所支持的网络模式 vxlan 是如何注册进来的，flannel 在启动阶段就会注册 xvlan 网络模式：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// pkg/backend/vxlan/vxlan.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">init</span>() {
+</span></span><span style="display:flex;"><span>	backend.<span style="color:#50fa7b">Register</span>(<span style="color:#f1fa8c">&#34;vxlan&#34;</span>, New)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>变量 constructors 是一个 map 类型的变量，管理不同后端以及其对应的 Backend 的构造方法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">var</span> constructors = <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]BackendCtor)
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> BackendCtor <span style="color:#8be9fd;font-style:italic">func</span>(sm subnet.Manager, ei <span style="color:#ff79c6">*</span>ExternalInterface) (Backend, <span style="color:#8be9fd">error</span>)
+</span></span></code></pre></div><p>backend manager  根据 backendType（从上面得知，其值为字符串 xvlan/host-gw等） 获取 constructors 中对应的构造方法, 然后创建对应的 Network 实例。</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> manager <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>	ctx      context.Context
+</span></span><span style="display:flex;"><span>	sm       subnet.Manager
+</span></span><span style="display:flex;"><span>	mux      sync.Mutex
+</span></span><span style="display:flex;"><span>	active   <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]Backend
+</span></span><span style="display:flex;"><span>	wg       sync.WaitGroup
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewManager</span>(ctx context.Context, sm subnet.Manager, extIface <span style="color:#ff79c6">*</span>ExternalInterface) Manager {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>manager{
+</span></span><span style="display:flex;"><span>		ctx:      ctx,
+</span></span><span style="display:flex;"><span>		sm:       sm,
+</span></span><span style="display:flex;"><span>		extIface: extIface,
+</span></span><span style="display:flex;"><span>		active:   <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]Backend),
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (bm <span style="color:#ff79c6">*</span>manager) <span style="color:#50fa7b">GetBackend</span>(backendType <span style="color:#8be9fd">string</span>) (Backend, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>	bm.mux.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> bm.mux.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	betype <span style="color:#ff79c6">:=</span> strings.<span style="color:#50fa7b">ToLower</span>(backendType)
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 如果已存在, 则直接返回</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> be, ok <span style="color:#ff79c6">:=</span> bm.active[betype]; ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> be, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 获取对应的网络模式的构造方法</span>
+</span></span><span style="display:flex;"><span>	befunc, ok <span style="color:#ff79c6">:=</span> constructors[betype]
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unknown backend type: %v&#34;</span>, betype)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 创建 backend </span>
+</span></span><span style="display:flex;"><span>	be, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">befunc</span>(bm.sm, bm.extIface)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 标记 backend 为活跃</span>
+</span></span><span style="display:flex;"><span>	bm.active[betype] = be
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	bm.wg.<span style="color:#50fa7b">Add</span>(<span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">&lt;-</span>bm.ctx.<span style="color:#50fa7b">Done</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 退出时需要删除</span>
+</span></span><span style="display:flex;"><span>		bm.mux.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">delete</span>(bm.active, betype)
+</span></span><span style="display:flex;"><span>		bm.mux.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		bm.wg.<span style="color:#50fa7b">Done</span>()
+</span></span><span style="display:flex;"><span>	}()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> be, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">Register</span>(name <span style="color:#8be9fd">string</span>, ctor BackendCtor) {
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 注册 backend</span>
+</span></span><span style="display:flex;"><span>	constructors[name] = ctor
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<p>篇幅有限，后端模式 xvlan 和 host-gw 的解析请查看如下文章：</p>
+<p><a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/">flannel 源码分析之 host-gw 模式</a></p>
+<p><a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/">flannel 源码分析之 xvlan 模式</a></p>
+
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/cni/" class="tag-link">Cni</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/flannel/" class="tag-link">Flannel</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>kubernetes csi 之 node-driver-register &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="kubernetes csi 之 node-driver-register">
+  <meta itemprop="description" content="node-driver-register 是一个辅助容器，通过 CSI 接口 提供的 Identity Service 来获取插件信息，并且通过kubelet 插件注册接口 注册到 kubelet。所以，node-dirver-rigister 即是一个客户端，也是一个服务端。">
+  <meta itemprop="datePublished" content="2025-08-02T00:43:31+08:00">
+  <meta itemprop="dateModified" content="2025-08-02T00:43:31+08:00">
+  <meta itemprop="wordCount" content="362">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="源码分析,Kubernetes,Kubelet,Csi">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="kubernetes csi 之 node-driver-register">
+  <meta name="twitter:description" content="node-driver-register 是一个辅助容器，通过 CSI 接口 提供的 Identity Service 来获取插件信息，并且通过kubelet 插件注册接口 注册到 kubelet。所以，node-dirver-rigister 即是一个客户端，也是一个服务端。">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/csi/node-driver-register/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="kubernetes csi 之 node-driver-register">
+  <meta property="og:description" content="node-driver-register 是一个辅助容器，通过 CSI 接口 提供的 Identity Service 来获取插件信息，并且通过kubelet 插件注册接口 注册到 kubelet。所以，node-dirver-rigister 即是一个客户端，也是一个服务端。">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-08-02T00:43:31+08:00">
+    <meta property="article:modified_time" content="2025-08-02T00:43:31+08:00">
+    <meta property="article:tag" content="源码分析">
+    <meta property="article:tag" content="Kubernetes">
+    <meta property="article:tag" content="Kubelet">
+    <meta property="article:tag" content="Csi">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/kubernetes/csi/node-driver-register/#webpage",
+      "url": "https://www.zhangzewen.net/posts/kubernetes/csi/node-driver-register/",
+      "name": "kubernetes csi 之 node-driver-register",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2025-08-02T00:43:31+08:00",
+      "dateModified": "2025-08-02T00:43:31+08:00",
+      "description": "\u003cp\u003e\u003ca href=\"https://github.com/kubernetes-csi/node-driver-registrar.git\"\u003enode-driver-register\u003c/a\u003e 是一个辅助容器，通过 \u003ca href=\"https://github.com/container-storage-interface/spec.git\"\u003eCSI 接口\u003c/a\u003e 提供的 Identity Service 来获取插件信息，并且通过\u003ca href=\"https://github.com/kubernetes/kubelet/blob/master/pkg/apis/pluginregistration/v1/api.proto\"\u003ekubelet 插件注册接口\u003c/a\u003e 注册到 kubelet。所以，node-dirver-rigister 即是一个客户端，也是一个服务端。\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/csi/node-driver-register/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/csi/node-driver-register/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/csi/node-driver-register/#webpage"
+      },
+      "headline": "kubernetes csi 之 node-driver-register",
+      "datePublished": "2025-08-02T00:43:31+08:00",
+      "dateModified": "2025-08-02T00:43:31+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "源码分析",
+        "Kubernetes",
+        "Kubelet",
+        "Csi"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/csi/node-driver-register/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents"></nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">kubernetes csi 之 node-driver-register</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2025-08-02T00:43:31&#43;0800">Created: Aug 2, 2025</time>
+    <span class="readtime">&middot; 2 min read</span>
+  </div>
+
+  <div>
+    <p><a href="https://github.com/kubernetes-csi/node-driver-registrar.git">node-driver-register</a> 是一个辅助容器，通过 <a href="https://github.com/container-storage-interface/spec.git">CSI 接口</a> 提供的 Identity Service 来获取插件信息，并且通过<a href="https://github.com/kubernetes/kubelet/blob/master/pkg/apis/pluginregistration/v1/api.proto">kubelet 插件注册接口</a> 注册到 kubelet。所以，node-dirver-rigister 即是一个客户端，也是一个服务端。</p>
+<p>和 kubelet 通信所使用的 unix domain socket：</p>
+<ul>
+<li>由 node-driver-register 创建的。</li>
+<li>通过 hostpath 类型的 volume 暴露在 kubernetes 的节点上，路径一般是：
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>/var/lib/kubelet/plugins_registry/&lt;drivername.example.com&gt;-reg.sock<span style="color:#f1fa8c">`</span>
+</span></span></code></pre></div></li>
+<li>且挂载到 Pod 中的路径必须是 <code>/registration</code>。</li>
+</ul>
+<p>和第三方 CSI 插件通信的 unix domain socket：</p>
+<ul>
+<li>由 CSI Driver 创建。</li>
+<li>通过 hostpath 的 volume 暴露在 kubernetes 的节点上，路径一般是：
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>/var/lib/kubelet/plugins/&lt;drivername.example.com&gt;/csi.sock
+</span></span></code></pre></div></li>
+<li>且挂载到 Pod 中的路径必须是 <code>/csi</code>。</li>
+</ul>
+<p><img src="/images/kubernetes/csi/node_driver_register.png" alt="node_driver_register"></p>
+<p>整个 main 函数比较简单：</p>
+<ul>
+<li>获取 第三方 CSI 插件信息。</li>
+<li>把 第三方 CSI 插件注册到 kubelet 中。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 构建与第三方 CSI 插件服务的链接</span>
+</span></span><span style="display:flex;"><span>	csiConn, err <span style="color:#ff79c6">:=</span> connection.<span style="color:#50fa7b">ConnectWithoutMetrics</span>(ctx, <span style="color:#ff79c6">*</span>csiAddress)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		logger.<span style="color:#50fa7b">Error</span>(err, <span style="color:#f1fa8c">&#34;Error connecting to CSI driver&#34;</span>)
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">FlushAndExit</span>(klog.ExitFlushTimeout, <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	logger.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">1</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Calling CSI driver to discover driver name&#34;</span>)
+</span></span><span style="display:flex;"><span>	getNameCtx, cancel <span style="color:#ff79c6">:=</span> context.<span style="color:#50fa7b">WithTimeout</span>(ctx, <span style="color:#ff79c6">*</span>operationTimeout)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> <span style="color:#50fa7b">cancel</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 通过 CSI 接口提供的 Identity Service 来获取插件信息</span>
+</span></span><span style="display:flex;"><span>	csiDriverName, err <span style="color:#ff79c6">:=</span> csirpc.<span style="color:#50fa7b">GetDriverName</span>(getNameCtx, csiConn)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		logger.<span style="color:#50fa7b">Error</span>(err, <span style="color:#f1fa8c">&#34;Error retreiving CSI driver name&#34;</span>)
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">FlushAndExit</span>(klog.ExitFlushTimeout, <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	logger.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;CSI driver name&#34;</span>, <span style="color:#f1fa8c">&#34;csiDriverName&#34;</span>, csiDriverName)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> <span style="color:#50fa7b">closeGrpcConnection</span>(logger, <span style="color:#ff79c6">*</span>csiAddress, csiConn)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Run forever</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 向 kubelet 注册 csi 插件</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">nodeRegister</span>(ctx, csiDriverName, addr)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>nodeRegister 通过 <a href="https://github.com/kubernetes/kubelet/blob/master/pkg/apis/pluginregistration/v1/api.proto">kubelet 插件注册接口</a> 来生成 gPRC 服务，<a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/">kubelet 通过监听 unix domain socket 文件的创建/更新</a> 来生成 gRPC 客户端并调用 GetInfo 和 NotifyRegistrationStatus 把 CSI 插件注册到 kubelet 中。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">nodeRegister</span>(ctx context.Context, csiDriverName, httpEndpoint <span style="color:#8be9fd">string</span>) {
+</span></span><span style="display:flex;"><span>	logger <span style="color:#ff79c6">:=</span> klog.<span style="color:#50fa7b">FromContext</span>(ctx)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建插件注册服务，供kubelet 请求</span>
+</span></span><span style="display:flex;"><span>	registrar <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">newRegistrationServer</span>(csiDriverName, <span style="color:#ff79c6">*</span>kubeletRegistrationPath, supportedVersions)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 生成提供服务的 unix domain socket 的文件路径</span>
+</span></span><span style="display:flex;"><span>	socketPath <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">buildSocketPath</span>(csiDriverName)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 删除旧的 unix domain socket 文件，例如重启情况的发生</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> util.<span style="color:#50fa7b">CleanupSocketFile</span>(socketPath); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		logger.<span style="color:#50fa7b">Error</span>(err, <span style="color:#f1fa8c">&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">FlushAndExit</span>(klog.ExitFlushTimeout, <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> oldmask <span style="color:#8be9fd">int</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> runtime.GOOS <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;linux&#34;</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Default to only user accessible socket, caller can open up later if desired</span>
+</span></span><span style="display:flex;"><span>		oldmask, _ = util.<span style="color:#50fa7b">Umask</span>(<span style="color:#bd93f9">0077</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	logger.<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Starting Registration Server&#34;</span>, <span style="color:#f1fa8c">&#34;socketPath&#34;</span>, socketPath)
+</span></span><span style="display:flex;"><span>	lis, err <span style="color:#ff79c6">:=</span> net.<span style="color:#50fa7b">Listen</span>(<span style="color:#f1fa8c">&#34;unix&#34;</span>, socketPath)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		logger.<span style="color:#50fa7b">Error</span>(err, <span style="color:#f1fa8c">&#34;Failed to listen on socket&#34;</span>, <span style="color:#f1fa8c">&#34;socketPath&#34;</span>, socketPath)
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">FlushAndExit</span>(klog.ExitFlushTimeout, <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> runtime.GOOS <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;linux&#34;</span> {
+</span></span><span style="display:flex;"><span>		util.<span style="color:#50fa7b">Umask</span>(oldmask)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	logger.<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Registration Server started&#34;</span>, <span style="color:#f1fa8c">&#34;socketPath&#34;</span>, socketPath)
+</span></span><span style="display:flex;"><span>	opts <span style="color:#ff79c6">:=</span> []grpc.ServerOption{
+</span></span><span style="display:flex;"><span>		grpc.<span style="color:#50fa7b">UnaryInterceptor</span>(<span style="color:#8be9fd;font-style:italic">func</span>(ctx context.Context, req <span style="color:#8be9fd;font-style:italic">interface</span>{}, _ <span style="color:#ff79c6">*</span>grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp <span style="color:#8be9fd;font-style:italic">interface</span>{}, err <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#50fa7b">handler</span>(klog.<span style="color:#50fa7b">NewContext</span>(ctx, logger), req)
+</span></span><span style="display:flex;"><span>		}),
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建gRPC 服务</span>
+</span></span><span style="display:flex;"><span>	grpcServer <span style="color:#ff79c6">:=</span> grpc.<span style="color:#50fa7b">NewServer</span>(opts<span style="color:#ff79c6">...</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	registerapi.<span style="color:#50fa7b">RegisterRegistrationServer</span>(grpcServer, registrar)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">//  httpServer 给 node-driver-register 添加了健康检查，以及 profile 的http服务，利于debug。</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> <span style="color:#50fa7b">httpServer</span>(ctx, socketPath, httpEndpoint, csiDriverName)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取到 kill 信号时，删除unix domain socket 文件,服务退出</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> <span style="color:#50fa7b">removeRegSocket</span>(logger, csiDriverName)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> grpcServer.<span style="color:#50fa7b">Serve</span>(lis); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		logger.<span style="color:#50fa7b">Error</span>(err, <span style="color:#f1fa8c">&#34;Registration Server stopped serving&#34;</span>)
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">FlushAndExit</span>(klog.ExitFlushTimeout, <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	os.<span style="color:#50fa7b">Exit</span>(<span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kubelet/" class="tag-link">Kubelet</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/csi/" class="tag-link">Csi</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

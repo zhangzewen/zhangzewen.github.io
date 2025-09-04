@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>kubernetes 源码分析之 kube-proxy &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="kubernetes 源码分析之 kube-proxy">
+  <meta itemprop="description" content="本篇文章基于 Kubernetes v1.25.1
+kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部署在集群的每个节点之上，负责在其宿主节点上配置 iptables，ipvs等规则。">
+  <meta itemprop="datePublished" content="2024-10-06T00:27:07+08:00">
+  <meta itemprop="dateModified" content="2024-10-06T00:27:07+08:00">
+  <meta itemprop="wordCount" content="1131">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="源码分析,Kubernetes,Kube-Proxy">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="kubernetes 源码分析之 kube-proxy">
+  <meta name="twitter:description" content="本篇文章基于 Kubernetes v1.25.1
+kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部署在集群的每个节点之上，负责在其宿主节点上配置 iptables，ipvs等规则。">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="kubernetes 源码分析之 kube-proxy">
+  <meta property="og:description" content="本篇文章基于 Kubernetes v1.25.1
+kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部署在集群的每个节点之上，负责在其宿主节点上配置 iptables，ipvs等规则。">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-10-06T00:27:07+08:00">
+    <meta property="article:modified_time" content="2024-10-06T00:27:07+08:00">
+    <meta property="article:tag" content="源码分析">
+    <meta property="article:tag" content="Kubernetes">
+    <meta property="article:tag" content="Kube-Proxy">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/#webpage",
+      "url": "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/",
+      "name": "kubernetes 源码分析之 kube-proxy",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2024-10-06T00:27:07+08:00",
+      "dateModified": "2024-10-06T00:27:07+08:00",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ekube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部署在集群的每个节点之上，负责在其宿主节点上配置 iptables，ipvs等规则。\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/#webpage"
+      },
+      "headline": "kubernetes 源码分析之 kube-proxy",
+      "datePublished": "2024-10-06T00:27:07+08:00",
+      "dateModified": "2024-10-06T00:27:07+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "源码分析",
+        "Kubernetes",
+        "Kube-Proxy"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#kube-proxy-启动流程分析">kube-proxy 启动流程分析</a></li>
+        <li><a href="#事件的监听">事件的监听</a></li>
+        <li><a href="#三种代理模式">三种代理模式</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">kubernetes 源码分析之 kube-proxy</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2024-10-06T00:27:07&#43;0800">Created: Oct 6, 2024</time>
+    <span class="readtime">&middot; 6 min read</span>
+  </div>
+
+  <div>
+    <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部署在集群的每个节点之上，负责在其宿主节点上配置 iptables，ipvs等规则。</p>
+<h2 id="kube-proxy-启动流程分析">kube-proxy 启动流程分析</h2>
+<p>kube-proxy 入口在 <code>cmd/kube-proxy/proxy.go</code>。首先，通过解析命令行参数完善 Options 结构体，然后就是对 Options 进行校验，随后就调用 Run 来启动 kube-proxy ：</p>
+<ul>
+<li>
+<p>若启动时指定了 <code>--write-config-to</code> 参数，kube-proxy 只将启动的默认参数写到指定的配置文件中，然后退出。</p>
+</li>
+<li>
+<p>初始化 ProxyServer 对象。</p>
+</li>
+<li>
+<p>如果启动参数 <code>--cleanup</code> 设置为 true，则清理 iptables 和 ipvs 规则并退出。</p>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (o <span style="color:#ff79c6">*</span>Options) <span style="color:#50fa7b">Run</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">defer</span> <span style="color:#8be9fd;font-style:italic">close</span>(o.errCh)
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 如果指定了 --write-config-to 参数，则将默认的配置文件写到指定文件并退出</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(o.WriteConfigTo) &gt; <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> o.<span style="color:#50fa7b">writeConfigFile</span>()
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 初始化 ProxyServer 对象</span>
+</span></span><span style="display:flex;"><span>  proxyServer, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">NewProxyServer</span>(o)
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 如果启动参数 --cleanup 设置为 true，则清理 iptables 和 ipvs 规则并退出</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> o.CleanupAndExit {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> proxyServer.<span style="color:#50fa7b">CleanupAndExit</span>()
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  o.proxyServer = proxyServer
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> o.<span style="color:#50fa7b">runLoop</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Run 方法中主要调用了 NewProxyServer 方法来初始化 ProxyServer，然后会调用 runLoop 启动主循环，继续看初始化 ProxyServer 的具体实现：</p>
+<ul>
+<li>初始化 iptables、ipvs 相关的工具的实例</li>
+<li>若启用了 ipvs 则检查内核版本、ipvs 依赖的内核模块、ipset 版本，内核模块主要包括：ip_vs，ip_vs_rr，ip_vs_wrr，ip_vs_sh，nf_conntrack_ipv4，nf_conntrack，若没有相关模块，kube-proxy 会尝试使用 modprobe 命令自动加载。</li>
+<li>根据 proxyMode 初始化 proxier，kube-proxy 启动后只运行一种 proxier。</li>
+</ul>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewProxyServer</span>(o <span style="color:#ff79c6">*</span>Options) (<span style="color:#ff79c6">*</span>ProxyServer, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#50fa7b">newProxyServer</span>(o.config, o.CleanupAndExit, o.master)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">newProxyServer</span>(
+</span></span><span style="display:flex;"><span>    config <span style="color:#ff79c6">*</span>proxyconfigapi.KubeProxyConfiguration,
+</span></span><span style="display:flex;"><span>    cleanupAndExit <span style="color:#8be9fd">bool</span>,
+</span></span><span style="display:flex;"><span>    master <span style="color:#8be9fd">string</span>) (<span style="color:#ff79c6">*</span>ProxyServer, <span style="color:#8be9fd">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">......</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> c, err <span style="color:#ff79c6">:=</span> configz.<span style="color:#50fa7b">New</span>(proxyconfigapi.GroupName); err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        c.<span style="color:#50fa7b">Set</span>(config)
+</span></span><span style="display:flex;"><span>    } <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unable to register configz: %s&#34;</span>, err)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 关键依赖工具 iptables/ipvs/ipset/kernel，实例化这些工具的接口</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> iptInterface utiliptables.Interface
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> ipvsInterface utilipvs.Interface
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> kernelHandler ipvs.KernelHandler
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> ipsetInterface utilipset.Interface
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    execer <span style="color:#ff79c6">:=</span> exec.<span style="color:#50fa7b">New</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 检测是否支持ipvs</span>
+</span></span><span style="display:flex;"><span>    kernelHandler = ipvs.<span style="color:#50fa7b">NewLinuxKernelHandler</span>()
+</span></span><span style="display:flex;"><span>    ipsetInterface = utilipset.<span style="color:#50fa7b">New</span>(execer)
+</span></span><span style="display:flex;"><span>    canUseIPVS, err <span style="color:#ff79c6">:=</span> ipvs.<span style="color:#50fa7b">CanUseIPVSProxier</span>(kernelHandler, ipsetInterface, config.IPVS.Scheduler)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">string</span>(config.Mode) <span style="color:#ff79c6">==</span> proxyModeIPVS <span style="color:#ff79c6">&amp;&amp;</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>    	klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Can&#39;t use the IPVS proxier&#34;</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取当前kube-proxy实例所在宿主机的hostname</span>
+</span></span><span style="display:flex;"><span>    hostname, err <span style="color:#ff79c6">:=</span> utilnode.<span style="color:#50fa7b">GetHostname</span>(config.HostnameOverride)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>    	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, err
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 初始化 kube client 和 event client, 用于和 apiserver通信，</span>
+</span></span><span style="display:flex;"><span>    client, eventClient, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">createClients</span>(config.ClientConnection, master)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, err
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取宿主机 IP</span>
+</span></span><span style="display:flex;"><span>    nodeIP <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">detectNodeIP</span>(client, hostname, config.BindAddress)
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Detected node IP&#34;</span>, <span style="color:#f1fa8c">&#34;address&#34;</span>, nodeIP.<span style="color:#50fa7b">String</span>())
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 判断 proxyMode，其后根据 proxyMode 来 初始化 proxier，如iptable/ipvs</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> proxier proxy.Provider
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> detectLocalMode proxyconfigapi.LocalMode
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    proxyMode <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getProxyMode</span>(<span style="color:#8be9fd;font-style:italic">string</span>(config.Mode), canUseIPVS, iptables.LinuxKernelCompatTester{})
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取本地数据包判定方法</span>
+</span></span><span style="display:flex;"><span>    detectLocalMode, err = <span style="color:#50fa7b">getDetectLocalMode</span>(config)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取 IP 协议栈，默认的是ipv4</span>
+</span></span><span style="display:flex;"><span>    primaryProtocol <span style="color:#ff79c6">:=</span> utiliptables.ProtocolIPv4
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> netutils.<span style="color:#50fa7b">IsIPv6</span>(nodeIP) {
+</span></span><span style="display:flex;"><span>    	primaryProtocol = utiliptables.ProtocolIPv6
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> proxyMode <span style="color:#ff79c6">==</span> proxyModeIPTables {
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">0</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Using iptables Proxier.&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> config.IPTables.MasqueradeBit <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unable to read IPTables MasqueradeBit from config&#34;</span>)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 初始化 iptables 模式的 proxier</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> dualStack {
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 双协议栈</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>        } <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#8be9fd;font-style:italic">var</span> localDetector proxyutiliptables.LocalTrafficDetector
+</span></span><span style="display:flex;"><span>	    localDetector, err = <span style="color:#50fa7b">getLocalDetector</span>(detectLocalMode, config, iptInterface, nodeInfo)
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 初始化 iptables 模式的 proxier</span>
+</span></span><span style="display:flex;"><span>            proxier, err = iptables.<span style="color:#50fa7b">NewProxier</span>(
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>            metrics.<span style="color:#50fa7b">RegisterMetrics</span>()
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    } <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> proxyMode <span style="color:#ff79c6">==</span> proxyModeIPVS {
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 判断是够启用了双栈</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> dualStack {
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 双栈模式</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>        } <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>	    <span style="color:#8be9fd;font-style:italic">var</span> localDetector proxyutiliptables.LocalTrafficDetector
+</span></span><span style="display:flex;"><span>	    localDetector, err = <span style="color:#50fa7b">getLocalDetector</span>(detectLocalMode, config, iptInterface, nodeInfo)
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 初始化 ipvs 模式的 proxier</span>
+</span></span><span style="display:flex;"><span>            proxier, err = ipvs.<span style="color:#50fa7b">NewProxier</span>(
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>        metrics.<span style="color:#50fa7b">RegisterMetrics</span>()
+</span></span><span style="display:flex;"><span>    } <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 初始化 userspace 模式的 proxier，现在很少使用这种模式了</span>
+</span></span><span style="display:flex;"><span>        proxier, err = userspace.<span style="color:#50fa7b">NewProxier</span>(
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建 ProxyServer 实例，其实现了接口k8s.io/kubernetes/cmd/kube-proxy/app/server.go#proxyRun接口</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>ProxyServer{
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>    }, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<p>runLoop 方法主要是启动 proxy Server：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (o <span style="color:#ff79c6">*</span>Options) <span style="color:#50fa7b">runLoop</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 1.watch 配置文件变化</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> o.watcher <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        o.watcher.<span style="color:#50fa7b">Run</span>()
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 2.以 goroutine 方式启动 proxyServer</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
+</span></span><span style="display:flex;"><span>        err <span style="color:#ff79c6">:=</span> o.proxyServer.<span style="color:#50fa7b">Run</span>()
+</span></span><span style="display:flex;"><span>        o.errCh <span style="color:#ff79c6">&lt;-</span> err
+</span></span><span style="display:flex;"><span>    }()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> {
+</span></span><span style="display:flex;"><span>        err <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>o.errCh
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>o.proxyServer.Run()</code> 中会启动已经初始化好的所有服务：</p>
+<ul>
+<li>设定进程 OOMScore，可通过命令行配置，默认值为 <code>--oom-score-adj=&quot;-999&quot;</code>，避免在内存使用紧张的时候 kube-proxy 被误杀掉</li>
+<li>启动 metric server 和 healthz server，两者分别监听 10256 和 10249 端口</li>
+<li>设置内核参数 <code>nf_conntrack_tcp_timeout_established</code> 和 <code>nf_conntrack_tcp_timeout_close_wait</code></li>
+<li>将 proxier 注册到 serviceEventHandler 和 endpointsEventHandler 中, proxier实现了service，node，endpoint，endpointslice 创建/删除/更新事件的回调函数，具体看<a href="#%E4%BA%8B%E4%BB%B6%E7%9A%84%E7%9B%91%E5%90%AC">事件的监听</a></li>
+<li>启动 informer 监听 service 和 endpointslice, node 资源变化</li>
+<li>执行 <code>s.Proxier.SyncLoop()</code>，启动 proxier 主循环</li>
+</ul>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (s <span style="color:#ff79c6">*</span>ProxyServer) <span style="color:#50fa7b">Run</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 进程 OOMScore，避免进程因 oom 被杀掉，此处默认值为 -999</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> oomAdjuster <span style="color:#ff79c6">*</span>oom.OOMAdjuster
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> s.OOMScoreAdj <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        oomAdjuster = oom.<span style="color:#50fa7b">NewOOMAdjuster</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> oomAdjuster.<span style="color:#50fa7b">ApplyOOMScoreAdj</span>(<span style="color:#bd93f9">0</span>, <span style="color:#8be9fd;font-style:italic">int</span>(<span style="color:#ff79c6">*</span>s.OOMScoreAdj)); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>	    klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Failed to apply OOMScore&#34;</span>, <span style="color:#f1fa8c">&#34;err&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 按需启动 healthz server</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">serveHealthz</span>(s.HealthzServer, errCh)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 按需启动 metrics server</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">serveMetrics</span>(s.MetricsBindAddress, s.ProxyMode, s.EnableProfiling, errCh)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 配置 conntrack，设置内核参数 nf_conntrack_tcp_timeout_established 和 nf_conntrack_tcp_timeout_close_wait</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> s.Conntracker <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        max, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getConntrackMax</span>(s.ConntrackConfiguration)
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> max &gt; <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>            err <span style="color:#ff79c6">:=</span> s.Conntracker.<span style="color:#50fa7b">SetMax</span>(max)
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> s.ConntrackConfiguration.TCPEstablishedTimeout <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> s.ConntrackConfiguration.TCPEstablishedTimeout.Duration &gt; <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>            timeout <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">int</span>(s.ConntrackConfiguration.TCPEstablishedTimeout.Duration <span style="color:#ff79c6">/</span> time.Second)
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> s.Conntracker.<span style="color:#50fa7b">SetTCPEstablishedTimeout</span>(timeout); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> s.ConntrackConfiguration.TCPCloseWaitTimeout <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> s.ConntrackConfiguration.TCPCloseWaitTimeout.Duration &gt; <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>            timeout <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">int</span>(s.ConntrackConfiguration.TCPCloseWaitTimeout.Duration <span style="color:#ff79c6">/</span> time.Second)
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> s.Conntracker.<span style="color:#50fa7b">SetTCPCloseWaitTimeout</span>(timeout); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 启动 informer 监听 Services 和 Endpoints 或者 EndpointSlices 信息</span>
+</span></span><span style="display:flex;"><span>    informerFactory <span style="color:#ff79c6">:=</span> informers.<span style="color:#50fa7b">NewSharedInformerFactoryWithOptions</span>(s.Client, s.ConfigSyncPeriod,
+</span></span><span style="display:flex;"><span>        informers.<span style="color:#50fa7b">WithTweakListOptions</span>(<span style="color:#8be9fd;font-style:italic">func</span>(options <span style="color:#ff79c6">*</span>metav1.ListOptions) {
+</span></span><span style="display:flex;"><span>            options.LabelSelector = labelSelector.<span style="color:#50fa7b">String</span>()
+</span></span><span style="display:flex;"><span>        }))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 将 proxier 注册到 serviceConfig、endpointsConfig 中</span>
+</span></span><span style="display:flex;"><span>    serviceConfig <span style="color:#ff79c6">:=</span> config.<span style="color:#50fa7b">NewServiceConfig</span>(informerFactory.<span style="color:#50fa7b">Core</span>().<span style="color:#50fa7b">V1</span>().<span style="color:#50fa7b">Services</span>(), s.ConfigSyncPeriod)
+</span></span><span style="display:flex;"><span>    serviceConfig.<span style="color:#50fa7b">RegisterEventHandler</span>(s.Proxier)
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> serviceConfig.<span style="color:#50fa7b">Run</span>(wait.NeverStop)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> endpointsHandler, ok <span style="color:#ff79c6">:=</span> s.Proxier.(config.EndpointsHandler); ok <span style="color:#ff79c6">&amp;&amp;</span> !s.UseEndpointSlices {
+</span></span><span style="display:flex;"><span>    	endpointsConfig <span style="color:#ff79c6">:=</span> config.<span style="color:#50fa7b">NewEndpointsConfig</span>(informerFactory.<span style="color:#50fa7b">Core</span>().<span style="color:#50fa7b">V1</span>().<span style="color:#50fa7b">Endpoints</span>(), s.ConfigSyncPeriod)
+</span></span><span style="display:flex;"><span>    	endpointsConfig.<span style="color:#50fa7b">RegisterEventHandler</span>(endpointsHandler)
+</span></span><span style="display:flex;"><span>    	<span style="color:#ff79c6">go</span> endpointsConfig.<span style="color:#50fa7b">Run</span>(wait.NeverStop)
+</span></span><span style="display:flex;"><span>    } <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>    	endpointSliceConfig <span style="color:#ff79c6">:=</span> config.<span style="color:#50fa7b">NewEndpointSliceConfig</span>(informerFactory.<span style="color:#50fa7b">Discovery</span>().<span style="color:#50fa7b">V1</span>().<span style="color:#50fa7b">EndpointSlices</span>(), s.ConfigSyncPeriod)
+</span></span><span style="display:flex;"><span>    	endpointSliceConfig.<span style="color:#50fa7b">RegisterEventHandler</span>(s.Proxier)
+</span></span><span style="display:flex;"><span>    	<span style="color:#ff79c6">go</span> endpointSliceConfig.<span style="color:#50fa7b">Run</span>(wait.NeverStop)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 启动 informer</span>
+</span></span><span style="display:flex;"><span>    informerFactory.<span style="color:#50fa7b">Start</span>(wait.NeverStop)
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>    s.<span style="color:#50fa7b">birthCry</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 启动 proxier 主循环</span>
+</span></span><span style="display:flex;"><span>    s.Proxier.<span style="color:#50fa7b">SyncLoop</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&lt;-</span>errCh
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (s <span style="color:#ff79c6">*</span>ProxyServer) <span style="color:#50fa7b">birthCry</span>() {
+</span></span><span style="display:flex;"><span>	s.Recorder.<span style="color:#50fa7b">Eventf</span>(s.NodeRef, <span style="color:#ff79c6">nil</span>, api.EventTypeNormal, <span style="color:#f1fa8c">&#34;Starting&#34;</span>, <span style="color:#f1fa8c">&#34;StartKubeProxy&#34;</span>, <span style="color:#f1fa8c">&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<h2 id="事件的监听">事件的监听</h2>
+<p>kube-proxy 通过 ServiceConfig 封装了 services 资源的新增/删除/更新事件注册到 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/informer/">informer</a> 的逻辑，真正的资源新增/删除/更新事件的回调函数由 proxier 提供，而且 proxier 会被加入到 ServiceConfig 的回调句柄列表中：</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/proxy/config/config.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// ServiceConfig tracks a set of service configurations.</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> ServiceConfig <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>	listerSynced  cache.InformerSynced
+</span></span><span style="display:flex;"><span>	eventHandlers []ServiceHandler
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// NewServiceConfig creates a new ServiceConfig.</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewServiceConfig</span>(serviceInformer coreinformers.ServiceInformer, resyncPeriod time.Duration) <span style="color:#ff79c6">*</span>ServiceConfig {
+</span></span><span style="display:flex;"><span>	result <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>ServiceConfig{
+</span></span><span style="display:flex;"><span>		listerSynced: serviceInformer.<span style="color:#50fa7b">Informer</span>().HasSynced,
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	serviceInformer.<span style="color:#50fa7b">Informer</span>().<span style="color:#50fa7b">AddEventHandlerWithResyncPeriod</span>(
+</span></span><span style="display:flex;"><span>		cache.ResourceEventHandlerFuncs{
+</span></span><span style="display:flex;"><span>			AddFunc:    result.handleAddService,
+</span></span><span style="display:flex;"><span>			UpdateFunc: result.handleUpdateService,
+</span></span><span style="display:flex;"><span>			DeleteFunc: result.handleDeleteService,
+</span></span><span style="display:flex;"><span>		},
+</span></span><span style="display:flex;"><span>		resyncPeriod,
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> result
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 添加回调句柄，其实就是各个proxier</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>ServiceConfig) <span style="color:#50fa7b">RegisterEventHandler</span>(handler ServiceHandler) {
+</span></span><span style="display:flex;"><span>	c.eventHandlers = <span style="color:#8be9fd;font-style:italic">append</span>(c.eventHandlers, handler)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>ServiceConfig) <span style="color:#50fa7b">Run</span>(stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}) {
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Starting service config controller&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 首次启动, 等待数据同步到缓存</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !cache.<span style="color:#50fa7b">WaitForNamedCacheSync</span>(<span style="color:#f1fa8c">&#34;service config&#34;</span>, stopCh, c.listerSynced) {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> c.eventHandlers {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Calling handler.OnServiceSynced()&#34;</span>)
+</span></span><span style="display:flex;"><span>		c.eventHandlers[i].<span style="color:#50fa7b">OnServiceSynced</span>()
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 处理 service 添加事件</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>ServiceConfig) <span style="color:#50fa7b">handleAddService</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
+</span></span><span style="display:flex;"><span>	service, ok <span style="color:#ff79c6">:=</span> obj.(<span style="color:#ff79c6">*</span>v1.Service)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok {
+</span></span><span style="display:flex;"><span>		utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unexpected object type: %v&#34;</span>, obj))
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> c.eventHandlers {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Calling handler.OnServiceAdd&#34;</span>)
+</span></span><span style="display:flex;"><span>		c.eventHandlers[i].<span style="color:#50fa7b">OnServiceAdd</span>(service)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 处理 service 更新事件</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>ServiceConfig) <span style="color:#50fa7b">handleUpdateService</span>(oldObj, newObj <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
+</span></span><span style="display:flex;"><span>	oldService, ok <span style="color:#ff79c6">:=</span> oldObj.(<span style="color:#ff79c6">*</span>v1.Service)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok {
+</span></span><span style="display:flex;"><span>		utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unexpected object type: %v&#34;</span>, oldObj))
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	service, ok <span style="color:#ff79c6">:=</span> newObj.(<span style="color:#ff79c6">*</span>v1.Service)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok {
+</span></span><span style="display:flex;"><span>		utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unexpected object type: %v&#34;</span>, newObj))
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> c.eventHandlers {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Calling handler.OnServiceUpdate&#34;</span>)
+</span></span><span style="display:flex;"><span>		c.eventHandlers[i].<span style="color:#50fa7b">OnServiceUpdate</span>(oldService, service)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 处理 service 删除事件</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>ServiceConfig) <span style="color:#50fa7b">handleDeleteService</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
+</span></span><span style="display:flex;"><span>	service, ok <span style="color:#ff79c6">:=</span> obj.(<span style="color:#ff79c6">*</span>v1.Service)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok {
+</span></span><span style="display:flex;"><span>		tombstone, ok <span style="color:#ff79c6">:=</span> obj.(cache.DeletedFinalStateUnknown)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !ok {
+</span></span><span style="display:flex;"><span>			utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unexpected object type: %v&#34;</span>, obj))
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> service, ok = tombstone.Obj.(<span style="color:#ff79c6">*</span>v1.Service); !ok {
+</span></span><span style="display:flex;"><span>			utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unexpected object type: %v&#34;</span>, obj))
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> c.eventHandlers {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Calling handler.OnServiceDelete&#34;</span>)
+</span></span><span style="display:flex;"><span>		c.eventHandlers[i].<span style="color:#50fa7b">OnServiceDelete</span>(service)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<p>对于 node/endpoint/endpointslice 有与之对应的 NodeConfig/EndpointConfig/EndpointSliceConfig，其逻辑和 ServiceConfig 类似，这里就不啰唆了。</p>
+<h2 id="三种代理模式">三种代理模式</h2>
+<p>上述所说的 proxier 其实是 kube-proxy 支持的三种代理模式: iptables, ipvs, userspace 它们其中一种的实例。 默认的模式是 iptables，userspace 已经不常用。</p>
+<p>kube-proxy 提供了接口 Provider 来抽象代理模式，即真正干活的 proxier， 上述中的 ProxyServer 只是用来做一些通用的事务，以及决定使用哪一种代理模式。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Provider <span style="color:#8be9fd;font-style:italic">interface</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// endpointslice 资源删除/新增/更新事件处理接口</span>
+</span></span><span style="display:flex;"><span>  config.EndpointSliceHandler
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// service 资源删除/新增/更新事件回调处理接口</span>
+</span></span><span style="display:flex;"><span>  config.ServiceHandler
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// node  资源删除/新增/更新事件回调处理接口</span>
+</span></span><span style="display:flex;"><span>  config.NodeHandler
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Sync immediately synchronizes the Provider&#39;s current state to proxy rules.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Sync</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// SyncLoop runs periodic work.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// This is expected to run as a goroutine or as the main loop of the app.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// It does not return.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">SyncLoop</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>由于篇幅有限，<code>iptables</code> 和 <code>ipvs</code> 的解析请查看如下文章：</p>
+<p><a href="https://www.zhangzewen.net/posts/kubernetes/kube-proxy/iptables/">kube-proxy iptables 模式</a></p>
+<p><a href="https://www.zhangzewen.net/posts/kubernetes/kube-proxy/ipvs/">kube-proxy ipvs 模式</a></p>
+
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kube-proxy/" class="tag-link">Kube-Proxy</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

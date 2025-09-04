@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod">
+  <meta itemprop="description" content="介于能力有限，翻译有不当之处，不吝赐教
+这是一个系列文章：
+[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses [译]Debugging with eBPF Part 3: Tracing SSL/TLS connections 原文: Debugging with eBPF Part 1: Tracing Go function arguments in prod">
+  <meta itemprop="datePublished" content="2024-03-09T15:03:00+08:00">
+  <meta itemprop="dateModified" content="2024-03-09T15:03:00+08:00">
+  <meta itemprop="wordCount" content="526">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="EBPF,Linux,Kernel,Tracing,Debug,Go,翻译">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod">
+  <meta name="twitter:description" content="介于能力有限，翻译有不当之处，不吝赐教
+这是一个系列文章：
+[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses [译]Debugging with eBPF Part 3: Tracing SSL/TLS connections 原文: Debugging with eBPF Part 1: Tracing Go function arguments in prod">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod">
+  <meta property="og:description" content="介于能力有限，翻译有不当之处，不吝赐教
+这是一个系列文章：
+[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses [译]Debugging with eBPF Part 3: Tracing SSL/TLS connections 原文: Debugging with eBPF Part 1: Tracing Go function arguments in prod">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-03-09T15:03:00+08:00">
+    <meta property="article:modified_time" content="2024-03-09T15:03:00+08:00">
+    <meta property="article:tag" content="EBPF">
+    <meta property="article:tag" content="Linux">
+    <meta property="article:tag" content="Kernel">
+    <meta property="article:tag" content="Tracing">
+    <meta property="article:tag" content="Debug">
+    <meta property="article:tag" content="Go">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/#webpage",
+      "url": "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/",
+      "name": "[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2024-03-09T15:03:00+08:00",
+      "dateModified": "2024-03-09T15:03:00+08:00",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e这是一个系列文章：\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e\u003ca href=\"https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/\"\u003e[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003e\u003ca href=\"https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/\"\u003e[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections\u003c/a\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003e原文: \u003cstrong\u003e\u003ca href=\"https://blog.px.dev/ebpf-function-tracing/\"\u003eDebugging with eBPF Part 1: Tracing Go function arguments in prod\u003c/a\u003e\u003c/strong\u003e\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/#webpage"
+      },
+      "headline": "[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod",
+      "datePublished": "2024-03-09T15:03:00+08:00",
+      "dateModified": "2024-03-09T15:03:00+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "EBPF",
+        "Linux",
+        "Kernel",
+        "Tracing",
+        "Debug",
+        "Go",
+        "翻译"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#references">References</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2024-03-09T15:03:00&#43;0800">Created: Mar 9, 2024</time>
+    <span class="readtime">&middot; 3 min read</span>
+  </div>
+
+  <div>
+    <blockquote>
+<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
+<p>这是一个系列文章：</p>
+<ul>
+<li><a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></li>
+<li><a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/">[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</a></li>
+</ul>
+<p>原文: <strong><a href="https://blog.px.dev/ebpf-function-tracing/">Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></strong></p></blockquote>
+<p>本片文章是描述如何使用 eBPF 在生产环境中调试应用程序而无需重新编译/重新部署的系列文章中的第一篇。 这篇文章描述了如何使用 <a href="https://github.com/iovisor/gobpf">gobpf</a> 和 <strong>Uprobes</strong> 为 Go 应用程序构建函数参数跟踪器。 该技术还可以扩展到其他编译语言，例如 C++、Rust 等。本系列其余文章将讨论使用 eBPF 来跟踪 HTTP/gRPC 数据、SSL 等。</p>
+<p>在调试的过程中，我们通常对捕获程序运行时的状态信息更感兴趣。 这使我们能够检查应用程序正在做什么并找到代码中的bug。 观察状态的一种简单方法是使用调试器来捕获函数参数。 对于 Go 应用程序，我们经常使用 Delve 或 gdb。</p>
+<p>Delve 和 gdb 非常适合在开发环境中进行调试，但它们在生产环境中并不经常使用。 调试器强大的特性也可能使得它们并不适合在生产系统中使用。 例如调试器可能导致程序严重中断，甚至修改了程序状态，这可能导致生产环境下的软件的产生意外故障。</p>
+<p>为了更清晰地捕获函数参数，我们将探索使用 Linux 4.x+ 中可用的增强型 BPF (<a href="https://ebpf.io/">eBPF</a>) 和更高级别的 Go 库 <a href="https://github.com/iovisor/gobpf">gobpf</a>。</p>
+<p>增强型 BPF (eBPF) 是一种内核技术，可在 Linux 4.x+系统中使用。 可以将其视为在 Linux 内核内部运行的轻量级沙盒虚拟机，并且其可以对内核内存的访问进行验证。</p>
+<p>如下面的概述所示，eBPF 允许内核运行 BPF 字节码。 虽然使用的前端语言可能会有所不同，但它通常是 C 的受限子集。通常，C 代码首先使用 Clang 编译为 BPF 字节码，然后验证字节码以确保其可以安全执行。 这些严格的验证保证机器代码不会有意或无意地破坏 Linux 内核，并且每次触发 BPF 探针时都会执行有限数量的指令。 这些保证使 eBPF 能够用于性能敏感的工作负载，如数据包过滤、网络监控等。</p>
+<p>从功能上讲，eBPF 允许您在某些事件（例如计时器、网络事件或函数调用）上运行受限的 C 代码。 当在函数调用上触发时，我们称这些函数为探针，它们可用于在内核中的函数调用（kprobes）或用户空间程序中的函数调用（<strong>Uprobes</strong>）上运行。 这篇文章的重点是使用 <strong>Uprobes</strong> 来动态跟踪函数参数。</p>
+<p><strong>Uprobes</strong> 允许您通过插入触发软中断的调试陷阱指令（x86 上的 <code>int3</code>）来拦截用户空间程序。 这也是<a href="https://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints">调试器的原理所在</a>。 uprobe 的流程与任何其他 BPF 程序基本相同，请看下图。 执行编译和验证 BPF 程序作为 <strong>uprobe</strong> 的一部分，执行结果可以通过写入缓冲区返回。</p>
+<p><img src="https://blog.px.dev/static/a11d6d9cb78e055d59136a97665907d3/073a0/bpf-tracing.jpg" alt="BPF for tracing (from Brendan Gregg)"></p>
+<p>让我们看看 <strong>Uprobes</strong> 的实际功能。为了部署 <strong>Uprobes</strong> 和捕获函数参数，我们将使用<a href="https://github.com/pixie-io/pixie-demos/blob/main/simple-gotracing/app/app.go">简单的演示程序</a>。这个 Go 程序的相关部分如下所示</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// computeE computes the approximation of e by running a fixed number of iterations.</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">computeE</span>(iterations <span style="color:#8be9fd">int64</span>) <span style="color:#8be9fd">float64</span> {
+</span></span><span style="display:flex;"><span>  res <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">2.0</span>
+</span></span><span style="display:flex;"><span>  fact <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">1.0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">int64</span>(<span style="color:#bd93f9">2</span>); i &lt; iterations; i<span style="color:#ff79c6">++</span> {
+</span></span><span style="display:flex;"><span>    fact <span style="color:#ff79c6">*=</span> <span style="color:#8be9fd;font-style:italic">float64</span>(i)
+</span></span><span style="display:flex;"><span>    res <span style="color:#ff79c6">+=</span> <span style="color:#bd93f9">1</span> <span style="color:#ff79c6">/</span> fact
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> res
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>  http.<span style="color:#50fa7b">HandleFunc</span>(<span style="color:#f1fa8c">&#34;/e&#34;</span>, <span style="color:#8be9fd;font-style:italic">func</span>(w http.ResponseWriter, r <span style="color:#ff79c6">*</span>http.Request) {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Parse iters argument from get request, use default if not available.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ... removed for brevity ...</span>
+</span></span><span style="display:flex;"><span>    w.<span style="color:#50fa7b">Write</span>([]<span style="color:#8be9fd;font-style:italic">byte</span>(fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;e = %0.4f\n&#34;</span>, <span style="color:#50fa7b">computeE</span>(iters))))
+</span></span><span style="display:flex;"><span>  })
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Start server...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>main()</code> 中的逻辑实现了一个简单的 HTTP 服务器，其只有一个只支持<strong>GET</strong>的路径<code>/e</code>【译者注：上面的代码看不出来，请直接点击提供的链接来查看代码】，它使用迭代近似计算欧拉数 ($e$)。 函数<code>computeE</code> 接受一个查询参数（<em>iters</em>），它指定为近似值运行的迭代次数。 迭代次数越多，近似值越准确，但需要以计算周期为代价。 理解函数背后的数学并不是必须的。 我们只对跟踪函数<code>computeE</code> 调用的参数感兴趣。</p>
+<p>我们可以通过跟踪可执行文件中的符号(symbols)来了解<strong>Uprobes</strong>的工作原理。 由于 <strong>Uprobes</strong> 通过插入调试陷阱指令来工作，因此我们需要获取函数所在的地址。 Linux 上的 Go 二进制文件使用 ELF 来存储调试信息。即使在经过编译优化后二进制文件中也能找到这些调试信息，除非这些信息被剥离。 我们可以使用命令 <code>objdump</code> 来检查二进制文件中的符号：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#ff79c6">[</span>0<span style="color:#ff79c6">]</span> % objdump --syms app|grep computeE
+</span></span><span style="display:flex;"><span>00000000006609a0 g     F .text    000000000000004b              main.computeE
+</span></span></code></pre></div><p>从上面的输出中，我们知道函数<code>computeE</code>位于地址<code>0x6609a0</code>。 要查看这条指令的上下文，我们可以执行 <code>objdump</code>命令进行反汇编（通过添加 <code>-d</code> 完成）。 反汇编代码如下所示：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#ff79c6">[</span>0<span style="color:#ff79c6">]</span> % objdump -d app | less
+</span></span><span style="display:flex;"><span>00000000006609a0 &lt;main.computeE&gt;:
+</span></span><span style="display:flex;"><span>  6609a0:       <span style="color:#bd93f9">48</span> 8b <span style="color:#bd93f9">44</span> <span style="color:#bd93f9">24</span> <span style="color:#bd93f9">08</span>          mov    0x8<span style="color:#ff79c6">(</span>%rsp<span style="color:#ff79c6">)</span>,%rax
+</span></span><span style="display:flex;"><span>  6609a5:       b9 <span style="color:#bd93f9">02</span> <span style="color:#bd93f9">00</span> <span style="color:#bd93f9">00</span> <span style="color:#bd93f9">00</span>          mov    <span style="color:#8be9fd;font-style:italic">$0</span>x2,%ecx
+</span></span><span style="display:flex;"><span>  6609aa:       f2 0f <span style="color:#bd93f9">10</span> <span style="color:#bd93f9">05</span> <span style="color:#bd93f9">16</span> a6 0f    movsd  0xfa616<span style="color:#ff79c6">(</span>%rip<span style="color:#ff79c6">)</span>,%xmm0
+</span></span><span style="display:flex;"><span>  6609b1:       <span style="color:#bd93f9">00</span>
+</span></span><span style="display:flex;"><span>  6609b2:       f2 0f <span style="color:#bd93f9">10</span> 0d <span style="color:#bd93f9">36</span> a6 0f    movsd  0xfa636<span style="color:#ff79c6">(</span>%rip<span style="color:#ff79c6">)</span>,%xmm1
+</span></span></code></pre></div><p>从上面的反汇编结果可以看到调用 <code>computeE</code> 时会发生什么： 第一条指令是<code>mov 0x8(%rsp),%rax</code>。 即把寄存器<code>rsp</code>所指向的地址偏移<code>0x8</code>后的地址写入到寄存器<code>rax</code>【译者注：这个就是进入函数的时候<strong>ESP</strong>/<strong>EBP</strong>/<strong>EIP</strong>变化相关，可通过google去查找相关信息】。</p>
+<p>我们可以使用这些已知的信息来深入研究并编写代码来跟踪<code>computeE</code>”的参数。</p>
+<p>要捕获事件，我们需要注册一个 <strong>uprobe</strong> 函数并拥有一个可以读取输出的用户空间函数。 如下图所示。 我们将编写一个名为 <code>tracer</code> 的可执行二进制文件，负责注册 BPF 代码并读取 BPF 代码的结果。 如图所示，<strong>uprobe</strong> 将简单地写入 <strong>perf-buffer</strong>，这是一种用于 perf 事件的 linux 内核数据结构。</p>
+<p><img src="https://blog.px.dev/static/9f8b26f88f9b132440ef1b9d48b5a341/app-tracer.svg" alt="High-level overview showing the Tracer binary listening to perf events generated from the App"></p>
+<p>现在我们了解了所涉及的部分，让我们来看看当我们添加一个 uprobe 时会发生什么的细节。 下图显示了 Linux 内核如何使用 uprobe 修改二进制文件。 软中断指令 (<code>int3</code>) 作为第一条指令插入 <code>main.computeE</code>。 这会导致软中断，允许 Linux 内核执行我们的 BPF 函数。 然后我们将参数写入<strong>perf-buffer</strong>，由<code>tracer</code>异步读取。</p>
+<p><img src="https://blog.px.dev/static/87301c7282e8f8270fee2afb9fe85c81/app-trace.svg" alt="Details of how a debug trap instruction is used call a BPF program"></p>
+<p>用于此例子的 BPF 功能相对简单； C代码如下所示。 我们注册这个函数，以便每次调用<code>main.computeE</code> 时都会调用它。 一旦它被调用，我们只需读取函数参数并写入 perf 缓冲区。 可以<a href="https://github.com/pixie-io/pixie-demos/blob/main/simple-gotracing/trace_example/trace.go">点击</a>查看完整的示例。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;uapi/linux/ptrace.h&gt;</span><span style="color:#ff79c6">
+</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b">BPF_PERF_OUTPUT</span>(trace);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">inline</span> <span style="color:#8be9fd">int</span> <span style="color:#50fa7b">computeECalled</span>(<span style="color:#ff79c6">struct</span> pt_regs <span style="color:#ff79c6">*</span>ctx) {
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// The input argument is stored in ax.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#8be9fd">long</span> val <span style="color:#ff79c6">=</span> ctx<span style="color:#ff79c6">-&gt;</span>ax;
+</span></span><span style="display:flex;"><span>  trace.<span style="color:#50fa7b">perf_submit</span>(ctx, <span style="color:#ff79c6">&amp;</span>val, <span style="color:#ff79c6">sizeof</span>(val));
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>现在我们为 <code>main.computeE</code> 函数提供了一个功能齐全的端到端参数跟踪器！ 其结果显示在下面的视频剪辑中。</p>
+<p><img src="https://blog.px.dev/static/4de8713a5b05e1f9132350f333572174/e2e-demo.gif" alt="End-to-End demo"></p>
+<p>实际上我们也可以使用 GDB 来查看对二进制文件所做的修改。 在这里，我们在运行我们的跟踪器二进制文件之前打印了<code>0x6609a0</code>地址处的指令。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>1<span style="color:#ff79c6">(</span>gdb<span style="color:#ff79c6">)</span> display /4i 0x6609a0
+</span></span><span style="display:flex;"><span>210: x/4i 0x6609a0
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">3</span>   0x6609a0 &lt;main.computeE&gt;:    mov    0x8<span style="color:#ff79c6">(</span>%rsp<span style="color:#ff79c6">)</span>,%rax
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">4</span>   0x6609a5 &lt;main.computeE+5&gt;:  mov    <span style="color:#8be9fd;font-style:italic">$0</span>x2,%ecx
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">5</span>   0x6609aa &lt;main.computeE+10&gt;: movsd  0xfa616<span style="color:#ff79c6">(</span>%rip<span style="color:#ff79c6">)</span>,%xmm0
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">6</span>   0x6609b2 &lt;main.computeE+18&gt;: movsd  0xfa636<span style="color:#ff79c6">(</span>%rip<span style="color:#ff79c6">)</span>,%xmm1
+</span></span></code></pre></div><p>这是在我们运行跟踪器二进制文件之后。 我们可以清楚地看到第一条指令现在是 <code>int3</code>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>1<span style="color:#ff79c6">(</span>gdb<span style="color:#ff79c6">)</span> display /4i 0x6609a0
+</span></span><span style="display:flex;"><span>27: x/4i 0x6609a0
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">3</span>   0x6609a0 &lt;main.computeE&gt;:    int3
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">4</span>   0x6609a1 &lt;main.computeE+1&gt;:  mov    0x8<span style="color:#ff79c6">(</span>%rsp<span style="color:#ff79c6">)</span>,%eax
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">5</span>   0x6609a5 &lt;main.computeE+5&gt;:  mov    <span style="color:#8be9fd;font-style:italic">$0</span>x2,%ecx
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">6</span>   0x6609aa &lt;main.computeE+10&gt;: movsd  0xfa616<span style="color:#ff79c6">(</span>%rip<span style="color:#ff79c6">)</span>,%xmm0
+</span></span></code></pre></div><p>尽管我们对这个特定示例的跟踪器进行了硬编码，但可以使这个过程泛形化 。 Go 的许多方面，例如嵌套指针、接口、通道等，使这个过程具有挑战性，但解决这些问题需要对现有系统引入新的依赖(BPF)。 此外，由于此过程在可执行的二进制级别上工作，因此它可以与其他语言（C++、Rust 等）的本地编译的可执行二进制文件一起使用。 我们只需要考虑它们各自 <strong>ABI</strong> 的差异。</p>
+<p>使用 <strong>Uprobes</strong> 进行 BPF 跟踪有其自身的优点和缺点。 当我们需要观察可执行二进制执行状态时，使用 BPF 是有益的，即使在附加调试器会出现问题或有害的环境中运行（例如生产环境下的可执行二进制文件）。 最大的缺点是获为了得对应用程序状态所需要编写的代码。 虽然 BPF 代码相对容易理解，但编写和维护起来很复杂。 如果没有大量的高级工具，这不太可能用于通用调试。</p>
+<p>Go dynamic logging is something we are working on at Pixie. You can checkout <a href="https://docs.px.dev/tutorials/simple-go-tracing/">this</a> to see how Pixie traces Go applications running on K8s clusters. If this post&rsquo;s contents are interesting, please give <a href="https://px.dev/">Pixie</a> a try, or check out our <a href="https://pixielabs.ai/careers">open positions</a>.</p>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://github.com/iovisor/gobpf">iovisor/gobpf</a></li>
+<li><a href="https://github.com/iovisor/bcc">iovisor/bcc</a></li>
+<li>GoPoland Meetup <a href="https://www.youtube.com/watch?v=SlcBq3xDc7I">Video</a> + <a href="https://www.slideshare.net/ZainAsgar/go-logging-using-ebpf">Slides</a></li>
+<li>GoBangalore Meetup <a href="https://www.youtube.com/watch?v=0mxUU_--dDM&amp;feature=youtu.be">Video</a>. Checkout Below:</li>
+</ul>
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+      <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/0mxUU_--dDM?autoplay=0&amp;controls=1&amp;end=0&amp;loop=0&amp;mute=0&amp;start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video"></iframe>
+    </div>
+
+
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/ebpf/" class="tag-link">EBPF</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/linux/" class="tag-link">Linux</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kernel/" class="tag-link">Kernel</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/tracing/" class="tag-link">Tracing</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/debug/" class="tag-link">Debug</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/go/" class="tag-link">Go</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E7%BF%BB%E8%AF%91/" class="tag-link">翻译</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>What a Life!</title>
+    <link>https://www.zhangzewen.net/</link>
+    <description>Recent content on What a Life!</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Fri, 29 Aug 2025 02:43:31 +0800</lastBuildDate>
+    <atom:link href="https://www.zhangzewen.net/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>kubernetes 源码分析之 AttachDetach Controller </title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/</link>
+      <pubDate>Fri, 29 Aug 2025 02:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 PV Controller</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/</link>
+      <pubDate>Fri, 29 Aug 2025 02:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建PersistentVolumeController，NewController 主要做了如下几件事情：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>MIT 公开课 6.S081 实现总结</title>
+      <link>https://www.zhangzewen.net/posts/os/xv6/6.s081_summary/</link>
+      <pubDate>Wed, 20 Aug 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/os/xv6/6.s081_summary/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;6.S081&lt;/strong&gt; 是非常著名的 MIT 操作系统课程。该公开课链接的年份后缀的是可以更改的，这个课程提供的可编程 lab 每年都稍微有些不同，每个 lab 的自评测中的 answers-*.txt 和 time.txt 需要自行填写。 本篇文章对应的是&lt;a href=&#34;https://pdos.csail.mit.edu/6.828/2024/&#34;&gt; 2024 年度课程&lt;/a&gt;的实现总结。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>xv6 之 进程调度</title>
+      <link>https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/</link>
+      <pubDate>Sun, 10 Aug 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/</guid>
+      <description>&lt;p&gt;本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。 请结合 &lt;a href=&#34;https://www.zhangzewen.net/posts/os/xv6/xv6_trap/&#34;&gt;xv6 trap 机制&lt;/a&gt; 来查阅本篇笔记。&lt;/p&gt;&#xA;&lt;p&gt;xv6 进程间切换发生在如下两种情况：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;系统中断， 比如 time interrupt， 会调用 yield 进行切换。&lt;/li&gt;&#xA;&lt;li&gt;调用 xv6 的 sleep 和 wakeup 。&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h2 id=&#34;寄存器&#34;&gt;寄存器&lt;/h2&gt;&#xA;&lt;table&gt;&#xA;  &lt;thead&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;th style=&#34;text-align: center&#34;&gt;寄存器&lt;/th&gt;&#xA;          &lt;th style=&#34;text-align: center&#34;&gt;描述&lt;/th&gt;&#xA;      &lt;/tr&gt;&#xA;  &lt;/thead&gt;&#xA;  &lt;tbody&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;x0/zero&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;始终为0&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;ra&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存 return address&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;sp&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存栈顶地址&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;t0-t6&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存临时数据，这些数据会在函数调用返回后失效，调用函数作用域内的数据&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;s0-s11&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存数据，这些数据在函数调用返回后不失效，调用幻术作用域外的数据&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;a0-a1&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存参数列表中的前两个/保存返回值&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;a2-a7&lt;/td&gt;&#xA;          &lt;td style=&#34;text-align: center&#34;&gt;保存参数列表前两位之后的参数&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;  &lt;/tbody&gt;&#xA;&lt;/table&gt;&#xA;&lt;h2 id=&#34;上下文切换&#34;&gt;上下文切换&lt;/h2&gt;&#xA;&lt;p&gt;xv6 中上下文切换是通过 swtch 完成的， swtch 是一段汇编代码， 其实就是保存要保存出让cpu进程的寄存器，加载获取cpu进程的寄存器：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>xv6 之 trap 机制</title>
+      <link>https://www.zhangzewen.net/posts/os/xv6/xv6_trap/</link>
+      <pubDate>Tue, 05 Aug 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/os/xv6/xv6_trap/</guid>
+      <description>&lt;p&gt;本片文章结合 xv6 的代码、配套 xv6-book 和 RISC-V 的文档，根据自己理解总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。如果错误，望不吝赐教。&lt;/p&gt;&#xA;&lt;h2 id=&#34;trap-机制&#34;&gt;trap 机制&lt;/h2&gt;&#xA;&lt;p&gt;根据 xv6 book 所述，以下三种状况会导致从用户态到内核态的切换：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes csi 之 CSI Volume Plugin</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/csi/kubelet-volume-plugins-csi/</link>
+      <pubDate>Sat, 02 Aug 2025 00:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/csi/kubelet-volume-plugins-csi/</guid>
+      <description>&lt;h2 id=&#34;csidriver-注册&#34;&gt;CSIDriver 注册&lt;/h2&gt;&#xA;&lt;p&gt;所有的 CSI Driver 都是通过map来关联存储的：&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; Driver &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;endpoint                &lt;span style=&#34;color:#8be9fd&#34;&gt;string&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;highestSupportedVersion &lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;utilversion.Version&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; DriversStore &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;store&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;sync.RWMutex&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; store &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;map&lt;/span&gt;[&lt;span style=&#34;color:#8be9fd&#34;&gt;string&lt;/span&gt;]Driver&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;具体的增/删/改/查可以看&lt;code&gt;k8s.io/kubernetes/pkg/volume/csi/csi_drivers_store.go&lt;/code&gt;， 全局变量 csiDrivers 就存储了所有注册的CSI Driver：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes csi 之 external-provisioner</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/</link>
+      <pubDate>Sat, 02 Aug 2025 00:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/</guid>
+      <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/kubernetes-csi/external-provisioner.git&#34;&gt;external-provisioner&lt;/a&gt; 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 &lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/&#34;&gt;sig-storage-lib-external-provisioner&lt;/a&gt; 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 &lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/&#34;&gt;PV Controller&lt;/a&gt; 的工作。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes csi 之 node-driver-register</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/csi/node-driver-register/</link>
+      <pubDate>Sat, 02 Aug 2025 00:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/csi/node-driver-register/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://github.com/kubernetes-csi/node-driver-registrar.git&#34;&gt;node-driver-register&lt;/a&gt; 是一个辅助容器，通过 &lt;a href=&#34;https://github.com/container-storage-interface/spec.git&#34;&gt;CSI 接口&lt;/a&gt; 提供的 Identity Service 来获取插件信息，并且通过&lt;a href=&#34;https://github.com/kubernetes/kubelet/blob/master/pkg/apis/pluginregistration/v1/api.proto&#34;&gt;kubelet 插件注册接口&lt;/a&gt; 注册到 kubelet。所以，node-dirver-rigister 即是一个客户端，也是一个服务端。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes csi 之 sig-storage-lib-external-provisioner</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/</link>
+      <pubDate>Sat, 02 Aug 2025 00:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://github.com/kubernetes-sigs/sig-storage-lib-external-provisioner.git&#34;&gt;sig-storage-lib-external-provisioner&lt;/a&gt; 是用来开发的 external provisioners 的工具库，提供了一个通用的控制器，即根据提供的 Provisioner，然后监听 PVC/PV 资源的变化来实现创建/删除 PV。&lt;/p&gt;&#xA;&lt;h2 id=&#34;接口&#34;&gt;接口&lt;/h2&gt;&#xA;&lt;p&gt;sig-storage-lib-external-provisioner 中的接口 Provisioner 提供了 external provisioners 实现创建/删除 PV 的方法 Provision/Delete, 接口 BlockProvisioner 扩展了 Provisioner：能够判断 provisioner是否支持块设备。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>xv6 之 内存管理</title>
+      <link>https://www.zhangzewen.net/posts/os/xv6/xv6_memory_management/</link>
+      <pubDate>Mon, 28 Jul 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/os/xv6/xv6_memory_management/</guid>
+      <description>&lt;p&gt;本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃和不连贯，请见谅。&lt;/p&gt;&#xA;&lt;h2 id=&#34;xv6-page-table&#34;&gt;xv6 page table&lt;/h2&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/os/xv6/risc-v-pagetable.png&#34; alt=&#34;risc-v page table&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;上图是 &lt;code&gt;RISC-V&lt;/code&gt; 多种虚拟内存布局中的一种 — &lt;code&gt;Sv39&lt;/code&gt;。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>flannel 源码分析</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/cni/flannel/</link>
+      <pubDate>Mon, 21 Jul 2025 23:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/cni/flannel/</guid>
+      <description>&lt;p&gt;flannel 的配置一般如下：&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;#34;Network&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;10.0.0.0/16&amp;#34;&lt;/span&gt;,&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;#34;SubnetLen&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#bd93f9&#34;&gt;24&lt;/span&gt;,&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;#34;SubnetMin&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;10.0.1.0&amp;#34;&lt;/span&gt;,&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;#34;SubnetMax&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;10.0.20.0&amp;#34;&lt;/span&gt;,&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;#34;Backend&amp;#34;&lt;/span&gt;:{&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;#34;Type&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;vxlan&amp;#34;&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;&#xA;&lt;li&gt;Network：用于指定Flannel地址池。&lt;/li&gt;&#xA;&lt;li&gt;SubnetLen：用于指定分配给单个宿主机的docker0的ip段的子网掩码的长度。&lt;/li&gt;&#xA;&lt;li&gt;SubnetMin：用于指定最小能够分配的ip段。&lt;/li&gt;&#xA;&lt;li&gt;SudbnetMax：用于指定最大能够分配的ip段，在上面的示例中，表示每个宿主机可以分配一个24位掩码长度的子网，可以分配的子网从10.0.1.0/24到10.0.20.0/24，也就意味着在这个网段中，最多只能有20台宿主机。&lt;/li&gt;&#xA;&lt;li&gt;Backend：，用于在跨主机通信时指定数据包以什么方式转发，如vxlan/host-gw/udp等。&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;flannel 中比较重要的概念&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>flannel 源码分析之 host-gw 模式</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/</link>
+      <pubDate>Mon, 21 Jul 2025 23:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/</guid>
+      <description>&lt;p&gt;flannel 的 host-gw 网络模式不涉及数据包的封包和解包，就是在宿主机上配置路由规则，把其它宿主机ip当成其上所有pod的下一跳。&lt;/p&gt;&#xA;&lt;h2 id=&#34;注册和创建-host-gw-network-实例&#34;&gt;注册和创建 host-gw Network 实例&lt;/h2&gt;&#xA;&lt;p&gt;结构体 HostgwBackend 实现了接口 Backend 。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>flannel 源码分析之 vxlan 模式</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/</link>
+      <pubDate>Mon, 21 Jul 2025 23:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/</guid>
+      <description>&lt;h2 id=&#34;注册和创建-vxlan-network-实例&#34;&gt;注册和创建 vxlan Network 实例&lt;/h2&gt;&#xA;&lt;p&gt;结构体 VXLANBackend 实现了接口 Backend 和 Network。&#xA;vxlan 注册到 flannel 的流程如下:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Stanford 公开课 CS144 2025版 通关指南</title>
+      <link>https://www.zhangzewen.net/posts/linux/cs144_simple_summary/</link>
+      <pubDate>Tue, 15 Jul 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/linux/cs144_simple_summary/</guid>
+      <description>&lt;h2 id=&#34;环境准备&#34;&gt;环境准备&lt;/h2&gt;&#xA;&lt;p&gt;我的机器是 2020 年的 intel mbp， 该项目在 mac 下是跑不通的，需要安装虚拟机，这里提供一个 lima 的虚拟机配置：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 CSI Volume Plugin</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/csi-volume-plugin/</link>
+      <pubDate>Fri, 27 Jun 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/csi-volume-plugin/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;在 kubernetes 中，第三方 CSI Plugin 注册到 kubelet 是通过 CSI Volume Plugin 来完成的。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>少太连穿</title>
+      <link>https://www.zhangzewen.net/posts/life/shao_tai/</link>
+      <pubDate>Sat, 21 Jun 2025 14:54:32 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/life/shao_tai/</guid>
+      <description>&lt;p&gt;自四川回来之后，整个四、五月份都没有进山，一直在路跑。进六月份后实在是心痒难受，南太行刚解封人多不想去，能一日往返的也就旁边的嵩山了，这里有个很成熟的路线：少太连穿。&lt;/p&gt;&#xA;&lt;p&gt;少太穿越说的是少室山和太室山连穿，以少室山摩崖石刻为起点，途径三皇寨、少林寺，经永泰寺进入太室山，一路攀爬到峻极峰，以卢崖瀑布为终点的经典穿越路线。整个路线 32KM+，爬升 2000M+，难度适中。如果要加点难度的话，可以加上达摩洞和嵩顶草甸。&lt;/p&gt;&#xA;&lt;p&gt;风景主要集中在少室山，且景区路线，三皇庙到书册崖是少室山的精华所在，是随便找个地方可以坐上一天的那种。而且可以从少林寺坐缆车到三皇寨，所以游人很多，且小卖部分布很均匀。&lt;/p&gt;&#xA;&lt;p&gt;难度主要集中在太室山，从永泰寺一直到峻极峰都是山路，永泰寺到山脊线起点石楼这段的爬升有足足有 760m 之多。 石楼前的一段以及之后到峻极峰的山脊线有几处有些危险，都是一到两个身位落差的直上直下攀爬。峻极峰之前，没有任何补给点，过了峻极峰就是成熟的景区路线了。今年雨水少，所以卢崖瀑布并不壮观。要不是单纯的刷路线记录，到了峻极峰是可以掐表，然后慢慢悠悠从景区下撤的。&lt;/p&gt;&#xA;&lt;p&gt;至于少林寺，感觉少林寺商业化太严重了，景区里一瓶尖叫卖15元你敢信？！过年的时候带父母来玩了一趟，逛完塔林他们就嚷嚷着要回去。可能是不信佛的缘故，庙宇我觉得都是大同小异。而且都跑了好几趟了，想打卡少林寺都不能够，门前的场地人是真的多。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet volume plugins manager</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/volume_plugins_manager/</link>
+      <pubDate>Wed, 18 Jun 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/volume_plugins_manager/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;在 kubernetes 中存储以插件的形似存在，kubernetes 提供了接口 &lt;a href=&#34;https://github.com/kubernetes/kubernetes/blob/e4d4e1ab7cf1bf15273ef97303551b279f0920a9/pkg/volume/volume.go#L30&#34;&gt;Volume&lt;/a&gt; 极其扩展接口来表示存储卷，使用 &lt;a href=&#34;https://github.com/kubernetes/kubernetes/blob/e4d4e1ab7cf1bf15273ef97303551b279f0920a9/pkg/volume/plugins.go#L134&#34;&gt;VolumePlugin&lt;/a&gt; 接口来表示一个存储卷插件。像常用的 &lt;code&gt;empty/hostpath/configmap/secert/csi&lt;/code&gt; 等都是以插件形式存在的存储卷（这里的 csi 是让 kubernetes 可以使用第三方提供的存储功能），kubelet 使用 volume plugins manager 来管理它们。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>cmu15445 实现踩坑不完全指北</title>
+      <link>https://www.zhangzewen.net/posts/database/cmu15445/summary/</link>
+      <pubDate>Sat, 14 Jun 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/database/cmu15445/summary/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet pod 的创建和启动</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-create-and-start/</link>
+      <pubDate>Sun, 25 May 2025 16:33:16 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-create-and-start/</guid>
+      <description>&lt;p&gt;接口 SyncHandler 定义了一系列管理 Pod 的方法：&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; SyncHandler &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;interface&lt;/span&gt; {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#6272a4&#34;&gt;// 新增&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;&lt;span style=&#34;color:#50fa7b&#34;&gt;HandlePodAdditions&lt;/span&gt;(pods []&lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;v1.Pod)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#6272a4&#34;&gt;// 更新&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;&lt;span style=&#34;color:#50fa7b&#34;&gt;HandlePodUpdates&lt;/span&gt;(pods []&lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;v1.Pod)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#6272a4&#34;&gt;// 删除&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;&lt;span style=&#34;color:#50fa7b&#34;&gt;HandlePodRemoves&lt;/span&gt;(pods []&lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;v1.Pod)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#6272a4&#34;&gt;// 协调&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;&lt;span style=&#34;color:#50fa7b&#34;&gt;HandlePodReconcile&lt;/span&gt;(pods []&lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;v1.Pod)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#6272a4&#34;&gt;// 同步&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;&lt;span style=&#34;color:#50fa7b&#34;&gt;HandlePodSyncs&lt;/span&gt;(pods []&lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;v1.Pod)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#6272a4&#34;&gt;// 清理&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;&lt;span style=&#34;color:#50fa7b&#34;&gt;HandlePodCleanups&lt;/span&gt;() &lt;span style=&#34;color:#8be9fd&#34;&gt;error&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;结构体 Kubelet 实现了该方法。&lt;code&gt;Kubelet.HandlePodAdditions&lt;/code&gt; 的流程如下：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet syncLoop</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/syncloop/</link>
+      <pubDate>Sun, 25 May 2025 16:31:39 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/syncloop/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubelet 是由多个生产者和多个消费者组成的后台服务，其内部实现是一个控制循环，由事件驱动着控制循环的运行，如下图所示：&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/kubernetes/kubelet/syncLoop.png&#34; alt=&#34;syncLoop&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;这个图片是展示的组件和本篇分析所使用的kubernetes 版本已经有所不同，但是其设计理念没有变法，依旧是 syncLoop 驱动着整个控制循环的运行。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet pleg</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/pleg/</link>
+      <pubDate>Tue, 06 May 2025 01:27:07 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/pleg/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;PLEG 是 &amp;ldquo;Pod Lifecycle Event Generator&amp;rdquo; 的缩写，监控运行在集群各个节点上的容器状态变化，并将这些变化事件推送给 kubelet，kubelet 处理后同步到 apiserver。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 container 探针以及探针管理</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/probe-manager/</link>
+      <pubDate>Tue, 22 Apr 2025 21:27:07 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/probe-manager/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubernetes 支持三种 container 探针：startupProbe、readinessProbe、livenessProbe。 livenessProbe 决定是否要重启容器，readinessProbe 确认是服务是否可用，startupProbe 是为了避免 container 启动时间过长使得 liveness 失败而造成无限重启的场景。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>三月份南太行穿越</title>
+      <link>https://www.zhangzewen.net/posts/life/nan_tai_hang/</link>
+      <pubDate>Sun, 13 Apr 2025 14:54:32 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/life/nan_tai_hang/</guid>
+      <description>&lt;p&gt;为了准备3月底的熊猫蜀道山比赛，3月份去了两次南太行，都是两天的行程。&lt;/p&gt;&#xA;&lt;p&gt;第一天的路线： 双底村—马武寨—抱犊村—西莲—隧道—锡崖沟—张沟。 全程39公里左右，爬升1500m - 1600m。&lt;/p&gt;&#xA;&lt;p&gt;双底村出来后红豆衫大峡谷，三月份的时候还是是枯水期，河床的石头很光滑，背阴处的冰瀑布还是很壮观的，就是有些脏。&lt;/p&gt;&#xA;&lt;p&gt;过了大峡谷就是一段爬升，应该有600-700左右，然后下到马武寨，从马武寨到老龙口整体下降趋势，很简单，只是刚开始会很泥泞，因为化冻。&lt;/p&gt;&#xA;&lt;p&gt;从老龙口到西莲这一段我觉得是精华所在， 这一段是沿着山边儿的小路切到西莲，路旁边就是悬崖，垂直的崖壁，感觉就是凭空拔地而起，一点都不拖泥带水，只要不是低着头往前冲，还是很安全的。一路跑跑停停，拍照，拍照，还是拍照。有很多突出来的平台，好多人都在那儿排队打卡，我只是看了眼就走了，有些恐高，无福消受。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>四川成都之行：熊猫蜀道山赛记</title>
+      <link>https://www.zhangzewen.net/posts/life/xiong_mao_shu_dao_shan/</link>
+      <pubDate>Sat, 05 Apr 2025 14:21:45 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/life/xiong_mao_shu_dao_shan/</guid>
+      <description>&lt;p&gt;准备已久的比赛以 DNF 收尾，这篇就记录个流水账吧。&lt;/p&gt;&#xA;&lt;p&gt;在成都下飞机就上午10点了，到天府广场都快12点了，计划去宽窄巷子逛逛也没有时间，下地铁随便吃了些就去成都博物馆。 成都博物馆提供了免费的行李寄存处，虽然我预约的是下午1点的，但是没有到点也让进了。&lt;/p&gt;&#xA;&lt;p&gt;博物馆里逛了差不多3个小时，我最喜欢的就是看各种陶俑了，总是喜哈哈地，还有蜀锦(不怎么好拍照，显示不了细节)，然后就是一些器皿上的纹理，真的很细腻很不真实，总让我有种这不是现代仿的吧的感觉。然后就是木偶和皮影，想起了这些年追的金光布袋戏。然后是震撼了我一百年的皮影，三打白骨精 白骨夫人变换人形简直神了，然后就是杨丽萍的《月光》皮影版也是让人叹为观止，这也让我想起了我的姥爷，他以前也是唱皮影戏的。&lt;/p&gt;&#xA;&lt;p&gt;从博物馆出来后直接坐地铁到犀黄坐火车去彭州，然后在彭州又坐去白鹿的旅游专线到了白鹿音乐小镇，挺折腾的。每次出去比赛，出行总是最耗时的，也是消费大头。&lt;/p&gt;&#xA;&lt;p&gt;比赛的当天天气有些冷，但是现场很是热闹，我们168KM组别的首先出发，广场里面挤满了人，到点儿比赛准时开始。 我在CP1和CP2之间把肌肉拉伤(我觉得是，人生第一次，没有啥经验，恢复的很快)了。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>C&#43;&#43; Type Traits 和 SFINAE</title>
+      <link>https://www.zhangzewen.net/posts/cpp/deep_dive_into_type_traits_and_sfinae/</link>
+      <pubDate>Sat, 15 Mar 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/cpp/deep_dive_into_type_traits_and_sfinae/</guid>
+      <description>&lt;h2 id=&#34;type-traits&#34;&gt;Type Traits&lt;/h2&gt;&#xA;&lt;p&gt;c++ type traits 特性一句话总结：“&lt;strong&gt;在编译期利用模板的(偏)特化功能提取目标的相关信息，用于确定策略或者实现细节&lt;/strong&gt;”。&lt;/p&gt;&#xA;&lt;p&gt;这在模板编程中很有用， 因为模板参数&lt;code&gt;T&lt;/code&gt;的存在，实现模板的人很难预测使用模板的人会输入什么类型的参数，一般的 c++ type traits 的编程套路就是：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet plugin manager</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/</link>
+      <pubDate>Tue, 11 Mar 2025 00:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 的能力: CSI 和 Device。得益于 gRPC 和 Linux 的 inotify 实现了插件的动态管理。本片文章将详细讲解 kubelet 管理插件的逻辑，至于 CSI 和 Device 这两种类型的插件的详细内容，不在本片文章讨论范围之内，本片文章会在需要的地方提及一下，不会对理解本片文章造成困难。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>C&#43;&#43; STL 迭代器</title>
+      <link>https://www.zhangzewen.net/posts/cpp/deep_dive_into_cpp_iterators/</link>
+      <pubDate>Sun, 02 Mar 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/cpp/deep_dive_into_cpp_iterators/</guid>
+      <description>&lt;h2 id=&#34;c-迭代器的种类&#34;&gt;c++ 迭代器的种类&lt;/h2&gt;&#xA;&lt;p&gt;在STL中，迭代器的种类可以分为输入迭代器、输出迭代器、前向迭代器、双向迭代器、随机访问迭代器：&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#ff79c6&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;input_iterator_tag&lt;/span&gt; {};  &lt;span style=&#34;color:#6272a4&#34;&gt;// 输入迭代器&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#ff79c6&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;output_iterator_tag&lt;/span&gt; {}; &lt;span style=&#34;color:#6272a4&#34;&gt;// 输出迭代器&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#ff79c6&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;forward_iterator_tag&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;public&lt;/span&gt; input_iterator_tag {};  &lt;span style=&#34;color:#6272a4&#34;&gt;// 向前迭代器&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#ff79c6&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;bidirectional_iterator_tag&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;public&lt;/span&gt; forward_iterator_tag {}; &lt;span style=&#34;color:#6272a4&#34;&gt;// 双向迭代器&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;  &lt;span style=&#34;color:#ff79c6&#34;&gt;struct&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;random_access_iterator_tag&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;public&lt;/span&gt; bidirectional_iterator_tag {}; &lt;span style=&#34;color:#6272a4&#34;&gt;// 随机访问迭代器&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;输入迭代器指向的位置只能被顺序读取：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Effective Modern C&#43;&#43; 读书笔记之第六章</title>
+      <link>https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-six/</link>
+      <pubDate>Thu, 27 Feb 2025 18:34:44 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-six/</guid>
+      <description>&lt;h2 id=&#34;item-31-避免使用默认的变量捕获方式&#34;&gt;Item 31 避免使用默认的变量捕获方式&lt;/h2&gt;&#xA;&lt;p&gt;&lt;code&gt;c++11&lt;/code&gt;的&lt;code&gt;lambda&lt;/code&gt;表达式有两种变量的捕获方式：按值(复制)捕获和引用捕获(默认模式)。在采用引用模式(默认&lt;code&gt;[&amp;amp;]&lt;/code&gt;会捕获定义&lt;code&gt;lambda&lt;/code&gt;表达式作用域下的所有变量, &lt;code&gt;[&amp;amp;params]&lt;/code&gt;为显示捕获定义&lt;code&gt;lambda&lt;/code&gt;表达式作用域下特定的变量)下，如果不加注意的话,&lt;code&gt;lambda&lt;/code&gt;表达式很容易走出引用变量的作用域范围，造成悬空引用，会产生未定义的错误。&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;iostream&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;functional&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;string&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;A&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;:&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    A() &lt;span style=&#34;color:#ff79c6&#34;&gt;:&lt;/span&gt; name_(&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;default&amp;#34;&lt;/span&gt;){}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#8be9fd&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;Print&lt;/span&gt;() &lt;span style=&#34;color:#ff79c6&#34;&gt;const&lt;/span&gt; {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt;cout &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;A::Print: &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; name_ &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; std&lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt;endl;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;private&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;:&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        std&lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt;string name_;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;typedef&lt;/span&gt; std&lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt;function&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#8be9fd&#34;&gt;void&lt;/span&gt;()&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; func;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;main&lt;/span&gt;(&lt;span style=&#34;color:#8be9fd&#34;&gt;int&lt;/span&gt; argc, &lt;span style=&#34;color:#8be9fd&#34;&gt;char&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;**&lt;/span&gt; argv)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    func target;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        A a;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#ff79c6&#34;&gt;auto&lt;/span&gt; f &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;amp;&lt;/span&gt;](){ a.Print();};&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#6272a4&#34;&gt;//auto f = [&amp;amp;a](){ a.Print();};&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;        target &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; f;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    target();&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#bd93f9&#34;&gt;0&lt;/span&gt;;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在我自己机器下的测试结果为&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet eviction manager</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/eviction-manager/</link>
+      <pubDate>Thu, 27 Feb 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/eviction-manager/</guid>
+      <description>&lt;p&gt;在分析 eviction manager 的实现之前，先要说一下工具类-阀值触发器的实现，对 eviction manager 的理解还是有帮助的。&lt;/p&gt;&#xA;&lt;h2 id=&#34;阀值触发器&#34;&gt;阀值触发器&lt;/h2&gt;&#xA;&lt;p&gt;接口 CgroupNotifier 定义了阀值触发器的功能，其实现是 linuxCgroupNotifier。 而接口 NotifierFactor 提供的方法 NewCgroupNotifier 是生成 CgroupNotifier 实例的，重点是其实例 memoryThresholdNotifier 中的字段 factory 和 notifier， factory 是用来生成阀值触发器实例工厂函数, notifier 是 factory 生产的具体阀值触发器实例。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>gdb init script</title>
+      <link>https://www.zhangzewen.net/posts/linux/gdb_init_script/</link>
+      <pubDate>Tue, 25 Feb 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/linux/gdb_init_script/</guid>
+      <description>&lt;p&gt;.gdbinit 能够将gdb基本命令添加到文件中以避免每次启动gdb 进行 debug 时候输入他们，例如&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;b main&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;r&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;b main.c:56&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;c&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这样就可以避免重复性的劳动。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Effective Modern C&#43;&#43; 读书笔记之第五章</title>
+      <link>https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-five/</link>
+      <pubDate>Tue, 18 Feb 2025 18:34:43 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-five/</guid>
+      <description>&lt;h2 id=&#34;item-23-stdmove-和-stdforward语义&#34;&gt;Item 23: std::move 和 std::forward语义&lt;/h2&gt;&#xA;&lt;p&gt;&lt;code&gt;Item23&lt;/code&gt;开篇就直接说明了&lt;code&gt;std::move&lt;/code&gt;不移动任何变量，&lt;code&gt;std::forward&lt;/code&gt;不转发任何变量，这两个语义仅仅做的是转换的工作(类似c/c++的类型转换)，&lt;code&gt;std::move&lt;/code&gt;无条件的把它的参数转换为一个右值，但是&lt;code&gt;std::forward&lt;/code&gt;只有在满足一定条件下才会做转换工作。&#xA;书中为&lt;code&gt;std::move&lt;/code&gt;的实现，写了一个伪码：&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;template&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;typename&lt;/span&gt; T&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt;                              &lt;span style=&#34;color:#6272a4&#34;&gt;// in namespace std&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;typename&lt;/span&gt; remove_reference&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&lt;/span&gt;T&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;::&lt;/span&gt;type&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;move(T&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; param)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#ff79c6&#34;&gt;using&lt;/span&gt; ReturnType &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt;                            &lt;span style=&#34;color:#6272a4&#34;&gt;// alias declaration;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;        &lt;span style=&#34;color:#ff79c6&#34;&gt;typename&lt;/span&gt; remove_reference&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&lt;/span&gt;T&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;::&lt;/span&gt;type&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt;;     &lt;span style=&#34;color:#6272a4&#34;&gt;// see Item 9&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#ff79c6&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;static_cast&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&lt;/span&gt;ReturnType&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt;(param);&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在这段代码中，返回值类型为&lt;code&gt;typename remove_reference&amp;lt;T&amp;gt;::type&amp;amp;&amp;amp;&lt;/code&gt;说明 &lt;code&gt;std::move&lt;/code&gt;返回的是一个右值引用。函数&lt;code&gt;move&lt;/code&gt;的参数类型为&lt;code&gt;T&amp;amp;&amp;amp;&lt;/code&gt;，具体来说这个一个&lt;code&gt;universal reference&lt;/code&gt;(后面会说到),如果传入的参数T是一个左值引用的话，参数推导的结果仍然是一个左值引用，调用&lt;a href=&#34;http://en.cppreference.com/w/cpp/types/remove_reference&#34;&gt;std::remove_reference&lt;/a&gt;剔除掉引用来确保右值引用作用在一个不是左值引用的类型上。然后就是&amp;rsquo;公理&amp;rsquo;&lt;code&gt;右值引用坐作函数的返回值返回后是右值&lt;/code&gt;。&#xA;需要注意的是如果&lt;code&gt;std::move&lt;/code&gt;的参数如果是&lt;code&gt;a reference-to-const&lt;/code&gt;的话，虽然通过移动语义的作用，使其转换成了右值，但是&lt;code&gt;const&lt;/code&gt;语义仍然保存了下来，这时候需要注意如果把其赋值给变量，这里用的就不是移动拷贝语义了，而是用的的赋值拷贝语义。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Effective Modern C&#43;&#43; 读书笔记之第四章</title>
+      <link>https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/</link>
+      <pubDate>Mon, 17 Feb 2025 18:34:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/</guid>
+      <description>&lt;h2 id=&#34;item-18-stdunique_ptr管理独占资源&#34;&gt;Item 18: std::unique_ptr管理独占资源&lt;/h2&gt;&#xA;&lt;p&gt;&lt;code&gt;std::unique_ptr&lt;/code&gt;有着几乎和指针几乎相同的性能，大小几乎差不多，且&lt;code&gt;std::unique_ptr&lt;/code&gt;不能被赋值，它只有移动语义。对于管理独占资源，&lt;code&gt;std::unique_ptr&lt;/code&gt;是一个不错的选择，在工厂模式下，它可以管理生成的对象。&#xA;当&lt;code&gt;std::unique_ptr&lt;/code&gt;对象是释放的时候，它会释放它所管理的资源，这是它的默认行为。可以为其制定释放它所管理资源的方法，需要实现一个&lt;code&gt;deleter&lt;/code&gt;：&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#50fa7b&#34;&gt;A&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;public&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;:&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   A() {std&lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt;cout &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Call A::A()&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; std&lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt;endl;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   &lt;span style=&#34;color:#ff79c6&#34;&gt;~&lt;/span&gt;() {std&lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt;cout &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;Call A::~A()&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; std&lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt;endl;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;};&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;auto&lt;/span&gt; DeleterOfA &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; [](A&lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt; a) {&lt;span style=&#34;color:#ff79c6&#34;&gt;if&lt;/span&gt; (a &lt;span style=&#34;color:#ff79c6&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#ff79c6&#34;&gt;nullptr&lt;/span&gt;){&lt;span style=&#34;color:#ff79c6&#34;&gt;delete&lt;/span&gt; a;}};&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;std&lt;span style=&#34;color:#ff79c6&#34;&gt;::&lt;/span&gt;unique_ptr&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&lt;/span&gt;A, DeleterOfA&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt; ptrA(&lt;span style=&#34;color:#ff79c6&#34;&gt;new&lt;/span&gt; a());&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;需要注意的是，在使用自定义的&lt;code&gt;deleter&lt;/code&gt;的时候，如果&lt;code&gt;deleter&lt;/code&gt;是普通的函数的话，那么&lt;code&gt;std::unique_ptr&amp;lt;T, deleter&amp;gt;&lt;/code&gt;的大小就是双倍的原始指针的大小(raw pointer，一个指针的大小通常是一个word的大小)。如果是函数对象，没有状态的函数对象，如不捕获任何变量的&lt;code&gt;lambda&lt;/code&gt;表达式，&lt;code&gt;std::unique_ptr&lt;/code&gt;的大小不变的。但是如果&lt;code&gt;delete&lt;/code&gt;是函数的时候，&lt;code&gt;std::unique_ptr&lt;/code&gt;增加的一个函数指针的大小，所以在&lt;code&gt;delete&lt;/code&gt;的使用上，更推荐使用&lt;code&gt;lambda&lt;/code&gt;表达式。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 Kubernetes Resource QoS Classes </title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/resource-qos/</link>
+      <pubDate>Mon, 10 Feb 2025 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/resource-qos/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;Kubernetes 根据 Pod 中 Containers Resource 的 &lt;code&gt;request&lt;/code&gt; 和 &lt;code&gt;limit&lt;/code&gt; 的值来定义 Pod 的 QoS Class。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Effective Modern C&#43;&#43; 读书笔记之第三章</title>
+      <link>https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-three/</link>
+      <pubDate>Fri, 07 Feb 2025 18:34:41 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-three/</guid>
+      <description>&lt;h2 id=&#34;item-7-区别和在声明和初始化变量时的不同&#34;&gt;Item 7: 区别()和{}在声明和初始化变量时的不同&lt;/h2&gt;&#xA;&lt;p&gt;在&lt;a href=&#34;https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-one/&#34;&gt;Effective Modern C++ 读书笔记之第一章&lt;/a&gt;关于&lt;code&gt;auto&lt;/code&gt;的参数类型推导中，里面说到&lt;code&gt;auto&lt;/code&gt;的类型推导中与模版参数类型推导唯一的不同之处：&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;auto&lt;/span&gt; a &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; {&lt;span style=&#34;color:#bd93f9&#34;&gt;1&lt;/span&gt;}; &lt;span style=&#34;color:#6272a4&#34;&gt;// a 的类型为 std::initializer_list&amp;lt;int&amp;gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在&lt;code&gt;C++11&lt;/code&gt;中有四种声明变量的方式：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 Pause 容器</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/pause/</link>
+      <pubDate>Mon, 27 Jan 2025 23:16:45 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/pause/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;Pod 是 kubernetes 里最小调度单元，一个 Pod 里面可以包含由多个容器。 这些容器之间通过 linux namespace 来共享资源以及和宿主节点环境隔离。Pod 里面最基础的容器是 pause 容器，它是 Pod 启动的时候，首先创建的容器，其他的业务容器都依赖该 pause 容器，毕竟它提供了可共享的 linux namspace。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet 镜像回收和容器回收</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/</link>
+      <pubDate>Mon, 27 Jan 2025 22:44:45 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资源不会被消耗殆尽。本片文章从源码角度来分析 kubelet 的垃圾回收功能，即清理不需要的容器和镜像。&lt;/p&gt;&#xA;&lt;h2 id=&#34;启动切入点&#34;&gt;启动切入点&lt;/h2&gt;&#xA;&lt;p&gt;垃圾回收是在 kubelet 对象初始化完成后启动的，在 createAndInitKubelet 方法中首先调用 NewMainKubelet 初始化 Kubelet 实例，随后调用 &lt;code&gt;Kubelet.StartGarbageCollection&lt;/code&gt; 启动了 GarbageCollect。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kube-proxy ipvs 模式</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/ipvs/</link>
+      <pubDate>Tue, 21 Jan 2025 21:39:37 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/ipvs/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/&#34;&gt;上一篇文章&lt;/a&gt; 分析了 kube-proxy 的主流程逻辑实现，本篇文章通过分析核心方法 syncProxyRules 来分析 kube-proxy 的 ipvs 模式的实现。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Effective Modern C&#43;&#43; 读书笔记之第二章</title>
+      <link>https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-two/</link>
+      <pubDate>Fri, 10 Jan 2025 18:34:40 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-two/</guid>
+      <description>&lt;h2 id=&#34;item-5-auto优先于显示类型声明&#34;&gt;Item 5: auto优先于显示类型声明&lt;/h2&gt;&#xA;&lt;p&gt;首先，在&lt;code&gt;C/C++&lt;/code&gt;中声明一个变量，如果不进行初始化，其默认值可能会因为其所在的作用域的不同而不同，在使用的时候可能会出现意想不到的错误。而&lt;code&gt;auto&lt;/code&gt;类型的变量类型是从初始化进行推导的，所以需要在定义&lt;code&gt;auto&lt;/code&gt;变量的时候进行初始化。使用&lt;code&gt;auto&lt;/code&gt;变量可以强制对其进行初始化。&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd&#34;&gt;int&lt;/span&gt; a; &lt;span style=&#34;color:#6272a4&#34;&gt;//ok&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;auto&lt;/span&gt; x &lt;span style=&#34;color:#ff79c6&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#bd93f9&#34;&gt;10&lt;/span&gt;; &lt;span style=&#34;color:#6272a4&#34;&gt;//ok&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#6272a4&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;auto&lt;/span&gt; a; &lt;span style=&#34;color:#6272a4&#34;&gt;//error: declaration of ‘auto a’ has no initializer&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;其次，使用&lt;code&gt;auto&lt;/code&gt;可以避免冗长的显示类型声明，特别是在操作&lt;code&gt;STL&lt;/code&gt;的各种容器及迭代器等, &lt;code&gt;auto&lt;/code&gt;可以节省很多时间，如：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Effective Modern C&#43;&#43; 读书笔记之第一章</title>
+      <link>https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-one/</link>
+      <pubDate>Tue, 07 Jan 2025 18:34:39 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-one/</guid>
+      <description>&lt;h2 id=&#34;item-1-模板类型推导&#34;&gt;Item 1: 模板类型推导&lt;/h2&gt;&#xA;&lt;p&gt;&lt;code&gt;C++98&lt;/code&gt;只有一种模板参数类型推导即函数模板参数类型推导，但是在&lt;code&gt;C++11&lt;/code&gt;之后，修改了原有的类型推导规则，并加入了&lt;code&gt;auto&lt;/code&gt;和&lt;code&gt;decltype&lt;/code&gt;的推导规则。&#xA;函数模板形如：&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;template&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color:#ff79c6&#34;&gt;typename&lt;/span&gt; T&lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;gt;&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd&#34;&gt;void&lt;/span&gt; f(ParamType param);&lt;span style=&#34;color:#6272a4&#34;&gt;// ParamType可以是T加上各种修饰，如const， reference，指针等&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;然后在程序逻辑中调用该函数：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kube-proxy iptables 模式</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/iptables/</link>
+      <pubDate>Sat, 23 Nov 2024 16:31:39 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/iptables/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/&#34;&gt;上一篇文章&lt;/a&gt; 分析了 kube-proxy 的主流程逻辑实现，本片文章来分析 kube-proxy 的 iptables 模式实现。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>2024年11月03日郑州马拉松赛记</title>
+      <link>https://www.zhangzewen.net/posts/life/2024_zhengzhou_marathon/</link>
+      <pubDate>Tue, 05 Nov 2024 21:43:33 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/life/2024_zhengzhou_marathon/</guid>
+      <description>&lt;p&gt;本来我是不跑马拉松的，但是刚好有个契机，老早之前就计划着回郑州办事情，刚好郑州马拉松延期重新补录且时间合适，我就报名了，还给中签了，毕竟想着自己可是完赛 3 个百公里越野的人，区区一个马拉松还不是轻松拿捏。&#xA;“姓氏马拉松” 是郑州马拉松的一大特色，让人有文化归属感和那种无以名状的凝聚力。完赛还有姓氏鞋扣，但是我完赛后忘了领了，这是这次马拉松唯一的遗憾。领物的现场还有武术表演，我的目光都被功夫少年们给吸引了，他们在现场表演武术，抱拳迎接我们，稚嫩的脸庞和坚毅的眼神让我感觉年轻是真的好。比赛当日他们也在赛道上给我们助威。&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/2024_zhengzhou_marathon/%E5%A7%93%E6%B0%8F%E6%97%97%E6%89%8B.jpeg&#34; alt=&#34;姓氏旗手&#34;&gt;&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/2024_zhengzhou_marathon/%E5%8A%9F%E5%A4%AB%E5%B0%91%E5%B9%B4.JPG&#34; alt=&#34;功夫少年&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;比赛的当日从寄存到站到出发区域都井然有序，从大连半马之后就从未见过这么大的阵势的比赛，后面才得知郑州马拉松的参赛人数是当日在全国各地举办的马拉松的参赛人数之最。&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/2024_zhengzhou_marathon/%E5%87%BA%E5%8F%91%E5%8C%BA%E5%9F%9F.jpeg&#34; alt=&#34;出发区域&#34;&gt;&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/2024_zhengzhou_marathon/%E8%AE%A1%E6%97%B6%E8%B5%B7%E7%82%B9.jpeg&#34; alt=&#34;计时起点&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;从鸣枪到拱门计时开跑用了差不多10分钟，前半程我的配速一直在5分40秒左右。 后半程的考验才开始，先是大腿逐渐酸痛，然后就是小腿也开始酸痛起来，应该是快到25公里的时候我追上了 4:30 的兔子，但是在后面的一个补给点我上完厕所的时候，他们已经远远的把我甩在身后。我开始跑跑停停，因为每次我感觉我大腿和小腿要抽筋时候我就走路，我很不喜欢抽筋的感觉，但是每次都在疯狂的试探，慢慢的双腿的肌肉开始变的僵硬，索性摆烂，想走就走，想跑就跑。&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/2024_zhengzhou_marathon/%E5%A4%A7%E6%A1%A5.JPG&#34; alt=&#34;大桥&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>2024年10月19日宁海ByUTMB 100公里组赛记</title>
+      <link>https://www.zhangzewen.net/posts/life/ninghai_2024_100km_utra_trail/</link>
+      <pubDate>Tue, 22 Oct 2024 16:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/life/ninghai_2024_100km_utra_trail/</guid>
+      <description>&lt;p&gt;宁海越野挑战赛顺利完赛，成绩23:01， 虽然比自己预期的要晚了2个小时左右，但好在年度比赛顺利收官，今年就三场比赛，每一场都是雨战，运气是真的差。&lt;/p&gt;&#xA;&lt;p&gt;刚下火车就感觉热的受不了，这边丝毫没有降温的迹象，太阳高照，打车到西门城楼的会场后，快速领物就开始逛各个品牌临时搭建起来的的集市，然后看了会儿精英选手见面会，主持人很有趣，随后见证了宁海给四郎多吉举办的传统婚礼，之后就回酒店了。&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/ninghai_2024_100KM_Utra_Trail/%E8%B5%B7%E7%BB%88%E7%82%B9%E5%89%8D%E7%9A%84hoka%E9%A3%9E%E9%97%A8.JPG&#34; alt=&#34;起终点前的hoka飞门&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;比赛当日早上起来的时候零星下了些雨，但不一会儿就停了，我在酒店的附近吃完早餐，慢悠悠地走到起点。起点还是很热闹，我存完包的时候，100KM组别的第一波已经出发了。稍做热身就进入了起点线前，赛事总监再一次强调赛事纪律和安全，主持人随机采访跑友热场，头顶的屏幕实时直播着第一波出发的精英和大众跑者，好多人都抬着头看直播，第一波发枪20分钟后，我们起跑了。&lt;/p&gt;&#xA;&lt;p&gt;鸣枪出发的时候，心情还是有些激动和兴奋的。比赛出发后先沿着河边和村间水泥路跑上几公里进行热身，我的速度比平时路跑要慢些，心里也不是很着急。进山后就很滑了，石头都磨的和鹅卵石一样光滑，石板上布满了青苔，溪边的石头也是布满青苔，所以一直都在全神贯注地下脚。赛道把宁海线周边的山和村落都串了起来，这里最常见的就是漫山的竹海了，在竹林中穿梭也别有意境，特别是手持登山杖，有种侠客的感觉。&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/ninghai_2024_100KM_Utra_Trail/%E8%BF%9B%E5%B1%B1%E5%89%8D%E7%9A%84%E8%B7%AF.jpeg&#34; alt=&#34;进山前的路&#34;&gt;&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/ninghai_2024_100KM_Utra_Trail/%E7%AB%B9%E6%B5%B7.jpeg&#34; alt=&#34;竹海&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;这边的村落大多都是依山层层叠叠而建，房子的外墙大多都刷成了白色，很精致和干净。这些村落还保存了以前的老房子。最让我记忆深刻的是进入榧坑这个 CP 点前的桥上，桥程拱形，桥身由石头筑成，长满了青苔，桥下是清澈的溪流，很有古韵，跑在上面肯定是很出片儿的，很可惜我翻遍的赛事的照片都没有找到我的身影。这里的每个村落都有公共厕所，而且卫生做的真的很干净，终于不用在野外打野了。&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/ninghai_2024_100KM_Utra_Trail/%E8%80%81%E6%88%BF%E5%AD%90.JPG&#34; alt=&#34;老房子&#34;&gt;&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/ninghai_2024_100KM_Utra_Trail/%E6%A6%A7%E5%9D%91.JPG&#34; alt=&#34;榧坑&#34;&gt;&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/ninghai_2024_100KM_Utra_Trail/%E9%97%A8%E7%A5%9E.JPG&#34; alt=&#34;榧坑&#34;&gt;&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/ninghai_2024_100KM_Utra_Trail/%E6%9D%91%E5%BA%84%E5%8F%B0%E9%98%B6.JPG&#34; alt=&#34;榧坑&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;整个上午都是很潮湿和闷热，帽子早早就被我收起来放到背包里面。应该是下午的时候出了一会儿太阳，但是到 CP5 前就开始下雨了，这前半程用了9个小时，在补给的时候心里还很乐观地盘算着21小时左右就完赛的计划。在 CP5 的强装检查很严格，出站的时候我把冲锋衣套上了，看着这大雨，低头就冲出了 CP 点。CP5到CP6这段的大部分时间都是我一个人，下到公路和村庄后才看到有跑友。天黑的特别块，又在下雨，加之林子很密，光线不是很好，在 CP5 的时候忘了把头灯拿出来放到称手的包里，想着下去就是 CP 点了就没有戴头灯，所以最后的一段下坡我几乎是摸着黑下去的，很幸运没有出任何事故，下次不敢了。在田埂上走了一段后就进了村子来到了 CP6，此时雨也停了，整个村子灯火通明。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kube-proxy</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/</link>
+      <pubDate>Sun, 06 Oct 2024 00:27:07 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部署在集群的每个节点之上，负责在其宿主节点上配置 iptables，ipvs等规则。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes Service 机制</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/services/</link>
+      <pubDate>Sat, 07 Sep 2024 19:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/services/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>client-go 源码分析之 controller</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/client-go/controller/</link>
+      <pubDate>Thu, 29 Aug 2024 23:48:15 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/client-go/controller/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;&lt;code&gt;Controller&lt;/code&gt;是一个接口，该接口的实例的主要作用是构建和启动 &lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/&#34;&gt;reflector&lt;/a&gt;。&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; Controller &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;interface&lt;/span&gt; {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#50fa7b&#34;&gt;Run&lt;/span&gt;(stopCh &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;lt;-&lt;/span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;chan&lt;/span&gt; &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt;{})&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#50fa7b&#34;&gt;HasSynced&lt;/span&gt;() &lt;span style=&#34;color:#8be9fd&#34;&gt;bool&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#50fa7b&#34;&gt;LastSyncResourceVersion&lt;/span&gt;() &lt;span style=&#34;color:#8be9fd&#34;&gt;string&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;type&lt;/span&gt; controller &lt;span style=&#34;color:#8be9fd;font-style:italic&#34;&gt;struct&lt;/span&gt; {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  config         Config&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  reflector      &lt;span style=&#34;color:#ff79c6&#34;&gt;*&lt;/span&gt;Reflector&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  reflectorMutex sync.RWMutex&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  clock          clock.Clock&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;controller 实现了上述的 Controller，Config 存储的是配置信息， 通过调用 New 构造 controller 实例：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]BPF CO-RE reference guide</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-bpf-co-re-reference-guide/</link>
+      <pubDate>Sat, 17 Aug 2024 08:13:34 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-bpf-co-re-reference-guide/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文：&lt;a href=&#34;https://nakryiko.com/posts/bpf-core-reference-guide/&#34;&gt;BPF CO-RE reference guide&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;h2 id=&#34;缺失的手册&#34;&gt;缺失的手册&lt;/h2&gt;&#xA;&lt;p&gt;BPF CO-RE（编译一次-到处运行）是编写可移植BPF应用程序的现代方法，应用程序可以在不同的内核版本和配置上运行，而无需在目标机器上修改和编译运行时源代码。这与&lt;a href=&#34;https://github.com/iovisor/bcc&#34;&gt;BCC&lt;/a&gt;框架提供的更传统的方法有很大的区别，在BCC框架中，BPF应用程序源代码编译被延迟到目标主机上，其携带了一个重量级的编译器工具链来实现这一点。请阅读&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/&#34;&gt;[译]BPF CO-RE (Compile Once – Run Everywhere)&lt;/a&gt;这篇文章，该文章介绍了 BPF CO-RE 的概念，并解释了为什么 BPF CO-RE对这些现实世界的 BPF 应用程序来说都是重要且必要的，以及在没有&lt;a href=&#34;https://nakryiko.com/posts/btf-dedup/&#34;&gt;内核BTF&lt;/a&gt;的情况下变得困难的原因。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>client-go 源码分析之 informer</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/client-go/informer/</link>
+      <pubDate>Tue, 13 Aug 2024 23:42:19 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/client-go/informer/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;h2 id=&#34;变更事件分发和消费&#34;&gt;变更事件分发和消费&lt;/h2&gt;&#xA;&lt;p&gt;在讲解 Informer 机制之前，先来简单了解两个数据结构，这两个数据结构设计到变更事件的监听，事件分发，事件消费。&lt;/p&gt;&#xA;&lt;h3 id=&#34;processorlistener&#34;&gt;processorListener&lt;/h3&gt;&#xA;&lt;p&gt;processorListener 是用户对特定资源对象变更事件的回调处理逻辑接口 ResourceEventHandler 的封装，其监听变更事件以及调用用户注册的回调逻辑来消费这些变更事件。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>client-go 源码分析之 reflector</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/</link>
+      <pubDate>Sat, 27 Jul 2024 09:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取目标资源数据，然后再监听目标资源的变更事件, 并将数据同步到本地缓存。下面来具体说细节之处。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>2024年07月12日崇礼168超级越野赛100KM组赛记</title>
+      <link>https://www.zhangzewen.net/posts/life/chongli168_2024_utra_trail/</link>
+      <pubDate>Wed, 17 Jul 2024 22:13:00 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/life/chongli168_2024_utra_trail/</guid>
+      <description>&lt;p&gt;在崇礼168超级越野赛放出报名链接后，我第一次时间想都没想就报了100KM组别。把去年对大家对这个赛事的吐槽完全忘掉了，报完名之后才想起来，只求他这次的补给保持上次的水平(这也是大家吐槽最严重的部分，但是我觉的还行，该有的都有)，但是每个点至少有可乐可以喝。&lt;/p&gt;&#xA;&lt;p&gt;因为已经去过一次，所以对薅羊毛的事情也就没有那么的积极，请了周四下午加上周五一天的假，在公司吃完中午饭，然后慢慢悠悠的从公司去高铁站，在高铁上还睡着了。到了庆典广场后，直奔报道处，这次的强装检测很严格，我去当地的药店买了敷料才让我通过，准备的医用无纺布和布贴根本不行。领完参赛包和手环后在庆典广场的各品牌展摊快速逛了一遍就回自己定的酒店登记入住。然后找了个餐馆随便吃了点晚餐，回到酒店的时候天色已经暗了起来。洗完澡后把装备重新在收拾收拾检查检查就关灯睡觉了。&lt;/p&gt;&#xA;&lt;p&gt;凌晨2点多的时候就醒了，然后就辗转反侧难以入睡。工作上的事儿在脑子里挥之不去，好不容易到了5点，我起来洗个了澡，再次仔仔细细地收拾了下，6点到前台退房。吃完早餐，快6点40多到庆典广场，此刻广场上已经有不少的人了。我存好起点包和换装包并检录后找了一个地方活动和拉伸身体，等待8点的到来。&lt;/p&gt;&#xA;&lt;p&gt;当大家鱼贯跑过起点的时候，比赛已经开始了。道路两旁的市民给我们加油鼓掌，我按着自己的节奏跑，5，6月份的训练背负的装备比较轻，此刻强装、水，食物加起来都有5KG了感觉，沉甸甸地，跑起来很不舒服，努力不让自己停下来走动，在公路跑了4公里后就转入土路。100KM组别的路线是去年70KM组别的反方向，只有到万龙滑雪场之后的路段未体验过。因此，这次比赛我给自己定了个20小时完赛的目标。&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/chongli168_2024_Utra_Trail/qipao.jpeg&#34; alt=&#34;比赛开始前&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;进入土路，从这儿开始一直爬升400多米到山顶然后下降到CP1。我迅速抽出登山杖，快走前进，每年这段路，这个组别的必塞车。这条路太熟悉了，这个过程中超了不少人， 但是还是经历了差不多3分钟的堵车。爬上山顶后，也没有停下来慢走恢复体力，而是直接一路小跑下山，我一直不紧不慢的跟在一个大叔后面，直到第一个CP1，这个大叔我在后面还多次遇到。&lt;/p&gt;&#xA;&lt;p&gt;在CP1 快速补给，主要是吃主食和西瓜，早餐只是让自己不至于空腹，且CP1到CP2的这段路在状况深深印刻在我脑海中，我喝了2杯矿泉水，1杯可乐，1杯电解质饮料就出站了。水袋里的1L的水几乎没有动。&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/chongli168_2024_Utra_Trail/cp1-fangyang.jpg&#34; alt=&#34;比赛开始前&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>client-go 源码分析之 实现 cache 的关键数据结构</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/client-go/cache/</link>
+      <pubDate>Sat, 13 Jul 2024 21:45:30 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/client-go/cache/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubernetes 的 client-go 提供了一种基于客户端缓存机制的工具，该工具把目标数据都缓存在内存中，旨在减少对服务器端的拉取数据请求调用次数，代码在 &lt;code&gt;tools/cache&lt;/code&gt; 目录下。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>client-go 源码分析之 workqueue</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/</link>
+      <pubDate>Wed, 03 Jul 2024 21:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑实现在&lt;code&gt;k8s.io/client-go/util/workqueue&lt;/code&gt; 目录下。&lt;/p&gt;&#xA;&lt;h2 id=&#34;基础去重队列&#34;&gt;基础：去重队列&lt;/h2&gt;&#xA;&lt;p&gt;基础队列接口 Interface 的定义如下：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>client-go 源码分析之 Event 机制</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/client-go/event/</link>
+      <pubDate>Sat, 01 Jun 2024 23:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/client-go/event/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubernetes 的事件（Event）是一种资源对象，用于展示集群内发生的情况，kubernetes 系统中的各个组件会将运行时发生的各种事件上报给 kubernetes apiserver。由于事件是一种资源，因此他们存储在 etcd 集群中。为了避免磁盘空间被填满，故强制执行保留策略：在最后一次的事件发生后，删除1小时之前发生的事件。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/</link>
+      <pubDate>Fri, 17 May 2024 08:13:34 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&#xA;原文: &lt;strong&gt;&lt;a href=&#34;https://nakryiko.com/posts/bpf-tips-printk/&#34;&gt;BPF tips &amp;amp; tricks: the guide to bpf_trace_printk() and bpf_printk()&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]Building BPF applications with libbpf-bootstrap</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-building-bpf-applications-with-libbpf-bootstrap/</link>
+      <pubDate>Fri, 10 May 2024 08:13:34 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-building-bpf-applications-with-libbpf-bootstrap/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文: &lt;strong&gt;&lt;a href=&#34;https://nakryiko.com/posts/libbpf-bootstrap/&#34;&gt;Building BPF applications with libbpf-bootstrap&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/libbpf/libbpf-bootstrap&#34;&gt;libbpf-bootstrap&lt;/a&gt;脚手架能快速轻松地让您构建自己的BPF应用程序，该脚手架负责所有让人乏味的设置步骤，并最大限度地减少必要的样板，让您直接沉浸在 BPF 的乐趣中。我们将看看 libbpf-bootstrap 提供了什么，以及所有内容是如何联系在一起的。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>2024年03月31日温岭黄金海岸跑山赛70KM组赛记</title>
+      <link>https://www.zhangzewen.net/posts/life/wenling70km_2024_utra_trail/</link>
+      <pubDate>Fri, 05 Apr 2024 22:48:33 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/life/wenling70km_2024_utra_trail/</guid>
+      <description>&lt;p&gt;和之前出北京去比赛一样，周五下班又是风风火火地赶往火车站。这次的温岭有些期待又有些顾虑，期待的是要沿着海岸线奔跑，又可以看见大海了；顾虑的是赛前一周大腿膝盖外侧异常疼痛，及时停止了训练，一直在拉伸放松和复健，希望不要影响了比赛。好在是出发了，把一切留给未知，这让我更兴奋。&lt;/p&gt;&#xA;&lt;p&gt;从北京到温岭虽然有直达的高铁，就是时间上不怎么美丽，只能在杭州中转一下，出去比赛真的很喜欢可以直接坐睡一觉就到的慢车，经济实惠拉满，这次来回的火车票钱就是再报名一场温岭的比赛都绰绰有余。早上9点20左右到的杭州，火车晚点了，又风风火火地坐地铁赶往北站坐高铁去温岭。去温岭的路上，窗外的风景是真的好看，这边的春天来了很久，绿意盎然，加之江南独有的精致，真的很赏心悦目，就是下车的时候脖子都是僵的。&lt;/p&gt;&#xA;&lt;p&gt;出了火车站直奔面馆，为了保险起见，要了一份鸡蛋炒饭，不敢吃当地的海鲜面，怕肠胃有什么不适，毕竟没有吃过，想着先忍忍赛后随便吃，但是到我离开温岭，我都没有机会吃上一碗海鲜面。这次组委会提供了摆渡车，倒了俩趟车才到了比赛起点所在的渔村。当摆渡车缓缓驶出隧道的时候，远处坐落在山上的民居首先抓住了我的眼球，然后就是那海天模糊的界限，以及白色灯塔，虽然还在车上，我已经感觉到那久违的扑面而来的带着咸腥味的海风，所有的事情都抛诸脑后，一身轻松。&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/2024_wenling/a_peek_of_jin_sha_tan.jpeg&#34; alt=&#34;初见金沙滩&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;让我意外的是，金沙滩的海风的咸腥味很淡，这座海边的渔村因为一场比赛而热闹非凡，来来往往的人群，搭眼一看都是来自全国各地的跑者，道路两旁都竖着赛事的宣传旗帜，远处的灯塔处热闹非凡。强装检验和领物都很顺利，接着逛各大品牌的展摊，没有啥羊毛可以薅的。本次组委会还开了一个曙光集市，汇聚了本地的特产，我也是走马观花般的浏览了一遍，还是先忍忍吧，赛后随便吃。下午四点准时精英见面会，精英们在台上放着烟雾弹，我们这些大众选手都忙着在台下纷纷举起手机拍精英。这次终于在现实中看到了精英选手，好多都是迎面撞上，想上去合影但每次都被一拥而上的人群给断了念想。&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/2024_wenling/sha_tan.jpeg&#34; alt=&#34;初见金沙滩&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;下午的时光过的是真快， 本想着还要去看下五彩小渔村的计划也因要赶最后一趟去往松西镇的公交而终止，我只能走上几公里穿过涵洞去石塘镇上去等公交。等到了酒店时，天已经块黑了，办好了入住就去找了一家河南烩面馆吃了一碗烩面，接着去超市买了水和面包，临睡觉前把物品在仔细核对清点后就关灯睡觉了。&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/2024_wenling/qi_cai_xiao_cun.jpg&#34; alt=&#34;初见金沙滩&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;本来定的2点的闹钟，0点就醒了。我在床上躺到了1点。就起来又仔仔细细地收拾了一遍装备，简单的吃了下早餐，就这样准时3点退房出酒店。接驳车所在的位置不远，一小会儿的功夫就到了，此时接驳车内已经坐了差不多半车的跑有。大家有一搭没一搭的说话，不一会儿车就满员了，到三点半就发车了。到起点也是一波三折，因为交通管制，司机也是掉头了两次，本来10多分钟的路程硬是跑了差不多半个小时。&lt;/p&gt;&#xA;&lt;p&gt;起点也已经有不少的人了，镭射灯射出的灯柱在漆黑的夜空中摇曳，我上来直奔存包的地方把包存了，然后就开始热身，陆陆续续的跑友一波一波的来到了起点，起点的气氛逐渐高涨。此时，已开始下起的雨，且雨势越来越大，能避雨的地方都挤满的人。冲锋衣根本就顶不了多长时间，所以我就没有把冲锋衣拿出来，但是我的渔夫帽因为材质的问题，帽檐吸足了雨水软绵绵的搭在我耳朵上。&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/2024_wenling/deng_ta.jpg&#34; alt=&#34;初见金沙滩&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;现场的气氛已经燃炸了，在主持人带领大家做完热身运动以及介绍鸣枪嘉宾后，在的倒计时声中，比赛开始了。踏过起点拱门的时候我努力平息内心的激动，压着自己的速度，不仅不慢的跟着大部队。雨越下越大，路面都积水成河了。好在到 CP1 之前都是在景区穿行，都是台阶和公路，且志愿者很密集，所以很安全。海边的温度很适合，虽然大雨冲刷，体感还是不错的，没有温度流失的风险。&#xA;当天逐渐亮了起来的时候雨势已经非常小了，大家跑在被雾气萦绕的盘上公路上，看着身旁跑过的跑友一头扎进了雾气中，不知道被多少人超过去，以至雾气慢慢散去的时候，前后的人已经寥寥无几。不一会儿就折进了沙土路开始爬坡，爬到顶的时候就看到了隐没在雾气中的港口。&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/2024_wenling/yun_wu_liao_rao.jpeg&#34; alt=&#34;初见金沙滩&#34;&gt;&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/2024_wenling/wu_zhong_de_hai_gang.jpeg&#34; alt=&#34;初见金沙滩&#34;&gt;&#xA;CP1前的长下坡，沙地很松软，于是我是撒丫子跑的，一路上超过了不少人，到 CP 点的时候我用时1小时10分钟，在补给点稍微的补给了一下就出站了。在CP1出站没有多远，我的右侧大腿膝盖外侧有些轻微的不适应。我开始放慢了速度，心情也随之低落。当到了 CP2 的时候已经发展到了一到下坡和下台阶路就疼的要命。&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/2024_wenling/ben_pao_zhong_de_wo.JPG&#34; alt=&#34;初见金沙滩&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]BPF ring buffer</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-bpf-ring-buffer/</link>
+      <pubDate>Sun, 24 Mar 2024 21:42:07 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-bpf-ring-buffer/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文: &lt;strong&gt;&lt;a href=&#34;https://nakryiko.com/posts/bpf-ringbuf/&#34;&gt;BPF ring buffer&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲区（当前用于从内核向用户态发送数据的标准）的内存效率和事件重新排序问题，同时达到或超过了其性能。它提供了perfbuf兼容性以便于轻松迁移，但也有新的reserve/submit API，具有更好的可用性。此外，合成和实际基准测试都表明，在几乎所有情况下，考虑将其作为从BPF程序发送数据到用户态的默认选择。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/</link>
+      <pubDate>Thu, 21 Mar 2024 15:03:02 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;这是一个系列文章：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/&#34;&gt;[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/&#34;&gt;[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;&lt;strong&gt;原文：&lt;a href=&#34;https://blog.px.dev/ebpf-openssl-tracing/&#34;&gt;Debugging with eBPF Part 3: Tracing SSL/TLS connections&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/</link>
+      <pubDate>Wed, 13 Mar 2024 21:03:01 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;这是一个系列文章：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/&#34;&gt;[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/&#34;&gt;[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;原文：&lt;a href=&#34;https://blog.px.dev/ebpf-http-tracing/&#34;&gt;Debugging with eBPF Part 2: Tracing full body HTTP request/responses&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/</link>
+      <pubDate>Sat, 09 Mar 2024 15:03:00 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;这是一个系列文章：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/&#34;&gt;[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/&#34;&gt;[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;原文: &lt;strong&gt;&lt;a href=&#34;https://blog.px.dev/ebpf-function-tracing/&#34;&gt;Debugging with eBPF Part 1: Tracing Go function arguments in prod&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译] Lifetime of BPF objects</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/</link>
+      <pubDate>Mon, 04 Mar 2024 21:42:07 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文链接: &lt;a href=&#34;https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html&#34;&gt;Lifetime of BPF objects&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;BPF验证器保证程序本身能够被内核安全地执行，但为了安全地且无意外地使用整个BPF，用户需要理解 BPF 程序和 Maps 的生命周期。本文深入介绍了这些细节。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[译]BPF CO-RE (Compile Once – Run Everywhere)</title>
+      <link>https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/</link>
+      <pubDate>Sat, 17 Feb 2024 08:13:34 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文：&lt;a href=&#34;https://nakryiko.com/posts/bpf-portability-and-co-re/&#34;&gt;BPF CO-RE (Compile Once – Run Everywhere)&lt;/a&gt;&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一次 - 到处运行（CO-RE）**的情况下实现这一点实际上很困难？在这篇文章中，我们将探讨编写可以在多个内核版本上运行的BPF程序的挑战，以及BPF CO-RE如何帮助解决这个问题。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>2023年07月08日崇礼168超级越野赛70KM组赛记</title>
+      <link>https://www.zhangzewen.net/posts/life/chongli168_2023_utra_trail/</link>
+      <pubDate>Sat, 19 Aug 2023 21:43:33 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/life/chongli168_2023_utra_trail/</guid>
+      <description>&lt;p&gt;这次的崇礼168超级越野赛就在北京周边举办,且70KM组别的出发实现是7月8号23:00出发, 北京到崇礼的动车车次几乎覆盖到全天, 时间安排上很自由, 刚开始订票的时候定的是下午过去, 但是随着比赛的临近, 赛事群里面的跑友们互动也越来越频繁, 恨不得立马去崇礼以及去展摊上薅羊毛的心情呼之欲出, 直接改签到了早上7点多的车次. 出发的前一天晚上把比赛强装都检查了几遍后, 躺在床上翻来覆去的睡不着, 好不容易睡了4个多小时, 6点整就出门赶公交到北京北站.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>2018年11月22日三峡168赛记</title>
+      <link>https://www.zhangzewen.net/posts/life/sanxia168_2018_ultra_trail/</link>
+      <pubDate>Sat, 19 Aug 2023 21:43:32 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/life/sanxia168_2018_ultra_trail/</guid>
+      <description>&lt;p&gt;把工作安排好后，急冲冲的赶到北京西站，又是在开车几分钟前上的车，和上次去江山跑越野一样, 至此我的三峡168越野跑之旅拉开了序幕。上车后，发现车厢好多人是去三峡比赛的，和他们寒暄了几句，爬到自己的铺位就睡了下来。一觉醒来，就到了宜昌。出了火车站，直接到旁边的汽车站坐上了汽车，等了一会儿，车上就载满了跑友，师傅开动了汽车，向秭归进发！&lt;/p&gt;&#xA;&lt;p&gt;第一次来三峡，坐在靠窗的位置，目不转睛的望着窗外的景色，三峡的山和门头沟的山很像，都是比较险峻。这期间，老妈打来电话问我到那了，我在来三峡之前就让她和老爸过来玩，从信阳坐高铁到宜昌很方便，但是老爸和老妈死活不过来，怕花钱的想法有时真的是让我哭笑不得。这次她什么都没有说，只是让我吃好，休息好，不要勉强自己，注意安全，得到我的保证后，她就挂电话了，我继续看我的风景。&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/sanxia168_2018_Ultra_Trail/%E4%B8%89%E5%B3%A1%E9%99%A9%E5%B3%BB%E7%9A%84%E9%AB%98%E5%B1%B1.jpg&#34; alt=&#34;长江三峡险峻的高山&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;到秭归县城下了车后，走了一小段路来到了组委会指定的酒店进行装备检查，检查的挺严格的，我的体检报告被看了好一阵子，强制准备是随机抽查的，因为组委会安排的很有序，一会就检查完了，中间有个小插曲，就是GPS押金只能用现金，我只好去旁边的ATM机器取了些钱，真的是好久没有用ATM了，押金是用个信封装起来的，上面有名字和参赛号码，后面完赛的时候直接原封不动地还了回来，随后也把参赛包领取了。&lt;/p&gt;&#xA;&lt;p&gt;这些都弄完后，我就去找住的地方，随后找了一个旅馆，40块钱，比较简陋，毕竟晚上就开赛了，就没有租个高档次的(60块钱面朝长江的标间，真是便宜啊)。我又重新仔仔细细地清理了下装备，把换装点的装备也整理好，就出门在附近闲逛。我沿着江边的木栈小道闲逛，眺望着三峡大坝，拍了几张照片发到工作群，和同事闲扯了几句。&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/sanxia168_2018_Ultra_Trail/%E6%97%85%E5%BA%97%E6%97%81%E8%BE%B9%E7%9A%84%E6%99%AF%E8%89%B2.jpg&#34; alt=&#34;旅店旁边的景色&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;屈原广场就在附近，当时竟然没有想到要看看，赵叔微信告知我下午到，毕竟他住在武汉，离这边很近。临近中午，我随便找了一个馆子吃了午饭，然后回到房间准备睡一觉，却发现怎么也睡不着，随后又去洗了个澡，就这样躺着，想象着自己在赛道上遇到的各种状况，就这样一直到赵叔微信告知我去集合点集合。我脑袋昏昏地出了旅馆。&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/utral_running/sanxia168_2018_Ultra_Trail/%E8%87%AD%E7%BE%8E%E7%9A%84%E8%87%AA%E6%8B%8D%E7%85%A7.jpg&#34; alt=&#34;臭美的自拍照&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;和赵叔碰了个面，接着我们简单地吃了顿饭。饭后，我们看还有时间，就听了一会儿赛道分析会，三四百号人都在大厅，走廊也站满了人，赵叔和我商量着到CP1怎么跑，和江山那次一样，赵叔准备快速通过CP1来为后面争取时间，不能被关门，那想到就立了Flag，这是后话。我因为是100组别的，时间上不怎么紧迫，就和赵叔商量着不结伴，按自己的节奏来。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>2018年10月20日江山100 60公里组赛记</title>
+      <link>https://www.zhangzewen.net/posts/life/jiangshan100_ultra_trail/</link>
+      <pubDate>Sat, 19 Aug 2023 21:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/life/jiangshan100_ultra_trail/</guid>
+      <description>&lt;p&gt;比赛都结束了一个星期了，才想着要写一篇流水账赛记。&lt;/p&gt;&#xA;&lt;h2 id=&#34;备战&#34;&gt;备战&lt;/h2&gt;&#xA;&lt;p&gt;自从报名了江山100越野赛60KM组别之后，就开始了抓紧训练，8，9月份一共进山5次，周一到周五隔天路跑，好在成绩一次比一次好。&#xA;从跑一圈三峰要6个多小时到现在可以把时间压缩到5小时10多分钟，能做到爬升的时候把心率稳定到145左右，平路和下坡都能跑动起来，&#xA;不枉我这两个月的运动量都上120KM之多了。&lt;/p&gt;&#xA;&lt;h2 id=&#34;前往江山&#34;&gt;前往江山&lt;/h2&gt;&#xA;&lt;p&gt;北京到江山的火车只有一趟高铁，下午的的车次，晚上23左右到江山。20号早上5点就要开跑，没办法，订了九江中转的票，正好也去九江看看，然后19号请了一天的假。&#xA;18号上完班，冲冲忙忙的赶到北京西站，好在开车几分钟前上了火车，在火车上一觉睡到天亮。7点左右出了火车站就直奔江边。上午12点的火车到江山，时间很是充裕，打算去江边看看浔阳楼和锁江楼塔看看。&#xA;第一次近距离接触长江，叹为观止，江面比较宽，江边风比较大，呼呼作响，空气比较清新和潮湿，江面船只零星，江边的公园有很多晨练的人。&#xA;然后，就进了锁江楼塔，20元的门票很便宜，除了几个穿着时髦的阿姨，景区里面也没有几个游客。景区就一座塔楼和一座石塔就没有其他了。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>About me</title>
+      <link>https://www.zhangzewen.net/about-me/</link>
+      <pubDate>Sun, 17 Jul 2022 10:37:25 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/about-me/</guid>
+      <description>&lt;h2 id=&#34;联系方式&#34;&gt;联系方式&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;E-mail: &lt;a href=&#34;mailto:zhangzewen895655@gmail.com&#34;&gt;zhangzewen895655@gmail.com&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;Blog: &lt;a href=&#34;https://www.zhangzewen.net&#34;&gt;https://www.zhangzewen.net&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h2 id=&#34;专业技能&#34;&gt;专业技能&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;使用 C/C++，go，python&lt;/li&gt;&#xA;&lt;li&gt;掌握基本的数据结构和算法&lt;/li&gt;&#xA;&lt;li&gt;喜欢 MacOS 和 Fedora, Fedora更胜一筹, VIM/NVIM 重度使用成瘾者&lt;/li&gt;&#xA;&lt;li&gt;熟悉网络编程, 系统编程, 分布式系统&lt;/li&gt;&#xA;&lt;li&gt;DevOps，云原生是目前正在做的和主攻的方向&lt;/li&gt;&#xA;&lt;li&gt;正在一个猛子扎进 linux 内核世界学习网络和存储&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h2 id=&#34;兴趣&#34;&gt;兴趣&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;越野跑爱好者&#xA;&lt;ul&gt;&#xA;&lt;li&gt;比赛&#xA;&lt;ul&gt;&#xA;&lt;li&gt;2018 爱江山越野跑北京凤凰岭夜赛 42KM组 11:19:08&lt;/li&gt;&#xA;&lt;li&gt;2018 江山100国际越野跑 60KM组 17:48:48&lt;/li&gt;&#xA;&lt;li&gt;2018 雷越野三峡168超级越野赛 116KM组 31:28:06&lt;/li&gt;&#xA;&lt;li&gt;2023 崇礼168超级越野赛 70KM组 19:15:41&lt;/li&gt;&#xA;&lt;li&gt;2024 温岭黄金海岸跑山赛 70KM组 16:24:33&lt;/li&gt;&#xA;&lt;li&gt;2024 崇礼168超级越野赛 100KM组 25:25:05&lt;/li&gt;&#xA;&lt;li&gt;2024 宁海byUTMB越野挑战赛 100KM组 23:01:24&lt;/li&gt;&#xA;&lt;li&gt;2025 熊猫蜀道山超级越野赛 168KM组 DNF&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;路线&#xA;&lt;ul&gt;&#xA;&lt;li&gt;北京大觉寺三峰环线 4:22&lt;/li&gt;&#xA;&lt;li&gt;登封嵩山 少太连穿 7:20&lt;/li&gt;&#xA;&lt;li&gt;武功山穿越DNF 沈子村-九龙山-金顶 5:03&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;公路/山地车长距离骑行爱好者&lt;/li&gt;&#xA;&lt;li&gt;热爱美食，但折耳根，香椿对我来说是致命DNA生化武器&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
+    </item>
+    <item>
+      <title>Posts Archive</title>
+      <link>https://www.zhangzewen.net/archive/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://www.zhangzewen.net/archive/</guid>
+      <description>This page contains an archive of all posts.</description>
+    </item>
+  </channel>
+</rss>

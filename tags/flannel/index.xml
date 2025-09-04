@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Flannel on What a Life!</title>
+    <link>https://www.zhangzewen.net/tags/flannel/</link>
+    <description>Recent content in Flannel on What a Life!</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Mon, 21 Jul 2025 23:43:31 +0800</lastBuildDate>
+    <atom:link href="https://www.zhangzewen.net/tags/flannel/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>flannel 源码分析</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/cni/flannel/</link>
+      <pubDate>Mon, 21 Jul 2025 23:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/cni/flannel/</guid>
+      <description>&lt;p&gt;flannel 的配置一般如下：&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;#34;Network&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;10.0.0.0/16&amp;#34;&lt;/span&gt;,&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;#34;SubnetLen&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#bd93f9&#34;&gt;24&lt;/span&gt;,&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;#34;SubnetMin&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;10.0.1.0&amp;#34;&lt;/span&gt;,&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;#34;SubnetMax&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;10.0.20.0&amp;#34;&lt;/span&gt;,&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;#34;Backend&amp;#34;&lt;/span&gt;:{&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#ff79c6&#34;&gt;&amp;#34;Type&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#f1fa8c&#34;&gt;&amp;#34;vxlan&amp;#34;&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;&#xA;&lt;li&gt;Network：用于指定Flannel地址池。&lt;/li&gt;&#xA;&lt;li&gt;SubnetLen：用于指定分配给单个宿主机的docker0的ip段的子网掩码的长度。&lt;/li&gt;&#xA;&lt;li&gt;SubnetMin：用于指定最小能够分配的ip段。&lt;/li&gt;&#xA;&lt;li&gt;SudbnetMax：用于指定最大能够分配的ip段，在上面的示例中，表示每个宿主机可以分配一个24位掩码长度的子网，可以分配的子网从10.0.1.0/24到10.0.20.0/24，也就意味着在这个网段中，最多只能有20台宿主机。&lt;/li&gt;&#xA;&lt;li&gt;Backend：，用于在跨主机通信时指定数据包以什么方式转发，如vxlan/host-gw/udp等。&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;flannel 中比较重要的概念&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>flannel 源码分析之 host-gw 模式</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/</link>
+      <pubDate>Mon, 21 Jul 2025 23:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/</guid>
+      <description>&lt;p&gt;flannel 的 host-gw 网络模式不涉及数据包的封包和解包，就是在宿主机上配置路由规则，把其它宿主机ip当成其上所有pod的下一跳。&lt;/p&gt;&#xA;&lt;h2 id=&#34;注册和创建-host-gw-network-实例&#34;&gt;注册和创建 host-gw Network 实例&lt;/h2&gt;&#xA;&lt;p&gt;结构体 HostgwBackend 实现了接口 Backend 。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>flannel 源码分析之 vxlan 模式</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/</link>
+      <pubDate>Mon, 21 Jul 2025 23:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/</guid>
+      <description>&lt;h2 id=&#34;注册和创建-vxlan-network-实例&#34;&gt;注册和创建 vxlan Network 实例&lt;/h2&gt;&#xA;&lt;p&gt;结构体 VXLANBackend 实现了接口 Backend 和 Network。&#xA;vxlan 注册到 flannel 的流程如下:&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

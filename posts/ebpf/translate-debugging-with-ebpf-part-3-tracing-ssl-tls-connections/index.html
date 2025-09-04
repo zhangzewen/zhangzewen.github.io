@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections">
+  <meta itemprop="description" content="介于能力有限，翻译有不当之处，不吝赐教
+这是一个系列文章：
+[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod [译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses 原文：Debugging with eBPF Part 3: Tracing SSL/TLS connections">
+  <meta itemprop="datePublished" content="2024-03-21T15:03:02+08:00">
+  <meta itemprop="dateModified" content="2024-03-21T15:03:02+08:00">
+  <meta itemprop="wordCount" content="743">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="EBPF,Linux,Kernel,Tracing,Debug,Go,翻译">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections">
+  <meta name="twitter:description" content="介于能力有限，翻译有不当之处，不吝赐教
+这是一个系列文章：
+[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod [译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses 原文：Debugging with eBPF Part 3: Tracing SSL/TLS connections">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections">
+  <meta property="og:description" content="介于能力有限，翻译有不当之处，不吝赐教
+这是一个系列文章：
+[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod [译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses 原文：Debugging with eBPF Part 3: Tracing SSL/TLS connections">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-03-21T15:03:02+08:00">
+    <meta property="article:modified_time" content="2024-03-21T15:03:02+08:00">
+    <meta property="article:tag" content="EBPF">
+    <meta property="article:tag" content="Linux">
+    <meta property="article:tag" content="Kernel">
+    <meta property="article:tag" content="Tracing">
+    <meta property="article:tag" content="Debug">
+    <meta property="article:tag" content="Go">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/#webpage",
+      "url": "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/",
+      "name": "[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2024-03-21T15:03:02+08:00",
+      "dateModified": "2024-03-21T15:03:02+08:00",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e这是一个系列文章：\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e\u003ca href=\"https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/\"\u003e[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003e\u003ca href=\"https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/\"\u003e[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses\u003c/a\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003e\u003cstrong\u003e原文：\u003ca href=\"https://blog.px.dev/ebpf-openssl-tracing/\"\u003eDebugging with eBPF Part 3: Tracing SSL/TLS connections\u003c/a\u003e\u003c/strong\u003e\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/#webpage"
+      },
+      "headline": "[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections",
+      "datePublished": "2024-03-21T15:03:02+08:00",
+      "dateModified": "2024-03-21T15:03:02+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "EBPF",
+        "Linux",
+        "Kernel",
+        "Tracing",
+        "Debug",
+        "Go",
+        "翻译"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#使用bpf进行跟踪">使用BPF进行跟踪</a></li>
+        <li><a href="#tlsssl带来的问题">TLS/SSL带来的问题</a></li>
+        <li><a href="#简单的解决方案">简单的解决方案</a></li>
+        <li><a href="#在共享库上设置-uprobe-锚点">在共享库上设置 uprobe 锚点</a></li>
+        <li><a href="#整合到一起">整合到一起</a>
+          <ul>
+            <li><a href="#用户空间跟踪器">用户空间跟踪器</a></li>
+            <li><a href="#bpf-uprobes">BPF uprobes</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2024-03-21T15:03:02&#43;0800">Created: Mar 21, 2024</time>
+    <span class="readtime">&middot; 4 min read</span>
+  </div>
+
+  <div>
+    <blockquote>
+<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
+<p>这是一个系列文章：</p>
+<ul>
+<li><a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></li>
+<li><a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></li>
+</ul>
+<p><strong>原文：<a href="https://blog.px.dev/ebpf-openssl-tracing/">Debugging with eBPF Part 3: Tracing SSL/TLS connections</a></strong></p></blockquote>
+<p>本文将演示如何使用eBPF跟踪通过TLS（或其前身SSL）运行的加密连接。TLS已成为保护微服务通信的标准，因此任何可用于生产环境的跟踪工具都应该能够处理加密连接。</p>
+<p>这篇文章是我们持续分享的系列之一，介绍如何使用eBPF在不重新编译或重新部署应用程序的情况下进行调试。如要更进一步了解eBPF，请查看：</p>
+<ul>
+<li><a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></li>
+<li><a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></li>
+</ul>
+<h2 id="使用bpf进行跟踪">使用BPF进行跟踪</h2>
+<p><a href="https://www.brendangregg.com/ebpf.html">BPF</a>就像使用调试器在应用程序中设置断点那样几乎可以在任何时候中断程序的执行。</p>
+<p>然而与调试器不同的是，调试器会无限期地停止程序以允许你探查，而在使用BPF时，当指定的触发器发生时，内核只需在指定触发事件发生时运行一个BPF程序，然后立即恢复原始程序的执行。</p>
+<p>BPF的一个有趣应用是网络流量追踪。许多网络流量追踪器，如Wireshark，使用pcap（数据包捕获）来捕获发送到网络接口卡（NIC）的数据。如今，pcap实际上在底层使用BPF。每当将数据包发送到NIC时，BPF程序会捕获数据包数据。</p>
+<p>BPF探针并不局限于追踪数据包级别的数据；探针可以部署在网络堆栈的多个位置。</p>
+<p>在Pixie中，我们将BPF kprobes放置在Linux系统调用的<code>send()</code>和<code>recv()</code>函数族上。每当执行其中一个系统调用时，kprobe都会触发，并且Pixie将捕获数据。</p>
+<p><img src="/images/ebpf/translate-Debugging-with-eBPF-Part-3-Tracing-SSL-TLS-connections/bpf-syscall-tracing.svg" alt="Diagram of a network traffic tracer BPF program using kprobes attached to Linux syscalls"></p>
+<p><code>send()</code>和<code>recv()</code>系统调用在网络堆栈中处于非常高的位置，在数据被打包并准备用于网络传输之前。由于Pixie的目标是自动观察应用程序在网络上发送的数据，因此在这一层添加探针是获得应用程序如何与环境中的其他服务对话的理想选择。</p>
+<h2 id="tlsssl带来的问题">TLS/SSL带来的问题</h2>
+<p>上面概述的BPF kprobe方法对所有纯文本流量都很有效，但对加密连接则无效。当数据流经TSL/SSL流量的Linux <code>send()</code>和<code>recv()</code>系统调用时，它已经被加密了，我们不能对它做任何有意义的事情。</p>
+<p>Wireshark和其他底层数据包捕获器所采取的方法是要求提供密钥，以便数据可以被解密。TLS握手是相当复杂的，由许多不同的密钥和秘密组成，但在高层次上，有两种模式。</p>
+<ol>
+<li>给Wireshark提供RSA私钥，这样它就可以追踪整个连接。在这种设置下，只要Wireshark能够观察到初始的密钥交换，它就能够追踪数据；但对于现有的连接就不好使。</li>
+<li>如果你知道给Wireshark一个在密钥交换过程中协商的（预）主密钥的这个方法的，即使没有看到初始连接，Wireshark也能解密数据。因为这是一个常见的使用情况，你实际上可以要求你的浏览器为这个目的转储会话密钥。</li>
+</ol>
+<p>对于Wireshark的用例来说，共享加密密钥的效果很好，但这种方法的可扩展性不够，无法用于以 &ldquo;在几秒钟内启动和运行 &ldquo;为口号的观察平台。</p>
+<h2 id="简单的解决方案">简单的解决方案</h2>
+<p>鉴于BPF的强大功能，我们想知道是否有一种更无缝的方式来访问纯文本数据。由此产生的计划是很直观的：我们只是在数据被加密之前捕获它。</p>
+<p>这种预先加密的方法排除了kprobes，因为数据在到达Linux内核之前就被加密了。但BPF并不限于内核事件触发器。Uprobes 探针允许内核在应用程序代码到达某个指令时触发BPF程序。</p>
+<p>为了弄清楚在哪里放置uprobe以捕获加密前的流量，看一下SSL/TLS通常是如何被纳入应用的图表会有帮助。</p>
+<p><img src="/images/ebpf/translate-Debugging-with-eBPF-Part-3-Tracing-SSL-TLS-connections/bpf-tls-tracing.svg" alt="Diagram of application without TLS vs Application with TLS"></p>
+<p>上图显示了用流行的TLS库OpenSSL加密应用流量的常见设置。我们的目标是追踪TLS库的输入，这恰好是OpenSSL的<code>SSL_write</code>和<code>SSL_read</code>函数。追踪这些调用，而不是Linux的<code>send()</code>和<code>recv()</code>系统调用，将会在加密前捕获流量。</p>
+<p>这一策略得到了BPF uprobes的支持。通过 uprobes，我们将我们的触发器设置为发生在用户空间的事件。通常，uprobes是在用户自己的编译代码中设置的，但没有什么可以阻止我们把它们放在共享库中。</p>
+<p>通过把uprobe放在一个共享库上，我们最终会追踪所有使用该共享库的应用程序，所以我们需要过滤掉我们真正感兴趣的进程的数据。这与我们在Linux的<code>send()</code>和<code>recv()</code>系统调用上放置一个kprobe没有什么不同。这些kprobe最终也会跟踪所有的应用程序&ndash;事实上，它们会跟踪更多的应用程序，因为不是所有的应用程序都使用OpenSSL，但所有的应用程序都会通过内核。然而，在一个完整的系统追踪器的背景下，对共享库的探测实际上是一个优势，因为单一的探测给了我们广泛的可观察性覆盖。</p>
+<h2 id="在共享库上设置-uprobe-锚点">在共享库上设置 uprobe 锚点</h2>
+<p>将 uprobes 附加到共享库上与在应用程序代码上设置 uprobes 没有区别。</p>
+<p><a href="https://github.com/iovisor/bcc">BCC</a> 使得把一个 uprobe 附加到一个函数上变得很容易。例如，如果你在一个叫demo的程序中有一个叫foo()的函数，你可以用BCC来附加一个uprobe，方法如下。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>attach_uprobe(
+</span></span><span style="display:flex;"><span>    <span style="color:#f1fa8c">&#34;/home/user/demo&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f1fa8c">&#34;foo&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&lt;</span>your BPF code here<span style="color:#ff79c6">&gt;</span>);
+</span></span></code></pre></div><p>请注意，要做到这一点，你必须用调试符号编译你的代码。你可以通过运行像nm这样的程序来验证一个二进制文件是否有符号；下面我们还运行grep来搜索一个感兴趣的特定符号。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ nm -C demo | grep foo
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">0000000000401110</span> T foo<span style="color:#ff79c6">()</span>
+</span></span></code></pre></div><p>编译器的优化，如内联，往往意味着你要找的符号是不可用的，所以这是需要注意的。尽管如此，只要该符号在二进制文件中是可用的，你就可以追踪它。</p>
+<p>现在，如果你想把一个uprobe附加到一个共享库中，该怎么办？在这种情况下，我们将<code>.so</code>共享库作为我们的对象文件来处理，而不是我们所编译的程序，因为共享库是我们感兴趣的代码的所在。首先，让我们看看是否能找到我们想要探测的<code>SSL_write</code>或<code>SSL_read</code>符号。要做到这一点，我们直接在<code>libssl.so</code>文件上运行<code>nm</code>。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ nm /usr/lib/x86_64-linux-gnu/libssl.so.1.1
+</span></span><span style="display:flex;"><span>nm: /usr/lib/x86_64-linux-gnu/libssl.so.1.1: no symbols
+</span></span></code></pre></div><p>没有符号？它们被剔除了吗？那么我们如何调用attach_uprobe函数呢？</p>
+<p>在短暂的恐慌之后，你问自己，应用程序是如何调用OpenSSL函数，比如<code>SSL_write</code>？这些信息一定保存在某个地方，通过阅读<code>nm</code>的手册页面，我们可以找到答案。我们需要通过标志<code>--dynamic</code>来查看动态符号。这些符号不会被剥离，否则任何二进制文件都不可能链接到共享库。带着这个标志再次运行<code>nm</code>，会发现更有趣的东西</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ nm --dynamic /usr/lib/x86_64-linux-gnu/libssl.so.1.1 | grep -e SSL_write -e SSL_read
+</span></span><span style="display:flex;"><span>0000000000038b00 T SSL_read
+</span></span><span style="display:flex;"><span>000000000003c730 T SSL_read_early_data
+</span></span><span style="display:flex;"><span>0000000000038b70 T SSL_read_ex
+</span></span><span style="display:flex;"><span>0000000000038dd0 T SSL_write
+</span></span><span style="display:flex;"><span>000000000003c900 T SSL_write_early_data
+</span></span><span style="display:flex;"><span>0000000000038e40 T SSL_write_ex
+</span></span></code></pre></div><p>这些符号确实存在，这很有希望。</p>
+<p>最后的<code>attach_uprobe</code>调用非常简单。对于要设置uprobe的对象，你可以直接提供共享库。而对于符号，使用感兴趣的动态符号。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>attach_uprobe(
+</span></span><span style="display:flex;"><span>    <span style="color:#f1fa8c">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f1fa8c">&#34;SSL_write&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&lt;</span>your BPF code here<span style="color:#ff79c6">&gt;</span>)
+</span></span></code></pre></div><h2 id="整合到一起">整合到一起</h2>
+<p>一个完全工作的OpenSSL追踪器的版本可以在<a href="https://github.com/pixie-io/pixie-demos/tree/main/openssl-tracer">这里</a>找到。要运行该演示，请遵循README文件中的指示。</p>
+<p>项目主要结构如下:</p>
+<ul>
+<li><code>openssl_tracer.cc</code>:  用户空间跟踪逻辑</li>
+<li><code>openssl_tracer_bpf_funcs.c</code>:  部署BPF探针</li>
+<li><code>probe_deployment.h/cc</code>: 一个薄包装的BCC</li>
+</ul>
+<h3 id="用户空间跟踪器">用户空间跟踪器</h3>
+<p><code>openssl_tracer.cc</code>是包括<code>main</code>的顶层文件。它负责部署探针，然后从BPF读取跟踪数据并打印到屏幕上。</p>
+<p>在<code>openssl_tracer.cc</code>的文件的开始，我们列出了我们想要连接的探针。<code>UProbeSpec</code>是我们定义的一个自定义结构体，用于指定一个探针。它有我们想要附加探针的对象文件和符号。它还指定了探针是否应该在被追踪函数的进入或返回时触发。最后，<code>probe_fn</code>指定了探针被触发时要执行的BPF函数（后面会有更多介绍）。</p>
+<p>在我们的OpenSSL追踪器中，我们想追踪<code>SSL_write</code>和<code>SSL_read</code>。由于我们对这两个函数的输入和输出都感兴趣，我们实际上需要4个探针：一个关于<code>SSL_write</code>的入口和返回探针，以及一个关于<code>SSL_read</code>的入口和返回探针。我们将在下一节看一下BPF探针函数的内容。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#6272a4">// A probe on entry of SSL_write
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>UProbeSpec kSSLWriteEntryProbeSpec{
+</span></span><span style="display:flex;"><span>    .binary_path <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
+</span></span><span style="display:flex;"><span>    .symbol <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;SSL_write&#34;</span>,
+</span></span><span style="display:flex;"><span>    .attach_type <span style="color:#ff79c6">=</span> BPF_PROBE_ENTRY,
+</span></span><span style="display:flex;"><span>    .probe_fn <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;probe_entry_SSL_write&#34;</span>,
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// A probe on return of SSL_write
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>UProbeSpec kSSLWriteRetProbeSpec{
+</span></span><span style="display:flex;"><span>    .binary_path <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
+</span></span><span style="display:flex;"><span>    .symbol <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;SSL_write&#34;</span>,
+</span></span><span style="display:flex;"><span>    .attach_type <span style="color:#ff79c6">=</span> BPF_PROBE_RETURN,
+</span></span><span style="display:flex;"><span>    .probe_fn <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;probe_ret_SSL_write&#34;</span>,
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// A probe on entry of SSL_read
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>UProbeSpec kSSLReadEntryProbeSpec{
+</span></span><span style="display:flex;"><span>    .binary_path <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
+</span></span><span style="display:flex;"><span>    .symbol <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;SSL_read&#34;</span>,
+</span></span><span style="display:flex;"><span>    .attach_type <span style="color:#ff79c6">=</span> BPF_PROBE_ENTRY,
+</span></span><span style="display:flex;"><span>    .probe_fn <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;probe_entry_SSL_read&#34;</span>,
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// A probe on return of SSL_read
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>UProbeSpec kSSLReadRetProbeSpec{
+</span></span><span style="display:flex;"><span>    .binary_path <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
+</span></span><span style="display:flex;"><span>    .symbol <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;SSL_read&#34;</span>,
+</span></span><span style="display:flex;"><span>    .attach_type <span style="color:#ff79c6">=</span> BPF_PROBE_RETURN,
+</span></span><span style="display:flex;"><span>    .probe_fn <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;probe_ret_SSL_read&#34;</span>,
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">const</span> std<span style="color:#ff79c6">::</span>vector<span style="color:#ff79c6">&lt;</span>UProbeSpec<span style="color:#ff79c6">&gt;</span> kUProbes <span style="color:#ff79c6">=</span> {
+</span></span><span style="display:flex;"><span>    kSSLWriteEntryProbeSpec,
+</span></span><span style="display:flex;"><span>    kSSLWriteRetProbeSpec,
+</span></span><span style="display:flex;"><span>    kSSLReadEntryProbeSpec,
+</span></span><span style="display:flex;"><span>    kSSLReadRetProbeSpec,
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>接下来，我们设置perf缓冲区的输出。回想一下，perf缓冲区只是一个输出缓冲区（之所以叫 &ldquo;perf &ldquo;是因为它在历史上被用作perf套件的一部分）；它实际上只是一个简单的输出缓冲区。内核空间的BPF探针将数据推入perf缓冲区，这里我们从用户空间读出数据。</p>
+<p>我们再次定义了一个自定义的<code>PerfBufferSpec</code>来指定我们想要读取的perf缓冲区。在这种情况下，perf_buffer被称为<code>tls_events</code>。这个名称必须与BPF探针中指定的perf缓冲区匹配，否则我们将无法找到推送的数据。我们还设置了一个<code>probe_output_fn</code>，它指定在从缓冲区读取事件时要调用户空间函数。在这种情况下，我们调用<code>handle_output</code>函数，它只是将信息打印到<code>标准输出</code>上。由于该缓冲区本质上是一个循环缓冲区，并且可能会丢失事件，因此还有一个可选的<code>probe_loss_fn</code>来处理丢失事件；为简单起见，在本示例中忽略此类事件。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#8be9fd">void</span> <span style="color:#50fa7b">handle_output</span>(<span style="color:#8be9fd">void</span><span style="color:#ff79c6">*</span> <span style="color:#6272a4">/*cb_cookie*/</span>, <span style="color:#8be9fd">void</span><span style="color:#ff79c6">*</span> data, <span style="color:#8be9fd">int</span> <span style="color:#6272a4">/*data_size*/</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Cast the raw memory into the ssl_data_event_t struct that we know it is.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">ssl_data_event_t</span> r <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">*</span><span style="color:#ff79c6">static_cast</span><span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">ssl_data_event_t</span><span style="color:#ff79c6">*&gt;</span>(data);
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>string_view plaintext(r.data, r.data_len);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34; t=&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> r.timestamp_ns;
+</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34; type=&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> (r.type <span style="color:#ff79c6">==</span> kSSLRead <span style="color:#ff79c6">?</span> <span style="color:#f1fa8c">&#34;read&#34;</span> <span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#34;write&#34;</span>);
+</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34; data=&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> plaintext;
+</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">const</span> PerfBufferSpec kPerfBufferSpec <span style="color:#ff79c6">=</span> {
+</span></span><span style="display:flex;"><span>    .name <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;tls_events&#34;</span>,
+</span></span><span style="display:flex;"><span>    .probe_output_fn <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">&amp;</span>handle_output,
+</span></span><span style="display:flex;"><span>    .probe_loss_fn <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">nullptr</span>,
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>接下来，我们有了追踪器的主要功能，它不是太复杂。代码的主要部分包括：</p>
+<ul>
+<li>将<code>openssl_tracer_bpf_funcs.c</code>中的BPF代码装入内核。</li>
+<li>部署4个上行链，以便它们开始追踪<code>libssl.so</code>中的<code>SSL_read</code>和<code>SSL_write</code>。</li>
+<li>打开perf缓冲区，以便我们可以读取被uprobes插入的数据。</li>
+<li>使用一个循环来定期读取perf buffer中的所有事件。每次从这里读出一个事件，都会触发上述的<code>handle_output</code>。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#8be9fd">int</span> <span style="color:#50fa7b">main</span>(<span style="color:#8be9fd">int</span> argc, <span style="color:#8be9fd">char</span><span style="color:#ff79c6">**</span> argv) {
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Read arguments to get the target PID to trace.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">if</span> (argc <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">2</span>) {
+</span></span><span style="display:flex;"><span>    std<span style="color:#ff79c6">::</span>cerr <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;Usage: &#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> argv[<span style="color:#bd93f9">0</span>] <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34; &lt;PID to trace for SSL traffic&gt;&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+</span></span><span style="display:flex;"><span>    exit(<span style="color:#bd93f9">1</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>string target_pid(argv[<span style="color:#bd93f9">1</span>]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  BCCWrapper bcc;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Read and deploy the BPF code.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  std<span style="color:#ff79c6">::</span>ifstream ifs(<span style="color:#f1fa8c">&#34;openssl_tracer_bpf_funcs.c&#34;</span>);
+</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>string bpf_code(std<span style="color:#ff79c6">::</span>istreambuf_iterator<span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">char</span><span style="color:#ff79c6">&gt;</span>(ifs), {});
+</span></span><span style="display:flex;"><span>  RETURN_IF_ERROR(bcc.Init(bpf_code, {<span style="color:#f1fa8c">&#34;-DTRACE_PID=&#34;</span> <span style="color:#ff79c6">+</span> target_pid}));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Deploy uprobes.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">for</span> (<span style="color:#ff79c6">auto</span><span style="color:#ff79c6">&amp;</span> <span style="color:#8be9fd;font-style:italic">probe_spec</span> : kUProbes) {
+</span></span><span style="display:flex;"><span>    RETURN_IF_ERROR(bcc.AttachUProbe(probe_spec));
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Open the perf buffer used by our uprobes to output data.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  RETURN_IF_ERROR(bcc.OpenPerfBuffer(kPerfBufferSpec));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;Successfully deployed BPF probes. Tracing for SSL data. Use Ctrl-C to exit.&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Periodically read the output buffer and print entries to screen.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">while</span> (<span style="color:#8be9fd;font-style:italic">true</span>) {
+</span></span><span style="display:flex;"><span>    bcc.PollPerfBuffer(kPerfBufferSpec.name);
+</span></span><span style="display:flex;"><span>    usleep(<span style="color:#bd93f9">100000</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="bpf-uprobes">BPF uprobes</h3>
+<p>BPF uprobes 的主要目的是追踪<code>SSL_write</code>和<code>SSL_read</code>函数并捕获数据。实际上，这意味着我们需要跟踪这些函数的入口和出口。返回值探针对于跟踪返回值是必要的。此外，在<code>SSL_read</code>的情况下，输入缓冲区的指针在入口处不会包含读取的数据，所以在返回时复制数据是必要的。</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Function</th>
+          <th style="text-align: left">Entry probe actions</th>
+          <th style="text-align: left">Return probe actions</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">int SSL_write(SSL *ssl, const void *buf, int num);</td>
+          <td style="text-align: left">将输入数据（即buf）的记录到BPF映射中。</td>
+          <td style="text-align: left">从BPF映射中检索输入的数据。检查返回值以获取写入的字节数。将数据从缓冲区复制到性能缓冲区输出。</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">int SSL_read(SSL *ssl, void *buf, int num);</td>
+          <td style="text-align: left">将返回数据（即buf）的记录到BPF映射中。</td>
+          <td style="text-align: left">从BPF映射中检索返回的数据。检查返回值以获取读取的字节数。将数据从缓冲区复制到性能缓冲输出。</td>
+      </tr>
+  </tbody>
+</table>
+<p>在更详细地浏览BPF代码时，有几个要点需要强调。首先，我们在源码文件开始部分有一些全局变量：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>BPF_PERF_OUTPUT(tls_events);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// Key is thread ID (from bpf_get_current_pid_tgid).
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">// Value is a pointer to the data buffer argument to SSL_write/SSL_read.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>BPF_HASH(active_ssl_read_args_map, <span style="color:#8be9fd">uint64_t</span>, <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">ssl_args_t</span>);
+</span></span><span style="display:flex;"><span>BPF_HASH(active_ssl_write_args_map, <span style="color:#8be9fd">uint64_t</span>, <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">ssl_args_t</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// BPF programs are limited to a 512-byte stack. We store this value per CPU
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">// and use it as a heap allocated value.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>BPF_PERCPU_ARRAY(data_buffer_heap, <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">ssl_data_event_t</span>, <span style="color:#bd93f9">1</span>);
+</span></span></code></pre></div><p>可以将上述三个语句视为对任何BPF探针可用的全局结构。在<code>BPF_HASH</code>的情况下，它表示一个全局哈希表：第一个参数是名称，第二个参数是键，第三个参数是值类型。我们使用前两个映射将数据从入口探针传输到返回探针。尤其是我们将数据缓冲区的位置（作为输入参数）存储在全局映射中。然后返回探针（无法直接访问输入参数）从全局映射中读取该值。为了使其工作，我们将使用线程ID作为这些映射的键。</p>
+<p>BPF_PERCPU_ARRAY是另一个针对每个CPU本地的BPF映射。我们将其用作临时的暂存空间，因为无法将过多的数据复制到BPF堆栈上。</p>
+<p>接下来，我将展示SSL_read探针的代码——<code>SSL_write</code>探针非常相似，可自行探索。</p>
+<p>入口探针<code>probe_entry_SSL_read</code>首先获取pid，以查看刚刚触发的探针是否是目标PID。如果不是，则探针返回而不采取任何操作。然而，如果当前PID是目标PID，则探针读取缓冲区指针并将该值存储在全局<code>active_ssl_read_args_map</code>中。这只是一种通过将其存储在持久的全局位置中来向返回探测器传递参数的方式。</p>
+<p>在触发输入探针后不久，我们预计将会触发返回探针<code>probe_ret_SSL_read</code>。当这种情况发生时，我们再次确保正在追踪一个感兴趣的PID。如果是这样，我们将“取出”buf参数，该参数告诉我们<code>SSL_read</code>数据被复制到了哪里。然后，我们也复制一份该数据，并通过<code>process_SSL_data</code>将其推送到输出perf_buffer中。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">static</span> <span style="color:#8be9fd">int</span> <span style="color:#50fa7b">process_SSL_data</span>(<span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">pt_regs</span><span style="color:#ff79c6">*</span> ctx, <span style="color:#8be9fd">uint64_t</span> id, <span style="color:#ff79c6">enum</span> <span style="color:#50fa7b">ssl_data_event_type</span> type,
+</span></span><span style="display:flex;"><span>                            <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span><span style="color:#ff79c6">*</span> buf) {
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">int</span> len <span style="color:#ff79c6">=</span> (<span style="color:#8be9fd">int</span>)PT_REGS_RC(ctx);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (len <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">ssl_data_event_t</span><span style="color:#ff79c6">*</span> event <span style="color:#ff79c6">=</span> create_ssl_data_event(id);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (event <span style="color:#ff79c6">==</span> <span style="color:#8be9fd;font-style:italic">NULL</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  event<span style="color:#ff79c6">-&gt;</span>type <span style="color:#ff79c6">=</span> type;
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// This is a max function, but it is written in such a way to keep older BPF verifiers happy.
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  event<span style="color:#ff79c6">-&gt;</span>data_len <span style="color:#ff79c6">=</span> (len <span style="color:#ff79c6">&lt;</span> MAX_DATA_SIZE <span style="color:#ff79c6">?</span> (len <span style="color:#ff79c6">&amp;</span> (MAX_DATA_SIZE <span style="color:#ff79c6">-</span> <span style="color:#bd93f9">1</span>)) <span style="color:#ff79c6">:</span> MAX_DATA_SIZE);
+</span></span><span style="display:flex;"><span>  bpf_probe_read(event<span style="color:#ff79c6">-&gt;</span>data, event<span style="color:#ff79c6">-&gt;</span>data_len, buf);
+</span></span><span style="display:flex;"><span>  tls_events.perf_submit(ctx, event, <span style="color:#ff79c6">sizeof</span>(<span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">ssl_data_event_t</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// Function signature being probed:
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">// int SSL_read(SSL *s, void *buf, int num)
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#8be9fd">int</span> <span style="color:#50fa7b">probe_entry_SSL_read</span>(<span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">pt_regs</span><span style="color:#ff79c6">*</span> ctx) {
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">uint64_t</span> current_pid_tgid <span style="color:#ff79c6">=</span> bpf_get_current_pid_tgid();
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">uint32_t</span> pid <span style="color:#ff79c6">=</span> current_pid_tgid <span style="color:#ff79c6">&gt;&gt;</span> <span style="color:#bd93f9">32</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (pid <span style="color:#ff79c6">!=</span> TRACE_PID) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span><span style="color:#ff79c6">*</span> buf <span style="color:#ff79c6">=</span> (<span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span><span style="color:#ff79c6">*</span>)PT_REGS_PARM2(ctx);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  active_ssl_read_args_map.update(<span style="color:#ff79c6">&amp;</span>current_pid_tgid, <span style="color:#ff79c6">&amp;</span>buf);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd">int</span> <span style="color:#50fa7b">probe_ret_SSL_read</span>(<span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">pt_regs</span><span style="color:#ff79c6">*</span> ctx) {
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">uint64_t</span> current_pid_tgid <span style="color:#ff79c6">=</span> bpf_get_current_pid_tgid();
+</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">uint32_t</span> pid <span style="color:#ff79c6">=</span> current_pid_tgid <span style="color:#ff79c6">&gt;&gt;</span> <span style="color:#bd93f9">32</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (pid <span style="color:#ff79c6">!=</span> TRACE_PID) {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span><span style="color:#ff79c6">**</span> buf <span style="color:#ff79c6">=</span> active_ssl_read_args_map.lookup(<span style="color:#ff79c6">&amp;</span>current_pid_tgid);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (buf <span style="color:#ff79c6">!=</span> <span style="color:#8be9fd;font-style:italic">NULL</span>) {
+</span></span><span style="display:flex;"><span>    process_SSL_data(ctx, current_pid_tgid, kSSLRead, <span style="color:#ff79c6">*</span>buf);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  active_ssl_read_args_map.<span style="color:#ff79c6">delete</span>(<span style="color:#ff79c6">&amp;</span>current_pid_tgid);
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>这就是全部了。一旦探针将数据推送到<code>tls_events</code>性能缓冲区，用户空间的<code>openssl_tracer.cc</code>跟踪器将在下次唤醒时看到数据。然后它会将其打印到屏幕上。</p>
+<p>看哪！您刚刚追踪了自己的TLS/SSL应用程序。</p>
+
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/ebpf/" class="tag-link">EBPF</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/linux/" class="tag-link">Linux</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kernel/" class="tag-link">Kernel</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/tracing/" class="tag-link">Tracing</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/debug/" class="tag-link">Debug</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/go/" class="tag-link">Go</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E7%BF%BB%E8%AF%91/" class="tag-link">翻译</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

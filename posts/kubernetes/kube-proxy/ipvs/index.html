@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.149.0">
+
+  <title>kubernetes 源码分析之 kube-proxy ipvs 模式 &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="kubernetes 源码分析之 kube-proxy ipvs 模式">
+  <meta itemprop="description" content="本篇文章基于 Kubernetes v1.25.1
+上一篇文章 分析了 kube-proxy 的主流程逻辑实现，本篇文章通过分析核心方法 syncProxyRules 来分析 kube-proxy 的 ipvs 模式的实现。">
+  <meta itemprop="datePublished" content="2025-01-21T21:39:37+08:00">
+  <meta itemprop="dateModified" content="2025-01-21T21:39:37+08:00">
+  <meta itemprop="wordCount" content="2064">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="源码分析,Kubernetes,Kube-Proxy">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="kubernetes 源码分析之 kube-proxy ipvs 模式">
+  <meta name="twitter:description" content="本篇文章基于 Kubernetes v1.25.1
+上一篇文章 分析了 kube-proxy 的主流程逻辑实现，本篇文章通过分析核心方法 syncProxyRules 来分析 kube-proxy 的 ipvs 模式的实现。">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/kube-proxy/ipvs/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="kubernetes 源码分析之 kube-proxy ipvs 模式">
+  <meta property="og:description" content="本篇文章基于 Kubernetes v1.25.1
+上一篇文章 分析了 kube-proxy 的主流程逻辑实现，本篇文章通过分析核心方法 syncProxyRules 来分析 kube-proxy 的 ipvs 模式的实现。">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-01-21T21:39:37+08:00">
+    <meta property="article:modified_time" content="2025-01-21T21:39:37+08:00">
+    <meta property="article:tag" content="源码分析">
+    <meta property="article:tag" content="Kubernetes">
+    <meta property="article:tag" content="Kube-Proxy">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/ipvs/#webpage",
+      "url": "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/ipvs/",
+      "name": "kubernetes 源码分析之 kube-proxy ipvs 模式",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2025-01-21T21:39:37+08:00",
+      "dateModified": "2025-01-21T21:39:37+08:00",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003e\u003ca href=\"https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/\"\u003e上一篇文章\u003c/a\u003e 分析了 kube-proxy 的主流程逻辑实现，本篇文章通过分析核心方法 syncProxyRules 来分析 kube-proxy 的 ipvs 模式的实现。\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/ipvs/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/ipvs/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/ipvs/#webpage"
+      },
+      "headline": "kubernetes 源码分析之 kube-proxy ipvs 模式",
+      "datePublished": "2025-01-21T21:39:37+08:00",
+      "dateModified": "2025-01-21T21:39:37+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "源码分析",
+        "Kubernetes",
+        "Kube-Proxy"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/ipvs/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#实现">实现</a>
+          <ul>
+            <li><a href="#前置操作">前置操作</a></li>
+            <li><a href="#创建-dummy-网卡">创建 dummy 网卡</a></li>
+            <li><a href="#为-service-生成-ipset-规则">为 Service 生成 ipset 规则</a></li>
+            <li><a href="#宿主机刷新-ipset-规则">宿主机刷新 ipset 规则</a></li>
+            <li><a href="#创建-iptables-规则">创建 iptables 规则</a>
+              <ul>
+                <li><a href="#生成-snat-规则">生成 SNAT 规则</a></li>
+                <li><a href="#生成-kube-forward-规则">生成 KUBE-FORWARD 规则</a></li>
+                <li><a href="#生成-kube-postrouting-规则">生成 KUBE-POSTROUTING 规则</a></li>
+                <li><a href="#生成-kube-mark-masq--跳转规则">生成 KUBE-MARK-MASQ  跳转规则</a></li>
+              </ul>
+            </li>
+            <li><a href="#收尾工作">收尾工作</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li><li>
+          <a href="/about-me/">About Me</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+      <a href="https://github.com/zhangzewen" rel="me" title="GitHub" target="_blank">
+        <i class="fab fa-github" aria-hidden="true"></i>
+      </a>
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">kubernetes 源码分析之 kube-proxy ipvs 模式</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2025-01-21T21:39:37&#43;0800">Created: Jan 21, 2025</time>
+    <span class="readtime">&middot; 10 min read</span>
+  </div>
+
+  <div>
+    <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p><a href="https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/">上一篇文章</a> 分析了 kube-proxy 的主流程逻辑实现，本篇文章通过分析核心方法 syncProxyRules 来分析 kube-proxy 的 ipvs 模式的实现。</p>
+<h2 id="实现">实现</h2>
+<h3 id="前置操作">前置操作</h3>
+<p>ipvs 模式下也涉及一些 iptables 链和规则的创建，需要调用 createAndLinkKubeChain 在 iptables 的 nat 表 和 filter  表上创建基础的以<code>KUBE-</code>开头的链以及跳转规则。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/proxy/ipvs/proxier.go</span>
+</span></span><span style="display:flex;"><span>	proxier.natChains.<span style="color:#50fa7b">Reset</span>()
+</span></span><span style="display:flex;"><span>	proxier.natRules.<span style="color:#50fa7b">Reset</span>()
+</span></span><span style="display:flex;"><span>	proxier.filterChains.<span style="color:#50fa7b">Reset</span>()
+</span></span><span style="display:flex;"><span>	proxier.filterRules.<span style="color:#50fa7b">Reset</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Write table headers.</span>
+</span></span><span style="display:flex;"><span>	proxier.filterChains.<span style="color:#50fa7b">Write</span>(<span style="color:#f1fa8c">&#34;*filter&#34;</span>)
+</span></span><span style="display:flex;"><span>	proxier.natChains.<span style="color:#50fa7b">Write</span>(<span style="color:#f1fa8c">&#34;*nat&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	proxier.<span style="color:#50fa7b">createAndLinkKubeChain</span>()
+</span></span></code></pre></div><p>createAndLinkKubeChain 的代码如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (proxier <span style="color:#ff79c6">*</span>Proxier) <span style="color:#50fa7b">createAndLinkKubeChain</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, ch <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> iptablesChains {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> _, err <span style="color:#ff79c6">:=</span> proxier.iptables.<span style="color:#50fa7b">EnsureChain</span>(ch.table, ch.chain); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to ensure chain exists&#34;</span>, <span style="color:#f1fa8c">&#34;table&#34;</span>, ch.table, <span style="color:#f1fa8c">&#34;chain&#34;</span>, ch.chain)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> ch.table <span style="color:#ff79c6">==</span> utiliptables.TableNAT {
+</span></span><span style="display:flex;"><span>			proxier.natChains.<span style="color:#50fa7b">Write</span>(utiliptables.<span style="color:#50fa7b">MakeChainLine</span>(ch.chain))
+</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>			proxier.filterChains.<span style="color:#50fa7b">Write</span>(utiliptables.<span style="color:#50fa7b">MakeChainLine</span>(ch.chain))
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, jc <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> iptablesJumpChain {
+</span></span><span style="display:flex;"><span>		args <span style="color:#ff79c6">:=</span> []<span style="color:#8be9fd">string</span>{<span style="color:#f1fa8c">&#34;-m&#34;</span>, <span style="color:#f1fa8c">&#34;comment&#34;</span>, <span style="color:#f1fa8c">&#34;--comment&#34;</span>, jc.comment, <span style="color:#f1fa8c">&#34;-j&#34;</span>, <span style="color:#8be9fd;font-style:italic">string</span>(jc.to)}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> _, err <span style="color:#ff79c6">:=</span> proxier.iptables.<span style="color:#50fa7b">EnsureRule</span>(utiliptables.Prepend, jc.table, jc.from, args<span style="color:#ff79c6">...</span>); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to ensure chain jumps&#34;</span>, <span style="color:#f1fa8c">&#34;table&#34;</span>, jc.table, <span style="color:#f1fa8c">&#34;srcChain&#34;</span>, jc.from, <span style="color:#f1fa8c">&#34;dstChain&#34;</span>, jc.to)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>变量 iptablesChains 的值如下，其描述必须要存在的链：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">var</span> iptablesChains = []<span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>	table utiliptables.Table
+</span></span><span style="display:flex;"><span>	chain utiliptables.Chain
+</span></span><span style="display:flex;"><span>}{
+</span></span><span style="display:flex;"><span>	{utiliptables.TableNAT, kubeServicesChain},
+</span></span><span style="display:flex;"><span>	{utiliptables.TableNAT, kubePostroutingChain},
+</span></span><span style="display:flex;"><span>	{utiliptables.TableNAT, kubeNodePortChain},
+</span></span><span style="display:flex;"><span>	{utiliptables.TableNAT, kubeLoadBalancerChain},
+</span></span><span style="display:flex;"><span>	{utiliptables.TableNAT, kubeMarkMasqChain},
+</span></span><span style="display:flex;"><span>	{utiliptables.TableFilter, kubeForwardChain},
+</span></span><span style="display:flex;"><span>	{utiliptables.TableFilter, kubeNodePortChain},
+</span></span><span style="display:flex;"><span>	{utiliptables.TableFilter, kubeProxyFirewallChain},
+</span></span><span style="display:flex;"><span>	{utiliptables.TableFilter, kubeSourceRangesFirewallChain},
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>会创建如下规则：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>iptables -N KUBE-SERVICES -t nat
+</span></span><span style="display:flex;"><span>iptables -N KUBE-POSTROUTING -t nat
+</span></span><span style="display:flex;"><span>iptables -N KUBE-NODE-PORT -t nat
+</span></span><span style="display:flex;"><span>iptables -N KUBE-LOAD-BALANCER -t nat
+</span></span><span style="display:flex;"><span>iptables -N KUBE-MARK-MASQ -t nat
+</span></span><span style="display:flex;"><span>iptables -N KUBE-FORWARD -t fileter
+</span></span><span style="display:flex;"><span>iptables -N KUBE-NODE-PORT -t filter
+</span></span><span style="display:flex;"><span>iptables -N KUBE-PROXY-FIREWALL -t filter
+</span></span><span style="display:flex;"><span>iptables -N KUBE-SOURCE-RANGES-FIREWALL -t filter
+</span></span></code></pre></div><p>在 natchains 缓冲区新增：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>:KUBE-SERVICES - <span style="color:#ff79c6">[</span>0:0<span style="color:#ff79c6">]</span>
+</span></span><span style="display:flex;"><span>:KUBE-POSTROUTING - <span style="color:#ff79c6">[</span>0:0<span style="color:#ff79c6">]</span>
+</span></span><span style="display:flex;"><span>:KUBE-NODE-PORT - <span style="color:#ff79c6">[</span>0:0<span style="color:#ff79c6">]</span>
+</span></span><span style="display:flex;"><span>:KUBE-LOAD-BALANCER - <span style="color:#ff79c6">[</span>0:0<span style="color:#ff79c6">]</span>
+</span></span><span style="display:flex;"><span>:KUBE-MARK-MASQ - <span style="color:#ff79c6">[</span>0:0<span style="color:#ff79c6">]</span>
+</span></span></code></pre></div><p>在 natRules 缓冲区新增：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>:KUBE-FORWARD - <span style="color:#ff79c6">[</span>0:0<span style="color:#ff79c6">]</span>
+</span></span><span style="display:flex;"><span>:KUBE-NODE-PORT - <span style="color:#ff79c6">[</span>0:0<span style="color:#ff79c6">]</span>
+</span></span><span style="display:flex;"><span>:KUBE-PROXY-FIREWALL - <span style="color:#ff79c6">[</span>0:0<span style="color:#ff79c6">]</span>
+</span></span><span style="display:flex;"><span>:KUBE-SOURCE-RANGES-FIREWALL - <span style="color:#ff79c6">[</span>0:0<span style="color:#ff79c6">]</span>
+</span></span></code></pre></div><p>变量 iptablesJumpChain 的值如下， 其描述跳转规则：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">var</span> iptablesJumpChain = []<span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span>	table   utiliptables.Table
+</span></span><span style="display:flex;"><span>	from    utiliptables.Chain
+</span></span><span style="display:flex;"><span>	to      utiliptables.Chain
+</span></span><span style="display:flex;"><span>	comment <span style="color:#8be9fd">string</span>
+</span></span><span style="display:flex;"><span>}{
+</span></span><span style="display:flex;"><span>	{utiliptables.TableNAT, utiliptables.ChainOutput, kubeServicesChain, <span style="color:#f1fa8c">&#34;kubernetes service portals&#34;</span>},
+</span></span><span style="display:flex;"><span>	{utiliptables.TableNAT, utiliptables.ChainPrerouting, kubeServicesChain, <span style="color:#f1fa8c">&#34;kubernetes service portals&#34;</span>},
+</span></span><span style="display:flex;"><span>	{utiliptables.TableNAT, utiliptables.ChainPostrouting, kubePostroutingChain, <span style="color:#f1fa8c">&#34;kubernetes postrouting rules&#34;</span>},
+</span></span><span style="display:flex;"><span>	{utiliptables.TableFilter, utiliptables.ChainForward, kubeForwardChain, <span style="color:#f1fa8c">&#34;kubernetes forwarding rules&#34;</span>},
+</span></span><span style="display:flex;"><span>	{utiliptables.TableFilter, utiliptables.ChainInput, kubeNodePortChain, <span style="color:#f1fa8c">&#34;kubernetes health check rules&#34;</span>},
+</span></span><span style="display:flex;"><span>	{utiliptables.TableFilter, utiliptables.ChainInput, kubeProxyFirewallChain, <span style="color:#f1fa8c">&#34;kube-proxy firewall rules&#34;</span>},
+</span></span><span style="display:flex;"><span>	{utiliptables.TableFilter, utiliptables.ChainForward, kubeProxyFirewallChain, <span style="color:#f1fa8c">&#34;kube-proxy firewall rules&#34;</span>},
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>以如下规则为例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>	{utiliptables.TableFilter, utiliptables.ChainForward, kubeForwardChain, <span style="color:#f1fa8c">&#34;kubernetes forwarding rules&#34;</span>},
+</span></span></code></pre></div><p>会创建如下规则：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>iptables -I FORWARD -t filter -m comment --comment <span style="color:#f1fa8c">&#34;kubernetes forwarding rules&#34;</span> -j KUBE-FORWARD
+</span></span></code></pre></div><h3 id="创建-dummy-网卡">创建 dummy 网卡</h3>
+<p>确保宿主机已创建 dummy 网卡，默认为 <code>kube-ipvs0</code>。 ipvs netfilter 的 DNAT 钩子挂载在 INPUT 链上，当访问 ClusterIP 时，需要将 ClusterIP 绑定在 dummy 网卡上为了让内核识别该 IP 就是本机 IP，进而进入 INPUT 链，进而被 ipvs 处理，完成 DNAT操作。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>	_, err <span style="color:#ff79c6">:=</span> proxier.netlinkHandle.<span style="color:#50fa7b">EnsureDummyDevice</span>(defaultDummyDevice)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to create dummy interface&#34;</span>, <span style="color:#f1fa8c">&#34;interface&#34;</span>, defaultDummyDevice)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span></code></pre></div><p>可以使用 <code>ip link</code> 命令来查看该网卡：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#ff79c6">[</span>root@zj-k8s-1 ~<span style="color:#ff79c6">]</span><span style="color:#6272a4"># ip link show type dummy</span>
+</span></span><span style="display:flex;"><span>4: dummy0: &lt;BROADCAST,NOARP&gt; mtu <span style="color:#bd93f9">1500</span> qdisc noop state DOWN mode DEFAULT group default qlen <span style="color:#bd93f9">1000</span>
+</span></span><span style="display:flex;"><span>    link/ether 96:81:53:da:51:fd brd ff:ff:ff:ff:ff:ff
+</span></span><span style="display:flex;"><span>5: kube-ipvs0: &lt;BROADCAST,NOARP&gt; mtu <span style="color:#bd93f9">1500</span> qdisc noop state DOWN mode DEFAULT group default
+</span></span><span style="display:flex;"><span>    link/ether 62:34:39:f1:6d:0f brd ff:ff:ff:ff:ff:ff
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>root@zj-k8s-1 ~<span style="color:#ff79c6">]</span><span style="color:#6272a4"># ip addr  show dev kube-ipvs0</span>
+</span></span><span style="display:flex;"><span>5: kube-ipvs0: &lt;BROADCAST,NOARP&gt; mtu <span style="color:#bd93f9">1500</span> qdisc noop state DOWN group default
+</span></span><span style="display:flex;"><span>    link/ether 62:34:39:f1:6d:0f brd ff:ff:ff:ff:ff:ff
+</span></span><span style="display:flex;"><span>    inet 10.96.0.10/32 scope global kube-ipvs0
+</span></span><span style="display:flex;"><span>       valid_lft forever preferred_lft forever
+</span></span><span style="display:flex;"><span>    inet 10.96.0.1/32 scope global kube-ipvs0
+</span></span><span style="display:flex;"><span>       valid_lft forever preferred_lft forever
+</span></span><span style="display:flex;"><span>    inet 10.97.131.201/32 scope global kube-ipvs0
+</span></span><span style="display:flex;"><span>       valid_lft forever preferred_lft forever
+</span></span><span style="display:flex;"><span>    inet 10.105.106.5/32 scope global kube-ipvs0
+</span></span><span style="display:flex;"><span>       valid_lft forever preferred_lft forever
+</span></span></code></pre></div><p>需要注意的是该interface的状态为<code>DOWN</code>, 这意味着该interface不可用, 但是可以让数据包往linux kernel里面送，这样就可以保证被ipvs处理到。</p>
+<h3 id="为-service-生成-ipset-规则">为 Service 生成 ipset 规则</h3>
+<p>kubernetes 的 Service 有如下几种 ：</p>
+<ul>
+<li>ClusterIP</li>
+<li>NodePort</li>
+<li>LoadBalancer</li>
+<li>ExternalName</li>
+</ul>
+<p>在 ipvs 模式下，kube-proxy 会为每种 Service 创建 ipset。因为种类是固定的，所以 ipset 的数量也是固定的。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>	<span style="color:#6272a4">// make sure ip sets exists in the system.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, set <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> proxier.ipsetList {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">ensureIPSet</span>(set); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		set.<span style="color:#50fa7b">resetEntries</span>()
+</span></span><span style="display:flex;"><span>	}
+</span></span></code></pre></div><p>ensureIPSet 会根据 Service 的类型创建与之对应的 ipset：</p>
+<ul>
+<li>ClusterIP, 创建的对应的 ipset 为： KUBE-CLUSTER-IP</li>
+<li>ExternalName，创建的对应的 ipset为：KUBE-EXTERNAL-IP</li>
+<li>LoadBalancer，创建的对应的 ipset为：KUBE-LOAD-BALANCER、KUBE-LOAD-BALANCER-LOCAL、KUBE-LOAD-BALANCER-FW、KUBE-LOAD-BALANCER-SOURCE-CIDR、KUBE-LOAD-BALANCER-SOURCE-IP</li>
+<li>NodePort，创建的对应的 ipset为：KUBE-NODE-PORT-TCP、KUBE-NODE-PORT-LOCAL-TCP、KUBE-NODE-PORT-LOCAL-SCTP-HASH、KUBE-NODE-PORT-LOCAL-UDP、KUBE-NODE-PORT-SCTP-HASH、KUBE-NODE-PORT-UDP</li>
+</ul>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">const</span> (
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// MinIPSetCheckVersion is the min ipset version we need.  IPv6 is supported in ipset 6.x</span>
+</span></span><span style="display:flex;"><span>	MinIPSetCheckVersion = <span style="color:#f1fa8c">&#34;6.0&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeLoopBackIPSetComment = <span style="color:#f1fa8c">&#34;Kubernetes endpoints dst ip:port, source ip for solving hairpin purpose&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeLoopBackIPSet        = <span style="color:#f1fa8c">&#34;KUBE-LOOP-BACK&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeClusterIPSetComment = <span style="color:#f1fa8c">&#34;Kubernetes service cluster ip + port for masquerade purpose&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeClusterIPSet        = <span style="color:#f1fa8c">&#34;KUBE-CLUSTER-IP&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeExternalIPSetComment = <span style="color:#f1fa8c">&#34;Kubernetes service external ip + port for masquerade and filter purpose&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeExternalIPSet        = <span style="color:#f1fa8c">&#34;KUBE-EXTERNAL-IP&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeExternalIPLocalSetComment = <span style="color:#f1fa8c">&#34;Kubernetes service external ip + port with externalTrafficPolicy=local&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeExternalIPLocalSet        = <span style="color:#f1fa8c">&#34;KUBE-EXTERNAL-IP-LOCAL&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeLoadBalancerSetComment = <span style="color:#f1fa8c">&#34;Kubernetes service lb portal&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeLoadBalancerSet        = <span style="color:#f1fa8c">&#34;KUBE-LOAD-BALANCER&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeLoadBalancerLocalSetComment = <span style="color:#f1fa8c">&#34;Kubernetes service load balancer ip + port with externalTrafficPolicy=local&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeLoadBalancerLocalSet        = <span style="color:#f1fa8c">&#34;KUBE-LOAD-BALANCER-LOCAL&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeLoadBalancerFWSetComment = <span style="color:#f1fa8c">&#34;Kubernetes service load balancer ip + port for load balancer with sourceRange&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeLoadBalancerFWSet        = <span style="color:#f1fa8c">&#34;KUBE-LOAD-BALANCER-FW&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeLoadBalancerSourceIPSetComment = <span style="color:#f1fa8c">&#34;Kubernetes service load balancer ip + port + source IP for packet filter purpose&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeLoadBalancerSourceIPSet        = <span style="color:#f1fa8c">&#34;KUBE-LOAD-BALANCER-SOURCE-IP&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeLoadBalancerSourceCIDRSetComment = <span style="color:#f1fa8c">&#34;Kubernetes service load balancer ip + port + source cidr for packet filter purpose&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeLoadBalancerSourceCIDRSet        = <span style="color:#f1fa8c">&#34;KUBE-LOAD-BALANCER-SOURCE-CIDR&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeNodePortSetTCPComment = <span style="color:#f1fa8c">&#34;Kubernetes nodeport TCP port for masquerade purpose&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeNodePortSetTCP        = <span style="color:#f1fa8c">&#34;KUBE-NODE-PORT-TCP&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeNodePortLocalSetTCPComment = <span style="color:#f1fa8c">&#34;Kubernetes nodeport TCP port with externalTrafficPolicy=local&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeNodePortLocalSetTCP        = <span style="color:#f1fa8c">&#34;KUBE-NODE-PORT-LOCAL-TCP&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeNodePortSetUDPComment = <span style="color:#f1fa8c">&#34;Kubernetes nodeport UDP port for masquerade purpose&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeNodePortSetUDP        = <span style="color:#f1fa8c">&#34;KUBE-NODE-PORT-UDP&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeNodePortLocalSetUDPComment = <span style="color:#f1fa8c">&#34;Kubernetes nodeport UDP port with externalTrafficPolicy=local&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeNodePortLocalSetUDP        = <span style="color:#f1fa8c">&#34;KUBE-NODE-PORT-LOCAL-UDP&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeNodePortSetSCTPComment = <span style="color:#f1fa8c">&#34;Kubernetes nodeport SCTP port for masquerade purpose with type &#39;hash ip:port&#39;&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeNodePortSetSCTP        = <span style="color:#f1fa8c">&#34;KUBE-NODE-PORT-SCTP-HASH&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeNodePortLocalSetSCTPComment = <span style="color:#f1fa8c">&#34;Kubernetes nodeport SCTP port with externalTrafficPolicy=local with type &#39;hash ip:port&#39;&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeNodePortLocalSetSCTP        = <span style="color:#f1fa8c">&#34;KUBE-NODE-PORT-LOCAL-SCTP-HASH&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	kubeHealthCheckNodePortSetComment = <span style="color:#f1fa8c">&#34;Kubernetes health check node port&#34;</span>
+</span></span><span style="display:flex;"><span>	kubeHealthCheckNodePortSet        = <span style="color:#f1fa8c">&#34;KUBE-HEALTH-CHECK-NODE-PORT&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div>
+</details>
+
+<p>本篇文章只分析 ClusterIP 这一种情况，其余可以以此类推。下面的代码的逻辑就是配置 ipvs 的 VirtualServer 和 RealServer，这里的 VirtualServer 就是 Service 的 ClusterIP， RealServer 就是 Service 的所有Endpoints。 需要注意的是，如果 Service 配置了 InternalTrafficPolicy 且其值是 Local，如果宿主机上存在 Endpoints（部分），则把宿主机上的 Endpoint 加入到 RealServer 中，如果宿主机上不存在 Endpoints，则把所有的 Endpoints 加入到 RealServer。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> svcPortName, svcPort <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> proxier.serviceMap {
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>		entry <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>utilipset.Entry{
+</span></span><span style="display:flex;"><span>			IP:       svcInfo.<span style="color:#50fa7b">ClusterIP</span>().<span style="color:#50fa7b">String</span>(),
+</span></span><span style="display:flex;"><span>			Port:     svcInfo.<span style="color:#50fa7b">Port</span>(),
+</span></span><span style="display:flex;"><span>			Protocol: protocol,
+</span></span><span style="display:flex;"><span>			SetType:  utilipset.HashIPPort,
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// add service Cluster IP:Port to kubeServiceAccess ip set for the purpose of solving hairpin.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// proxier.kubeServiceAccessSet.activeEntries.Insert(entry.String())</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> valid <span style="color:#ff79c6">:=</span> proxier.ipsetList[kubeClusterIPSet].<span style="color:#50fa7b">validateEntry</span>(entry); !valid {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">ErrorS</span>(<span style="color:#ff79c6">nil</span>, <span style="color:#f1fa8c">&#34;Error adding entry to ipset&#34;</span>, <span style="color:#f1fa8c">&#34;entry&#34;</span>, entry, <span style="color:#f1fa8c">&#34;ipset&#34;</span>, proxier.ipsetList[kubeClusterIPSet].Name)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		proxier.ipsetList[kubeClusterIPSet].activeEntries.<span style="color:#50fa7b">Insert</span>(entry.<span style="color:#50fa7b">String</span>())
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// ipvs call</span>
+</span></span><span style="display:flex;"><span>		serv <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>utilipvs.VirtualServer{
+</span></span><span style="display:flex;"><span>			Address:   svcInfo.<span style="color:#50fa7b">ClusterIP</span>(),
+</span></span><span style="display:flex;"><span>			Port:      <span style="color:#8be9fd;font-style:italic">uint16</span>(svcInfo.<span style="color:#50fa7b">Port</span>()),
+</span></span><span style="display:flex;"><span>			Protocol:  <span style="color:#8be9fd;font-style:italic">string</span>(svcInfo.<span style="color:#50fa7b">Protocol</span>()),
+</span></span><span style="display:flex;"><span>			Scheduler: proxier.ipvsScheduler,
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Set session affinity flag and timeout for IPVS service</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> svcInfo.<span style="color:#50fa7b">SessionAffinityType</span>() <span style="color:#ff79c6">==</span> v1.ServiceAffinityClientIP {
+</span></span><span style="display:flex;"><span>			serv.Flags <span style="color:#ff79c6">|=</span> utilipvs.FlagPersistent
+</span></span><span style="display:flex;"><span>			serv.Timeout = <span style="color:#8be9fd;font-style:italic">uint32</span>(svcInfo.<span style="color:#50fa7b">StickyMaxAgeSeconds</span>())
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// We need to bind ClusterIP to dummy interface, so set `bindAddr` parameter to `true` in syncService()</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> proxier.<span style="color:#50fa7b">syncService</span>(svcPortNameString, serv, <span style="color:#ff79c6">true</span>, bindedAddresses); err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			activeIPVSServices[serv.<span style="color:#50fa7b">String</span>()] = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>			activeBindAddrs[serv.Address.<span style="color:#50fa7b">String</span>()] = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// ExternalTrafficPolicy only works for NodePort and external LB traffic, does not affect ClusterIP</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// So we still need clusterIP rules in onlyNodeLocalEndpoints mode.</span>
+</span></span><span style="display:flex;"><span>			internalNodeLocal <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> utilfeature.DefaultFeatureGate.<span style="color:#50fa7b">Enabled</span>(features.ServiceInternalTrafficPolicy) <span style="color:#ff79c6">&amp;&amp;</span> svcInfo.<span style="color:#50fa7b">InternalPolicyLocal</span>() {
+</span></span><span style="display:flex;"><span>				internalNodeLocal = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> proxier.<span style="color:#50fa7b">syncEndpoint</span>(svcPortName, internalNodeLocal, serv); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to sync endpoint for service&#34;</span>, <span style="color:#f1fa8c">&#34;servicePortName&#34;</span>, svcPortName, <span style="color:#f1fa8c">&#34;virtualServer&#34;</span>, serv)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to sync service&#34;</span>, <span style="color:#f1fa8c">&#34;servicePortName&#34;</span>, svcPortName, <span style="color:#f1fa8c">&#34;virtualServer&#34;</span>, serv)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>在宿主机器上可以通过命令 <code>ipvsadm -Ln</code> 来查看 VirtualServer 和 RealServer。</p>
+<h3 id="宿主机刷新-ipset-规则">宿主机刷新 ipset 规则</h3>
+<p>在完成上述 VirtualServer 和 RealServer 的生成和配对后，需要把这些内容刷新到宿主机上：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/proxy/ipvs/proxier.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// sync ipset entries</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">for</span> _, set <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> proxier.ipsetList {
+</span></span><span style="display:flex;"><span>	set.<span style="color:#50fa7b">syncIPSetEntries</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/proxy/ipvs/ipset.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (set <span style="color:#ff79c6">*</span>IPSet) <span style="color:#50fa7b">syncIPSetEntries</span>() {
+</span></span><span style="display:flex;"><span>	appliedEntries, err <span style="color:#ff79c6">:=</span> set.handle.<span style="color:#50fa7b">ListEntries</span>(set.Name)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to list ip set entries&#34;</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// currentIPSetEntries represents Endpoints watched from API Server.</span>
+</span></span><span style="display:flex;"><span>	currentIPSetEntries <span style="color:#ff79c6">:=</span> sets.<span style="color:#50fa7b">NewString</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, appliedEntry <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> appliedEntries {
+</span></span><span style="display:flex;"><span>		currentIPSetEntries.<span style="color:#50fa7b">Insert</span>(appliedEntry)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !set.activeEntries.<span style="color:#50fa7b">Equal</span>(currentIPSetEntries) {
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Clean legacy entries</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, entry <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> currentIPSetEntries.<span style="color:#50fa7b">Difference</span>(set.activeEntries).<span style="color:#50fa7b">List</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> set.handle.<span style="color:#50fa7b">DelEntry</span>(entry, set.Name); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> !utilipset.<span style="color:#50fa7b">IsNotFoundError</span>(err) {
+</span></span><span style="display:flex;"><span>					klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to delete ip set entry from ip set&#34;</span>, <span style="color:#f1fa8c">&#34;ipSetEntry&#34;</span>, entry, <span style="color:#f1fa8c">&#34;ipSet&#34;</span>, set.Name)
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Successfully deleted legacy ip set entry from ip set&#34;</span>, <span style="color:#f1fa8c">&#34;ipSetEntry&#34;</span>, entry, <span style="color:#f1fa8c">&#34;ipSet&#34;</span>, set.Name)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Create active entries</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, entry <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> set.activeEntries.<span style="color:#50fa7b">Difference</span>(currentIPSetEntries).<span style="color:#50fa7b">List</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> set.handle.<span style="color:#50fa7b">AddEntry</span>(entry, <span style="color:#ff79c6">&amp;</span>set.IPSet, <span style="color:#ff79c6">true</span>); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to add ip set entry to ip set&#34;</span>, <span style="color:#f1fa8c">&#34;ipSetEntry&#34;</span>, entry, <span style="color:#f1fa8c">&#34;ipSet&#34;</span>, set.Name)
+</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Successfully added ip set entry to ip set&#34;</span>, <span style="color:#f1fa8c">&#34;ipSetEntry&#34;</span>, entry, <span style="color:#f1fa8c">&#34;ipSet&#34;</span>, set.Name)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>最终是使用的命令 <code>ipset add/del</code>来添加记录。</p>
+<h3 id="创建-iptables-规则">创建 iptables 规则</h3>
+<p>通过调用 writeIptablesRules 来创建 iptables 规则，并通过命令 <code>iptables-restore</code> 把 规则刷到宿主机的iptables中：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>	proxier.<span style="color:#50fa7b">writeIptablesRules</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Sync iptables rules.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// NOTE: NoFlushTables is used so we don&#39;t flush non-kubernetes chains in the table.</span>
+</span></span><span style="display:flex;"><span>	proxier.iptablesData.<span style="color:#50fa7b">Reset</span>()
+</span></span><span style="display:flex;"><span>	proxier.iptablesData.<span style="color:#50fa7b">Write</span>(proxier.natChains.<span style="color:#50fa7b">Bytes</span>())
+</span></span><span style="display:flex;"><span>	proxier.iptablesData.<span style="color:#50fa7b">Write</span>(proxier.natRules.<span style="color:#50fa7b">Bytes</span>())
+</span></span><span style="display:flex;"><span>	proxier.iptablesData.<span style="color:#50fa7b">Write</span>(proxier.filterChains.<span style="color:#50fa7b">Bytes</span>())
+</span></span><span style="display:flex;"><span>	proxier.iptablesData.<span style="color:#50fa7b">Write</span>(proxier.filterRules.<span style="color:#50fa7b">Bytes</span>())
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Restoring iptables&#34;</span>, <span style="color:#f1fa8c">&#34;rules&#34;</span>, <span style="color:#8be9fd;font-style:italic">string</span>(proxier.iptablesData.<span style="color:#50fa7b">Bytes</span>()))
+</span></span><span style="display:flex;"><span>	err = proxier.iptables.<span style="color:#50fa7b">RestoreAll</span>(proxier.iptablesData.<span style="color:#50fa7b">Bytes</span>(), utiliptables.NoFlushTables, utiliptables.RestoreCounters)
+</span></span></code></pre></div><h4 id="生成-snat-规则">生成 SNAT 规则</h4>
+<p>以 ClusterIP 为例，数据包的 SNAT 是在 iptables 中完成的：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (proxier <span style="color:#ff79c6">*</span>Proxier) <span style="color:#50fa7b">writeIptablesRules</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !proxier.ipsetList[kubeClusterIPSet].<span style="color:#50fa7b">isEmpty</span>() {
+</span></span><span style="display:flex;"><span>		args = <span style="color:#8be9fd;font-style:italic">append</span>(args[:<span style="color:#bd93f9">0</span>],
+</span></span><span style="display:flex;"><span>			<span style="color:#f1fa8c">&#34;-A&#34;</span>, <span style="color:#8be9fd;font-style:italic">string</span>(kubeServicesChain),
+</span></span><span style="display:flex;"><span>			<span style="color:#f1fa8c">&#34;-m&#34;</span>, <span style="color:#f1fa8c">&#34;comment&#34;</span>, <span style="color:#f1fa8c">&#34;--comment&#34;</span>, proxier.ipsetList[kubeClusterIPSet].<span style="color:#50fa7b">getComment</span>(),
+</span></span><span style="display:flex;"><span>			<span style="color:#f1fa8c">&#34;-m&#34;</span>, <span style="color:#f1fa8c">&#34;set&#34;</span>, <span style="color:#f1fa8c">&#34;--match-set&#34;</span>, proxier.ipsetList[kubeClusterIPSet].Name,
+</span></span><span style="display:flex;"><span>		)
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> proxier.masqueradeAll {
+</span></span><span style="display:flex;"><span>			proxier.natRules.<span style="color:#50fa7b">Write</span>(
+</span></span><span style="display:flex;"><span>				args, <span style="color:#f1fa8c">&#34;dst,dst&#34;</span>,
+</span></span><span style="display:flex;"><span>				<span style="color:#f1fa8c">&#34;-j&#34;</span>, <span style="color:#8be9fd;font-style:italic">string</span>(kubeMarkMasqChain))
+</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> proxier.localDetector.<span style="color:#50fa7b">IsImplemented</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// This masquerades off-cluster traffic to a service VIP.  The idea</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// is that you can establish a static route for your Service range,</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// routing to any node, and that node will bridge into the Service</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// for you.  Since that might bounce off-node, we masquerade here.</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// If/when we support &#34;Local&#34; policy for VIPs, we should update this.</span>
+</span></span><span style="display:flex;"><span>			proxier.natRules.<span style="color:#50fa7b">Write</span>(
+</span></span><span style="display:flex;"><span>				args, <span style="color:#f1fa8c">&#34;dst,dst&#34;</span>,
+</span></span><span style="display:flex;"><span>				proxier.localDetector.<span style="color:#50fa7b">IfNotLocal</span>(),
+</span></span><span style="display:flex;"><span>				<span style="color:#f1fa8c">&#34;-j&#34;</span>, <span style="color:#8be9fd;font-style:italic">string</span>(kubeMarkMasqChain))
+</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// Masquerade all OUTPUT traffic coming from a service ip.</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// The kube dummy interface has all service VIPs assigned which</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// results in the service VIP being picked as the source IP to reach</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// a VIP. This leads to a connection from VIP:&lt;random port&gt; to</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// VIP:&lt;service port&gt;.</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// Always masquerading OUTPUT (node-originating) traffic with a VIP</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// source ip and service port destination fixes the outgoing connections.</span>
+</span></span><span style="display:flex;"><span>			proxier.natRules.<span style="color:#50fa7b">Write</span>(
+</span></span><span style="display:flex;"><span>				args, <span style="color:#f1fa8c">&#34;src,dst&#34;</span>,
+</span></span><span style="display:flex;"><span>				<span style="color:#f1fa8c">&#34;-j&#34;</span>, <span style="color:#8be9fd;font-style:italic">string</span>(kubeMarkMasqChain))
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>会生成如下规则：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>-A KUBE-SERVICES -m comment --comment <span style="color:#f1fa8c">&#34;Kubernetes service cluster ip + port for masquerade purpose&#34;</span> -m <span style="color:#8be9fd;font-style:italic">set</span> --match-set <span style="color:#ff79c6">{</span>ClusterIP<span style="color:#ff79c6">}</span> src,dst -j KUBE-MARK-MASQ
+</span></span></code></pre></div><p>以上的 comment 可以在<code>k8s.io/kubernetes/pkg/proxy/ipvs/ipset.go</code> 中找到， ClusterIP 为 Service 的ClusterIP。</p>
+<p>对于未开启 <code>--masquerade-all</code> 且<code>--detect-local-mode</code>设置 ：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>-A KUBE-SERVICES -m comment --comment <span style="color:#f1fa8c">&#34;Kubernetes service cluster ip + port for masquerade purpose&#34;</span> -m <span style="color:#8be9fd;font-style:italic">set</span> --match-set <span style="color:#ff79c6">{</span>ClusterIP<span style="color:#ff79c6">}</span> src,dst <span style="color:#ff79c6">{</span>IfNotLocal<span style="color:#ff79c6">}</span> -j KUBE-MARK-MASQ
+</span></span></code></pre></div><p>IfNotLoacl 为 kube-proxy 启动参数 <code>--detect-local-mode</code> 中设置的判断请求是否是来自宿主机本地的方式，如&quot;! -s 192.168.16.0/24&quot;。</p>
+<h4 id="生成-kube-forward-规则">生成 KUBE-FORWARD 规则</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>	<span style="color:#6272a4">// If the masqueradeMark has been added then we want to forward that same</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// traffic, this allows NodePort traffic to be forwarded even if the default</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// FORWARD policy is not accept.</span>
+</span></span><span style="display:flex;"><span>	proxier.filterRules.<span style="color:#50fa7b">Write</span>(
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-A&#34;</span>, <span style="color:#8be9fd;font-style:italic">string</span>(kubeForwardChain),
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-m&#34;</span>, <span style="color:#f1fa8c">&#34;comment&#34;</span>, <span style="color:#f1fa8c">&#34;--comment&#34;</span>, <span style="color:#f1fa8c">`&#34;kubernetes forwarding rules&#34;`</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-m&#34;</span>, <span style="color:#f1fa8c">&#34;mark&#34;</span>, <span style="color:#f1fa8c">&#34;--mark&#34;</span>, fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;%s/%s&#34;</span>, proxier.masqueradeMark, proxier.masqueradeMark),
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-j&#34;</span>, <span style="color:#f1fa8c">&#34;ACCEPT&#34;</span>,
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// The following rule ensures the traffic after the initial packet accepted</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// by the &#34;kubernetes forwarding rules&#34; rule above will be accepted.</span>
+</span></span><span style="display:flex;"><span>	proxier.filterRules.<span style="color:#50fa7b">Write</span>(
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-A&#34;</span>, <span style="color:#8be9fd;font-style:italic">string</span>(kubeForwardChain),
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-m&#34;</span>, <span style="color:#f1fa8c">&#34;comment&#34;</span>, <span style="color:#f1fa8c">&#34;--comment&#34;</span>, <span style="color:#f1fa8c">`&#34;kubernetes forwarding conntrack rule&#34;`</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-m&#34;</span>, <span style="color:#f1fa8c">&#34;conntrack&#34;</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;--ctstate&#34;</span>, <span style="color:#f1fa8c">&#34;RELATED,ESTABLISHED&#34;</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-j&#34;</span>, <span style="color:#f1fa8c">&#34;ACCEPT&#34;</span>,
+</span></span><span style="display:flex;"><span>	)
+</span></span></code></pre></div><p>会生成如下规则：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>-A KUBE-FORWARD -m comment --comment <span style="color:#f1fa8c">&#34;kuberentes forwarding rules&#34;</span> -m mark --mark 0x4000/0x4000 -j ACCEPT
+</span></span><span style="display:flex;"><span>-A KUBE-FORWARD -m comment --comment <span style="color:#f1fa8c">&#34;kubernetes forwarding conntrack rule&#34;</span> -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+</span></span></code></pre></div><h4 id="生成-kube-postrouting-规则">生成 KUBE-POSTROUTING 规则</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>	<span style="color:#6272a4">// Install the kubernetes-specific postrouting rules. We use a whole chain for</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// this so that it is easier to flush and change, for example if the mark</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// value should ever change.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// NB: THIS MUST MATCH the corresponding code in the kubelet</span>
+</span></span><span style="display:flex;"><span>	proxier.natRules.<span style="color:#50fa7b">Write</span>(
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-A&#34;</span>, <span style="color:#8be9fd;font-style:italic">string</span>(kubePostroutingChain),
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-m&#34;</span>, <span style="color:#f1fa8c">&#34;mark&#34;</span>, <span style="color:#f1fa8c">&#34;!&#34;</span>, <span style="color:#f1fa8c">&#34;--mark&#34;</span>, fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;%s/%s&#34;</span>, proxier.masqueradeMark, proxier.masqueradeMark),
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-j&#34;</span>, <span style="color:#f1fa8c">&#34;RETURN&#34;</span>,
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Clear the mark to avoid re-masquerading if the packet re-traverses the network stack.</span>
+</span></span><span style="display:flex;"><span>	proxier.natRules.<span style="color:#50fa7b">Write</span>(
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-A&#34;</span>, <span style="color:#8be9fd;font-style:italic">string</span>(kubePostroutingChain),
+</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// XOR proxier.masqueradeMark to unset it</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-j&#34;</span>, <span style="color:#f1fa8c">&#34;MARK&#34;</span>, <span style="color:#f1fa8c">&#34;--xor-mark&#34;</span>, proxier.masqueradeMark,
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>	masqRule <span style="color:#ff79c6">:=</span> []<span style="color:#8be9fd">string</span>{
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-A&#34;</span>, <span style="color:#8be9fd;font-style:italic">string</span>(kubePostroutingChain),
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-m&#34;</span>, <span style="color:#f1fa8c">&#34;comment&#34;</span>, <span style="color:#f1fa8c">&#34;--comment&#34;</span>, <span style="color:#f1fa8c">`&#34;kubernetes service traffic requiring SNAT&#34;`</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-j&#34;</span>, <span style="color:#f1fa8c">&#34;MASQUERADE&#34;</span>,
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> proxier.iptables.<span style="color:#50fa7b">HasRandomFully</span>() {
+</span></span><span style="display:flex;"><span>		masqRule = <span style="color:#8be9fd;font-style:italic">append</span>(masqRule, <span style="color:#f1fa8c">&#34;--random-fully&#34;</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span></code></pre></div><p>生成的规则如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#6272a4"># iptables 检查到数据包没有 MARK 标志 则返回</span>
+</span></span><span style="display:flex;"><span>-A KUBE-POSTROUTING -m mark ! --mark  0x4000/0x4000 -j RETURN
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># 检测到 MARK 标志，使用 XOR 去掉 MARK 标志</span>
+</span></span><span style="display:flex;"><span>-A KUBE-POSTROUTING -j MARK --xor-mark 0x4000
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># 跳转到 MASQUERADE 完成 SNAT 操作，--random-fully 只有特性开启才会加上</span>
+</span></span><span style="display:flex;"><span>-A KUBE-POSTROUTING -m comment --comment <span style="color:#f1fa8c">&#34;kubernetes service traffic requiring SNAT&#34;</span> -j MASQUERADE --random-fully
+</span></span></code></pre></div><h4 id="生成-kube-mark-masq--跳转规则">生成 KUBE-MARK-MASQ  跳转规则</h4>
+<p>对于需要执行 Masquerade 操作的数据包，KUBE-MARK-MASQ 为数据包添加 MARK 标志，之后在 KUBE-POSTROUTING 链中完成 Masquerade 操作：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>	<span style="color:#6272a4">// Install the kubernetes-specific masquerade mark rule. We use a whole chain for</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// this so that it is easier to flush and change, for example if the mark</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// value should ever change.</span>
+</span></span><span style="display:flex;"><span>	proxier.natRules.<span style="color:#50fa7b">Write</span>(
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-A&#34;</span>, <span style="color:#8be9fd;font-style:italic">string</span>(kubeMarkMasqChain),
+</span></span><span style="display:flex;"><span>		<span style="color:#f1fa8c">&#34;-j&#34;</span>, <span style="color:#f1fa8c">&#34;MARK&#34;</span>, <span style="color:#f1fa8c">&#34;--or-mark&#34;</span>, proxier.masqueradeMark,
+</span></span><span style="display:flex;"><span>	)
+</span></span></code></pre></div><p>生成的规则如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>-A KUBE-MARK-MASQ -j MARK --or-mark 0x4000
+</span></span></code></pre></div><h3 id="收尾工作">收尾工作</h3>
+<p>在 ipvs 代理模式下，需要及时清理 Service 相关的 ipset 规则：</p>
+<ul>
+<li>删除各个 ipset 中和 Service 相关的 VirtualServer 和 RealServer。</li>
+<li>在 Dummy 网卡上删除 Service 的相关 ip 地址。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (proxier <span style="color:#ff79c6">*</span>Proxier) <span style="color:#50fa7b">cleanLegacyService</span>(activeServices <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">bool</span>, currentServices <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#ff79c6">*</span>utilipvs.VirtualServer, legacyBindAddrs <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">bool</span>) {
+</span></span><span style="display:flex;"><span>	isIPv6 <span style="color:#ff79c6">:=</span> netutils.<span style="color:#50fa7b">IsIPv6</span>(proxier.nodeIP)
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> cs <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> currentServices {
+</span></span><span style="display:flex;"><span>		svc <span style="color:#ff79c6">:=</span> currentServices[cs]
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> proxier.<span style="color:#50fa7b">isIPInExcludeCIDRs</span>(svc.Address) {
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> netutils.<span style="color:#50fa7b">IsIPv6</span>(svc.Address) <span style="color:#ff79c6">!=</span> isIPv6 {
+</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// Not our family</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> _, ok <span style="color:#ff79c6">:=</span> activeServices[cs]; !ok {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Delete service&#34;</span>, <span style="color:#f1fa8c">&#34;virtualServer&#34;</span>, svc)
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> proxier.ipvs.<span style="color:#50fa7b">DeleteVirtualServer</span>(svc); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to delete service&#34;</span>, <span style="color:#f1fa8c">&#34;virtualServer&#34;</span>, svc)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			addr <span style="color:#ff79c6">:=</span> svc.Address.<span style="color:#50fa7b">String</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> _, ok <span style="color:#ff79c6">:=</span> legacyBindAddrs[addr]; ok {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Unbinding address&#34;</span>, <span style="color:#f1fa8c">&#34;address&#34;</span>, addr)
+</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> proxier.netlinkHandle.<span style="color:#50fa7b">UnbindAddress</span>(addr, defaultDummyDevice); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>					klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to unbind service from dummy interface&#34;</span>, <span style="color:#f1fa8c">&#34;interface&#34;</span>, defaultDummyDevice, <span style="color:#f1fa8c">&#34;address&#34;</span>, addr)
+</span></span><span style="display:flex;"><span>				} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// In case we delete a multi-port service, avoid trying to unbind multiple times</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#8be9fd;font-style:italic">delete</span>(legacyBindAddrs, addr)
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>删除不需要的 conntrack 连接，主要是针对UDP协议的，因为UDP没有三次握手，四次握手之类的机制，当UDP Service 被删除后，其Conntrack记录不会被立即清除。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>	<span style="color:#6272a4">// Finish housekeeping.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// TODO: these could be made more consistent.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, svcIP <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> staleServices.<span style="color:#50fa7b">UnsortedList</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> conntrack.<span style="color:#50fa7b">ClearEntriesForIP</span>(proxier.exec, svcIP, v1.ProtocolUDP); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to delete stale service IP connections&#34;</span>, <span style="color:#f1fa8c">&#34;IP&#34;</span>, svcIP)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	proxier.<span style="color:#50fa7b">deleteEndpointConnections</span>(endpointUpdateResult.StaleEndpoints)
+</span></span></code></pre></div>
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kube-proxy/" class="tag-link">Kube-Proxy</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

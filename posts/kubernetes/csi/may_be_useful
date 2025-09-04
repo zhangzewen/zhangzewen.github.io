@@ -1,0 +1,17 @@
+
+回过头看看 `k8s.io/kubernetes/pkg/volume` 中定义的各种 Volume Plugins：ProvisionableVolumePlugin 和 Provisioner, DeletableVolumePlugin, DeletableVolumePlugin 和 Deleter， 在[kubernetes csi 之 PV Controller 源码解析中 PV 的三种回收策虑]({{< ref "./volume_pv_controller.md" >}})中说过这个问题：
+
+- In-Tree volume plugins 如果支持 dynamic provision，必须是要实现 ProvisionableVolumePlugin 和 Provisioner 这两个接口，然后才能通过 volume plugins manager 的 FindProvisionablePluginByName 找到 ProVisionableVolumePlugin 来动态创建 PV，对于删除和回收的逻辑同上。
+- 但是对于 Out-Tree 的 external provisioners， 是没有实现这些 In-Tree 的接口的，这个都要依赖 extrnal-provisioner 来做。
+
+```go
+type ProvisionableVolumePlugin interface {
+    VolumePlugin
+    NewProvisioner(options VolumeOptions) (Provisioner, error)
+}
+
+type Provisioner interface {
+    Provision(selectedNode *v1.Node, allowedTopologies []v1.TopologySelectorTerm) (*v1.PersistentVolume, error)
+}
+```
+
