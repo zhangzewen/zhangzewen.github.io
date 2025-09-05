@@ -15,7 +15,7 @@
   <meta itemprop="description" content="6.S081 是非常著名的 MIT 操作系统课程。该公开课链接的年份后缀的是可以更改的，这个课程提供的可编程 lab 每年都稍微有些不同，每个 lab 的自评测中的 answers-*.txt 和 time.txt 需要自行填写。 本篇文章对应的是 2024 年度课程的实现总结。">
   <meta itemprop="datePublished" content="2025-08-20T09:43:31+08:00">
   <meta itemprop="dateModified" content="2025-08-20T09:43:31+08:00">
-  <meta itemprop="wordCount" content="13786">
+  <meta itemprop="wordCount" content="15906">
   <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
   <meta itemprop="keywords" content="公开课,操作系统,Linux,Mit,Xv6">
 
@@ -256,7 +256,7 @@
 
   <div class="post-date">
     <time datetime=" 2025-08-20T09:43:31&#43;0800">Created: Aug 20, 2025</time>
-    <span class="readtime">&middot; 65 min read</span>
+    <span class="readtime">&middot; 75 min read</span>
   </div>
 
   <div>
@@ -4046,7 +4046,567 @@
 </details>
 
 <h2 id="lab-mmap">Lab mmap</h2>
+<p>在这个lab 中要求实现简易版本的 mmap，lab 的提示已经写的很清楚，在实现的过程中还需要注意：</p>
+<ul>
+<li>Virtual Memory Area 的范围，在本次实验中，这里可以设置虚拟地址最大可为 <code>TRAPFRAME - PGSIZE</code>，即和 <code>TRAPFRAME</code> 之间有个 page guard，最小地址虚拟地址在本次实验中可以无须考虑。</li>
+<li>注意文件大小和映射的长度，这个在 mmap 中也有说明：
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>A file is mapped in multiples of the page size.  For a file that
+</span></span><span style="display:flex;"><span>is not a multiple of the page size, the remaining bytes in the
+</span></span><span style="display:flex;"><span>partial page at the end of the mapping are zeroed when mapped, and
+</span></span><span style="display:flex;"><span>modifications to that region are not written out to the file.  The
+</span></span><span style="display:flex;"><span>effect of changing the size of the underlying file of a mapping on
+</span></span><span style="display:flex;"><span>the pages that correspond to added or removed regions of the file
+</span></span><span style="display:flex;"><span>is unspecified.
+</span></span></code></pre></div></li>
+<li>在 munmap 的时候需要动态更新修改映射区间的起始地址，映射长度，以及 文件的 offset。</li>
+</ul>
+<p>lab 执行结果如下，本实现 read_only_write 这个 case 没有过去：</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ ./grade-lab-mmap
+</span></span><span style="display:flex;"><span>make: <span style="color:#f1fa8c">`</span>kernel/kernel<span style="color:#f1fa8c">&#39; is up to date.
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">== Test running mmaptest ==
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">Timeout! (180.9s)
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">== Test   mmaptest: mmap basic ==
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">  mmaptest: mmap basic: OK
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">== Test   mmaptest: mmap private ==
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">  mmaptest: mmap private: OK
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">== Test   mmaptest: mmap read-only ==
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">  mmaptest: mmap read-only: OK
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">== Test   mmaptest: mmap read/write ==
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">  mmaptest: mmap read/write: OK
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">== Test   mmaptest: mmap dirty ==
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">  mmaptest: mmap dirty: OK
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">== Test   mmaptest: not-mapped unmap ==
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">  mmaptest: not-mapped unmap: OK
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">== Test   mmaptest: lazy access ==
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">  mmaptest: lazy access: OK
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">== Test   mmaptest: two files ==
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">  mmaptest: two files: OK
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">== Test   mmaptest: fork_test ==
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">  mmaptest: fork_test: OK
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">== Test   mmaptest: munmap_noaccess ==
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">  mmaptest: munmap_noaccess: OK
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">== Test   mmaptest: read_only_write ==
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">  mmaptest: read_only_write: FAIL
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">    ...
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">                     sepc=0xab2 stval=0x3fffff7000
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">         test munmap prevents access: OK
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">         test writes to read-only mapped memory
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">         panic: mappages: remap
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">         qemu-system-riscv64: terminating on signal 15 from pid 54572 (&lt;unknown process&gt;)
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">    MISSING &#39;</span>^test writes to read-only mapped memory: OK$&#39;
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">==</span> Test <span style="color:#8be9fd;font-style:italic">usertests</span> <span style="color:#ff79c6">==</span> usertests: OK <span style="color:#ff79c6">(</span>120.5s<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">==</span> Test <span style="color:#8be9fd;font-style:italic">time</span> <span style="color:#ff79c6">==</span>
+</span></span><span style="display:flex;"><span>time: FAIL
+</span></span><span style="display:flex;"><span>    Cannot <span style="color:#8be9fd;font-style:italic">read</span> time.txt
+</span></span><span style="display:flex;"><span>Score: 159/170shel
+</span></span></code></pre></div>
+</details>
 
+<p>参考代码如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-diff" data-lang="diff"><span style="display:flex;"><span><span style="font-weight:bold">diff --git a/.gitignore b/.gitignore
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index 11d0677..1fc9859 100644
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/.gitignore
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/.gitignore
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -25,3 +25,6 @@ barrier
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> .DS_Store
+</span></span><span style="display:flex;"><span> *.dSYM
+</span></span><span style="display:flex;"><span> *.pcap
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+*.bak
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+*.img.*
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+compile_commands.json
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">diff --git a/Makefile b/Makefile
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index b7fb22d..f074d39 100644
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/Makefile
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/Makefile
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -194,6 +194,7 @@ UPROGS=\
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> 	$U/_grind\
+</span></span><span style="display:flex;"><span> 	$U/_wc\
+</span></span><span style="display:flex;"><span> 	$U/_zombie\
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+	$U/_mmaptest\
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span> 
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">diff --git a/kernel/defs.h b/kernel/defs.h
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index d133cd3..a0dbb35 100644
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/kernel/defs.h
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/kernel/defs.h
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -12,6 +12,7 @@ struct spinlock;
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> struct sleeplock;
+</span></span><span style="display:flex;"><span> struct stat;
+</span></span><span style="display:flex;"><span> struct superblock;
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+struct vma;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span> 
+</span></span><span style="display:flex;"><span> // bio.c
+</span></span><span style="display:flex;"><span> void            binit(void);
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">@@ -237,3 +238,9 @@ void            netinit(void);
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> void            net_rx(char *buf, int len);
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span> #endif
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+int handle_pagefault(uint64 va);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+uint64 writeback(uint64 addr, size_t len, struct proc *p, struct vma *v);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+uint64 mmap(uint64 addr, uint64 sz, int prot, int flags, struct file *f,
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+            uint64 offset);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+uint64 munmap(uint64 addr, uint64 sz);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">diff --git a/kernel/memlayout.h b/kernel/memlayout.h
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index 3ab2ace..2488117 100644
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/kernel/memlayout.h
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/kernel/memlayout.h
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -57,3 +57,4 @@
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> //   TRAPFRAME (p-&gt;trapframe, used by the trampoline)
+</span></span><span style="display:flex;"><span> //   TRAMPOLINE (the same page as in the kernel)
+</span></span><span style="display:flex;"><span> #define TRAPFRAME (TRAMPOLINE - PGSIZE)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+#define VMASTOP (TRAPFRAME - PGSIZE)
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">diff --git a/kernel/proc.c b/kernel/proc.c
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index 130d9ce..2c32379 100644
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/kernel/proc.c
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/kernel/proc.c
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -5,6 +5,7 @@
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> #include &#34;spinlock.h&#34;
+</span></span><span style="display:flex;"><span> #include &#34;proc.h&#34;
+</span></span><span style="display:flex;"><span> #include &#34;defs.h&#34;
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+#include &#34;fcntl.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span> 
+</span></span><span style="display:flex;"><span> struct cpu cpus[NCPU];
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">@@ -146,6 +147,17 @@ found:
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span>   p-&gt;context.ra = (uint64)forkret;
+</span></span><span style="display:flex;"><span>   p-&gt;context.sp = p-&gt;kstack + PGSIZE;
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  for (int i = 0; i &lt; NVMA; i++) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    p-&gt;vmas[i].valid = 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    p-&gt;vmas[i].sz = 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    p-&gt;vmas[i].vastart = 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    p-&gt;vmas[i].f = (struct file*)0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    p-&gt;vmas[i].prot = 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    p-&gt;vmas[i].flags = 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    p-&gt;vmas[i].offset = 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    p-&gt;vmas[i].file_size = 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span>   return p;
+</span></span><span style="display:flex;"><span> }
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">@@ -158,6 +170,13 @@ freeproc(struct proc *p)
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span>   if(p-&gt;trapframe)
+</span></span><span style="display:flex;"><span>     kfree((void*)p-&gt;trapframe);
+</span></span><span style="display:flex;"><span>   p-&gt;trapframe = 0;
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  //for (int i = 0; i &lt; NVMA; i++) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  //  struct vma *v = &amp;p-&gt;vmas[i];
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  //  if (!v-&gt;valid) continue;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  //  if (munmap(v-&gt;vastart, v-&gt;sz)!= 0) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  //    panic(&#34;exit: munmap failed&#34;);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  //  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  //}
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span>   if(p-&gt;pagetable)
+</span></span><span style="display:flex;"><span>     proc_freepagetable(p-&gt;pagetable, p-&gt;sz);
+</span></span><span style="display:flex;"><span>   p-&gt;pagetable = 0;
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">@@ -308,6 +327,14 @@ fork(void)
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span>       np-&gt;ofile[i] = filedup(p-&gt;ofile[i]);
+</span></span><span style="display:flex;"><span>   np-&gt;cwd = idup(p-&gt;cwd);
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  for (i = 0; i &lt; NVMA; i++) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    struct vma *v = &amp;p-&gt;vmas[i];
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    if (v-&gt;valid) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      np-&gt;vmas[i] = *v;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      filedup(v-&gt;f);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span>   safestrcpy(np-&gt;name, p-&gt;name, sizeof(p-&gt;name));
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>   pid = np-&gt;pid;
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">@@ -360,6 +387,14 @@ exit(int status)
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span>     }
+</span></span><span style="display:flex;"><span>   }
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  for (int i = 0; i &lt; NVMA; i++) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    struct vma *v = &amp;p-&gt;vmas[i];
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    if (!v-&gt;valid) continue;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    if (munmap(v-&gt;vastart, v-&gt;sz)!= 0) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      panic(&#34;exit: munmap failed&#34;);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span>   begin_op();
+</span></span><span style="display:flex;"><span>   iput(p-&gt;cwd);
+</span></span><span style="display:flex;"><span>   end_op();
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">diff --git a/kernel/proc.h b/kernel/proc.h
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index d021857..2c90d1c 100644
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/kernel/proc.h
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/kernel/proc.h
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -81,6 +81,19 @@ struct trapframe {
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> 
+</span></span><span style="display:flex;"><span> enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+#define NVMA 16
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+struct vma {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  int valid;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  uint64 vastart;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  uint64 sz;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  struct file *f;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  int prot;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  int flags;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  uint64 offset;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  uint64 file_size;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+};
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span> // Per-process state
+</span></span><span style="display:flex;"><span> struct proc {
+</span></span><span style="display:flex;"><span>   struct spinlock lock;
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">@@ -104,4 +117,5 @@ struct proc {
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span>   struct file *ofile[NOFILE];  // Open files
+</span></span><span style="display:flex;"><span>   struct inode *cwd;           // Current directory
+</span></span><span style="display:flex;"><span>   char name[16];               // Process name (debugging)
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  struct vma vmas[NVMA];
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span> };
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">diff --git a/kernel/riscv.h b/kernel/riscv.h
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index f7aaa8a..d4fc9bd 100644
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/kernel/riscv.h
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/kernel/riscv.h
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -362,6 +362,7 @@ typedef uint64 *pagetable_t; // 512 PTEs
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> #define PTE_W (1L &lt;&lt; 2)
+</span></span><span style="display:flex;"><span> #define PTE_X (1L &lt;&lt; 3)
+</span></span><span style="display:flex;"><span> #define PTE_U (1L &lt;&lt; 4) // user can access
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+#define PTE_D (1L &lt;&lt; 7)
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span> 
+</span></span><span style="display:flex;"><span> // shift a physical address to the right place for a PTE.
+</span></span><span style="display:flex;"><span> #define PA2PTE(pa) ((((uint64)pa) &gt;&gt; 12) &lt;&lt; 10)
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">diff --git a/kernel/syscall.c b/kernel/syscall.c
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index ed65409..4fb9baa 100644
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/kernel/syscall.c
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/kernel/syscall.c
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -101,6 +101,8 @@ extern uint64 sys_unlink(void);
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> extern uint64 sys_link(void);
+</span></span><span style="display:flex;"><span> extern uint64 sys_mkdir(void);
+</span></span><span style="display:flex;"><span> extern uint64 sys_close(void);
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+extern uint64 sys_mmap(void);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+extern uint64 sys_munmap(void);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span> 
+</span></span><span style="display:flex;"><span> // An array mapping syscall numbers from syscall.h
+</span></span><span style="display:flex;"><span> // to the function that handles the system call.
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">@@ -126,6 +128,8 @@ static uint64 (*syscalls[])(void) = {
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> [SYS_link]    sys_link,
+</span></span><span style="display:flex;"><span> [SYS_mkdir]   sys_mkdir,
+</span></span><span style="display:flex;"><span> [SYS_close]   sys_close,
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+[SYS_mmap]    sys_mmap,
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+[SYS_munmap]  sys_munmap,
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span> };
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span> void
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">diff --git a/kernel/syscall.h b/kernel/syscall.h
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index bc5f356..e7b18d6 100644
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/kernel/syscall.h
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/kernel/syscall.h
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -20,3 +20,5 @@
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> #define SYS_link   19
+</span></span><span style="display:flex;"><span> #define SYS_mkdir  20
+</span></span><span style="display:flex;"><span> #define SYS_close  21
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+#define SYS_mmap   22
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+#define SYS_munmap 23
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">diff --git a/kernel/sysfile.c b/kernel/sysfile.c
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index 16b668c..83c70e0 100644
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/kernel/sysfile.c
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/kernel/sysfile.c
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -15,6 +15,7 @@
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> #include &#34;sleeplock.h&#34;
+</span></span><span style="display:flex;"><span> #include &#34;file.h&#34;
+</span></span><span style="display:flex;"><span> #include &#34;fcntl.h&#34;
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+#include &#34;memlayout.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span> 
+</span></span><span style="display:flex;"><span> // Fetch the nth word-sized system call argument as a file descriptor
+</span></span><span style="display:flex;"><span> // and return both the descriptor and the corresponding struct file.
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">@@ -503,3 +504,31 @@ sys_pipe(void)
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span>   }
+</span></span><span style="display:flex;"><span>   return 0;
+</span></span><span style="display:flex;"><span> }
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+uint64 sys_mmap(void) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  uint64 addr, sz, offset;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  int prot, flags, fd;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  struct file *f;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  argaddr(0, &amp;addr);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  argaddr(1, &amp;sz);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  argint(2, &amp;prot);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  argint(3, &amp;flags);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  argfd(4, &amp;fd, &amp;f);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  argaddr(5, &amp;offset);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (sz == 0) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    return -1;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  return mmap(addr, sz, prot, flags, f, offset);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+}
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+uint64 sys_munmap(void) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  uint64 addr, sz;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  argaddr(0, &amp;addr);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  argaddr(1, &amp;sz);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (sz == 0) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    return -1;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  return munmap(addr, sz);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+}
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">diff --git a/kernel/trap.c b/kernel/trap.c
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index d454a7d..ba52987 100644
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/kernel/trap.c
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/kernel/trap.c
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -67,6 +67,14 @@ usertrap(void)
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span>     syscall();
+</span></span><span style="display:flex;"><span>   } else if((which_dev = devintr()) != 0){
+</span></span><span style="display:flex;"><span>     // ok
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  } else if(r_scause() == 13 || r_scause() == 15){
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    uint64 va = r_stval();
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    if (!handle_pagefault(va)) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      printf(&#34;usertrap(): unexpected scause 0x%lx pid=%d\n&#34;, r_scause(),
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+             p-&gt;pid);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      printf(&#34;            sepc=0x%lx stval=0x%lx\n&#34;, r_sepc(), r_stval());
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      setkilled(p);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span>   } else {
+</span></span><span style="display:flex;"><span>     printf(&#34;usertrap(): unexpected scause 0x%lx pid=%d\n&#34;, r_scause(), p-&gt;pid);
+</span></span><span style="display:flex;"><span>     printf(&#34;            sepc=0x%lx stval=0x%lx\n&#34;, r_sepc(), r_stval());
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">diff --git a/kernel/vm.c b/kernel/vm.c
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index 62421a2..aad9cd6 100644
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/kernel/vm.c
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/kernel/vm.c
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -5,6 +5,14 @@
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> #include &#34;riscv.h&#34;
+</span></span><span style="display:flex;"><span> #include &#34;defs.h&#34;
+</span></span><span style="display:flex;"><span> #include &#34;fs.h&#34;
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+#include &#34;fcntl.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+#include &#34;spinlock.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+#include &#34;proc.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+#include &#34;sleeplock.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+#include &#34;file.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+#include &#34;stat.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span> 
+</span></span><span style="display:flex;"><span> /*
+</span></span><span style="display:flex;"><span>  * the kernel&#39;s page table.
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">@@ -449,3 +457,176 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span>     return -1;
+</span></span><span style="display:flex;"><span>   }
+</span></span><span style="display:flex;"><span> }
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+int handle_pagefault(uint64 va) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  struct proc *p = myproc();
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  struct vma *v = (struct vma *)0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  va = PGROUNDDOWN(va);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  for (int i = 0; i &lt; NVMA; i++) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    struct vma *vv = &amp;p-&gt;vmas[i];
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    if (vv-&gt;valid == 1 &amp;&amp; va &gt;= vv-&gt;vastart &amp;&amp; va &lt; vv-&gt;vastart + vv-&gt;sz) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      v = vv;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      break;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (v == (struct vma *)0) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    return 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  void *pa = kalloc();
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (pa == 0) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    panic(&#34;handle_pagefault: kalloc&#34;);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  memset(pa, 0, PGSIZE);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  begin_op();
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  idup(v-&gt;f-&gt;ip);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  ilock(v-&gt;f-&gt;ip);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  readi(v-&gt;f-&gt;ip, 0, (uint64)pa, v-&gt;offset + va - v-&gt;vastart, PGSIZE);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  iunlockput(v-&gt;f-&gt;ip);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  end_op();
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  int perm = PTE_U;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (v-&gt;prot &amp; PROT_READ){
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    perm |= PTE_R;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (v-&gt;prot &amp; PROT_WRITE){
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    perm |= PTE_W;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (v-&gt;prot &amp; PROT_EXEC){
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    perm |= PTE_X;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (mappages(p-&gt;pagetable, va, PGSIZE, (uint64)pa, perm) &lt;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      0) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    panic(&#34;handle_pagefault: mappages&#34;);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  return 1;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+}
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+uint64 mmap(uint64 addr, uint64 len, int prot, int flags, struct file *f,
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+            uint64 offset) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (f &amp;&amp; ((!f-&gt;readable &amp;&amp; (prot &amp; (PROT_READ))) ||
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+            (!f-&gt;writable &amp;&amp; (prot &amp; PROT_WRITE) &amp;&amp; !(flags &amp; MAP_PRIVATE))))
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    return -1;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  struct proc *p = myproc();
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  uint64 end =
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      PGROUNDDOWN(VMASTOP); 
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  for (int i = 0; i &lt; NVMA;) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    if (p-&gt;vmas[i].valid) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      end = p-&gt;vmas[i].vastart;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      i++;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      continue;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    int j = i + 1;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    for (; j &lt;NVMA; j++) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      if (p-&gt;vmas[j].valid)
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+        break;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    int next_end = (j == NVMA) ? PGROUNDUP(p-&gt;sz)
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+                               : PGROUNDUP(p-&gt;vmas[j].vastart + p-&gt;vmas[j].sz);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    if (end - next_end &gt;= len) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      if (f &amp;&amp; (f-&gt;type != FD_INODE || !filedup(f))) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+        return -1;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      struct  stat st;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      stati(f-&gt;ip, &amp;st);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      p-&gt;vmas[i].valid = 1;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      p-&gt;vmas[i].vastart = PGROUNDDOWN(end - len);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      p-&gt;vmas[i].sz = len;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      p-&gt;vmas[i].prot = prot;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      p-&gt;vmas[i].flags = flags;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      p-&gt;vmas[i].f = f;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      p-&gt;vmas[i].offset = offset;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      p-&gt;vmas[i].file_size = st.size;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      return p-&gt;vmas[i].vastart;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    i = j;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  return -1;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+}
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+uint64 writeback(uint64 addr, size_t len, struct proc *p, struct vma *v)
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+{
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (addr % PGSIZE) panic(&#34;writeback&#34;);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  uint64 end = addr + len, off = 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  for(;addr &lt; end; addr += PGSIZE, off += PGSIZE)
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    pte_t *pte = walk(p-&gt;pagetable, addr, 0);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    if ((*pte &amp; PTE_D) &amp;&amp; (*pte &amp; PTE_W)) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      begin_op();
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      ilock(v-&gt;f-&gt;ip);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      if (writei(v-&gt;f-&gt;ip, 1, addr, v-&gt;offset + off, PGSIZE &gt; end - addr ? (end - addr) : PGSIZE) &lt; 0) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+        iunlock(v-&gt;f-&gt;ip);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+        end_op();
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+        return -1;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      iunlock(v-&gt;f-&gt;ip);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      end_op();
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  return 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+}
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+uint64 munmap(uint64 addr, size_t len)
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+{
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (addr % PGSIZE != 0) return -1;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  len = PGROUNDDOWN(len);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (len == 0) return 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  struct proc *p = myproc();
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  struct vma *v = (struct vma *)0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  for (int i = 0; i &lt; NVMA; i++) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    struct vma *vv = &amp;p-&gt;vmas[i];
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    if (vv-&gt;valid == 1 &amp;&amp; addr &gt;= vv-&gt;vastart &amp;&amp; addr &lt; vv-&gt;vastart + vv-&gt;sz) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      v = vv;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      break;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (v == 0) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    return -1;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (addr &gt; v-&gt;vastart &amp;&amp; addr + len &lt; v-&gt;vastart + v-&gt;sz) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    return -1;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (v-&gt;flags == MAP_SHARED &amp;&amp; v-&gt;f &amp;&amp;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      writeback(addr, (len &gt; v-&gt;file_size ? v-&gt;file_size : len), p, v) &lt; 0) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    return -1;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if (v-&gt;sz == len) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    v-&gt;valid = 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    if (v-&gt;f)
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      fileclose(v-&gt;f);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  } else {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    if (v-&gt;vastart == addr)
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      v-&gt;vastart += len;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    v-&gt;sz -= len;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    v-&gt;offset = (v-&gt;offset +len) &gt; v-&gt;file_size? v-&gt;file_size : (v-&gt;offset +len);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    v-&gt;file_size = v-&gt;file_size &lt; len? 0: v-&gt;file_size - len;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  uint64 end = addr + len;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  for (; addr &lt; end; addr += PGSIZE) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    pte_t *pte;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    if ((pte = walk(p-&gt;pagetable, addr, 0)) == 0)
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      panic(&#34;uvmunmap: walk&#34;);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    if ((*pte &amp; PTE_V) == 0) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+      return 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    uvmunmap(p-&gt;pagetable, addr, 1,1);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  return 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+}
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">diff --git a/user/mmaptest.c b/user/mmaptest.c
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index 2f995ea..c6533e0 100644
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/user/mmaptest.c
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/user/mmaptest.c
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -197,8 +197,11 @@ mmap_test(void)
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span>     if (buf[i] != &#39;B&#39;)
+</span></span><span style="display:flex;"><span>       err(&#34;file page 0 does not contain modifications&#34;);
+</span></span><span style="display:flex;"><span>   }
+</span></span><span style="display:flex;"><span><span style="color:#f55">-  if(read(fd, buf, PGSIZE) != PGSIZE/2)
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+  int len1 = 0;
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  if((len1 = read(fd, buf, PGSIZE)) != PGSIZE/2) {
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+    //printf(&#34;len1: %d, buf: %s\n&#34;, len1, buf);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span>     err(&#34;dirty read #2&#34;);
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+  }
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span>   for (i = 0; i &lt; PGSIZE/2; i++){
+</span></span><span style="display:flex;"><span>     if (buf[i] != &#39;C&#39;)
+</span></span><span style="display:flex;"><span>       err(&#34;file page 1 does not contain modifications&#34;);
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">diff --git a/user/user.h b/user/user.h
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index 0e9bd4a..dc9a30f 100644
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/user/user.h
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/user/user.h
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -26,6 +26,8 @@ int getpid(void);
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> char* sbrk(int);
+</span></span><span style="display:flex;"><span> int sleep(int);
+</span></span><span style="display:flex;"><span> int uptime(void);
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+void *mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+int munmap(void *addr, size_t len);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span> #ifdef LAB_NET
+</span></span><span style="display:flex;"><span> int bind(uint16);
+</span></span><span style="display:flex;"><span> int unbind(uint16);
+</span></span><span style="display:flex;"><span><span style="font-weight:bold">diff --git a/user/usys.pl b/user/usys.pl
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold">index 01e426e..d23b9cc 100755
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span><span style="color:#f55">--- a/user/usys.pl
+</span></span></span><span style="display:flex;"><span><span style="color:#f55"></span><span style="color:#50fa7b;font-weight:bold">+++ b/user/usys.pl
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold"></span><span style="font-weight:bold">@@ -36,3 +36,5 @@ entry(&#34;getpid&#34;);
+</span></span></span><span style="display:flex;"><span><span style="font-weight:bold"></span> entry(&#34;sbrk&#34;);
+</span></span><span style="display:flex;"><span> entry(&#34;sleep&#34;);
+</span></span><span style="display:flex;"><span> entry(&#34;uptime&#34;);
+</span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+entry(&#34;mmap&#34;);
+</span></span></span><span style="display:flex;"><span><span style="color:#50fa7b;font-weight:bold">+entry(&#34;munmap&#34;);
+</span></span></span></code></pre></div>
   </div>
 
 
