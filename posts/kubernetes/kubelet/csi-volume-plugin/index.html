@@ -249,227 +249,227 @@
 <p>在 kubernetes 中，第三方 CSI Plugin 注册到 kubelet 是通过 CSI Volume Plugin 来完成的。</p>
 <h2 id="插件注册管理">插件注册管理</h2>
 <p>CSI Volume Plugin 其实现了接口 PluginHandler：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/kubelet/pluginmanager/cache/types.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> PluginHandler <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">ValidatePlugin</span>(pluginName <span style="color:#8be9fd">string</span>, endpoint <span style="color:#8be9fd">string</span>, versions []<span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">RegisterPlugin</span>(pluginName, endpoint <span style="color:#8be9fd">string</span>, versions []<span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">DeRegisterPlugin</span>(pluginName <span style="color:#8be9fd">string</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/pluginmanager/cache/types.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> PluginHandler <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">ValidatePlugin</span>(pluginName <span style="color:#fabd2f">string</span>, endpoint <span style="color:#fabd2f">string</span>, versions []<span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">RegisterPlugin</span>(pluginName, endpoint <span style="color:#fabd2f">string</span>, versions []<span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">DeRegisterPlugin</span>(pluginName <span style="color:#fabd2f">string</span>)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>插件的注册和注销逻辑的调用是由 kubelet pluginmanager 完成的，具体请参考<a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/">kubernetes 源码分析之 kubelet pluginmanager</a>。</p>
 <p>结构体 RegistrationHandler 实现了上述 PluginHandler 接口：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// RegistrationHandler is the handler which is fed to the pluginwatcher API.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> RegistrationHandler <span style="color:#8be9fd;font-style:italic">struct</span> {
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// RegistrationHandler is the handler which is fed to the pluginwatcher API.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> RegistrationHandler <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// PluginHandler is the plugin registration handler interface passed to the</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// pluginwatcher module in kubelet</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">var</span> PluginHandler = <span style="color:#ff79c6">&amp;</span>RegistrationHandler{}
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// PluginHandler is the plugin registration handler interface passed to the</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// pluginwatcher module in kubelet</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">var</span> PluginHandler = <span style="color:#fe8019">&amp;</span>RegistrationHandler{}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// ValidatePlugin is called by kubelet&#39;s plugin watcher upon detection</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// of a new registration socket opened by CSI Driver registrar side car.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (h <span style="color:#ff79c6">*</span>RegistrationHandler) <span style="color:#50fa7b">ValidatePlugin</span>(pluginName <span style="color:#8be9fd">string</span>, endpoint <span style="color:#8be9fd">string</span>, versions []<span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">Infof</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;Trying to validate a new CSI Driver with name: %s endpoint: %s versions: %s&#34;</span>,
-</span></span><span style="display:flex;"><span>		pluginName, endpoint, strings.<span style="color:#50fa7b">Join</span>(versions, <span style="color:#f1fa8c">&#34;,&#34;</span>)))
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// ValidatePlugin is called by kubelet&#39;s plugin watcher upon detection</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// of a new registration socket opened by CSI Driver registrar side car.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (h <span style="color:#fe8019">*</span>RegistrationHandler) <span style="color:#fabd2f">ValidatePlugin</span>(pluginName <span style="color:#fabd2f">string</span>, endpoint <span style="color:#fabd2f">string</span>, versions []<span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">Infof</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;Trying to validate a new CSI Driver with name: %s endpoint: %s versions: %s&#34;</span>,
+</span></span><span style="display:flex;"><span>		pluginName, endpoint, strings.<span style="color:#fabd2f">Join</span>(versions, <span style="color:#b8bb26">&#34;,&#34;</span>)))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 校验</span>
-</span></span><span style="display:flex;"><span>	_, err <span style="color:#ff79c6">:=</span> h.<span style="color:#50fa7b">validateVersions</span>(<span style="color:#f1fa8c">&#34;ValidatePlugin&#34;</span>, pluginName, endpoint, versions)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 校验不成功，直接返回错误</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;validation failed for CSI Driver %s at endpoint %s: %v&#34;</span>, pluginName, endpoint, err)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 校验</span>
+</span></span><span style="display:flex;"><span>	_, err <span style="color:#fe8019">:=</span> h.<span style="color:#fabd2f">validateVersions</span>(<span style="color:#b8bb26">&#34;ValidatePlugin&#34;</span>, pluginName, endpoint, versions)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 校验不成功，直接返回错误</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;validation failed for CSI Driver %s at endpoint %s: %v&#34;</span>, pluginName, endpoint, err)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// RegisterPlugin is called when a plugin can be registered</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (h <span style="color:#ff79c6">*</span>RegistrationHandler) <span style="color:#50fa7b">RegisterPlugin</span>(pluginName <span style="color:#8be9fd">string</span>, endpoint <span style="color:#8be9fd">string</span>, versions []<span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">Infof</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;Register new plugin with name: %s at endpoint: %s&#34;</span>, pluginName, endpoint))
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// RegisterPlugin is called when a plugin can be registered</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (h <span style="color:#fe8019">*</span>RegistrationHandler) <span style="color:#fabd2f">RegisterPlugin</span>(pluginName <span style="color:#fabd2f">string</span>, endpoint <span style="color:#fabd2f">string</span>, versions []<span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">Infof</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;Register new plugin with name: %s at endpoint: %s&#34;</span>, pluginName, endpoint))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 校验并返回最高版本号</span>
-</span></span><span style="display:flex;"><span>	highestSupportedVersion, err <span style="color:#ff79c6">:=</span> h.<span style="color:#50fa7b">validateVersions</span>(<span style="color:#f1fa8c">&#34;RegisterPlugin&#34;</span>, pluginName, endpoint, versions)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 校验并返回最高版本号</span>
+</span></span><span style="display:flex;"><span>	highestSupportedVersion, err <span style="color:#fe8019">:=</span> h.<span style="color:#fabd2f">validateVersions</span>(<span style="color:#b8bb26">&#34;RegisterPlugin&#34;</span>, pluginName, endpoint, versions)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Storing endpoint of newly registered CSI driver into the map, where CSI driver name will be the key</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// all other CSI components will be able to get the actual socket of CSI drivers by its name.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 构建CSI Driver</span>
-</span></span><span style="display:flex;"><span>	csiDrivers.<span style="color:#50fa7b">Set</span>(pluginName, Driver{
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Storing endpoint of newly registered CSI driver into the map, where CSI driver name will be the key</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// all other CSI components will be able to get the actual socket of CSI drivers by its name.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 构建CSI Driver</span>
+</span></span><span style="display:flex;"><span>	csiDrivers.<span style="color:#fabd2f">Set</span>(pluginName, Driver{
 </span></span><span style="display:flex;"><span>		endpoint:                endpoint,
 </span></span><span style="display:flex;"><span>		highestSupportedVersion: highestSupportedVersion,
 </span></span><span style="display:flex;"><span>	})
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Get node info from the driver.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 从本地数据库（本地DriversStore）获取到 CSI Driver gRPC 的client</span>
-</span></span><span style="display:flex;"><span>	csi, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">newCsiDriverClient</span>(<span style="color:#50fa7b">csiDriverName</span>(pluginName))
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Get node info from the driver.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 从本地数据库（本地DriversStore）获取到 CSI Driver gRPC 的client</span>
+</span></span><span style="display:flex;"><span>	csi, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">newCsiDriverClient</span>(<span style="color:#fabd2f">csiDriverName</span>(pluginName))
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	ctx, cancel <span style="color:#ff79c6">:=</span> context.<span style="color:#50fa7b">WithTimeout</span>(context.<span style="color:#50fa7b">Background</span>(), csiTimeout)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> <span style="color:#50fa7b">cancel</span>()
+</span></span><span style="display:flex;"><span>	ctx, cancel <span style="color:#fe8019">:=</span> context.<span style="color:#fabd2f">WithTimeout</span>(context.<span style="color:#fabd2f">Background</span>(), csiTimeout)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> <span style="color:#fabd2f">cancel</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 通过调用CSI 接口的 Node Servier 获取信息</span>
-</span></span><span style="display:flex;"><span>	driverNodeID, maxVolumePerNode, accessibleTopology, err <span style="color:#ff79c6">:=</span> csi.<span style="color:#50fa7b">NodeGetInfo</span>(ctx)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> unregErr <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">unregisterDriver</span>(pluginName); unregErr <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;registrationHandler.RegisterPlugin failed to unregister plugin due to previous error: %v&#34;</span>, unregErr))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 通过调用CSI 接口的 Node Servier 获取信息</span>
+</span></span><span style="display:flex;"><span>	driverNodeID, maxVolumePerNode, accessibleTopology, err <span style="color:#fe8019">:=</span> csi.<span style="color:#fabd2f">NodeGetInfo</span>(ctx)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> unregErr <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">unregisterDriver</span>(pluginName); unregErr <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;registrationHandler.RegisterPlugin failed to unregister plugin due to previous error: %v&#34;</span>, unregErr))
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 注册CSI Driver 都 kubelet 中</span>
-</span></span><span style="display:flex;"><span>	err = nim.<span style="color:#50fa7b">InstallCSIDriver</span>(pluginName, driverNodeID, maxVolumePerNode, accessibleTopology)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> unregErr <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">unregisterDriver</span>(pluginName); unregErr <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;registrationHandler.RegisterPlugin failed to unregister plugin due to previous error: %v&#34;</span>, unregErr))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 注册CSI Driver 都 kubelet 中</span>
+</span></span><span style="display:flex;"><span>	err = nim.<span style="color:#fabd2f">InstallCSIDriver</span>(pluginName, driverNodeID, maxVolumePerNode, accessibleTopology)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> unregErr <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">unregisterDriver</span>(pluginName); unregErr <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;registrationHandler.RegisterPlugin failed to unregister plugin due to previous error: %v&#34;</span>, unregErr))
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (h <span style="color:#ff79c6">*</span>RegistrationHandler) <span style="color:#50fa7b">validateVersions</span>(callerName, pluginName <span style="color:#8be9fd">string</span>, endpoint <span style="color:#8be9fd">string</span>, versions []<span style="color:#8be9fd">string</span>) (<span style="color:#ff79c6">*</span>utilversion.Version, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// CSI Driver的版本不能为空</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(versions) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;%s for CSI driver %q failed. Plugin returned an empty list for supported versions&#34;</span>, callerName, pluginName))
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (h <span style="color:#fe8019">*</span>RegistrationHandler) <span style="color:#fabd2f">validateVersions</span>(callerName, pluginName <span style="color:#fabd2f">string</span>, endpoint <span style="color:#fabd2f">string</span>, versions []<span style="color:#fabd2f">string</span>) (<span style="color:#fe8019">*</span>utilversion.Version, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// CSI Driver的版本不能为空</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(versions) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, errors.<span style="color:#fabd2f">New</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;%s for CSI driver %q failed. Plugin returned an empty list for supported versions&#34;</span>, callerName, pluginName))
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Validate version</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 找到CSI Driver最高支持的版本号</span>
-</span></span><span style="display:flex;"><span>	newDriverHighestVersion, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">highestSupportedVersion</span>(versions)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;%s for CSI driver %q failed. None of the versions specified %q are supported. err=%v&#34;</span>, callerName, pluginName, versions, err))
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Validate version</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 找到CSI Driver最高支持的版本号</span>
+</span></span><span style="display:flex;"><span>	newDriverHighestVersion, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">highestSupportedVersion</span>(versions)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, errors.<span style="color:#fabd2f">New</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;%s for CSI driver %q failed. None of the versions specified %q are supported. err=%v&#34;</span>, callerName, pluginName, versions, err))
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 查看CSI Driver库中是否以及存在了该CSI Driver， 如果存在，需要比较传入的CSI Driver和库中的CSI Driver的版本号，如果新的比旧的高，返回错误</span>
-</span></span><span style="display:flex;"><span>	existingDriver, driverExists <span style="color:#ff79c6">:=</span> csiDrivers.<span style="color:#50fa7b">Get</span>(pluginName)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> driverExists {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !existingDriver.highestSupportedVersion.<span style="color:#50fa7b">LessThan</span>(newDriverHighestVersion) {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;%s for CSI driver %q failed. Another driver with the same name is already registered with a higher supported version: %q&#34;</span>, callerName, pluginName, existingDriver.highestSupportedVersion))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 查看CSI Driver库中是否以及存在了该CSI Driver， 如果存在，需要比较传入的CSI Driver和库中的CSI Driver的版本号，如果新的比旧的高，返回错误</span>
+</span></span><span style="display:flex;"><span>	existingDriver, driverExists <span style="color:#fe8019">:=</span> csiDrivers.<span style="color:#fabd2f">Get</span>(pluginName)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> driverExists {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !existingDriver.highestSupportedVersion.<span style="color:#fabd2f">LessThan</span>(newDriverHighestVersion) {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, errors.<span style="color:#fabd2f">New</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;%s for CSI driver %q failed. Another driver with the same name is already registered with a higher supported version: %q&#34;</span>, callerName, pluginName, existingDriver.highestSupportedVersion))
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 返回支持的最高版本号</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> newDriverHighestVersion, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 返回支持的最高版本号</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> newDriverHighestVersion, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// DeRegisterPlugin is called when a plugin removed its socket, signaling</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// it is no longer available</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 注销CSI Driver</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (h <span style="color:#ff79c6">*</span>RegistrationHandler) <span style="color:#50fa7b">DeRegisterPlugin</span>(pluginName <span style="color:#8be9fd">string</span>) {
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;registrationHandler.DeRegisterPlugin request for plugin %s&#34;</span>, pluginName))
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">unregisterDriver</span>(pluginName); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;registrationHandler.DeRegisterPlugin failed: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// DeRegisterPlugin is called when a plugin removed its socket, signaling</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// it is no longer available</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 注销CSI Driver</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (h <span style="color:#fe8019">*</span>RegistrationHandler) <span style="color:#fabd2f">DeRegisterPlugin</span>(pluginName <span style="color:#fabd2f">string</span>) {
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;registrationHandler.DeRegisterPlugin request for plugin %s&#34;</span>, pluginName))
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">unregisterDriver</span>(pluginName); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;registrationHandler.DeRegisterPlugin failed: %v&#34;</span>, err))
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">unregisterDriver</span>(driverName <span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>  	<span style="color:#6272a4">// 首先从CSI Driver库中删除</span>
-</span></span><span style="display:flex;"><span>	csiDrivers.<span style="color:#50fa7b">Delete</span>(driverName)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 从 kubelet 中注销插件</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> nim.<span style="color:#50fa7b">UninstallCSIDriver</span>(driverName); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;Error uninstalling CSI driver: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">unregisterDriver</span>(driverName <span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>  	<span style="color:#928374;font-style:italic">// 首先从CSI Driver库中删除</span>
+</span></span><span style="display:flex;"><span>	csiDrivers.<span style="color:#fabd2f">Delete</span>(driverName)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 从 kubelet 中注销插件</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> nim.<span style="color:#fabd2f">UninstallCSIDriver</span>(driverName); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> errors.<span style="color:#fabd2f">New</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;Error uninstalling CSI driver: %v&#34;</span>, err))
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
 
 <p>该注册和注销逻辑会在 kubelet 服务启动时候被注册到 <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/">kubelet pluginmanager</a> 中。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/kubelet/kubelet.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (kl <span style="color:#ff79c6">*</span>Kubelet) <span style="color:#50fa7b">initializeRuntimeDependentModules</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//...</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Adding Registration Callback function for CSI Driver</span>
-</span></span><span style="display:flex;"><span>	kl.pluginManager.<span style="color:#50fa7b">AddHandler</span>(pluginwatcherapi.CSIPlugin, plugincache.<span style="color:#50fa7b">PluginHandler</span>(csi.PluginHandler))
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Adding Registration Callback function for Device Manager</span>
-</span></span><span style="display:flex;"><span>	kl.pluginManager.<span style="color:#50fa7b">AddHandler</span>(pluginwatcherapi.DevicePlugin, kl.containerManager.<span style="color:#50fa7b">GetPluginRegistrationHandler</span>())
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Start the plugin manager</span>
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Starting plugin manager&#34;</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> kl.pluginManager.<span style="color:#50fa7b">Run</span>(kl.sourcesReady, wait.NeverStop)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//...</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/kubelet.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (kl <span style="color:#fe8019">*</span>Kubelet) <span style="color:#fabd2f">initializeRuntimeDependentModules</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Adding Registration Callback function for CSI Driver</span>
+</span></span><span style="display:flex;"><span>	kl.pluginManager.<span style="color:#fabd2f">AddHandler</span>(pluginwatcherapi.CSIPlugin, plugincache.<span style="color:#fabd2f">PluginHandler</span>(csi.PluginHandler))
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Adding Registration Callback function for Device Manager</span>
+</span></span><span style="display:flex;"><span>	kl.pluginManager.<span style="color:#fabd2f">AddHandler</span>(pluginwatcherapi.DevicePlugin, kl.containerManager.<span style="color:#fabd2f">GetPluginRegistrationHandler</span>())
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Start the plugin manager</span>
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Starting plugin manager&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">go</span> kl.pluginManager.<span style="color:#fabd2f">Run</span>(kl.sourcesReady, wait.NeverStop)
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//...</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="功能">功能</h2>
 <p>CSI Volume Plugin 管理着第三方的CSI Plugin，其实现了 VolumePlugin 接口以及其扩展接口，这些功能是通过 <a href="https://github.com/container-storage-interface/spec.git">CSI 接口</a>  提供的 Services 实现的，这里简单的分析下 Attach 和 Detach 的实现。</p>
 <p>csiPlugin 实现了接口 AttachableVolumePlugin：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/volume/plugins.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> AttachableVolumePlugin <span style="color:#8be9fd;font-style:italic">interface</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/volume/plugins.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> AttachableVolumePlugin <span style="color:#fe8019">interface</span> {
 </span></span><span style="display:flex;"><span>	DeviceMountableVolumePlugin
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">NewAttacher</span>() (Attacher, <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">NewDetacher</span>() (Detacher, <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// CanAttach tests if provided volume spec is attachable</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">CanAttach</span>(spec <span style="color:#ff79c6">*</span>Spec) (<span style="color:#8be9fd">bool</span>, <span style="color:#8be9fd">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">NewAttacher</span>() (Attacher, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">NewDetacher</span>() (Detacher, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// CanAttach tests if provided volume spec is attachable</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">CanAttach</span>(spec <span style="color:#fe8019">*</span>Spec) (<span style="color:#fabd2f">bool</span>, <span style="color:#fabd2f">error</span>)
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/volume/csi/csi_plugins.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// volume.AttachableVolumePlugin methods      </span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">var</span> _ volume.AttachableVolumePlugin = <span style="color:#ff79c6">&amp;</span>csiPlugin{}
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/volume/csi/csi_plugins.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// volume.AttachableVolumePlugin methods      </span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">var</span> _ volume.AttachableVolumePlugin = <span style="color:#fe8019">&amp;</span>csiPlugin{}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>csiPlugin) <span style="color:#50fa7b">NewAttacher</span>() (volume.Attacher, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> p.<span style="color:#50fa7b">newAttacherDetacher</span>()
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>csiPlugin) <span style="color:#fabd2f">NewAttacher</span>() (volume.Attacher, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> p.<span style="color:#fabd2f">newAttacherDetacher</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>csiPlugin) <span style="color:#50fa7b">NewDetacher</span>() (volume.Detacher, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> p.<span style="color:#50fa7b">newAttacherDetacher</span>()
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>csiPlugin) <span style="color:#fabd2f">NewDetacher</span>() (volume.Detacher, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> p.<span style="color:#fabd2f">newAttacherDetacher</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="attach方法的实现">Attach方法的实现</h3>
 <p>Attach 的实现就是判断 VolumeAttachment 资源是否存在，如果不存在就创建 VolumeAttachment 资源，然后一直循环判断这个 VolumeAttachment 资源的 <code>Status.Attached</code> 是否是 true 来判断 PV attach 到节点上是否已经完成：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>csiAttacher) <span style="color:#50fa7b">Attach</span>(spec <span style="color:#ff79c6">*</span>volume.Spec, nodeName types.NodeName) (<span style="color:#8be9fd">string</span>, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>	_, ok <span style="color:#ff79c6">:=</span> c.plugin.host.(volume.KubeletVolumeHost)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> ok {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#34;&#34;</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;attaching volumes from the kubelet is not supported&#34;</span>)
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (c <span style="color:#fe8019">*</span>csiAttacher) <span style="color:#fabd2f">Attach</span>(spec <span style="color:#fe8019">*</span>volume.Spec, nodeName types.NodeName) (<span style="color:#fabd2f">string</span>, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>	_, ok <span style="color:#fe8019">:=</span> c.plugin.host.(volume.KubeletVolumeHost)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#b8bb26">&#34;&#34;</span>, errors.<span style="color:#fabd2f">New</span>(<span style="color:#b8bb26">&#34;attaching volumes from the kubelet is not supported&#34;</span>)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> spec <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;attacher.Attach missing volume.Spec&#34;</span>))
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#34;&#34;</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;missing spec&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> spec <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;attacher.Attach missing volume.Spec&#34;</span>))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#b8bb26">&#34;&#34;</span>, errors.<span style="color:#fabd2f">New</span>(<span style="color:#b8bb26">&#34;missing spec&#34;</span>)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	pvSrc, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getPVSourceFromSpec</span>(spec)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#34;&#34;</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;attacher.Attach failed to get CSIPersistentVolumeSource: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>	pvSrc, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">getPVSourceFromSpec</span>(spec)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#b8bb26">&#34;&#34;</span>, errors.<span style="color:#fabd2f">New</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;attacher.Attach failed to get CSIPersistentVolumeSource: %v&#34;</span>, err))
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	node <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">string</span>(nodeName)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 生成VolumeAttachment 的Name</span>
-</span></span><span style="display:flex;"><span>	attachID <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getAttachmentName</span>(pvSrc.VolumeHandle, pvSrc.Driver, node)
+</span></span><span style="display:flex;"><span>	node <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">string</span>(nodeName)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 生成VolumeAttachment 的Name</span>
+</span></span><span style="display:flex;"><span>	attachID <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">getAttachmentName</span>(pvSrc.VolumeHandle, pvSrc.Driver, node)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 从informer cache中查找 VolumeAttachment</span>
-</span></span><span style="display:flex;"><span>	attachment, err <span style="color:#ff79c6">:=</span> c.plugin.volumeAttachmentLister.<span style="color:#50fa7b">Get</span>(attachID)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> !apierrors.<span style="color:#50fa7b">IsNotFound</span>(err) {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#34;&#34;</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;failed to get volume attachment from lister: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 从informer cache中查找 VolumeAttachment</span>
+</span></span><span style="display:flex;"><span>	attachment, err <span style="color:#fe8019">:=</span> c.plugin.volumeAttachmentLister.<span style="color:#fabd2f">Get</span>(attachID)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span> !apierrors.<span style="color:#fabd2f">IsNotFound</span>(err) {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#b8bb26">&#34;&#34;</span>, errors.<span style="color:#fabd2f">New</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;failed to get volume attachment from lister: %v&#34;</span>, err))
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> attachment <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> { <span style="color:#6272a4">// 没有找到</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 构建 VolumeAttachment</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">var</span> vaSrc storage.VolumeAttachmentSource
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> spec.InlineVolumeSpecForCSIMigration {
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// inline PV scenario - use PV spec to populate VA source.</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// The volume spec will be populated by CSI translation API</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// for inline volumes. This allows fields required by the CSI</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// attacher such as AccessMode and MountOptions (in addition to</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// fields in the CSI persistent volume source) to be populated</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// as part of CSI translation for inline volumes.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> attachment <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> { <span style="color:#928374;font-style:italic">// 没有找到</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 构建 VolumeAttachment</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">var</span> vaSrc storage.VolumeAttachmentSource
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> spec.InlineVolumeSpecForCSIMigration {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// inline PV scenario - use PV spec to populate VA source.</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// The volume spec will be populated by CSI translation API</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// for inline volumes. This allows fields required by the CSI</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// attacher such as AccessMode and MountOptions (in addition to</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// fields in the CSI persistent volume source) to be populated</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// as part of CSI translation for inline volumes.</span>
 </span></span><span style="display:flex;"><span>			vaSrc = storage.VolumeAttachmentSource{
-</span></span><span style="display:flex;"><span>				InlineVolumeSpec: <span style="color:#ff79c6">&amp;</span>spec.PersistentVolume.Spec,
+</span></span><span style="display:flex;"><span>				InlineVolumeSpec: <span style="color:#fe8019">&amp;</span>spec.PersistentVolume.Spec,
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// regular PV scenario - use PV name to populate VA source</span>
-</span></span><span style="display:flex;"><span>			pvName <span style="color:#ff79c6">:=</span> spec.PersistentVolume.<span style="color:#50fa7b">GetName</span>()
+</span></span><span style="display:flex;"><span>		} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// regular PV scenario - use PV name to populate VA source</span>
+</span></span><span style="display:flex;"><span>			pvName <span style="color:#fe8019">:=</span> spec.PersistentVolume.<span style="color:#fabd2f">GetName</span>()
 </span></span><span style="display:flex;"><span>			vaSrc = storage.VolumeAttachmentSource{
-</span></span><span style="display:flex;"><span>				PersistentVolumeName: <span style="color:#ff79c6">&amp;</span>pvName,
+</span></span><span style="display:flex;"><span>				PersistentVolumeName: <span style="color:#fe8019">&amp;</span>pvName,
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		attachment <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>storage.VolumeAttachment{
+</span></span><span style="display:flex;"><span>		attachment <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>storage.VolumeAttachment{
 </span></span><span style="display:flex;"><span>			ObjectMeta: metav1.ObjectMeta{
 </span></span><span style="display:flex;"><span>				Name: attachID,
 </span></span><span style="display:flex;"><span>			},
@@ -480,79 +480,79 @@
 </span></span><span style="display:flex;"><span>			},
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 通过APIServer写入到ETCD</span>
-</span></span><span style="display:flex;"><span>		_, err = c.k8s.<span style="color:#50fa7b">StorageV1</span>().<span style="color:#50fa7b">VolumeAttachments</span>().<span style="color:#50fa7b">Create</span>(context.<span style="color:#50fa7b">TODO</span>(), attachment, metav1.CreateOptions{})
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> !apierrors.<span style="color:#50fa7b">IsAlreadyExists</span>(err) {
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#34;&#34;</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;attacher.Attach failed: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 通过APIServer写入到ETCD</span>
+</span></span><span style="display:flex;"><span>		_, err = c.k8s.<span style="color:#fabd2f">StorageV1</span>().<span style="color:#fabd2f">VolumeAttachments</span>().<span style="color:#fabd2f">Create</span>(context.<span style="color:#fabd2f">TODO</span>(), attachment, metav1.CreateOptions{})
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> !apierrors.<span style="color:#fabd2f">IsAlreadyExists</span>(err) {
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span> <span style="color:#b8bb26">&#34;&#34;</span>, errors.<span style="color:#fabd2f">New</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;attacher.Attach failed: %v&#34;</span>, err))
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;attachment [%v] for volume [%v] already exists (will not be recreated)&#34;</span>, attachID, pvSrc.VolumeHandle))
-</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;attachment [%v] for volume [%v] created successfully&#34;</span>, attachID, pvSrc.VolumeHandle))
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;attachment [%v] for volume [%v] already exists (will not be recreated)&#34;</span>, attachID, pvSrc.VolumeHandle))
+</span></span><span style="display:flex;"><span>		} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;attachment [%v] for volume [%v] created successfully&#34;</span>, attachID, pvSrc.VolumeHandle))
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Attach and detach functionality is exclusive to the CSI plugin that runs in the AttachDetachController,</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// and has access to a VolumeAttachment lister that can be polled for the current status.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 如果集群中已经存在(或者是新创建的) VolumeAttachment，就等 attach 完成</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> c.<span style="color:#50fa7b">waitForVolumeAttachmentWithLister</span>(spec, pvSrc.VolumeHandle, attachID, c.watchTimeout); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#34;&#34;</span>, err
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Attach and detach functionality is exclusive to the CSI plugin that runs in the AttachDetachController,</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// and has access to a VolumeAttachment lister that can be polled for the current status.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 如果集群中已经存在(或者是新创建的) VolumeAttachment，就等 attach 完成</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> c.<span style="color:#fabd2f">waitForVolumeAttachmentWithLister</span>(spec, pvSrc.VolumeHandle, attachID, c.watchTimeout); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#b8bb26">&#34;&#34;</span>, err
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;attacher.Attach finished OK with VolumeAttachment object [%s]&#34;</span>, attachID))
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;attacher.Attach finished OK with VolumeAttachment object [%s]&#34;</span>, attachID))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Don&#39;t return attachID as a devicePath. We can reconstruct the attachID using getAttachmentName()</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#34;&#34;</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Don&#39;t return attachID as a devicePath. We can reconstruct the attachID using getAttachmentName()</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#b8bb26">&#34;&#34;</span>, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>csiAttacher) <span style="color:#50fa7b">waitForVolumeAttachmentWithLister</span>(spec <span style="color:#ff79c6">*</span>volume.Spec, volumeHandle, attachID <span style="color:#8be9fd">string</span>, timeout time.Duration) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;probing VolumeAttachment [id=%v]&#34;</span>, attachID))
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (c <span style="color:#fe8019">*</span>csiAttacher) <span style="color:#fabd2f">waitForVolumeAttachmentWithLister</span>(spec <span style="color:#fe8019">*</span>volume.Spec, volumeHandle, attachID <span style="color:#fabd2f">string</span>, timeout time.Duration) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;probing VolumeAttachment [id=%v]&#34;</span>, attachID))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	verifyStatus <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">func</span>() (<span style="color:#8be9fd">bool</span>, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>		volumeAttachment, err <span style="color:#ff79c6">:=</span> c.plugin.volumeAttachmentLister.<span style="color:#50fa7b">Get</span>(attachID)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// Ignore &#34;not found&#34; errors in case the VolumeAttachment was just created and hasn&#39;t yet made it into the lister.</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> !apierrors.<span style="color:#50fa7b">IsNotFound</span>(err) {
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;unexpected error waiting for volume attachment, %v&#34;</span>, err))
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, err
+</span></span><span style="display:flex;"><span>	verifyStatus <span style="color:#fe8019">:=</span> <span style="color:#fe8019">func</span>() (<span style="color:#fabd2f">bool</span>, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>		volumeAttachment, err <span style="color:#fe8019">:=</span> c.plugin.volumeAttachmentLister.<span style="color:#fabd2f">Get</span>(attachID)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// Ignore &#34;not found&#34; errors in case the VolumeAttachment was just created and hasn&#39;t yet made it into the lister.</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> !apierrors.<span style="color:#fabd2f">IsNotFound</span>(err) {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;unexpected error waiting for volume attachment, %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, err
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// The VolumeAttachment is not available yet and we will have to try again.</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// The VolumeAttachment is not available yet and we will have to try again.</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		successful, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">verifyAttachmentStatus</span>(volumeAttachment, volumeHandle)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, err
+</span></span><span style="display:flex;"><span>		successful, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">verifyAttachmentStatus</span>(volumeAttachment, volumeHandle)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, err
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> successful, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> successful, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> c.<span style="color:#50fa7b">waitForVolumeAttachDetachStatusWithLister</span>(spec, volumeHandle, attachID, timeout, verifyStatus, <span style="color:#f1fa8c">&#34;Attach&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> c.<span style="color:#fabd2f">waitForVolumeAttachDetachStatusWithLister</span>(spec, volumeHandle, attachID, timeout, verifyStatus, <span style="color:#b8bb26">&#34;Attach&#34;</span>)
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">verifyAttachmentStatus</span>(attachment <span style="color:#ff79c6">*</span>storage.VolumeAttachment, volumeHandle <span style="color:#8be9fd">string</span>) (<span style="color:#8be9fd">bool</span>, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// when we received a deleted event during attachment, fail fast</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> attachment <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;VolumeAttachment [%s] has been deleted, will not continue to wait for attachment&#34;</span>, volumeHandle))
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;volume attachment has been deleted&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">verifyAttachmentStatus</span>(attachment <span style="color:#fe8019">*</span>storage.VolumeAttachment, volumeHandle <span style="color:#fabd2f">string</span>) (<span style="color:#fabd2f">bool</span>, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// when we received a deleted event during attachment, fail fast</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> attachment <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;VolumeAttachment [%s] has been deleted, will not continue to wait for attachment&#34;</span>, volumeHandle))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, errors.<span style="color:#fabd2f">New</span>(<span style="color:#b8bb26">&#34;volume attachment has been deleted&#34;</span>)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// if being deleted, fail fast</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> attachment.<span style="color:#50fa7b">GetDeletionTimestamp</span>() <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;VolumeAttachment [%s] has deletion timestamp, will not continue to wait for attachment&#34;</span>, attachment.Name))
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;volume attachment is being deleted&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// if being deleted, fail fast</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> attachment.<span style="color:#fabd2f">GetDeletionTimestamp</span>() <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;VolumeAttachment [%s] has deletion timestamp, will not continue to wait for attachment&#34;</span>, attachment.Name))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, errors.<span style="color:#fabd2f">New</span>(<span style="color:#b8bb26">&#34;volume attachment is being deleted&#34;</span>)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// attachment OK</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> attachment.Status.Attached {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// attachment OK</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> attachment.Status.Attached {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// driver reports attach error</span>
-</span></span><span style="display:flex;"><span>	attachErr <span style="color:#ff79c6">:=</span> attachment.Status.AttachError
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> attachErr <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;attachment for %v failed: %v&#34;</span>, volumeHandle, attachErr.Message))
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, errors.<span style="color:#50fa7b">New</span>(attachErr.Message)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// driver reports attach error</span>
+</span></span><span style="display:flex;"><span>	attachErr <span style="color:#fe8019">:=</span> attachment.Status.AttachError
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> attachErr <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;attachment for %v failed: %v&#34;</span>, volumeHandle, attachErr.Message))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, errors.<span style="color:#fabd2f">New</span>(attachErr.Message)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
@@ -561,46 +561,46 @@
 <p>Detach 的实现就是删除 VolumeAttachment 资源，然后一直循环判断这个资源不存在来判断是不是 PV 从节点上 detach 是否已经完成：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>csiAttacher) <span style="color:#50fa7b">Detach</span>(volumeName <span style="color:#8be9fd">string</span>, nodeName types.NodeName) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>	_, ok <span style="color:#ff79c6">:=</span> c.plugin.host.(volume.KubeletVolumeHost)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> ok {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;detaching volumes from the kubelet is not supported&#34;</span>)
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (c <span style="color:#fe8019">*</span>csiAttacher) <span style="color:#fabd2f">Detach</span>(volumeName <span style="color:#fabd2f">string</span>, nodeName types.NodeName) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>	_, ok <span style="color:#fe8019">:=</span> c.plugin.host.(volume.KubeletVolumeHost)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> errors.<span style="color:#fabd2f">New</span>(<span style="color:#b8bb26">&#34;detaching volumes from the kubelet is not supported&#34;</span>)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> attachID <span style="color:#8be9fd">string</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> volID <span style="color:#8be9fd">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">var</span> attachID <span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">var</span> volID <span style="color:#fabd2f">string</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> volumeName <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;detacher.Detach missing value for parameter volumeName&#34;</span>))
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;missing expected parameter volumeName&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> volumeName <span style="color:#fe8019">==</span> <span style="color:#b8bb26">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;detacher.Detach missing value for parameter volumeName&#34;</span>))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> errors.<span style="color:#fabd2f">New</span>(<span style="color:#b8bb26">&#34;missing expected parameter volumeName&#34;</span>)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// volumeName in format driverName&lt;SEP&gt;volumeHandle generated by plugin.GetVolumeName()</span>
-</span></span><span style="display:flex;"><span>	parts <span style="color:#ff79c6">:=</span> strings.<span style="color:#50fa7b">Split</span>(volumeName, volNameSep)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(parts) <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">2</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;detacher.Detach insufficient info encoded in volumeName&#34;</span>))
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;volumeName missing expected data&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// volumeName in format driverName&lt;SEP&gt;volumeHandle generated by plugin.GetVolumeName()</span>
+</span></span><span style="display:flex;"><span>	parts <span style="color:#fe8019">:=</span> strings.<span style="color:#fabd2f">Split</span>(volumeName, volNameSep)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(parts) <span style="color:#fe8019">!=</span> <span style="color:#d3869b">2</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;detacher.Detach insufficient info encoded in volumeName&#34;</span>))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> errors.<span style="color:#fabd2f">New</span>(<span style="color:#b8bb26">&#34;volumeName missing expected data&#34;</span>)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	driverName <span style="color:#ff79c6">:=</span> parts[<span style="color:#bd93f9">0</span>]
-</span></span><span style="display:flex;"><span>	volID = parts[<span style="color:#bd93f9">1</span>]
-</span></span><span style="display:flex;"><span>	attachID = <span style="color:#50fa7b">getAttachmentName</span>(volID, driverName, <span style="color:#8be9fd;font-style:italic">string</span>(nodeName))
+</span></span><span style="display:flex;"><span>	driverName <span style="color:#fe8019">:=</span> parts[<span style="color:#d3869b">0</span>]
+</span></span><span style="display:flex;"><span>	volID = parts[<span style="color:#d3869b">1</span>]
+</span></span><span style="display:flex;"><span>	attachID = <span style="color:#fabd2f">getAttachmentName</span>(volID, driverName, <span style="color:#fabd2f">string</span>(nodeName))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 通过APIServer删除VolumeAttachment资源  </span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> c.k8s.<span style="color:#50fa7b">StorageV1</span>().<span style="color:#50fa7b">VolumeAttachments</span>().<span style="color:#50fa7b">Delete</span>(context.<span style="color:#50fa7b">TODO</span>(), attachID, metav1.DeleteOptions{}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> apierrors.<span style="color:#50fa7b">IsNotFound</span>(err) {
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// object deleted or never existed, done</span>
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;VolumeAttachment object [%v] for volume [%v] not found, object deleted&#34;</span>, attachID, volID))
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 通过APIServer删除VolumeAttachment资源  </span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> c.k8s.<span style="color:#fabd2f">StorageV1</span>().<span style="color:#fabd2f">VolumeAttachments</span>().<span style="color:#fabd2f">Delete</span>(context.<span style="color:#fabd2f">TODO</span>(), attachID, metav1.DeleteOptions{}); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> apierrors.<span style="color:#fabd2f">IsNotFound</span>(err) {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// object deleted or never existed, done</span>
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;VolumeAttachment object [%v] for volume [%v] not found, object deleted&#34;</span>, attachID, volID))
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> errors.<span style="color:#50fa7b">New</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;detacher.Detach failed to delete VolumeAttachment [%s]: %v&#34;</span>, attachID, err))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> errors.<span style="color:#fabd2f">New</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;detacher.Detach failed to delete VolumeAttachment [%s]: %v&#34;</span>, attachID, err))
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">log</span>(<span style="color:#f1fa8c">&#34;detacher deleted ok VolumeAttachment.ID=%s&#34;</span>, attachID))
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">log</span>(<span style="color:#b8bb26">&#34;detacher deleted ok VolumeAttachment.ID=%s&#34;</span>, attachID))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Attach and detach functionality is exclusive to the CSI plugin that runs in the AttachDetachController,</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// and has access to a VolumeAttachment lister that can be polled for the current status.</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> c.<span style="color:#50fa7b">waitForVolumeDetachmentWithLister</span>(volID, attachID, c.watchTimeout)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Attach and detach functionality is exclusive to the CSI plugin that runs in the AttachDetachController,</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// and has access to a VolumeAttachment lister that can be polled for the current status.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> c.<span style="color:#fabd2f">waitForVolumeDetachmentWithLister</span>(volID, attachID, c.watchTimeout)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>

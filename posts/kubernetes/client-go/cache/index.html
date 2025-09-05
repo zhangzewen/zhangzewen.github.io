@@ -245,346 +245,346 @@ kubernetes 的 client-go 提供了一种基于客户端缓存机制的工具，�
 <p>kubernetes 的 client-go 提供了一种基于客户端缓存机制的工具，该工具把目标数据都缓存在内存中，旨在减少对服务器端的拉取数据请求调用次数，代码在 <code>tools/cache</code> 目录下。</p>
 <h2 id="存储接口定义">存储接口定义</h2>
 <p>Store是存储接口：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Store <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Add</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Update</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Delete</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">List</span>() []<span style="color:#8be9fd;font-style:italic">interface</span>{}
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">ListKeys</span>() []<span style="color:#8be9fd">string</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Get</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) (item <span style="color:#8be9fd;font-style:italic">interface</span>{}, exists <span style="color:#8be9fd">bool</span>, err <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">GetByKey</span>(key <span style="color:#8be9fd">string</span>) (item <span style="color:#8be9fd;font-style:italic">interface</span>{}, exists <span style="color:#8be9fd">bool</span>, err <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Replace</span>([]<span style="color:#8be9fd;font-style:italic">interface</span>{}, <span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Resync</span>() <span style="color:#8be9fd">error</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Store <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Add</span>(obj <span style="color:#fe8019">interface</span>{}) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Update</span>(obj <span style="color:#fe8019">interface</span>{}) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Delete</span>(obj <span style="color:#fe8019">interface</span>{}) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">List</span>() []<span style="color:#fe8019">interface</span>{}
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">ListKeys</span>() []<span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Get</span>(obj <span style="color:#fe8019">interface</span>{}) (item <span style="color:#fe8019">interface</span>{}, exists <span style="color:#fabd2f">bool</span>, err <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetByKey</span>(key <span style="color:#fabd2f">string</span>) (item <span style="color:#fe8019">interface</span>{}, exists <span style="color:#fabd2f">bool</span>, err <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Replace</span>([]<span style="color:#fe8019">interface</span>{}, <span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Resync</span>() <span style="color:#fabd2f">error</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>所有的数据都是以键值的形式存储起来的， client-go 定义了一个算子类型，通过输入的参数算出key：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> KeyFunc <span style="color:#8be9fd;font-style:italic">func</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) (<span style="color:#8be9fd">string</span>, <span style="color:#8be9fd">error</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> KeyFunc <span style="color:#fe8019">func</span>(obj <span style="color:#fe8019">interface</span>{}) (<span style="color:#fabd2f">string</span>, <span style="color:#fabd2f">error</span>)
 </span></span></code></pre></div><p>接口 Queue 扩展了接口 Store：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Queue <span style="color:#8be9fd;font-style:italic">interface</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Queue <span style="color:#fe8019">interface</span> {
 </span></span><span style="display:flex;"><span>	Store
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Pop</span>(PopProcessFunc) (<span style="color:#8be9fd;font-style:italic">interface</span>{}, <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">AddIfNotPresent</span>(<span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">HasSynced</span>() <span style="color:#8be9fd">bool</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Close</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Pop</span>(PopProcessFunc) (<span style="color:#fe8019">interface</span>{}, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">AddIfNotPresent</span>(<span style="color:#fe8019">interface</span>{}) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">HasSynced</span>() <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Close</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="deltafifo">DeltaFIFO</h2>
 <p>结构体 DeltaFIFO，实现了Queue 接口， 它里面保存的是资源对象的一系列<strong>操作记录</strong>，每条操作记录包含了操作类型和所操作的资源对象：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> DeltaType <span style="color:#8be9fd">string</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> DeltaType <span style="color:#fabd2f">string</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">const</span> (
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 新增操作</span>
-</span></span><span style="display:flex;"><span>	Added   DeltaType = <span style="color:#f1fa8c">&#34;Added&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 更新操作</span>
-</span></span><span style="display:flex;"><span>	Updated DeltaType = <span style="color:#f1fa8c">&#34;Updated&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 删除操作 </span>
-</span></span><span style="display:flex;"><span>	Deleted DeltaType = <span style="color:#f1fa8c">&#34;Deleted&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// relist，这个状态是由于watch event 出错，导致需要进行 relist 来进行全盘同步。</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 需要设置 EmitDeltaTypeReplaced=true 才能显示这个状态，否为默认为Sync。 </span>
-</span></span><span style="display:flex;"><span>	Replaced DeltaType = <span style="color:#f1fa8c">&#34;Replaced&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 本地同步</span>
-</span></span><span style="display:flex;"><span>	Sync DeltaType = <span style="color:#f1fa8c">&#34;Sync&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 新增操作</span>
+</span></span><span style="display:flex;"><span>	Added   DeltaType = <span style="color:#b8bb26">&#34;Added&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 更新操作</span>
+</span></span><span style="display:flex;"><span>	Updated DeltaType = <span style="color:#b8bb26">&#34;Updated&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 删除操作 </span>
+</span></span><span style="display:flex;"><span>	Deleted DeltaType = <span style="color:#b8bb26">&#34;Deleted&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// relist，这个状态是由于watch event 出错，导致需要进行 relist 来进行全盘同步。</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 需要设置 EmitDeltaTypeReplaced=true 才能显示这个状态，否为默认为Sync。 </span>
+</span></span><span style="display:flex;"><span>	Replaced DeltaType = <span style="color:#b8bb26">&#34;Replaced&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 本地同步</span>
+</span></span><span style="display:flex;"><span>	Sync DeltaType = <span style="color:#b8bb26">&#34;Sync&#34;</span>
 </span></span><span style="display:flex;"><span>)
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 资源操作记录</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Delta <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 资源操作记录</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> Delta <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>	Type   DeltaType
-</span></span><span style="display:flex;"><span>	Object <span style="color:#8be9fd;font-style:italic">interface</span>{}
+</span></span><span style="display:flex;"><span>	Object <span style="color:#fe8019">interface</span>{}
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Deltas []Delta
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> Deltas []Delta
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> DeltaFIFO <span style="color:#8be9fd;font-style:italic">struct</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 并发控制</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> DeltaFIFO <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 并发控制</span>
 </span></span><span style="display:flex;"><span>	lock sync.RWMutex
 </span></span><span style="display:flex;"><span>	cond sync.Cond
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 资源对象操作记录集合</span>
-</span></span><span style="display:flex;"><span>	items <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]Deltas
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 存储 items 中的 key，与items 一一对应</span>
-</span></span><span style="display:flex;"><span>	queue []<span style="color:#8be9fd">string</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 标示首批 items 已经到达。</span>
-</span></span><span style="display:flex;"><span>	populated <span style="color:#8be9fd">bool</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 首批到达的 items 的个数，用来判断初始化同步是否完成，0 标示完成同步</span>
-</span></span><span style="display:flex;"><span>	initialPopulationCount <span style="color:#8be9fd">int</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 资源对象操作记录集合</span>
+</span></span><span style="display:flex;"><span>	items <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]Deltas
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 存储 items 中的 key，与items 一一对应</span>
+</span></span><span style="display:flex;"><span>	queue []<span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 标示首批 items 已经到达。</span>
+</span></span><span style="display:flex;"><span>	populated <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 首批到达的 items 的个数，用来判断初始化同步是否完成，0 标示完成同步</span>
+</span></span><span style="display:flex;"><span>	initialPopulationCount <span style="color:#fabd2f">int</span>
 </span></span><span style="display:flex;"><span>	keyFunc KeyFunc
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 本地全量存储</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 本地全量存储</span>
 </span></span><span style="display:flex;"><span>	knownObjects KeyListerGetter
-</span></span><span style="display:flex;"><span>	closed <span style="color:#8be9fd">bool</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 为 true 表示当执行 Replace 操作时，Type 为Replaced。为false时，不启用 Replaced 状态，使用Sync来代替。为了向后兼容。</span>
-</span></span><span style="display:flex;"><span>	emitDeltaTypeReplaced <span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span>	closed <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 为 true 表示当执行 Replace 操作时，Type 为Replaced。为false时，不启用 Replaced 状态，使用Sync来代替。为了向后兼容。</span>
+</span></span><span style="display:flex;"><span>	emitDeltaTypeReplaced <span style="color:#fabd2f">bool</span>
 </span></span><span style="display:flex;"><span>	transformer TransformFunc
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>下图是 字段 queue 和 items 的关系如下：</p>
 <p><img src="/images/kubernetes/client-go/cache/delt_fifo_layout.png" alt="deltafiro_layout"></p>
 <p>DeltaFIFO 通过 Add/Update/Delete 来操作资源，但是最终会调用 queueActionLocked 方法来记录一条操作资源的动作：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (f <span style="color:#ff79c6">*</span>DeltaFIFO) <span style="color:#50fa7b">queueActionLocked</span>(actionType DeltaType, obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 根据对象计算出key</span>
-</span></span><span style="display:flex;"><span>	id, err <span style="color:#ff79c6">:=</span> f.<span style="color:#50fa7b">KeyOf</span>(obj)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> KeyError{obj, err}
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (f <span style="color:#fe8019">*</span>DeltaFIFO) <span style="color:#fabd2f">queueActionLocked</span>(actionType DeltaType, obj <span style="color:#fe8019">interface</span>{}) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 根据对象计算出key</span>
+</span></span><span style="display:flex;"><span>	id, err <span style="color:#fe8019">:=</span> f.<span style="color:#fabd2f">KeyOf</span>(obj)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> KeyError{obj, err}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> f.transformer <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">var</span> err <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>		obj, err = f.<span style="color:#50fa7b">transformer</span>(obj)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> f.transformer <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">var</span> err <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>		obj, err = f.<span style="color:#fabd2f">transformer</span>(obj)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	oldDeltas <span style="color:#ff79c6">:=</span> f.items[id]
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 把记录加入到已存在的deltas</span>
-</span></span><span style="display:flex;"><span>	newDeltas <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">append</span>(oldDeltas, Delta{actionType, obj})
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 去重</span>
-</span></span><span style="display:flex;"><span>	newDeltas = <span style="color:#50fa7b">dedupDeltas</span>(newDeltas)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 更新记录</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(newDeltas) &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> _, exists <span style="color:#ff79c6">:=</span> f.items[id]; !exists {
-</span></span><span style="display:flex;"><span>			f.queue = <span style="color:#8be9fd;font-style:italic">append</span>(f.queue, id)
+</span></span><span style="display:flex;"><span>	oldDeltas <span style="color:#fe8019">:=</span> f.items[id]
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 把记录加入到已存在的deltas</span>
+</span></span><span style="display:flex;"><span>	newDeltas <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">append</span>(oldDeltas, Delta{actionType, obj})
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 去重</span>
+</span></span><span style="display:flex;"><span>	newDeltas = <span style="color:#fabd2f">dedupDeltas</span>(newDeltas)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 更新记录</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(newDeltas) &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> _, exists <span style="color:#fe8019">:=</span> f.items[id]; !exists {
+</span></span><span style="display:flex;"><span>			f.queue = <span style="color:#fabd2f">append</span>(f.queue, id)
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>		f.items[id] = newDeltas
-</span></span><span style="display:flex;"><span>		f.cond.<span style="color:#50fa7b">Broadcast</span>()
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> oldDeltas <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Impossible dedupDeltas for id=%q: oldDeltas=%#+v, obj=%#+v; ignoring&#34;</span>, id, oldDeltas, obj)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>		f.cond.<span style="color:#fabd2f">Broadcast</span>()
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> oldDeltas <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;Impossible dedupDeltas for id=%q: oldDeltas=%#+v, obj=%#+v; ignoring&#34;</span>, id, oldDeltas, obj)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Impossible dedupDeltas for id=%q: oldDeltas=%#+v, obj=%#+v; breaking invariant by storing empty Deltas&#34;</span>, id, oldDeltas, obj)
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;Impossible dedupDeltas for id=%q: oldDeltas=%#+v, obj=%#+v; breaking invariant by storing empty Deltas&#34;</span>, id, oldDeltas, obj)
 </span></span><span style="display:flex;"><span>		f.items[id] = newDeltas
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Impossible dedupDeltas for id=%q: oldDeltas=%#+v, obj=%#+v; broke DeltaFIFO invariant by storing empty Deltas&#34;</span>, id, oldDeltas, obj)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;Impossible dedupDeltas for id=%q: oldDeltas=%#+v, obj=%#+v; broke DeltaFIFO invariant by storing empty Deltas&#34;</span>, id, oldDeltas, obj)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>dedupDeltas 函数会将最后两个类型为 Deleted 的操作记录进行合并：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">dedupDeltas</span>(deltas Deltas) Deltas {
-</span></span><span style="display:flex;"><span>	n <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">len</span>(deltas)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> n &lt; <span style="color:#bd93f9">2</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> deltas
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">dedupDeltas</span>(deltas Deltas) Deltas {
+</span></span><span style="display:flex;"><span>	n <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">len</span>(deltas)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> n &lt; <span style="color:#d3869b">2</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> deltas
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	a <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>deltas[n<span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>]
-</span></span><span style="display:flex;"><span>	b <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>deltas[n<span style="color:#ff79c6">-</span><span style="color:#bd93f9">2</span>]
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> out <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">isDup</span>(a, b); out <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		deltas[n<span style="color:#ff79c6">-</span><span style="color:#bd93f9">2</span>] = <span style="color:#ff79c6">*</span>out
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> deltas[:n<span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>]
+</span></span><span style="display:flex;"><span>	a <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>deltas[n<span style="color:#fe8019">-</span><span style="color:#d3869b">1</span>]
+</span></span><span style="display:flex;"><span>	b <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>deltas[n<span style="color:#fe8019">-</span><span style="color:#d3869b">2</span>]
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> out <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">isDup</span>(a, b); out <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		deltas[n<span style="color:#fe8019">-</span><span style="color:#d3869b">2</span>] = <span style="color:#fe8019">*</span>out
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> deltas[:n<span style="color:#fe8019">-</span><span style="color:#d3869b">1</span>]
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> deltas
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> deltas
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">isDup</span>(a, b <span style="color:#ff79c6">*</span>Delta) <span style="color:#ff79c6">*</span>Delta {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> out <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">isDeletionDup</span>(a, b); out <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> out
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">isDup</span>(a, b <span style="color:#fe8019">*</span>Delta) <span style="color:#fe8019">*</span>Delta {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> out <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">isDeletionDup</span>(a, b); out <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> out
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">isDeletionDup</span>(a, b <span style="color:#ff79c6">*</span>Delta) <span style="color:#ff79c6">*</span>Delta {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> b.Type <span style="color:#ff79c6">!=</span> Deleted <span style="color:#ff79c6">||</span> a.Type <span style="color:#ff79c6">!=</span> Deleted {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">isDeletionDup</span>(a, b <span style="color:#fe8019">*</span>Delta) <span style="color:#fe8019">*</span>Delta {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> b.Type <span style="color:#fe8019">!=</span> Deleted <span style="color:#fe8019">||</span> a.Type <span style="color:#fe8019">!=</span> Deleted {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> _, ok <span style="color:#ff79c6">:=</span> b.Object.(DeletedFinalStateUnknown); ok {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> a
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> _, ok <span style="color:#fe8019">:=</span> b.Object.(DeletedFinalStateUnknown); ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> a
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> b
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> b
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>DeltaFIFO 提供了 Pop 方法消费元素：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (f <span style="color:#ff79c6">*</span>DeltaFIFO) <span style="color:#50fa7b">Pop</span>(process PopProcessFunc) (<span style="color:#8be9fd;font-style:italic">interface</span>{}, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>	f.lock.<span style="color:#50fa7b">Lock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> f.lock.<span style="color:#50fa7b">Unlock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// queue 队列为空, 则等待</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> <span style="color:#8be9fd;font-style:italic">len</span>(f.queue) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> f.closed {
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, ErrFIFOClosed
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (f <span style="color:#fe8019">*</span>DeltaFIFO) <span style="color:#fabd2f">Pop</span>(process PopProcessFunc) (<span style="color:#fe8019">interface</span>{}, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>	f.lock.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> f.lock.<span style="color:#fabd2f">Unlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// queue 队列为空, 则等待</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> <span style="color:#fabd2f">len</span>(f.queue) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> f.closed {
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, ErrFIFOClosed
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>			f.cond.<span style="color:#50fa7b">Wait</span>()
+</span></span><span style="display:flex;"><span>			f.cond.<span style="color:#fabd2f">Wait</span>()
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 弹出队列头部记录</span>
-</span></span><span style="display:flex;"><span>		id <span style="color:#ff79c6">:=</span> f.queue[<span style="color:#bd93f9">0</span>]
-</span></span><span style="display:flex;"><span>		f.queue = f.queue[<span style="color:#bd93f9">1</span>:]
-</span></span><span style="display:flex;"><span>		depth <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">len</span>(f.queue)
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// initialPopulationCount 如果大于0就减1，表示在初始 sync 阶段</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> f.initialPopulationCount &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>			f.initialPopulationCount<span style="color:#ff79c6">--</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 弹出队列头部记录</span>
+</span></span><span style="display:flex;"><span>		id <span style="color:#fe8019">:=</span> f.queue[<span style="color:#d3869b">0</span>]
+</span></span><span style="display:flex;"><span>		f.queue = f.queue[<span style="color:#d3869b">1</span>:]
+</span></span><span style="display:flex;"><span>		depth <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">len</span>(f.queue)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// initialPopulationCount 如果大于0就减1，表示在初始 sync 阶段</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> f.initialPopulationCount &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>			f.initialPopulationCount<span style="color:#fe8019">--</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 获取 item</span>
-</span></span><span style="display:flex;"><span>		item, ok <span style="color:#ff79c6">:=</span> f.items[id]
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !ok {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Inconceivable! %q was in f.queue but not f.items; ignoring.&#34;</span>, id)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 获取 item</span>
+</span></span><span style="display:flex;"><span>		item, ok <span style="color:#fe8019">:=</span> f.items[id]
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !ok {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;Inconceivable! %q was in f.queue but not f.items; ignoring.&#34;</span>, id)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">continue</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 删除记录</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">delete</span>(f.items, id)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> depth &gt; <span style="color:#bd93f9">10</span> {
-</span></span><span style="display:flex;"><span>			trace <span style="color:#ff79c6">:=</span> utiltrace.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;DeltaFIFO Pop Process&#34;</span>,
-</span></span><span style="display:flex;"><span>				utiltrace.Field{Key: <span style="color:#f1fa8c">&#34;ID&#34;</span>, Value: id},
-</span></span><span style="display:flex;"><span>				utiltrace.Field{Key: <span style="color:#f1fa8c">&#34;Depth&#34;</span>, Value: depth},
-</span></span><span style="display:flex;"><span>				utiltrace.Field{Key: <span style="color:#f1fa8c">&#34;Reason&#34;</span>, Value: <span style="color:#f1fa8c">&#34;slow event handlers blocking the queue&#34;</span>})
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">defer</span> trace.<span style="color:#50fa7b">LogIfLong</span>(<span style="color:#bd93f9">100</span> <span style="color:#ff79c6">*</span> time.Millisecond)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 删除记录</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">delete</span>(f.items, id)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> depth &gt; <span style="color:#d3869b">10</span> {
+</span></span><span style="display:flex;"><span>			trace <span style="color:#fe8019">:=</span> utiltrace.<span style="color:#fabd2f">New</span>(<span style="color:#b8bb26">&#34;DeltaFIFO Pop Process&#34;</span>,
+</span></span><span style="display:flex;"><span>				utiltrace.Field{Key: <span style="color:#b8bb26">&#34;ID&#34;</span>, Value: id},
+</span></span><span style="display:flex;"><span>				utiltrace.Field{Key: <span style="color:#b8bb26">&#34;Depth&#34;</span>, Value: depth},
+</span></span><span style="display:flex;"><span>				utiltrace.Field{Key: <span style="color:#b8bb26">&#34;Reason&#34;</span>, Value: <span style="color:#b8bb26">&#34;slow event handlers blocking the queue&#34;</span>})
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">defer</span> trace.<span style="color:#fabd2f">LogIfLong</span>(<span style="color:#d3869b">100</span> <span style="color:#fe8019">*</span> time.Millisecond)
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 调用 process 处理item，其实是 HandleDeltas</span>
-</span></span><span style="display:flex;"><span>		err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">process</span>(item)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> e, ok <span style="color:#ff79c6">:=</span> err.(ErrRequeue); ok {
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 执行出错，调用 addIfNotPresent 重新添加记录</span>
-</span></span><span style="display:flex;"><span>			f.<span style="color:#50fa7b">addIfNotPresent</span>(id, item)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 调用 process 处理item，其实是 HandleDeltas</span>
+</span></span><span style="display:flex;"><span>		err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">process</span>(item)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> e, ok <span style="color:#fe8019">:=</span> err.(ErrRequeue); ok {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 执行出错，调用 addIfNotPresent 重新添加记录</span>
+</span></span><span style="display:flex;"><span>			f.<span style="color:#fabd2f">addIfNotPresent</span>(id, item)
 </span></span><span style="display:flex;"><span>			err = e.Err
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> item, err
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> item, err
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (f <span style="color:#ff79c6">*</span>DeltaFIFO) <span style="color:#50fa7b">addIfNotPresent</span>(id <span style="color:#8be9fd">string</span>, deltas Deltas) {
-</span></span><span style="display:flex;"><span>	f.populated = <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> _, exists <span style="color:#ff79c6">:=</span> f.items[id]; exists {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (f <span style="color:#fe8019">*</span>DeltaFIFO) <span style="color:#fabd2f">addIfNotPresent</span>(id <span style="color:#fabd2f">string</span>, deltas Deltas) {
+</span></span><span style="display:flex;"><span>	f.populated = <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> _, exists <span style="color:#fe8019">:=</span> f.items[id]; exists {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	f.queue = <span style="color:#8be9fd;font-style:italic">append</span>(f.queue, id)
+</span></span><span style="display:flex;"><span>	f.queue = <span style="color:#fabd2f">append</span>(f.queue, id)
 </span></span><span style="display:flex;"><span>	f.items[id] = deltas
-</span></span><span style="display:flex;"><span>	f.cond.<span style="color:#50fa7b">Broadcast</span>()
+</span></span><span style="display:flex;"><span>	f.cond.<span style="color:#fabd2f">Broadcast</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="indexer">Indexer</h2>
 <p>接口 Indexer 扩展了接口 Store ，让其在存储的基础上，可以进行查找和索引操作：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Indexer <span style="color:#8be9fd;font-style:italic">interface</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Indexer <span style="color:#fe8019">interface</span> {
 </span></span><span style="display:flex;"><span>  Store
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Index</span>(indexName <span style="color:#8be9fd">string</span>, obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) ([]<span style="color:#8be9fd;font-style:italic">interface</span>{}, <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">IndexKeys</span>(indexName, indexedValue <span style="color:#8be9fd">string</span>) ([]<span style="color:#8be9fd">string</span>, <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">ListIndexFuncValues</span>(indexName <span style="color:#8be9fd">string</span>) []<span style="color:#8be9fd">string</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">ByIndex</span>(indexName, indexedValue <span style="color:#8be9fd">string</span>) ([]<span style="color:#8be9fd;font-style:italic">interface</span>{}, <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">GetIndexers</span>() Indexers
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">AddIndexers</span>(newIndexers Indexers) <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Index</span>(indexName <span style="color:#fabd2f">string</span>, obj <span style="color:#fe8019">interface</span>{}) ([]<span style="color:#fe8019">interface</span>{}, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">IndexKeys</span>(indexName, indexedValue <span style="color:#fabd2f">string</span>) ([]<span style="color:#fabd2f">string</span>, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">ListIndexFuncValues</span>(indexName <span style="color:#fabd2f">string</span>) []<span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">ByIndex</span>(indexName, indexedValue <span style="color:#fabd2f">string</span>) ([]<span style="color:#fe8019">interface</span>{}, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">GetIndexers</span>() Indexers
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">AddIndexers</span>(newIndexers Indexers) <span style="color:#fabd2f">error</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>在看懂这个接口的之前，一些数据类型需要做些解释。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> IndexFunc <span style="color:#8be9fd;font-style:italic">func</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) ([]<span style="color:#8be9fd">string</span>, <span style="color:#8be9fd">error</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> IndexFunc <span style="color:#fe8019">func</span>(obj <span style="color:#fe8019">interface</span>{}) ([]<span style="color:#fabd2f">string</span>, <span style="color:#fabd2f">error</span>)
 </span></span></code></pre></div><p>计算索引的函数，传入对象，输出字符串索引，且是数组，即一个对象可以有多个索引</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>  <span style="color:#8be9fd;font-style:italic">type</span> Index <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]sets.String
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>  <span style="color:#fe8019">type</span> Index <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]sets.String
 </span></span></code></pre></div><p>每种计算索引的函数 IndexFunc 在传入对象后会输出多个索引值,  Index 这个 map 中 key 为计算出来的索引值，值为对象的集合（ 不同的对象计算出来的索引有可能会一样，对索引进行聚合, 这个集合是 string，是因为这个 string 为对象的 key）</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Indexers <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]IndexFunc
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Indexers <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]IndexFunc
 </span></span></code></pre></div><p>计算索引的函数有很多，用名字分类</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Indices <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]Index
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Indices <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]Index
 </span></span></code></pre></div><p>每种计算索引的方式（IndexFunc）会输出多个索引(数组)， 这个是对索引函数和通过索引函数计算出来的值做聚合</p>
 <p>对这几个结构体了解后我们在来看看<code>Indexer</code>扩展出来的那几个方法吧</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#50fa7b">Index</span>(indexName <span style="color:#8be9fd">string</span>, obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) ([]<span style="color:#8be9fd;font-style:italic">interface</span>{}, <span style="color:#8be9fd">error</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fabd2f">Index</span>(indexName <span style="color:#fabd2f">string</span>, obj <span style="color:#fe8019">interface</span>{}) ([]<span style="color:#fe8019">interface</span>{}, <span style="color:#fabd2f">error</span>)
 </span></span></code></pre></div><p>通过indexName找到IndexFunc，然后通过IndexFunc对obj进行计算得出索引值数组。然后通过 Indices 和 indexName 找到 Index，这样就可以通过索引值数组和 Index 找到所有符合条件的 obj 对应的 key（注意这个 key 不是 indexFunc 计算 obj 生成的）。 <strong>其实就是找相关性， 找obj在IndexFunc下的相关objs</strong></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#50fa7b">IndexKeys</span>(indexName, indexedValue <span style="color:#8be9fd">string</span>) ([]<span style="color:#8be9fd">string</span>, <span style="color:#8be9fd">error</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fabd2f">IndexKeys</span>(indexName, indexedValue <span style="color:#fabd2f">string</span>) ([]<span style="color:#fabd2f">string</span>, <span style="color:#fabd2f">error</span>)
 </span></span></code></pre></div><p>通过indexName找到IndexFunc。 进而确定了Index的存在（通过Indices） 然后就可以通过indexedValue找到相应的keys了，进而也就找到了objs <strong>其实就是根据索引值,在indexName(IndexFunc)下找到相关的keys</strong></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#50fa7b">ListIndexFuncValues</span>(indexName <span style="color:#8be9fd">string</span>) []<span style="color:#8be9fd">string</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fabd2f">ListIndexFuncValues</span>(indexName <span style="color:#fabd2f">string</span>) []<span style="color:#fabd2f">string</span>
 </span></span></code></pre></div><p>这个很好理解： <strong>就是找到IndexFunc为indexName的计算下所有的索引值</strong></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#50fa7b">ByIndex</span>(indexName, indexedValue <span style="color:#8be9fd">string</span>) ([]<span style="color:#8be9fd;font-style:italic">interface</span>{}, <span style="color:#8be9fd">error</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fabd2f">ByIndex</span>(indexName, indexedValue <span style="color:#fabd2f">string</span>) ([]<span style="color:#fe8019">interface</span>{}, <span style="color:#fabd2f">error</span>)
 </span></span></code></pre></div><p><strong>这个和IndexKeys的逻辑类似，只不过这个是把keys都找到了，然后通过keys找到objs，然后返回</strong></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#50fa7b">GetIndexers</span>() Indexers
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fabd2f">GetIndexers</span>() Indexers
 </span></span></code></pre></div><p>返回所有IndexFunc计算的集合</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#50fa7b">AddIndexers</span>(newIndexers Indexers) <span style="color:#8be9fd">error</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fabd2f">AddIndexers</span>(newIndexers Indexers) <span style="color:#fabd2f">error</span>
 </span></span></code></pre></div><p>添加更多的IndexFunc到存储器中去</p>
 <h2 id="threadsafestore">ThreadSafeStore</h2>
 <p>接口 ThreadSafeStore 是一个并发安全的存储，不仅包含正常的存储操作，还包括资源数据索引，接口定义如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> ThreadSafeStore <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Add</span>(key <span style="color:#8be9fd">string</span>, obj <span style="color:#8be9fd;font-style:italic">interface</span>{})
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Update</span>(key <span style="color:#8be9fd">string</span>, obj <span style="color:#8be9fd;font-style:italic">interface</span>{})
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Delete</span>(key <span style="color:#8be9fd">string</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Get</span>(key <span style="color:#8be9fd">string</span>) (item <span style="color:#8be9fd;font-style:italic">interface</span>{}, exists <span style="color:#8be9fd">bool</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">List</span>() []<span style="color:#8be9fd;font-style:italic">interface</span>{}
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">ListKeys</span>() []<span style="color:#8be9fd">string</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Replace</span>(<span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd;font-style:italic">interface</span>{}, <span style="color:#8be9fd">string</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Index</span>(indexName <span style="color:#8be9fd">string</span>, obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) ([]<span style="color:#8be9fd;font-style:italic">interface</span>{}, <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">IndexKeys</span>(indexName, indexKey <span style="color:#8be9fd">string</span>) ([]<span style="color:#8be9fd">string</span>, <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">ListIndexFuncValues</span>(name <span style="color:#8be9fd">string</span>) []<span style="color:#8be9fd">string</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">ByIndex</span>(indexName, indexKey <span style="color:#8be9fd">string</span>) ([]<span style="color:#8be9fd;font-style:italic">interface</span>{}, <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">GetIndexers</span>() Indexers
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> ThreadSafeStore <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Add</span>(key <span style="color:#fabd2f">string</span>, obj <span style="color:#fe8019">interface</span>{})
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Update</span>(key <span style="color:#fabd2f">string</span>, obj <span style="color:#fe8019">interface</span>{})
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Delete</span>(key <span style="color:#fabd2f">string</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Get</span>(key <span style="color:#fabd2f">string</span>) (item <span style="color:#fe8019">interface</span>{}, exists <span style="color:#fabd2f">bool</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">List</span>() []<span style="color:#fe8019">interface</span>{}
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">ListKeys</span>() []<span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Replace</span>(<span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]<span style="color:#fe8019">interface</span>{}, <span style="color:#fabd2f">string</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Index</span>(indexName <span style="color:#fabd2f">string</span>, obj <span style="color:#fe8019">interface</span>{}) ([]<span style="color:#fe8019">interface</span>{}, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">IndexKeys</span>(indexName, indexKey <span style="color:#fabd2f">string</span>) ([]<span style="color:#fabd2f">string</span>, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">ListIndexFuncValues</span>(name <span style="color:#fabd2f">string</span>) []<span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">ByIndex</span>(indexName, indexKey <span style="color:#fabd2f">string</span>) ([]<span style="color:#fe8019">interface</span>{}, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">GetIndexers</span>() Indexers
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">AddIndexers</span>(newIndexers Indexers) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Resync</span>() <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">AddIndexers</span>(newIndexers Indexers) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Resync</span>() <span style="color:#fabd2f">error</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>结构体 threadSafeMap 实现了接口 ThreadSafeStore：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// threadSafeMap implements ThreadSafeStore</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> threadSafeMap <span style="color:#8be9fd;font-style:italic">struct</span> {
-</span></span><span style="display:flex;"><span>  lock  sync.RWMutex <span style="color:#ff79c6">//互斥锁， 线程安全</span>
-</span></span><span style="display:flex;"><span>  items <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd;font-style:italic">interface</span>{} <span style="color:#6272a4">// item的存储所在，通过key/value的形式</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// threadSafeMap implements ThreadSafeStore</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> threadSafeMap <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>  lock  sync.RWMutex <span style="color:#8ec07c">//互斥锁， 线程安全</span>
+</span></span><span style="display:flex;"><span>  items <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]<span style="color:#fe8019">interface</span>{} <span style="color:#928374;font-style:italic">// item的存储所在，通过key/value的形式</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// indexers maps a name to an IndexFunc</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// indexers maps a name to an IndexFunc</span>
 </span></span><span style="display:flex;"><span>  indexers Indexers 
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// indices maps a name to an Index</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// indices maps a name to an Index</span>
 </span></span><span style="display:flex;"><span>  indices Indices  
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>其增删改查最终调用的都是 updateIndices 来更新记录的索引。</p>
 <p>结构体 cache 实现了 Indexer 接口, 同时也实现了 Store 接口， 其底层存储用的是 ThreadSafeStore：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> cache <span style="color:#8be9fd;font-style:italic">struct</span> {     
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> cache <span style="color:#fe8019">struct</span> {     
 </span></span><span style="display:flex;"><span>    cacheStorage ThreadSafeStore                             
 </span></span><span style="display:flex;"><span>    keyFunc KeyFunc                                                                      
 </span></span><span style="display:flex;"><span>}                                                                 
 </span></span></code></pre></div><p>它可以用两种方法构建：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// NewStore returns a Store implemented simply with a map and a lock.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewStore</span>(keyFunc KeyFunc) Store {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>cache{
-</span></span><span style="display:flex;"><span>        cacheStorage: <span style="color:#50fa7b">NewThreadSafeStore</span>(Indexers{}, Indices{}),
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// NewStore returns a Store implemented simply with a map and a lock.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewStore</span>(keyFunc KeyFunc) Store {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>cache{
+</span></span><span style="display:flex;"><span>        cacheStorage: <span style="color:#fabd2f">NewThreadSafeStore</span>(Indexers{}, Indices{}),
 </span></span><span style="display:flex;"><span>        keyFunc:      keyFunc,
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}                                         
 </span></span><span style="display:flex;"><span>                                                                                   
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// NewIndexer returns an Indexer implemented simply with a map and a lock.         </span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewIndexer</span>(keyFunc KeyFunc, indexers Indexers) Indexer {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>cache{                                                  
-</span></span><span style="display:flex;"><span>        cacheStorage: <span style="color:#50fa7b">NewThreadSafeStore</span>(indexers, Indices{}),
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// NewIndexer returns an Indexer implemented simply with a map and a lock.         </span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewIndexer</span>(keyFunc KeyFunc, indexers Indexers) Indexer {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>cache{                                                  
+</span></span><span style="display:flex;"><span>        cacheStorage: <span style="color:#fabd2f">NewThreadSafeStore</span>(indexers, Indices{}),
 </span></span><span style="display:flex;"><span>        keyFunc:      keyFunc,                                                             
 </span></span><span style="display:flex;"><span>    }                           
 </span></span><span style="display:flex;"><span>}                  
 </span></span></code></pre></div><h2 id="expirationcache">ExpirationCache</h2>
 <p>ExpirationCache 是一个 cache ，不过这个 cache 里面存储的元素有过期时间。这个 cache 有一个特点：&ldquo;惰性cache&rdquo;， 即它不主动去释放已经过期的元素，而是使用在执行Get的时候检查该元素是否过期。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> ExpirationCache <span style="color:#8be9fd;font-style:italic">struct</span> {
-</span></span><span style="display:flex;"><span>    cacheStorage     ThreadSafeStore <span style="color:#ff79c6">//使用的存储，</span>
-</span></span><span style="display:flex;"><span>    keyFunc          KeyFunc  <span style="color:#6272a4">// 把obj转化为key的计算函数</span>
-</span></span><span style="display:flex;"><span>    clock            clock.Clock <span style="color:#6272a4">// 时间</span>
-</span></span><span style="display:flex;"><span>    expirationPolicy ExpirationPolicy <span style="color:#ff79c6">//过期策略判断</span>
-</span></span><span style="display:flex;"><span>    expirationLock sync.Mutex <span style="color:#ff79c6">//全局锁</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> ExpirationCache <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>    cacheStorage     ThreadSafeStore <span style="color:#8ec07c">//使用的存储，</span>
+</span></span><span style="display:flex;"><span>    keyFunc          KeyFunc  <span style="color:#928374;font-style:italic">// 把obj转化为key的计算函数</span>
+</span></span><span style="display:flex;"><span>    clock            clock.Clock <span style="color:#928374;font-style:italic">// 时间</span>
+</span></span><span style="display:flex;"><span>    expirationPolicy ExpirationPolicy <span style="color:#8ec07c">//过期策略判断</span>
+</span></span><span style="display:flex;"><span>    expirationLock sync.Mutex <span style="color:#8ec07c">//全局锁</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>如下是 ExpirationPolicy 接口的定义, 它提供了一个很简单的接口<code>IsExpired</code>，即根据传入的对象判断其是否过期</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> ExpirationPolicy <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">IsExpired</span>(obj <span style="color:#ff79c6">*</span>TimestampedEntry) <span style="color:#8be9fd">bool</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> ExpirationPolicy <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">IsExpired</span>(obj <span style="color:#fe8019">*</span>TimestampedEntry) <span style="color:#fabd2f">bool</span>
 </span></span><span style="display:flex;"><span>}   
 </span></span></code></pre></div><p>然后提供了一个 TTLPolicy 的过期策略实现，很简单，这里不再进行分析。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> TTLPolicy <span style="color:#8be9fd;font-style:italic">struct</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> TTLPolicy <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>    TTL time.Duration
 </span></span><span style="display:flex;"><span>    Clock clock.Clock
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>TTLPolicy) <span style="color:#50fa7b">IsExpired</span>(obj <span style="color:#ff79c6">*</span>TimestampedEntry) <span style="color:#8be9fd">bool</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> p.TTL &gt; <span style="color:#bd93f9">0</span> <span style="color:#ff79c6">&amp;&amp;</span> p.Clock.<span style="color:#50fa7b">Since</span>(obj.Timestamp) &gt; p.TTL
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>TTLPolicy) <span style="color:#fabd2f">IsExpired</span>(obj <span style="color:#fe8019">*</span>TimestampedEntry) <span style="color:#fabd2f">bool</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> p.TTL &gt; <span style="color:#d3869b">0</span> <span style="color:#fe8019">&amp;&amp;</span> p.Clock.<span style="color:#fabd2f">Since</span>(obj.Timestamp) &gt; p.TTL
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>存储在 ExpirationCache 里面的元素类型都是 TimestampedEntry , 它包括了要存储的对象，其过期的时间以及其对应的key。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> TimestampedEntry <span style="color:#8be9fd;font-style:italic">struct</span> {
-</span></span><span style="display:flex;"><span>    Obj       <span style="color:#8be9fd;font-style:italic">interface</span>{}
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> TimestampedEntry <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>    Obj       <span style="color:#fe8019">interface</span>{}
 </span></span><span style="display:flex;"><span>    Timestamp time.Time
-</span></span><span style="display:flex;"><span>    key       <span style="color:#8be9fd">string</span>
+</span></span><span style="display:flex;"><span>    key       <span style="color:#fabd2f">string</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>如下是核心的方法 getOrExpire , 他提供两个返回值，一个是通过 key 找到的对象，然后是一个 bool 类型判断是否过期</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>ExpirationCache) <span style="color:#50fa7b">getOrExpire</span>(key <span style="color:#8be9fd">string</span>) (<span style="color:#8be9fd;font-style:italic">interface</span>{}, <span style="color:#8be9fd">bool</span>) {
-</span></span><span style="display:flex;"><span>    c.expirationLock.<span style="color:#50fa7b">Lock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> c.expirationLock.<span style="color:#50fa7b">Unlock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取的entry</span>
-</span></span><span style="display:flex;"><span>    timestampedItem, exists <span style="color:#ff79c6">:=</span> c.<span style="color:#50fa7b">getTimestampedEntry</span>(key)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 不存在</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> !exists {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, <span style="color:#ff79c6">false</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (c <span style="color:#fe8019">*</span>ExpirationCache) <span style="color:#fabd2f">getOrExpire</span>(key <span style="color:#fabd2f">string</span>) (<span style="color:#fe8019">interface</span>{}, <span style="color:#fabd2f">bool</span>) {
+</span></span><span style="display:flex;"><span>    c.expirationLock.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">defer</span> c.expirationLock.<span style="color:#fabd2f">Unlock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取的entry</span>
+</span></span><span style="display:flex;"><span>    timestampedItem, exists <span style="color:#fe8019">:=</span> c.<span style="color:#fabd2f">getTimestampedEntry</span>(key)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 不存在</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> !exists {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 通过过期策略计算是否过期</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> c.expirationPolicy.<span style="color:#50fa7b">IsExpired</span>(timestampedItem) {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 过期立即从cache中删除</span>
-</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Entry %v: %+v has expired&#34;</span>, key, timestampedItem.Obj)
-</span></span><span style="display:flex;"><span>        c.cacheStorage.<span style="color:#50fa7b">Delete</span>(key)
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 通过过期策略计算是否过期</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> c.expirationPolicy.<span style="color:#fabd2f">IsExpired</span>(timestampedItem) {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 过期立即从cache中删除</span>
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;Entry %v: %+v has expired&#34;</span>, key, timestampedItem.Obj)
+</span></span><span style="display:flex;"><span>        c.cacheStorage.<span style="color:#fabd2f">Delete</span>(key)
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 没有过期就返回</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> timestampedItem.Obj, <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 没有过期就返回</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> timestampedItem.Obj, <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>上面的实现还是很简单的， 就是通过 key 找到 entry，然后通过过期策略判断是否过期，过期的话，返回 nil 和 true(已过期)， 反之返回具体的对象和 false(未过期)。</p>
 <p>ExpirationCache 的其他读方法 Get/GetByKey/List/ListKeys 都是在最后调用 getOrExpire ，所以上面才说 ExpirationCache 是一个惰性 cache。</p>
 <p>也提供了2个方法来构造这个惰性cache</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewTTLStore</span>(keyFunc KeyFunc, ttl time.Duration) Store {<span style="color:#ff79c6">//使用其提供的TTL过期策略</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#50fa7b">NewExpirationStore</span>(keyFunc, <span style="color:#ff79c6">&amp;</span>TTLPolicy{ttl, clock.RealClock{}})
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewTTLStore</span>(keyFunc KeyFunc, ttl time.Duration) Store {<span style="color:#8ec07c">//使用其提供的TTL过期策略</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fabd2f">NewExpirationStore</span>(keyFunc, <span style="color:#fe8019">&amp;</span>TTLPolicy{ttl, clock.RealClock{}})
 </span></span><span style="display:flex;"><span>}   
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 这个需要用户自己去实现过期策略</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewExpirationStore</span>(keyFunc KeyFunc, expirationPolicy ExpirationPolicy) Store {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>ExpirationCache{
-</span></span><span style="display:flex;"><span>        cacheStorage:     <span style="color:#50fa7b">NewThreadSafeStore</span>(Indexers{}, Indices{}),
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 这个需要用户自己去实现过期策略</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewExpirationStore</span>(keyFunc KeyFunc, expirationPolicy ExpirationPolicy) Store {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>ExpirationCache{
+</span></span><span style="display:flex;"><span>        cacheStorage:     <span style="color:#fabd2f">NewThreadSafeStore</span>(Indexers{}, Indices{}),
 </span></span><span style="display:flex;"><span>        keyFunc:          keyFunc,
 </span></span><span style="display:flex;"><span>        clock:            clock.RealClock{},
 </span></span><span style="display:flex;"><span>        expirationPolicy: expirationPolicy,

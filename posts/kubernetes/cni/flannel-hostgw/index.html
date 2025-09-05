@@ -241,160 +241,160 @@
 <p>结构体 HostgwBackend 实现了接口 Backend 。</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (be <span style="color:#ff79c6">*</span>HostgwBackend) <span style="color:#50fa7b">RegisterNetwork</span>(ctx context.Context, wg <span style="color:#ff79c6">*</span>sync.WaitGroup, config <span style="color:#ff79c6">*</span>subnet.Config) (backend.Network, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>	n <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>backend.RouteNetwork{
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (be <span style="color:#fe8019">*</span>HostgwBackend) <span style="color:#fabd2f">RegisterNetwork</span>(ctx context.Context, wg <span style="color:#fe8019">*</span>sync.WaitGroup, config <span style="color:#fe8019">*</span>subnet.Config) (backend.Network, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>	n <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>backend.RouteNetwork{
 </span></span><span style="display:flex;"><span>		SimpleNetwork: backend.SimpleNetwork{
 </span></span><span style="display:flex;"><span>			ExtIface: be.extIface,
 </span></span><span style="display:flex;"><span>		},
 </span></span><span style="display:flex;"><span>		SM:          be.sm,
-</span></span><span style="display:flex;"><span>		BackendType: <span style="color:#f1fa8c">&#34;host-gw&#34;</span>,
+</span></span><span style="display:flex;"><span>		BackendType: <span style="color:#b8bb26">&#34;host-gw&#34;</span>,
 </span></span><span style="display:flex;"><span>		Mtu:         be.extIface.Iface.MTU,
 </span></span><span style="display:flex;"><span>		LinkIndex:   be.extIface.Iface.Index,
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	attrs <span style="color:#ff79c6">:=</span> lease.LeaseAttrs{
-</span></span><span style="display:flex;"><span>		BackendType: <span style="color:#f1fa8c">&#34;host-gw&#34;</span>,
+</span></span><span style="display:flex;"><span>	attrs <span style="color:#fe8019">:=</span> lease.LeaseAttrs{
+</span></span><span style="display:flex;"><span>		BackendType: <span style="color:#b8bb26">&#34;host-gw&#34;</span>,
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> config.EnableIPv4 {
-</span></span><span style="display:flex;"><span>		attrs.PublicIP = ip.<span style="color:#50fa7b">FromIP</span>(be.extIface.ExtAddr)
-</span></span><span style="display:flex;"><span>		n.GetRoute = <span style="color:#8be9fd;font-style:italic">func</span>(lease <span style="color:#ff79c6">*</span>lease.Lease) <span style="color:#ff79c6">*</span>netlink.Route {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>netlink.Route{
-</span></span><span style="display:flex;"><span>				Dst:       lease.Subnet.<span style="color:#50fa7b">ToIPNet</span>(),
-</span></span><span style="display:flex;"><span>				Gw:        lease.Attrs.PublicIP.<span style="color:#50fa7b">ToIP</span>(),
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> config.EnableIPv4 {
+</span></span><span style="display:flex;"><span>		attrs.PublicIP = ip.<span style="color:#fabd2f">FromIP</span>(be.extIface.ExtAddr)
+</span></span><span style="display:flex;"><span>		n.GetRoute = <span style="color:#fe8019">func</span>(lease <span style="color:#fe8019">*</span>lease.Lease) <span style="color:#fe8019">*</span>netlink.Route {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>netlink.Route{
+</span></span><span style="display:flex;"><span>				Dst:       lease.Subnet.<span style="color:#fabd2f">ToIPNet</span>(),
+</span></span><span style="display:flex;"><span>				Gw:        lease.Attrs.PublicIP.<span style="color:#fabd2f">ToIP</span>(),
 </span></span><span style="display:flex;"><span>				LinkIndex: n.LinkIndex,
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> config.EnableIPv6 {
-</span></span><span style="display:flex;"><span>		attrs.PublicIPv6 = ip.<span style="color:#50fa7b">FromIP6</span>(be.extIface.ExtV6Addr)
-</span></span><span style="display:flex;"><span>		n.GetV6Route = <span style="color:#8be9fd;font-style:italic">func</span>(lease <span style="color:#ff79c6">*</span>lease.Lease) <span style="color:#ff79c6">*</span>netlink.Route {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>netlink.Route{
-</span></span><span style="display:flex;"><span>				Dst:       lease.IPv6Subnet.<span style="color:#50fa7b">ToIPNet</span>(),
-</span></span><span style="display:flex;"><span>				Gw:        lease.Attrs.PublicIPv6.<span style="color:#50fa7b">ToIP</span>(),
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> config.EnableIPv6 {
+</span></span><span style="display:flex;"><span>		attrs.PublicIPv6 = ip.<span style="color:#fabd2f">FromIP6</span>(be.extIface.ExtV6Addr)
+</span></span><span style="display:flex;"><span>		n.GetV6Route = <span style="color:#fe8019">func</span>(lease <span style="color:#fe8019">*</span>lease.Lease) <span style="color:#fe8019">*</span>netlink.Route {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>netlink.Route{
+</span></span><span style="display:flex;"><span>				Dst:       lease.IPv6Subnet.<span style="color:#fabd2f">ToIPNet</span>(),
+</span></span><span style="display:flex;"><span>				Gw:        lease.Attrs.PublicIPv6.<span style="color:#fabd2f">ToIP</span>(),
 </span></span><span style="display:flex;"><span>				LinkIndex: n.LinkIndex,
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	l, err <span style="color:#ff79c6">:=</span> be.sm.<span style="color:#50fa7b">AcquireLease</span>(ctx, <span style="color:#ff79c6">&amp;</span>attrs)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">switch</span> err {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">nil</span>:
+</span></span><span style="display:flex;"><span>	l, err <span style="color:#fe8019">:=</span> be.sm.<span style="color:#fabd2f">AcquireLease</span>(ctx, <span style="color:#fe8019">&amp;</span>attrs)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">switch</span> err {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> <span style="color:#fe8019">nil</span>:
 </span></span><span style="display:flex;"><span>		n.SubnetLease = l
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> context.Canceled, context.DeadlineExceeded:
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, err
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> context.Canceled, context.DeadlineExceeded:
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, err
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">default</span>:
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to acquire lease: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">default</span>:
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;failed to acquire lease: %v&#34;</span>, err)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> n, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> n, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
 
 <h2 id="启动-host-gw-network-实例">启动 host-gw Network 实例</h2>
 <p>结构体 RouteNetwork 实现了接口 Network。 通过 Run 启动，其在后台运行两个协程，一个是监听租约的变化事件，一个是处理事件：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (n <span style="color:#ff79c6">*</span>RouteNetwork) <span style="color:#50fa7b">Run</span>(ctx context.Context) {
-</span></span><span style="display:flex;"><span>	wg <span style="color:#ff79c6">:=</span> sync.WaitGroup{}
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (n <span style="color:#fe8019">*</span>RouteNetwork) <span style="color:#fabd2f">Run</span>(ctx context.Context) {
+</span></span><span style="display:flex;"><span>	wg <span style="color:#fe8019">:=</span> sync.WaitGroup{}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	log.<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Watching for new subnet leases&#34;</span>)
-</span></span><span style="display:flex;"><span>	evts <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> []lease.Event)
-</span></span><span style="display:flex;"><span>	wg.<span style="color:#50fa7b">Add</span>(<span style="color:#bd93f9">1</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// subnet manager 监听集群内所有 node 的网络变化.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 收到变更事件后, 传入 evnets 管道中，由 RouteNetwork 消费</span>
-</span></span><span style="display:flex;"><span>		subnet.<span style="color:#50fa7b">WatchLeases</span>(ctx, n.SM, n.SubnetLease, evts)
-</span></span><span style="display:flex;"><span>		wg.<span style="color:#50fa7b">Done</span>()
+</span></span><span style="display:flex;"><span>	log.<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Watching for new subnet leases&#34;</span>)
+</span></span><span style="display:flex;"><span>	evts <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">chan</span> []lease.Event)
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#fabd2f">Add</span>(<span style="color:#d3869b">1</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">go</span> <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// subnet manager 监听集群内所有 node 的网络变化.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// 收到变更事件后, 传入 evnets 管道中，由 RouteNetwork 消费</span>
+</span></span><span style="display:flex;"><span>		subnet.<span style="color:#fabd2f">WatchLeases</span>(ctx, n.SM, n.SubnetLease, evts)
+</span></span><span style="display:flex;"><span>		wg.<span style="color:#fabd2f">Done</span>()
 </span></span><span style="display:flex;"><span>	}()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	n.routes = <span style="color:#8be9fd;font-style:italic">make</span>([]netlink.Route, <span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">10</span>)
-</span></span><span style="display:flex;"><span>	wg.<span style="color:#50fa7b">Add</span>(<span style="color:#bd93f9">1</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>		n.<span style="color:#50fa7b">routeCheck</span>(ctx)
-</span></span><span style="display:flex;"><span>		wg.<span style="color:#50fa7b">Done</span>()
+</span></span><span style="display:flex;"><span>	n.routes = <span style="color:#fabd2f">make</span>([]netlink.Route, <span style="color:#d3869b">0</span>, <span style="color:#d3869b">10</span>)
+</span></span><span style="display:flex;"><span>	wg.<span style="color:#fabd2f">Add</span>(<span style="color:#d3869b">1</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">go</span> <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>		n.<span style="color:#fabd2f">routeCheck</span>(ctx)
+</span></span><span style="display:flex;"><span>		wg.<span style="color:#fabd2f">Done</span>()
 </span></span><span style="display:flex;"><span>	}()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> wg.<span style="color:#50fa7b">Wait</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> wg.<span style="color:#fabd2f">Wait</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 消费事件</span>
-</span></span><span style="display:flex;"><span>		evtBatch, ok <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>evts
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !ok {
-</span></span><span style="display:flex;"><span>			log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;evts chan closed&#34;</span>)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// 消费事件</span>
+</span></span><span style="display:flex;"><span>		evtBatch, ok <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&lt;-</span>evts
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !ok {
+</span></span><span style="display:flex;"><span>			log.<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;evts chan closed&#34;</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 根据事件类型, 修改路由表记录</span>
-</span></span><span style="display:flex;"><span>		n.<span style="color:#50fa7b">handleSubnetEvents</span>(evtBatch)
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// 根据事件类型, 修改路由表记录</span>
+</span></span><span style="display:flex;"><span>		n.<span style="color:#fabd2f">handleSubnetEvents</span>(evtBatch)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="host-gw-网络实现">host-gw 网络实现</h2>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (n <span style="color:#ff79c6">*</span>RouteNetwork) <span style="color:#50fa7b">handleSubnetEvents</span>(batch []lease.Event) {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, evt <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> batch {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">switch</span> evt.Type {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 当收到添加事件时, 在路由表里增加相关路由条目.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> lease.EventAdded:
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> evt.Lease.Attrs.BackendType <span style="color:#ff79c6">!=</span> n.BackendType {
-</span></span><span style="display:flex;"><span>				log.<span style="color:#50fa7b">Warningf</span>(<span style="color:#f1fa8c">&#34;Ignoring non-%v subnet: type=%v&#34;</span>, n.BackendType, evt.Lease.Attrs.BackendType)
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">continue</span>
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (n <span style="color:#fe8019">*</span>RouteNetwork) <span style="color:#fabd2f">handleSubnetEvents</span>(batch []lease.Event) {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> _, evt <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> batch {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">switch</span> evt.Type {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// 当收到添加事件时, 在路由表里增加相关路由条目.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> lease.EventAdded:
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> evt.Lease.Attrs.BackendType <span style="color:#fe8019">!=</span> n.BackendType {
+</span></span><span style="display:flex;"><span>				log.<span style="color:#fabd2f">Warningf</span>(<span style="color:#b8bb26">&#34;Ignoring non-%v subnet: type=%v&#34;</span>, n.BackendType, evt.Lease.Attrs.BackendType)
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">continue</span>
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> evt.Lease.EnableIPv4 {
-</span></span><span style="display:flex;"><span>				log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Subnet added: %v via %v&#34;</span>, evt.Lease.Subnet, evt.Lease.Attrs.PublicIP)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> evt.Lease.EnableIPv4 {
+</span></span><span style="display:flex;"><span>				log.<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;Subnet added: %v via %v&#34;</span>, evt.Lease.Subnet, evt.Lease.Attrs.PublicIP)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// 根据 lease 来构建 route 对象</span>
-</span></span><span style="display:flex;"><span>				route <span style="color:#ff79c6">:=</span> n.<span style="color:#50fa7b">GetRoute</span>(<span style="color:#ff79c6">&amp;</span>evt.Lease)
-</span></span><span style="display:flex;"><span>				<span style="color:#50fa7b">routeAdd</span>(route, netlink.FAMILY_V4, n.addToRouteList, n.removeFromV4RouteList)
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// 根据 lease 来构建 route 对象</span>
+</span></span><span style="display:flex;"><span>				route <span style="color:#fe8019">:=</span> n.<span style="color:#fabd2f">GetRoute</span>(<span style="color:#fe8019">&amp;</span>evt.Lease)
+</span></span><span style="display:flex;"><span>				<span style="color:#fabd2f">routeAdd</span>(route, netlink.FAMILY_V4, n.addToRouteList, n.removeFromV4RouteList)
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> evt.Lease.EnableIPv6 {
-</span></span><span style="display:flex;"><span>				log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Subnet added: %v via %v&#34;</span>, evt.Lease.IPv6Subnet, evt.Lease.Attrs.PublicIPv6)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> evt.Lease.EnableIPv6 {
+</span></span><span style="display:flex;"><span>				log.<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;Subnet added: %v via %v&#34;</span>, evt.Lease.IPv6Subnet, evt.Lease.Attrs.PublicIPv6)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>				route <span style="color:#ff79c6">:=</span> n.<span style="color:#50fa7b">GetV6Route</span>(<span style="color:#ff79c6">&amp;</span>evt.Lease)
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// 添加路由表</span>
-</span></span><span style="display:flex;"><span>				<span style="color:#50fa7b">routeAdd</span>(route, netlink.FAMILY_V6, n.addToV6RouteList, n.removeFromV6RouteList)
+</span></span><span style="display:flex;"><span>				route <span style="color:#fe8019">:=</span> n.<span style="color:#fabd2f">GetV6Route</span>(<span style="color:#fe8019">&amp;</span>evt.Lease)
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// 添加路由表</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#fabd2f">routeAdd</span>(route, netlink.FAMILY_V6, n.addToV6RouteList, n.removeFromV6RouteList)
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> lease.EventRemoved:
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// 当收到删除事件时, 进行相关路由条目删除.</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> evt.Lease.Attrs.BackendType <span style="color:#ff79c6">!=</span> n.BackendType {
-</span></span><span style="display:flex;"><span>				log.<span style="color:#50fa7b">Warningf</span>(<span style="color:#f1fa8c">&#34;Ignoring non-%v subnet: type=%v&#34;</span>, n.BackendType, evt.Lease.Attrs.BackendType)
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> lease.EventRemoved:
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// 当收到删除事件时, 进行相关路由条目删除.</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> evt.Lease.Attrs.BackendType <span style="color:#fe8019">!=</span> n.BackendType {
+</span></span><span style="display:flex;"><span>				log.<span style="color:#fabd2f">Warningf</span>(<span style="color:#b8bb26">&#34;Ignoring non-%v subnet: type=%v&#34;</span>, n.BackendType, evt.Lease.Attrs.BackendType)
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">continue</span>
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> evt.Lease.EnableIPv4 {
-</span></span><span style="display:flex;"><span>				log.<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Subnet removed: &#34;</span>, evt.Lease.Subnet)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> evt.Lease.EnableIPv4 {
+</span></span><span style="display:flex;"><span>				log.<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Subnet removed: &#34;</span>, evt.Lease.Subnet)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// 根据 lease 构建 route 对象.</span>
-</span></span><span style="display:flex;"><span>				route <span style="color:#ff79c6">:=</span> n.<span style="color:#50fa7b">GetRoute</span>(<span style="color:#ff79c6">&amp;</span>evt.Lease)
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// Always remove the route from the route list.</span>
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// 在 route list 里剔除》</span>
-</span></span><span style="display:flex;"><span>				n.<span style="color:#50fa7b">removeFromV4RouteList</span>(<span style="color:#ff79c6">*</span>route)
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// 根据 lease 构建 route 对象.</span>
+</span></span><span style="display:flex;"><span>				route <span style="color:#fe8019">:=</span> n.<span style="color:#fabd2f">GetRoute</span>(<span style="color:#fe8019">&amp;</span>evt.Lease)
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// Always remove the route from the route list.</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// 在 route list 里剔除》</span>
+</span></span><span style="display:flex;"><span>				n.<span style="color:#fabd2f">removeFromV4RouteList</span>(<span style="color:#fe8019">*</span>route)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// 删除该路由.</span>
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> netlink.<span style="color:#50fa7b">RouteDel</span>(route); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>					log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Error deleting route to %v: %v&#34;</span>, evt.Lease.Subnet, err)
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// 删除该路由.</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> netlink.<span style="color:#fabd2f">RouteDel</span>(route); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>					log.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;Error deleting route to %v: %v&#34;</span>, evt.Lease.Subnet, err)
 </span></span><span style="display:flex;"><span>				}
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> evt.Lease.EnableIPv6 {
-</span></span><span style="display:flex;"><span>				log.<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Subnet removed: &#34;</span>, evt.Lease.IPv6Subnet)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> evt.Lease.EnableIPv6 {
+</span></span><span style="display:flex;"><span>				log.<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Subnet removed: &#34;</span>, evt.Lease.IPv6Subnet)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>				route <span style="color:#ff79c6">:=</span> n.<span style="color:#50fa7b">GetV6Route</span>(<span style="color:#ff79c6">&amp;</span>evt.Lease)
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// Always remove the route from the route list.</span>
-</span></span><span style="display:flex;"><span>				n.<span style="color:#50fa7b">removeFromV6RouteList</span>(<span style="color:#ff79c6">*</span>route)
+</span></span><span style="display:flex;"><span>				route <span style="color:#fe8019">:=</span> n.<span style="color:#fabd2f">GetV6Route</span>(<span style="color:#fe8019">&amp;</span>evt.Lease)
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// Always remove the route from the route list.</span>
+</span></span><span style="display:flex;"><span>				n.<span style="color:#fabd2f">removeFromV6RouteList</span>(<span style="color:#fe8019">*</span>route)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> netlink.<span style="color:#50fa7b">RouteDel</span>(route); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>					log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Error deleting route to %v: %v&#34;</span>, evt.Lease.IPv6Subnet, err)
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> netlink.<span style="color:#fabd2f">RouteDel</span>(route); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>					log.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;Error deleting route to %v: %v&#34;</span>, evt.Lease.IPv6Subnet, err)
 </span></span><span style="display:flex;"><span>				}
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">default</span>:
-</span></span><span style="display:flex;"><span>			log.<span style="color:#50fa7b">Error</span>(<span style="color:#f1fa8c">&#34;Internal error: unknown event type: &#34;</span>, <span style="color:#8be9fd;font-style:italic">int</span>(evt.Type))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">default</span>:
+</span></span><span style="display:flex;"><span>			log.<span style="color:#fabd2f">Error</span>(<span style="color:#b8bb26">&#34;Internal error: unknown event type: &#34;</span>, <span style="color:#fabd2f">int</span>(evt.Type))
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
@@ -402,52 +402,52 @@
 </details>
 
 <p>GetRoute 方法是在 RegisterNetwork 时赋值的匿名方法，其内部会把传入的 lease 结构转换为 <code>netlink.Route</code> 路由结构。 route 的 dst 字段为 subnet 地址段， gw 是路由的下一条地址，这里其实就是该 subset 对应的 node 的地址。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>n.GetRoute = <span style="color:#8be9fd;font-style:italic">func</span>(lease <span style="color:#ff79c6">*</span>subnet.Lease) <span style="color:#ff79c6">*</span>netlink.Route {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>netlink.Route{
-</span></span><span style="display:flex;"><span>		Dst:       lease.Subnet.<span style="color:#50fa7b">ToIPNet</span>(),       <span style="color:#6272a4">// 目标地址</span>
-</span></span><span style="display:flex;"><span>		Gw:        lease.Attrs.PublicIP.<span style="color:#50fa7b">ToIP</span>(),  <span style="color:#6272a4">// 路由下一条地址</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>n.GetRoute = <span style="color:#fe8019">func</span>(lease <span style="color:#fe8019">*</span>subnet.Lease) <span style="color:#fe8019">*</span>netlink.Route {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>netlink.Route{
+</span></span><span style="display:flex;"><span>		Dst:       lease.Subnet.<span style="color:#fabd2f">ToIPNet</span>(),       <span style="color:#928374;font-style:italic">// 目标地址</span>
+</span></span><span style="display:flex;"><span>		Gw:        lease.Attrs.PublicIP.<span style="color:#fabd2f">ToIP</span>(),  <span style="color:#928374;font-style:italic">// 路由下一条地址</span>
 </span></span><span style="display:flex;"><span>		LinkIndex: n.LinkIndex,
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>routeAdd 用来添加路由条目，如果该路由条目存在时，需要先剔除再添加：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">routeAdd</span>(route <span style="color:#ff79c6">*</span>netlink.Route, ipFamily <span style="color:#8be9fd">int</span>, addToRouteList, removeFromRouteList <span style="color:#8be9fd;font-style:italic">func</span>(netlink.Route)) {
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">addToRouteList</span>(<span style="color:#ff79c6">*</span>route)
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 先检查是否存在.</span>
-</span></span><span style="display:flex;"><span>	routeList, err <span style="color:#ff79c6">:=</span> netlink.<span style="color:#50fa7b">RouteListFiltered</span>(ipFamily, <span style="color:#ff79c6">&amp;</span>netlink.Route{Dst: route.Dst}, netlink.RT_FILTER_DST)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		log.<span style="color:#50fa7b">Warningf</span>(<span style="color:#f1fa8c">&#34;Unable to list routes: %v&#34;</span>, err)
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">routeAdd</span>(route <span style="color:#fe8019">*</span>netlink.Route, ipFamily <span style="color:#fabd2f">int</span>, addToRouteList, removeFromRouteList <span style="color:#fe8019">func</span>(netlink.Route)) {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">addToRouteList</span>(<span style="color:#fe8019">*</span>route)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 先检查是否存在.</span>
+</span></span><span style="display:flex;"><span>	routeList, err <span style="color:#fe8019">:=</span> netlink.<span style="color:#fabd2f">RouteListFiltered</span>(ipFamily, <span style="color:#fe8019">&amp;</span>netlink.Route{Dst: route.Dst}, netlink.RT_FILTER_DST)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		log.<span style="color:#fabd2f">Warningf</span>(<span style="color:#b8bb26">&#34;Unable to list routes: %v&#34;</span>, err)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 如果存在且配置不一致时, 需要先删除路由条目.</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(routeList) &gt; <span style="color:#bd93f9">0</span> <span style="color:#ff79c6">&amp;&amp;</span> !<span style="color:#50fa7b">routeEqual</span>(routeList[<span style="color:#bd93f9">0</span>], <span style="color:#ff79c6">*</span>route) {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Same Dst different Gw or different link index. Remove it, correct route will be added below.</span>
-</span></span><span style="display:flex;"><span>		log.<span style="color:#50fa7b">Warningf</span>(<span style="color:#f1fa8c">&#34;Replacing existing route to %v with %v&#34;</span>, routeList[<span style="color:#bd93f9">0</span>], route)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> netlink.<span style="color:#50fa7b">RouteDel</span>(<span style="color:#ff79c6">&amp;</span>routeList[<span style="color:#bd93f9">0</span>]); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Effor deleteing route to %v: %v&#34;</span>, routeList[<span style="color:#bd93f9">0</span>].Dst, err)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 如果存在且配置不一致时, 需要先删除路由条目.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(routeList) &gt; <span style="color:#d3869b">0</span> <span style="color:#fe8019">&amp;&amp;</span> !<span style="color:#fabd2f">routeEqual</span>(routeList[<span style="color:#d3869b">0</span>], <span style="color:#fe8019">*</span>route) {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Same Dst different Gw or different link index. Remove it, correct route will be added below.</span>
+</span></span><span style="display:flex;"><span>		log.<span style="color:#fabd2f">Warningf</span>(<span style="color:#b8bb26">&#34;Replacing existing route to %v with %v&#34;</span>, routeList[<span style="color:#d3869b">0</span>], route)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> netlink.<span style="color:#fabd2f">RouteDel</span>(<span style="color:#fe8019">&amp;</span>routeList[<span style="color:#d3869b">0</span>]); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			log.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;Effor deleteing route to %v: %v&#34;</span>, routeList[<span style="color:#d3869b">0</span>].Dst, err)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#50fa7b">removeFromRouteList</span>(routeList[<span style="color:#bd93f9">0</span>])
+</span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">removeFromRouteList</span>(routeList[<span style="color:#d3869b">0</span>])
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 再次获取跟传入的目标 dst 一致的路由列表.</span>
-</span></span><span style="display:flex;"><span>	routeList, err = netlink.<span style="color:#50fa7b">RouteListFiltered</span>(ipFamily, <span style="color:#ff79c6">&amp;</span>netlink.Route{Dst: route.Dst}, netlink.RT_FILTER_DST)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		log.<span style="color:#50fa7b">Warningf</span>(<span style="color:#f1fa8c">&#34;Unable to list routes: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 再次获取跟传入的目标 dst 一致的路由列表.</span>
+</span></span><span style="display:flex;"><span>	routeList, err = netlink.<span style="color:#fabd2f">RouteListFiltered</span>(ipFamily, <span style="color:#fe8019">&amp;</span>netlink.Route{Dst: route.Dst}, netlink.RT_FILTER_DST)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		log.<span style="color:#fabd2f">Warningf</span>(<span style="color:#b8bb26">&#34;Unable to list routes: %v&#34;</span>, err)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 有路由表, 而且配置一致, 则忽略, 否则进行添加路由表.</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(routeList) &gt; <span style="color:#bd93f9">0</span> <span style="color:#ff79c6">&amp;&amp;</span> <span style="color:#50fa7b">routeEqual</span>(routeList[<span style="color:#bd93f9">0</span>], <span style="color:#ff79c6">*</span>route) {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Same Dst and same Gw, keep it and do not attempt to add it.</span>
-</span></span><span style="display:flex;"><span>		log.<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Route to %v already exists, skipping.&#34;</span>, route)
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> netlink.<span style="color:#50fa7b">RouteAdd</span>(route); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		log.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Error adding route to %v: %s&#34;</span>, route, err)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 有路由表, 而且配置一致, 则忽略, 否则进行添加路由表.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(routeList) &gt; <span style="color:#d3869b">0</span> <span style="color:#fe8019">&amp;&amp;</span> <span style="color:#fabd2f">routeEqual</span>(routeList[<span style="color:#d3869b">0</span>], <span style="color:#fe8019">*</span>route) {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Same Dst and same Gw, keep it and do not attempt to add it.</span>
+</span></span><span style="display:flex;"><span>		log.<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;Route to %v already exists, skipping.&#34;</span>, route)
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> netlink.<span style="color:#fabd2f">RouteAdd</span>(route); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		log.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;Error adding route to %v: %s&#34;</span>, route, err)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 是否可以正常获取对应条件的路由表, 不理解为什么又要判断. 😅</span>
-</span></span><span style="display:flex;"><span>	_, err = netlink.<span style="color:#50fa7b">RouteListFiltered</span>(ipFamily, <span style="color:#ff79c6">&amp;</span>netlink.Route{Dst: route.Dst}, netlink.RT_FILTER_DST)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		log.<span style="color:#50fa7b">Warningf</span>(<span style="color:#f1fa8c">&#34;Unable to list routes: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 是否可以正常获取对应条件的路由表, 不理解为什么又要判断. 😅</span>
+</span></span><span style="display:flex;"><span>	_, err = netlink.<span style="color:#fabd2f">RouteListFiltered</span>(ipFamily, <span style="color:#fe8019">&amp;</span>netlink.Route{Dst: route.Dst}, netlink.RT_FILTER_DST)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		log.<span style="color:#fabd2f">Warningf</span>(<span style="color:#b8bb26">&#34;Unable to list routes: %v&#34;</span>, err)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>

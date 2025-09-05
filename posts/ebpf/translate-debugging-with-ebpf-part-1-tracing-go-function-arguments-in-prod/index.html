@@ -264,38 +264,38 @@
 <p><strong>Uprobes</strong> 允许您通过插入触发软中断的调试陷阱指令（x86 上的 <code>int3</code>）来拦截用户空间程序。 这也是<a href="https://eli.thegreenplace.net/2011/01/27/how-debuggers-work-part-2-breakpoints">调试器的原理所在</a>。 uprobe 的流程与任何其他 BPF 程序基本相同，请看下图。 执行编译和验证 BPF 程序作为 <strong>uprobe</strong> 的一部分，执行结果可以通过写入缓冲区返回。</p>
 <p><img src="https://blog.px.dev/static/a11d6d9cb78e055d59136a97665907d3/073a0/bpf-tracing.jpg" alt="BPF for tracing (from Brendan Gregg)"></p>
 <p>让我们看看 <strong>Uprobes</strong> 的实际功能。为了部署 <strong>Uprobes</strong> 和捕获函数参数，我们将使用<a href="https://github.com/pixie-io/pixie-demos/blob/main/simple-gotracing/app/app.go">简单的演示程序</a>。这个 Go 程序的相关部分如下所示</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// computeE computes the approximation of e by running a fixed number of iterations.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">computeE</span>(iterations <span style="color:#8be9fd">int64</span>) <span style="color:#8be9fd">float64</span> {
-</span></span><span style="display:flex;"><span>  res <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">2.0</span>
-</span></span><span style="display:flex;"><span>  fact <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">1.0</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// computeE computes the approximation of e by running a fixed number of iterations.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">computeE</span>(iterations <span style="color:#fabd2f">int64</span>) <span style="color:#fabd2f">float64</span> {
+</span></span><span style="display:flex;"><span>  res <span style="color:#fe8019">:=</span> <span style="color:#d3869b">2.0</span>
+</span></span><span style="display:flex;"><span>  fact <span style="color:#fe8019">:=</span> <span style="color:#d3869b">1.0</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">int64</span>(<span style="color:#bd93f9">2</span>); i &lt; iterations; i<span style="color:#ff79c6">++</span> {
-</span></span><span style="display:flex;"><span>    fact <span style="color:#ff79c6">*=</span> <span style="color:#8be9fd;font-style:italic">float64</span>(i)
-</span></span><span style="display:flex;"><span>    res <span style="color:#ff79c6">+=</span> <span style="color:#bd93f9">1</span> <span style="color:#ff79c6">/</span> fact
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">for</span> i <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">int64</span>(<span style="color:#d3869b">2</span>); i &lt; iterations; i<span style="color:#fe8019">++</span> {
+</span></span><span style="display:flex;"><span>    fact <span style="color:#fe8019">*=</span> <span style="color:#fabd2f">float64</span>(i)
+</span></span><span style="display:flex;"><span>    res <span style="color:#fe8019">+=</span> <span style="color:#d3869b">1</span> <span style="color:#fe8019">/</span> fact
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> res
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> res
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">main</span>() {
-</span></span><span style="display:flex;"><span>  http.<span style="color:#50fa7b">HandleFunc</span>(<span style="color:#f1fa8c">&#34;/e&#34;</span>, <span style="color:#8be9fd;font-style:italic">func</span>(w http.ResponseWriter, r <span style="color:#ff79c6">*</span>http.Request) {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Parse iters argument from get request, use default if not available.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ... removed for brevity ...</span>
-</span></span><span style="display:flex;"><span>    w.<span style="color:#50fa7b">Write</span>([]<span style="color:#8be9fd;font-style:italic">byte</span>(fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;e = %0.4f\n&#34;</span>, <span style="color:#50fa7b">computeE</span>(iters))))
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">main</span>() {
+</span></span><span style="display:flex;"><span>  http.<span style="color:#fabd2f">HandleFunc</span>(<span style="color:#b8bb26">&#34;/e&#34;</span>, <span style="color:#fe8019">func</span>(w http.ResponseWriter, r <span style="color:#fe8019">*</span>http.Request) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Parse iters argument from get request, use default if not available.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ... removed for brevity ...</span>
+</span></span><span style="display:flex;"><span>    w.<span style="color:#fabd2f">Write</span>([]<span style="color:#fabd2f">byte</span>(fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;e = %0.4f\n&#34;</span>, <span style="color:#fabd2f">computeE</span>(iters))))
 </span></span><span style="display:flex;"><span>  })
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Start server...</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Start server...</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p><code>main()</code> 中的逻辑实现了一个简单的 HTTP 服务器，其只有一个只支持<strong>GET</strong>的路径<code>/e</code>【译者注：上面的代码看不出来，请直接点击提供的链接来查看代码】，它使用迭代近似计算欧拉数 ($e$)。 函数<code>computeE</code> 接受一个查询参数（<em>iters</em>），它指定为近似值运行的迭代次数。 迭代次数越多，近似值越准确，但需要以计算周期为代价。 理解函数背后的数学并不是必须的。 我们只对跟踪函数<code>computeE</code> 调用的参数感兴趣。</p>
 <p>我们可以通过跟踪可执行文件中的符号(symbols)来了解<strong>Uprobes</strong>的工作原理。 由于 <strong>Uprobes</strong> 通过插入调试陷阱指令来工作，因此我们需要获取函数所在的地址。 Linux 上的 Go 二进制文件使用 ELF 来存储调试信息。即使在经过编译优化后二进制文件中也能找到这些调试信息，除非这些信息被剥离。 我们可以使用命令 <code>objdump</code> 来检查二进制文件中的符号：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#ff79c6">[</span>0<span style="color:#ff79c6">]</span> % objdump --syms app|grep computeE
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#fe8019">[</span>0<span style="color:#fe8019">]</span> % objdump --syms app|grep computeE
 </span></span><span style="display:flex;"><span>00000000006609a0 g     F .text    000000000000004b              main.computeE
 </span></span></code></pre></div><p>从上面的输出中，我们知道函数<code>computeE</code>位于地址<code>0x6609a0</code>。 要查看这条指令的上下文，我们可以执行 <code>objdump</code>命令进行反汇编（通过添加 <code>-d</code> 完成）。 反汇编代码如下所示：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#ff79c6">[</span>0<span style="color:#ff79c6">]</span> % objdump -d app | less
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#fe8019">[</span>0<span style="color:#fe8019">]</span> % objdump -d app | less
 </span></span><span style="display:flex;"><span>00000000006609a0 &lt;main.computeE&gt;:
-</span></span><span style="display:flex;"><span>  6609a0:       <span style="color:#bd93f9">48</span> 8b <span style="color:#bd93f9">44</span> <span style="color:#bd93f9">24</span> <span style="color:#bd93f9">08</span>          mov    0x8<span style="color:#ff79c6">(</span>%rsp<span style="color:#ff79c6">)</span>,%rax
-</span></span><span style="display:flex;"><span>  6609a5:       b9 <span style="color:#bd93f9">02</span> <span style="color:#bd93f9">00</span> <span style="color:#bd93f9">00</span> <span style="color:#bd93f9">00</span>          mov    <span style="color:#8be9fd;font-style:italic">$0</span>x2,%ecx
-</span></span><span style="display:flex;"><span>  6609aa:       f2 0f <span style="color:#bd93f9">10</span> <span style="color:#bd93f9">05</span> <span style="color:#bd93f9">16</span> a6 0f    movsd  0xfa616<span style="color:#ff79c6">(</span>%rip<span style="color:#ff79c6">)</span>,%xmm0
-</span></span><span style="display:flex;"><span>  6609b1:       <span style="color:#bd93f9">00</span>
-</span></span><span style="display:flex;"><span>  6609b2:       f2 0f <span style="color:#bd93f9">10</span> 0d <span style="color:#bd93f9">36</span> a6 0f    movsd  0xfa636<span style="color:#ff79c6">(</span>%rip<span style="color:#ff79c6">)</span>,%xmm1
+</span></span><span style="display:flex;"><span>  6609a0:       <span style="color:#d3869b">48</span> 8b <span style="color:#d3869b">44</span> <span style="color:#d3869b">24</span> <span style="color:#d3869b">08</span>          mov    0x8<span style="color:#fe8019">(</span>%rsp<span style="color:#fe8019">)</span>,%rax
+</span></span><span style="display:flex;"><span>  6609a5:       b9 <span style="color:#d3869b">02</span> <span style="color:#d3869b">00</span> <span style="color:#d3869b">00</span> <span style="color:#d3869b">00</span>          mov    $0x2,%ecx
+</span></span><span style="display:flex;"><span>  6609aa:       f2 0f <span style="color:#d3869b">10</span> <span style="color:#d3869b">05</span> <span style="color:#d3869b">16</span> a6 0f    movsd  0xfa616<span style="color:#fe8019">(</span>%rip<span style="color:#fe8019">)</span>,%xmm0
+</span></span><span style="display:flex;"><span>  6609b1:       <span style="color:#d3869b">00</span>
+</span></span><span style="display:flex;"><span>  6609b2:       f2 0f <span style="color:#d3869b">10</span> 0d <span style="color:#d3869b">36</span> a6 0f    movsd  0xfa636<span style="color:#fe8019">(</span>%rip<span style="color:#fe8019">)</span>,%xmm1
 </span></span></code></pre></div><p>从上面的反汇编结果可以看到调用 <code>computeE</code> 时会发生什么： 第一条指令是<code>mov 0x8(%rsp),%rax</code>。 即把寄存器<code>rsp</code>所指向的地址偏移<code>0x8</code>后的地址写入到寄存器<code>rax</code>【译者注：这个就是进入函数的时候<strong>ESP</strong>/<strong>EBP</strong>/<strong>EIP</strong>变化相关，可通过google去查找相关信息】。</p>
 <p>我们可以使用这些已知的信息来深入研究并编写代码来跟踪<code>computeE</code>”的参数。</p>
 <p>要捕获事件，我们需要注册一个 <strong>uprobe</strong> 函数并拥有一个可以读取输出的用户空间函数。 如下图所示。 我们将编写一个名为 <code>tracer</code> 的可执行二进制文件，负责注册 BPF 代码并读取 BPF 代码的结果。 如图所示，<strong>uprobe</strong> 将简单地写入 <strong>perf-buffer</strong>，这是一种用于 perf 事件的 linux 内核数据结构。</p>
@@ -303,32 +303,32 @@
 <p>现在我们了解了所涉及的部分，让我们来看看当我们添加一个 uprobe 时会发生什么的细节。 下图显示了 Linux 内核如何使用 uprobe 修改二进制文件。 软中断指令 (<code>int3</code>) 作为第一条指令插入 <code>main.computeE</code>。 这会导致软中断，允许 Linux 内核执行我们的 BPF 函数。 然后我们将参数写入<strong>perf-buffer</strong>，由<code>tracer</code>异步读取。</p>
 <p><img src="https://blog.px.dev/static/87301c7282e8f8270fee2afb9fe85c81/app-trace.svg" alt="Details of how a debug trap instruction is used call a BPF program"></p>
 <p>用于此例子的 BPF 功能相对简单； C代码如下所示。 我们注册这个函数，以便每次调用<code>main.computeE</code> 时都会调用它。 一旦它被调用，我们只需读取函数参数并写入 perf 缓冲区。 可以<a href="https://github.com/pixie-io/pixie-demos/blob/main/simple-gotracing/trace_example/trace.go">点击</a>查看完整的示例。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;uapi/linux/ptrace.h&gt;</span><span style="color:#ff79c6">
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">BPF_PERF_OUTPUT</span>(trace);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;uapi/linux/ptrace.h&gt;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">BPF_PERF_OUTPUT</span>(trace);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">inline</span> <span style="color:#8be9fd">int</span> <span style="color:#50fa7b">computeECalled</span>(<span style="color:#ff79c6">struct</span> pt_regs <span style="color:#ff79c6">*</span>ctx) {
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// The input argument is stored in ax.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#8be9fd">long</span> val <span style="color:#ff79c6">=</span> ctx<span style="color:#ff79c6">-&gt;</span>ax;
-</span></span><span style="display:flex;"><span>  trace.<span style="color:#50fa7b">perf_submit</span>(ctx, <span style="color:#ff79c6">&amp;</span>val, <span style="color:#ff79c6">sizeof</span>(val));
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">inline</span> <span style="color:#fabd2f">int</span> <span style="color:#fabd2f">computeECalled</span>(<span style="color:#fe8019">struct</span> pt_regs <span style="color:#fe8019">*</span>ctx) {
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// The input argument is stored in ax.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">long</span> val <span style="color:#fe8019">=</span> ctx<span style="color:#fe8019">-&gt;</span>ax;
+</span></span><span style="display:flex;"><span>  trace.<span style="color:#fabd2f">perf_submit</span>(ctx, <span style="color:#fe8019">&amp;</span>val, <span style="color:#fe8019">sizeof</span>(val));
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>现在我们为 <code>main.computeE</code> 函数提供了一个功能齐全的端到端参数跟踪器！ 其结果显示在下面的视频剪辑中。</p>
 <p><img src="https://blog.px.dev/static/4de8713a5b05e1f9132350f333572174/e2e-demo.gif" alt="End-to-End demo"></p>
 <p>实际上我们也可以使用 GDB 来查看对二进制文件所做的修改。 在这里，我们在运行我们的跟踪器二进制文件之前打印了<code>0x6609a0</code>地址处的指令。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>1<span style="color:#ff79c6">(</span>gdb<span style="color:#ff79c6">)</span> display /4i 0x6609a0
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>1<span style="color:#fe8019">(</span>gdb<span style="color:#fe8019">)</span> display /4i 0x6609a0
 </span></span><span style="display:flex;"><span>210: x/4i 0x6609a0
-</span></span><span style="display:flex;"><span><span style="color:#bd93f9">3</span>   0x6609a0 &lt;main.computeE&gt;:    mov    0x8<span style="color:#ff79c6">(</span>%rsp<span style="color:#ff79c6">)</span>,%rax
-</span></span><span style="display:flex;"><span><span style="color:#bd93f9">4</span>   0x6609a5 &lt;main.computeE+5&gt;:  mov    <span style="color:#8be9fd;font-style:italic">$0</span>x2,%ecx
-</span></span><span style="display:flex;"><span><span style="color:#bd93f9">5</span>   0x6609aa &lt;main.computeE+10&gt;: movsd  0xfa616<span style="color:#ff79c6">(</span>%rip<span style="color:#ff79c6">)</span>,%xmm0
-</span></span><span style="display:flex;"><span><span style="color:#bd93f9">6</span>   0x6609b2 &lt;main.computeE+18&gt;: movsd  0xfa636<span style="color:#ff79c6">(</span>%rip<span style="color:#ff79c6">)</span>,%xmm1
+</span></span><span style="display:flex;"><span><span style="color:#d3869b">3</span>   0x6609a0 &lt;main.computeE&gt;:    mov    0x8<span style="color:#fe8019">(</span>%rsp<span style="color:#fe8019">)</span>,%rax
+</span></span><span style="display:flex;"><span><span style="color:#d3869b">4</span>   0x6609a5 &lt;main.computeE+5&gt;:  mov    $0x2,%ecx
+</span></span><span style="display:flex;"><span><span style="color:#d3869b">5</span>   0x6609aa &lt;main.computeE+10&gt;: movsd  0xfa616<span style="color:#fe8019">(</span>%rip<span style="color:#fe8019">)</span>,%xmm0
+</span></span><span style="display:flex;"><span><span style="color:#d3869b">6</span>   0x6609b2 &lt;main.computeE+18&gt;: movsd  0xfa636<span style="color:#fe8019">(</span>%rip<span style="color:#fe8019">)</span>,%xmm1
 </span></span></code></pre></div><p>这是在我们运行跟踪器二进制文件之后。 我们可以清楚地看到第一条指令现在是 <code>int3</code>。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>1<span style="color:#ff79c6">(</span>gdb<span style="color:#ff79c6">)</span> display /4i 0x6609a0
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>1<span style="color:#fe8019">(</span>gdb<span style="color:#fe8019">)</span> display /4i 0x6609a0
 </span></span><span style="display:flex;"><span>27: x/4i 0x6609a0
-</span></span><span style="display:flex;"><span><span style="color:#bd93f9">3</span>   0x6609a0 &lt;main.computeE&gt;:    int3
-</span></span><span style="display:flex;"><span><span style="color:#bd93f9">4</span>   0x6609a1 &lt;main.computeE+1&gt;:  mov    0x8<span style="color:#ff79c6">(</span>%rsp<span style="color:#ff79c6">)</span>,%eax
-</span></span><span style="display:flex;"><span><span style="color:#bd93f9">5</span>   0x6609a5 &lt;main.computeE+5&gt;:  mov    <span style="color:#8be9fd;font-style:italic">$0</span>x2,%ecx
-</span></span><span style="display:flex;"><span><span style="color:#bd93f9">6</span>   0x6609aa &lt;main.computeE+10&gt;: movsd  0xfa616<span style="color:#ff79c6">(</span>%rip<span style="color:#ff79c6">)</span>,%xmm0
+</span></span><span style="display:flex;"><span><span style="color:#d3869b">3</span>   0x6609a0 &lt;main.computeE&gt;:    int3
+</span></span><span style="display:flex;"><span><span style="color:#d3869b">4</span>   0x6609a1 &lt;main.computeE+1&gt;:  mov    0x8<span style="color:#fe8019">(</span>%rsp<span style="color:#fe8019">)</span>,%eax
+</span></span><span style="display:flex;"><span><span style="color:#d3869b">5</span>   0x6609a5 &lt;main.computeE+5&gt;:  mov    $0x2,%ecx
+</span></span><span style="display:flex;"><span><span style="color:#d3869b">6</span>   0x6609aa &lt;main.computeE+10&gt;: movsd  0xfa616<span style="color:#fe8019">(</span>%rip<span style="color:#fe8019">)</span>,%xmm0
 </span></span></code></pre></div><p>尽管我们对这个特定示例的跟踪器进行了硬编码，但可以使这个过程泛形化 。 Go 的许多方面，例如嵌套指针、接口、通道等，使这个过程具有挑战性，但解决这些问题需要对现有系统引入新的依赖(BPF)。 此外，由于此过程在可执行的二进制级别上工作，因此它可以与其他语言（C++、Rust 等）的本地编译的可执行二进制文件一起使用。 我们只需要考虑它们各自 <strong>ABI</strong> 的差异。</p>
 <p>使用 <strong>Uprobes</strong> 进行 BPF 跟踪有其自身的优点和缺点。 当我们需要观察可执行二进制执行状态时，使用 BPF 是有益的，即使在附加调试器会出现问题或有害的环境中运行（例如生产环境下的可执行二进制文件）。 最大的缺点是获为了得对应用程序状态所需要编写的代码。 虽然 BPF 代码相对容易理解，但编写和维护起来很复杂。 如果没有大量的高级工具，这不太可能用于通用调试。</p>
 <p>Go dynamic logging is something we are working on at Pixie. You can checkout <a href="https://docs.px.dev/tutorials/simple-go-tracing/">this</a> to see how Pixie traces Go applications running on K8s clusters. If this post&rsquo;s contents are interesting, please give <a href="https://px.dev/">Pixie</a> a try, or check out our <a href="https://pixielabs.ai/careers">open positions</a>.</p>

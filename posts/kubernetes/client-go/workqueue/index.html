@@ -246,30 +246,30 @@ client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑�
 <p>client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑实现在<code>k8s.io/client-go/util/workqueue</code> 目录下。</p>
 <h2 id="基础去重队列">基础：去重队列</h2>
 <p>基础队列接口 Interface 的定义如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Interface <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 添加元素</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Add</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{})
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取队列的长度</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Len</span>() <span style="color:#8be9fd">int</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 从队列中获取元素</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Get</span>() (item <span style="color:#8be9fd;font-style:italic">interface</span>{}, shutdown <span style="color:#8be9fd">bool</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 标记 item 处理完毕</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Done</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{})
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 关闭</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">ShutDown</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 消费完成后关闭</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">ShutDownWithDrain</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 是否关闭</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">ShuttingDown</span>() <span style="color:#8be9fd">bool</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Interface <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 添加元素</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Add</span>(item <span style="color:#fe8019">interface</span>{})
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取队列的长度</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Len</span>() <span style="color:#fabd2f">int</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 从队列中获取元素</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Get</span>() (item <span style="color:#fe8019">interface</span>{}, shutdown <span style="color:#fabd2f">bool</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 标记 item 处理完毕</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Done</span>(item <span style="color:#fe8019">interface</span>{})
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 关闭</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">ShutDown</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 消费完成后关闭</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">ShutDownWithDrain</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 是否关闭</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">ShuttingDown</span>() <span style="color:#fabd2f">bool</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>Type 结构体实现了上述接口：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Type <span style="color:#8be9fd;font-style:italic">struct</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Type <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>	queue []t
 </span></span><span style="display:flex;"><span>	dirty set
 </span></span><span style="display:flex;"><span>	processing set
-</span></span><span style="display:flex;"><span>	cond <span style="color:#ff79c6">*</span>sync.Cond
-</span></span><span style="display:flex;"><span>	shuttingDown <span style="color:#8be9fd">bool</span>
-</span></span><span style="display:flex;"><span>	drain        <span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span>	cond <span style="color:#fe8019">*</span>sync.Cond
+</span></span><span style="display:flex;"><span>	shuttingDown <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>	drain        <span style="color:#fabd2f">bool</span>
 </span></span><span style="display:flex;"><span>	metrics queueMetrics
 </span></span><span style="display:flex;"><span>	unfinishedWorkUpdatePeriod time.Duration
 </span></span><span style="display:flex;"><span>	clock                      clock.WithTicker
@@ -281,125 +281,125 @@ client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑�
 <li>processing，标记一个队列元素是否正在被处理</li>
 </ul>
 <p>dirty 保证串行化的唯一，processing 保证并行化的唯一， 这里主要看看 Add/Get/Done 这三个方法：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (q <span style="color:#ff79c6">*</span>Type) <span style="color:#50fa7b">Add</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
-</span></span><span style="display:flex;"><span>	q.cond.L.<span style="color:#50fa7b">Lock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> q.cond.L.<span style="color:#50fa7b">Unlock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> q.shuttingDown {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (q <span style="color:#fe8019">*</span>Type) <span style="color:#fabd2f">Add</span>(item <span style="color:#fe8019">interface</span>{}) {
+</span></span><span style="display:flex;"><span>	q.cond.L.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> q.cond.L.<span style="color:#fabd2f">Unlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> q.shuttingDown {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 在 dirty 中已存在, 则直接返回, dirty 是为了实现待消费元素的去重</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> q.dirty.<span style="color:#50fa7b">has</span>(item) {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	q.metrics.<span style="color:#50fa7b">add</span>(item)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	q.dirty.<span style="color:#50fa7b">insert</span>(item)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 如果正在处理，直接返回</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> q.processing.<span style="color:#50fa7b">has</span>(item) {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 在 dirty 中已存在, 则直接返回, dirty 是为了实现待消费元素的去重</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> q.dirty.<span style="color:#fabd2f">has</span>(item) {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	q.queue = <span style="color:#8be9fd;font-style:italic">append</span>(q.queue, item)
-</span></span><span style="display:flex;"><span>	q.cond.<span style="color:#50fa7b">Signal</span>()
+</span></span><span style="display:flex;"><span>	q.metrics.<span style="color:#fabd2f">add</span>(item)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	q.dirty.<span style="color:#fabd2f">insert</span>(item)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 如果正在处理，直接返回</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> q.processing.<span style="color:#fabd2f">has</span>(item) {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	q.queue = <span style="color:#fabd2f">append</span>(q.queue, item)
+</span></span><span style="display:flex;"><span>	q.cond.<span style="color:#fabd2f">Signal</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (q <span style="color:#ff79c6">*</span>Type) <span style="color:#50fa7b">Get</span>() (item <span style="color:#8be9fd;font-style:italic">interface</span>{}, shutdown <span style="color:#8be9fd">bool</span>) {
-</span></span><span style="display:flex;"><span>	q.cond.L.<span style="color:#50fa7b">Lock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> q.cond.L.<span style="color:#50fa7b">Unlock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> <span style="color:#8be9fd;font-style:italic">len</span>(q.queue) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> <span style="color:#ff79c6">&amp;&amp;</span> !q.shuttingDown {
-</span></span><span style="display:flex;"><span>		q.cond.<span style="color:#50fa7b">Wait</span>()
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (q <span style="color:#fe8019">*</span>Type) <span style="color:#fabd2f">Get</span>() (item <span style="color:#fe8019">interface</span>{}, shutdown <span style="color:#fabd2f">bool</span>) {
+</span></span><span style="display:flex;"><span>	q.cond.L.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> q.cond.L.<span style="color:#fabd2f">Unlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> <span style="color:#fabd2f">len</span>(q.queue) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> <span style="color:#fe8019">&amp;&amp;</span> !q.shuttingDown {
+</span></span><span style="display:flex;"><span>		q.cond.<span style="color:#fabd2f">Wait</span>()
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(q.queue) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// We must be shutting down.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(q.queue) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// We must be shutting down.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	item = q.queue[<span style="color:#bd93f9">0</span>]
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// The underlying array still exists and reference this object, so the object will not be garbage collected.</span>
-</span></span><span style="display:flex;"><span>	q.queue[<span style="color:#bd93f9">0</span>] = <span style="color:#ff79c6">nil</span>
-</span></span><span style="display:flex;"><span>	q.queue = q.queue[<span style="color:#bd93f9">1</span>:]
+</span></span><span style="display:flex;"><span>	item = q.queue[<span style="color:#d3869b">0</span>]
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// The underlying array still exists and reference this object, so the object will not be garbage collected.</span>
+</span></span><span style="display:flex;"><span>	q.queue[<span style="color:#d3869b">0</span>] = <span style="color:#fe8019">nil</span>
+</span></span><span style="display:flex;"><span>	q.queue = q.queue[<span style="color:#d3869b">1</span>:]
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	q.metrics.<span style="color:#50fa7b">get</span>(item)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 把元素打上正在处理的标志</span>
-</span></span><span style="display:flex;"><span>	q.processing.<span style="color:#50fa7b">insert</span>(item)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 从dirty 中删除</span>
-</span></span><span style="display:flex;"><span>	q.dirty.<span style="color:#8be9fd;font-style:italic">delete</span>(item)
+</span></span><span style="display:flex;"><span>	q.metrics.<span style="color:#fabd2f">get</span>(item)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 把元素打上正在处理的标志</span>
+</span></span><span style="display:flex;"><span>	q.processing.<span style="color:#fabd2f">insert</span>(item)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 从dirty 中删除</span>
+</span></span><span style="display:flex;"><span>	q.dirty.<span style="color:#fabd2f">delete</span>(item)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> item, <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> item, <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (q <span style="color:#ff79c6">*</span>Type) <span style="color:#50fa7b">Done</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
-</span></span><span style="display:flex;"><span>	q.cond.L.<span style="color:#50fa7b">Lock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> q.cond.L.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (q <span style="color:#fe8019">*</span>Type) <span style="color:#fabd2f">Done</span>(item <span style="color:#fe8019">interface</span>{}) {
+</span></span><span style="display:flex;"><span>	q.cond.L.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> q.cond.L.<span style="color:#fabd2f">Unlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	q.metrics.<span style="color:#50fa7b">done</span>(item)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 删除元素正在处理的标志</span>
-</span></span><span style="display:flex;"><span>	q.processing.<span style="color:#8be9fd;font-style:italic">delete</span>(item)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> q.dirty.<span style="color:#50fa7b">has</span>(item) { <span style="color:#6272a4">// 后续的加入，因为正在处理肯定是没有进入到queue中，具体可以看 Add 的逻辑</span>
-</span></span><span style="display:flex;"><span>		q.queue = <span style="color:#8be9fd;font-style:italic">append</span>(q.queue, item)
-</span></span><span style="display:flex;"><span>		q.cond.<span style="color:#50fa7b">Signal</span>()
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> q.processing.<span style="color:#8be9fd;font-style:italic">len</span>() <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>		q.cond.<span style="color:#50fa7b">Signal</span>()
+</span></span><span style="display:flex;"><span>	q.metrics.<span style="color:#fabd2f">done</span>(item)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 删除元素正在处理的标志</span>
+</span></span><span style="display:flex;"><span>	q.processing.<span style="color:#fabd2f">delete</span>(item)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> q.dirty.<span style="color:#fabd2f">has</span>(item) { <span style="color:#928374;font-style:italic">// 后续的加入，因为正在处理肯定是没有进入到queue中，具体可以看 Add 的逻辑</span>
+</span></span><span style="display:flex;"><span>		q.queue = <span style="color:#fabd2f">append</span>(q.queue, item)
+</span></span><span style="display:flex;"><span>		q.cond.<span style="color:#fabd2f">Signal</span>()
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span> q.processing.<span style="color:#fabd2f">len</span>() <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		q.cond.<span style="color:#fabd2f">Signal</span>()
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="扩展延迟队列">扩展：延迟队列</h2>
 <p>接口 DelayingInterface 在基础队列 Interface 的基础上，扩展了延迟的功能：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> DelayingInterface <span style="color:#8be9fd;font-style:italic">interface</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> DelayingInterface <span style="color:#fe8019">interface</span> {
 </span></span><span style="display:flex;"><span>	Interface
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">AddAfter</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}, duration time.Duration)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">AddAfter</span>(item <span style="color:#fe8019">interface</span>{}, duration time.Duration)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>delayingType 结构体实现了该接口：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> delayingType <span style="color:#8be9fd;font-style:italic">struct</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> delayingType <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>	Interface
 </span></span><span style="display:flex;"><span>	clock clock.Clock
-</span></span><span style="display:flex;"><span>	stopCh <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}
+</span></span><span style="display:flex;"><span>	stopCh <span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}
 </span></span><span style="display:flex;"><span>	stopOnce sync.Once
 </span></span><span style="display:flex;"><span>	heartbeat clock.Ticker
-</span></span><span style="display:flex;"><span>	waitingForAddCh <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>waitFor
+</span></span><span style="display:flex;"><span>	waitingForAddCh <span style="color:#fe8019">chan</span> <span style="color:#fe8019">*</span>waitFor
 </span></span><span style="display:flex;"><span>	metrics retryMetrics
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>delayingType 结构体中的有两个比较重要的字段：</p>
 <ul>
 <li>heartbeat，心跳定时器，周期性判断是否存在延迟元素是否过期。</li>
 <li>waitingForAddCh，用于接受打包后的延迟对象，供协程 waitingLoop 来消费，通过 AddAfter 来生产 延迟对象：
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (q <span style="color:#ff79c6">*</span>delayingType) <span style="color:#50fa7b">AddAfter</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}, duration time.Duration) {
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">//  queue 正在关闭，直接返回</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> q.<span style="color:#50fa7b">ShuttingDown</span>() {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (q <span style="color:#fe8019">*</span>delayingType) <span style="color:#fabd2f">AddAfter</span>(item <span style="color:#fe8019">interface</span>{}, duration time.Duration) {
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">//  queue 正在关闭，直接返回</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> q.<span style="color:#fabd2f">ShuttingDown</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	q.metrics.<span style="color:#50fa7b">retry</span>()
+</span></span><span style="display:flex;"><span>	q.metrics.<span style="color:#fabd2f">retry</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// immediately add things with no delay</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 无须延迟处理，直接添加到queue中</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> duration <span style="color:#ff79c6">&lt;=</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>		q.<span style="color:#50fa7b">Add</span>(item)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// immediately add things with no delay</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 无须延迟处理，直接添加到queue中</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> duration <span style="color:#fe8019">&lt;=</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		q.<span style="color:#fabd2f">Add</span>(item)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">select</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 若正在退出，则退出</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>q.stopCh:
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建一个延迟对象, 推到 waitingForAddCh 管道中, 等待 waitingLoop 处理</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> q.waitingForAddCh <span style="color:#ff79c6">&lt;-</span> <span style="color:#ff79c6">&amp;</span>waitFor{data: item, readyAt: q.clock.<span style="color:#50fa7b">Now</span>().<span style="color:#50fa7b">Add</span>(duration)}:
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 若正在退出，则退出</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>q.stopCh:
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 创建一个延迟对象, 推到 waitingForAddCh 管道中, 等待 waitingLoop 处理</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> q.waitingForAddCh <span style="color:#fe8019">&lt;-</span> <span style="color:#fe8019">&amp;</span>waitFor{data: item, readyAt: q.clock.<span style="color:#fabd2f">Now</span>().<span style="color:#fabd2f">Add</span>(duration)}:
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div></li>
 </ul>
 <p>delayingType 在实例话的时候会拉起来一个协程：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">newDelayingQueue</span>(clock clock.WithTicker, q Interface, name <span style="color:#8be9fd">string</span>) <span style="color:#ff79c6">*</span>delayingType {
-</span></span><span style="display:flex;"><span>	ret <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>delayingType{
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">newDelayingQueue</span>(clock clock.WithTicker, q Interface, name <span style="color:#fabd2f">string</span>) <span style="color:#fe8019">*</span>delayingType {
+</span></span><span style="display:flex;"><span>	ret <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>delayingType{
 </span></span><span style="display:flex;"><span>		Interface:       q,
 </span></span><span style="display:flex;"><span>		clock:           clock,
-</span></span><span style="display:flex;"><span>		heartbeat:       clock.<span style="color:#50fa7b">NewTicker</span>(maxWait),
-</span></span><span style="display:flex;"><span>		stopCh:          <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}),
-</span></span><span style="display:flex;"><span>		waitingForAddCh: <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>waitFor, <span style="color:#bd93f9">1000</span>),
-</span></span><span style="display:flex;"><span>		metrics:         <span style="color:#50fa7b">newRetryMetrics</span>(name),
+</span></span><span style="display:flex;"><span>		heartbeat:       clock.<span style="color:#fabd2f">NewTicker</span>(maxWait),
+</span></span><span style="display:flex;"><span>		stopCh:          <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}),
+</span></span><span style="display:flex;"><span>		waitingForAddCh: <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">chan</span> <span style="color:#fe8019">*</span>waitFor, <span style="color:#d3869b">1000</span>),
+</span></span><span style="display:flex;"><span>		metrics:         <span style="color:#fabd2f">newRetryMetrics</span>(name),
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> ret.<span style="color:#50fa7b">waitingLoop</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> ret
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">go</span> ret.<span style="color:#fabd2f">waitingLoop</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> ret
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>waitingLoop 的作用如下：</p>
 <ul>
@@ -407,86 +407,86 @@ client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑�
 <li>heartbeat 定时器周期性地取走 waitingForAddCh 中的延迟对象来构建和更新最小堆</li>
 <li>根据最小堆的堆顶元素设置定时器，当定时器触发的时候，会把延迟到期的元素添加到queue中，然后重新更新定时器</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (q <span style="color:#ff79c6">*</span>delayingType) <span style="color:#50fa7b">waitingLoop</span>() {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> utilruntime.<span style="color:#50fa7b">HandleCrash</span>()
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (q <span style="color:#fe8019">*</span>delayingType) <span style="color:#fabd2f">waitingLoop</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> utilruntime.<span style="color:#fabd2f">HandleCrash</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Make a placeholder channel to use when there are no items in our list</span>
-</span></span><span style="display:flex;"><span>	never <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> time.Time)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Make a placeholder channel to use when there are no items in our list</span>
+</span></span><span style="display:flex;"><span>	never <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> time.Time)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Make a timer that expires when the item at the head of the waiting queue is ready</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> nextReadyAtTimer clock.Timer
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// // 初始化最小堆</span>
-</span></span><span style="display:flex;"><span>	waitingForQueue <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>waitForPriorityQueue{}
-</span></span><span style="display:flex;"><span>	heap.<span style="color:#50fa7b">Init</span>(waitingForQueue)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Make a timer that expires when the item at the head of the waiting queue is ready</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">var</span> nextReadyAtTimer clock.Timer
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// // 初始化最小堆</span>
+</span></span><span style="display:flex;"><span>	waitingForQueue <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>waitForPriorityQueue{}
+</span></span><span style="display:flex;"><span>	heap.<span style="color:#fabd2f">Init</span>(waitingForQueue)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	waitingEntryByData <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">map</span>[t]<span style="color:#ff79c6">*</span>waitFor{}
+</span></span><span style="display:flex;"><span>	waitingEntryByData <span style="color:#fe8019">:=</span> <span style="color:#fe8019">map</span>[t]<span style="color:#fe8019">*</span>waitFor{}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 如果 queue 已经被关闭, 则退出</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> q.Interface.<span style="color:#50fa7b">ShuttingDown</span>() {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 如果 queue 已经被关闭, 则退出</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> q.Interface.<span style="color:#fabd2f">ShuttingDown</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		now <span style="color:#ff79c6">:=</span> q.clock.<span style="color:#50fa7b">Now</span>()
+</span></span><span style="display:flex;"><span>		now <span style="color:#fe8019">:=</span> q.clock.<span style="color:#fabd2f">Now</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Add ready entries</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> waitingForQueue.<span style="color:#50fa7b">Len</span>() &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 如果最小堆不为空, 则获取堆顶的元素.</span>
-</span></span><span style="display:flex;"><span>			entry <span style="color:#ff79c6">:=</span> waitingForQueue.<span style="color:#50fa7b">Peek</span>().(<span style="color:#ff79c6">*</span>waitFor)
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 堆顶元素没有过期，跳出</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> entry.readyAt.<span style="color:#50fa7b">After</span>(now) {
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">break</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Add ready entries</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> waitingForQueue.<span style="color:#fabd2f">Len</span>() &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 如果最小堆不为空, 则获取堆顶的元素.</span>
+</span></span><span style="display:flex;"><span>			entry <span style="color:#fe8019">:=</span> waitingForQueue.<span style="color:#fabd2f">Peek</span>().(<span style="color:#fe8019">*</span>waitFor)
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 堆顶元素没有过期，跳出</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> entry.readyAt.<span style="color:#fabd2f">After</span>(now) {
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">break</span>
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 弹出堆顶元素，加入到queue中</span>
-</span></span><span style="display:flex;"><span>			entry = heap.<span style="color:#50fa7b">Pop</span>(waitingForQueue).(<span style="color:#ff79c6">*</span>waitFor)
-</span></span><span style="display:flex;"><span>			q.<span style="color:#50fa7b">Add</span>(entry.data)
-</span></span><span style="display:flex;"><span>			<span style="color:#8be9fd;font-style:italic">delete</span>(waitingEntryByData, entry.data)
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 弹出堆顶元素，加入到queue中</span>
+</span></span><span style="display:flex;"><span>			entry = heap.<span style="color:#fabd2f">Pop</span>(waitingForQueue).(<span style="color:#fe8019">*</span>waitFor)
+</span></span><span style="display:flex;"><span>			q.<span style="color:#fabd2f">Add</span>(entry.data)
+</span></span><span style="display:flex;"><span>			<span style="color:#fabd2f">delete</span>(waitingEntryByData, entry.data)
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Set up a wait for the first item&#39;s readyAt (if one exists)</span>
-</span></span><span style="display:flex;"><span>		nextReadyAt <span style="color:#ff79c6">:=</span> never
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 如果 最小堆不为空, 设置堆顶元素的时间为定时器的时间，即最近过期时间</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> waitingForQueue.<span style="color:#50fa7b">Len</span>() &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> nextReadyAtTimer <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>				nextReadyAtTimer.<span style="color:#50fa7b">Stop</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Set up a wait for the first item&#39;s readyAt (if one exists)</span>
+</span></span><span style="display:flex;"><span>		nextReadyAt <span style="color:#fe8019">:=</span> never
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 如果 最小堆不为空, 设置堆顶元素的时间为定时器的时间，即最近过期时间</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> waitingForQueue.<span style="color:#fabd2f">Len</span>() &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> nextReadyAtTimer <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				nextReadyAtTimer.<span style="color:#fabd2f">Stop</span>()
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			entry <span style="color:#ff79c6">:=</span> waitingForQueue.<span style="color:#50fa7b">Peek</span>().(<span style="color:#ff79c6">*</span>waitFor)
-</span></span><span style="display:flex;"><span>			nextReadyAtTimer = q.clock.<span style="color:#50fa7b">NewTimer</span>(entry.readyAt.<span style="color:#50fa7b">Sub</span>(now))
-</span></span><span style="display:flex;"><span>			nextReadyAt = nextReadyAtTimer.<span style="color:#50fa7b">C</span>()
+</span></span><span style="display:flex;"><span>			entry <span style="color:#fe8019">:=</span> waitingForQueue.<span style="color:#fabd2f">Peek</span>().(<span style="color:#fe8019">*</span>waitFor)
+</span></span><span style="display:flex;"><span>			nextReadyAtTimer = q.clock.<span style="color:#fabd2f">NewTimer</span>(entry.readyAt.<span style="color:#fabd2f">Sub</span>(now))
+</span></span><span style="display:flex;"><span>			nextReadyAt = nextReadyAtTimer.<span style="color:#fabd2f">C</span>()
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">select</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>q.stopCh:
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 心跳</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>q.heartbeat.<span style="color:#50fa7b">C</span>():
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// continue the loop, which will add ready items</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 最近过期元素的时间到了</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>nextReadyAt:
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// continue the loop, which will add ready items</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 收到新的需要延迟处理的元素</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> waitEntry <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>q.waitingForAddCh:
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// // 如果新元素还未到期, 则放到最小堆中.</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> waitEntry.readyAt.<span style="color:#50fa7b">After</span>(q.clock.<span style="color:#50fa7b">Now</span>()) {
-</span></span><span style="display:flex;"><span>				<span style="color:#50fa7b">insert</span>(waitingForQueue, waitingEntryByData, waitEntry)
-</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// 到期了，直接添加到queue中</span>
-</span></span><span style="display:flex;"><span>				q.<span style="color:#50fa7b">Add</span>(waitEntry.data)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>q.stopCh:
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 心跳</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>q.heartbeat.<span style="color:#fabd2f">C</span>():
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// continue the loop, which will add ready items</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 最近过期元素的时间到了</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>nextReadyAt:
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// continue the loop, which will add ready items</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 收到新的需要延迟处理的元素</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> waitEntry <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&lt;-</span>q.waitingForAddCh:
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// // 如果新元素还未到期, 则放到最小堆中.</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> waitEntry.readyAt.<span style="color:#fabd2f">After</span>(q.clock.<span style="color:#fabd2f">Now</span>()) {
+</span></span><span style="display:flex;"><span>				<span style="color:#fabd2f">insert</span>(waitingForQueue, waitingEntryByData, waitEntry)
+</span></span><span style="display:flex;"><span>			} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// 到期了，直接添加到queue中</span>
+</span></span><span style="display:flex;"><span>				q.<span style="color:#fabd2f">Add</span>(waitEntry.data)
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 单次循环尽量取完所有的需要延迟的元素 </span>
-</span></span><span style="display:flex;"><span>			drained <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">false</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">for</span> !drained {
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">select</span> {
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">case</span> waitEntry <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>q.waitingForAddCh:
-</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">if</span> waitEntry.readyAt.<span style="color:#50fa7b">After</span>(q.clock.<span style="color:#50fa7b">Now</span>()) {
-</span></span><span style="display:flex;"><span>						<span style="color:#50fa7b">insert</span>(waitingForQueue, waitingEntryByData, waitEntry)
-</span></span><span style="display:flex;"><span>					} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>						q.<span style="color:#50fa7b">Add</span>(waitEntry.data)
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 单次循环尽量取完所有的需要延迟的元素 </span>
+</span></span><span style="display:flex;"><span>			drained <span style="color:#fe8019">:=</span> <span style="color:#fe8019">false</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">for</span> !drained {
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">case</span> waitEntry <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&lt;-</span>q.waitingForAddCh:
+</span></span><span style="display:flex;"><span>					<span style="color:#fe8019">if</span> waitEntry.readyAt.<span style="color:#fabd2f">After</span>(q.clock.<span style="color:#fabd2f">Now</span>()) {
+</span></span><span style="display:flex;"><span>						<span style="color:#fabd2f">insert</span>(waitingForQueue, waitingEntryByData, waitEntry)
+</span></span><span style="display:flex;"><span>					} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>						q.<span style="color:#fabd2f">Add</span>(waitEntry.data)
 </span></span><span style="display:flex;"><span>					}
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">default</span>:
-</span></span><span style="display:flex;"><span>					drained = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">default</span>:
+</span></span><span style="display:flex;"><span>					drained = <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>				}
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
@@ -494,29 +494,29 @@ client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑�
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="扩展限速队列">扩展：限速队列</h2>
 <p>接口 RateLimitingInterface 在延迟队列 RateLimitingInterface 的基础上，扩展了限速的功能：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> RateLimitingInterface <span style="color:#8be9fd;font-style:italic">interface</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> RateLimitingInterface <span style="color:#fe8019">interface</span> {
 </span></span><span style="display:flex;"><span>	DelayingInterface
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">AddRateLimited</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{})
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Forget</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{})
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">NumRequeues</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">int</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">AddRateLimited</span>(item <span style="color:#fe8019">interface</span>{})
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Forget</span>(item <span style="color:#fe8019">interface</span>{})
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">NumRequeues</span>(item <span style="color:#fe8019">interface</span>{}) <span style="color:#fabd2f">int</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>rateLimitingType 结构体实现了该接口：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> rateLimitingType <span style="color:#8be9fd;font-style:italic">struct</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> rateLimitingType <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>	DelayingInterface
 </span></span><span style="display:flex;"><span>	rateLimiter RateLimiter
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>在实例化 rateLimitingType 时, 需要创建 DelayingInterface 实例 和 Ratelimiter 实例，且rateLimitingType 也实现了 Ratelimiter接口。RateLimiter 接口的定义如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> RateLimiter <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 根据算法判断元素应该等待多长时间</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">When</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}) time.Duration
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 释放该元素，清空该元素的排队数</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Forget</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{})
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取该元素的排队数</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">NumRequeues</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">int</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> RateLimiter <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 根据算法判断元素应该等待多长时间</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">When</span>(item <span style="color:#fe8019">interface</span>{}) time.Duration
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 释放该元素，清空该元素的排队数</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Forget</span>(item <span style="color:#fe8019">interface</span>{})
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取该元素的排队数</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">NumRequeues</span>(item <span style="color:#fe8019">interface</span>{}) <span style="color:#fabd2f">int</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>AddRateLimited 方法是通过限速器计算出需要等待的时长, 然后调用 <code>delayingQueue.AddAfter()</code> 方法来决定把对象扔到延迟队里还是队列里：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (q <span style="color:#ff79c6">*</span>rateLimitingType) <span style="color:#50fa7b">AddRateLimited</span>(item <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
-</span></span><span style="display:flex;"><span>	q.DelayingInterface.<span style="color:#50fa7b">AddAfter</span>(item, q.rateLimiter.<span style="color:#50fa7b">When</span>(item))
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (q <span style="color:#fe8019">*</span>rateLimitingType) <span style="color:#fabd2f">AddRateLimited</span>(item <span style="color:#fe8019">interface</span>{}) {
+</span></span><span style="display:flex;"><span>	q.DelayingInterface.<span style="color:#fabd2f">AddAfter</span>(item, q.rateLimiter.<span style="color:#fabd2f">When</span>(item))
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>workqueue 提供了如下几种限速算法：</p>
 <ul>

@@ -319,17 +319,17 @@
         <div>
           <h2 id="csidriver-注册">CSIDriver 注册</h2>
 <p>所有的 CSI Driver 都是通过map来关联存储的：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Driver <span style="color:#8be9fd;font-style:italic">struct</span> {
-</span></span><span style="display:flex;"><span>	endpoint                <span style="color:#8be9fd">string</span>
-</span></span><span style="display:flex;"><span>	highestSupportedVersion <span style="color:#ff79c6">*</span>utilversion.Version
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Driver <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>	endpoint                <span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>	highestSupportedVersion <span style="color:#fe8019">*</span>utilversion.Version
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> DriversStore <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> DriversStore <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>	store
 </span></span><span style="display:flex;"><span>	sync.RWMutex
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> store <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]Driver
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> store <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]Driver
 </span></span></code></pre></div><p>具体的增/删/改/查可以看<code>k8s.io/kubernetes/pkg/volume/csi/csi_drivers_store.go</code>， 全局变量 csiDrivers 就存储了所有注册的CSI Driver：</p>
         </div>
 

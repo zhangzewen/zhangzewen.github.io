@@ -251,17 +251,17 @@ kubernetes 的事件（Event）是一种资源对象，用于展示集群内发�
 <p>本篇文章基于 client-go release-1.25 分支</p></blockquote>
 <p>kubernetes 的事件（Event）是一种资源对象，用于展示集群内发生的情况，kubernetes 系统中的各个组件会将运行时发生的各种事件上报给 kubernetes apiserver。由于事件是一种资源，因此他们存储在 etcd 集群中。为了避免磁盘空间被填满，故强制执行保留策略：在最后一次的事件发生后，删除1小时之前发生的事件。</p>
 <p>在写 kubernetes controller 的时候经常会用到：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>  eventBroadcaster <span style="color:#ff79c6">:=</span> record.<span style="color:#50fa7b">NewBroadcaster</span>()
-</span></span><span style="display:flex;"><span>  eventBroadcaster.<span style="color:#50fa7b">StartStructuredLogging</span>(<span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>  eventBroadcaster.<span style="color:#50fa7b">StartRecordingToSink</span>(<span style="color:#ff79c6">&amp;</span>typedcorev1.EventSinkImpl{Interface: kubeclientset.<span style="color:#50fa7b">CoreV1</span>().<span style="color:#50fa7b">Events</span>(<span style="color:#f1fa8c">&#34;&#34;</span>)})
-</span></span><span style="display:flex;"><span>  recorder <span style="color:#ff79c6">:=</span> eventBroadcaster.<span style="color:#50fa7b">NewRecorder</span>(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>  eventBroadcaster <span style="color:#fe8019">:=</span> record.<span style="color:#fabd2f">NewBroadcaster</span>()
+</span></span><span style="display:flex;"><span>  eventBroadcaster.<span style="color:#fabd2f">StartStructuredLogging</span>(<span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>  eventBroadcaster.<span style="color:#fabd2f">StartRecordingToSink</span>(<span style="color:#fe8019">&amp;</span>typedcorev1.EventSinkImpl{Interface: kubeclientset.<span style="color:#fabd2f">CoreV1</span>().<span style="color:#fabd2f">Events</span>(<span style="color:#b8bb26">&#34;&#34;</span>)})
+</span></span><span style="display:flex;"><span>  recorder <span style="color:#fe8019">:=</span> eventBroadcaster.<span style="color:#fabd2f">NewRecorder</span>(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 </span></span></code></pre></div><p>事件的数据结构在 <code>k8s.io/api/core/v1/type.go</code> 下，这里就不列出来了。</p>
 <h2 id="eventrecorder">EventRecorder</h2>
 <p>事件生产者，也称为事件记录器，kubernetes 系统组件通过 EventRecorder 记录关键性事件：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> EventRecorder <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Event</span>(object runtime.Object, eventtype, reason, message <span style="color:#8be9fd">string</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Eventf</span>(object runtime.Object, eventtype, reason, messageFmt <span style="color:#8be9fd">string</span>, args <span style="color:#ff79c6">...</span><span style="color:#8be9fd;font-style:italic">interface</span>{})
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">AnnotatedEventf</span>(object runtime.Object, annotations <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">string</span>, eventtype, reason, messageFmt <span style="color:#8be9fd">string</span>, args <span style="color:#ff79c6">...</span><span style="color:#8be9fd;font-style:italic">interface</span>{})
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> EventRecorder <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Event</span>(object runtime.Object, eventtype, reason, message <span style="color:#fabd2f">string</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Eventf</span>(object runtime.Object, eventtype, reason, messageFmt <span style="color:#fabd2f">string</span>, args <span style="color:#fe8019">...</span><span style="color:#fe8019">interface</span>{})
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">AnnotatedEventf</span>(object runtime.Object, annotations <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]<span style="color:#fabd2f">string</span>, eventtype, reason, messageFmt <span style="color:#fabd2f">string</span>, args <span style="color:#fe8019">...</span><span style="color:#fe8019">interface</span>{})
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><ul>
 <li>Event 对发生的事件进行记录</li>
@@ -269,94 +269,94 @@ kubernetes 的事件（Event）是一种资源对象，用于展示集群内发�
 <li>AnnotatedEventf 和Eventf的一样，但是附加了注释字段</li>
 </ul>
 <p>在 <code>tools/events</code> 目录下也会看到一个和该接口同名差不多的接口，在 <code>tools/record</code> 中实现了对 <code>tools/events#EventRecorder</code> 接口的适配实现：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> EventRecorderAdapter {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> EventRecorderAdapter {
 </span></span><span style="display:flex;"><span>	recorder eventRecorder
 </span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (a <span style="color:#ff79c6">*</span>EventRecorderAdapter) <span style="color:#50fa7b">Eventf</span>(regarding, _ runtime.Object, eventtype, reason, action, note <span style="color:#8be9fd">string</span>, args <span style="color:#ff79c6">...</span><span style="color:#8be9fd;font-style:italic">interface</span>{}) {    
-</span></span><span style="display:flex;"><span>	a.recorder.<span style="color:#50fa7b">Eventf</span>(regarding, eventtype, reason, note, args<span style="color:#ff79c6">...</span>)   
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (a <span style="color:#fe8019">*</span>EventRecorderAdapter) <span style="color:#fabd2f">Eventf</span>(regarding, _ runtime.Object, eventtype, reason, action, note <span style="color:#fabd2f">string</span>, args <span style="color:#fe8019">...</span><span style="color:#fe8019">interface</span>{}) {    
+</span></span><span style="display:flex;"><span>	a.recorder.<span style="color:#fabd2f">Eventf</span>(regarding, eventtype, reason, note, args<span style="color:#fe8019">...</span>)   
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>来看看 EventRecorder 的实现 :</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (recorder <span style="color:#ff79c6">*</span>recorderImpl) <span style="color:#50fa7b">Event</span>(object runtime.Object, eventtype, reason, message <span style="color:#8be9fd">string</span>) {
-</span></span><span style="display:flex;"><span>  recorder.<span style="color:#50fa7b">generateEvent</span>(object, <span style="color:#ff79c6">nil</span>, eventtype, reason, message)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (recorder <span style="color:#fe8019">*</span>recorderImpl) <span style="color:#fabd2f">Event</span>(object runtime.Object, eventtype, reason, message <span style="color:#fabd2f">string</span>) {
+</span></span><span style="display:flex;"><span>  recorder.<span style="color:#fabd2f">generateEvent</span>(object, <span style="color:#fe8019">nil</span>, eventtype, reason, message)
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (recorder <span style="color:#ff79c6">*</span>recorderImpl) <span style="color:#50fa7b">Eventf</span>(object runtime.Object, eventtype, reason, messageFmt <span style="color:#8be9fd">string</span>, args <span style="color:#ff79c6">...</span><span style="color:#8be9fd;font-style:italic">interface</span>{}) {
-</span></span><span style="display:flex;"><span>  recorder.<span style="color:#50fa7b">Event</span>(object, eventtype, reason, fmt.<span style="color:#50fa7b">Sprintf</span>(messageFmt, args<span style="color:#ff79c6">...</span>))
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (recorder <span style="color:#fe8019">*</span>recorderImpl) <span style="color:#fabd2f">Eventf</span>(object runtime.Object, eventtype, reason, messageFmt <span style="color:#fabd2f">string</span>, args <span style="color:#fe8019">...</span><span style="color:#fe8019">interface</span>{}) {
+</span></span><span style="display:flex;"><span>  recorder.<span style="color:#fabd2f">Event</span>(object, eventtype, reason, fmt.<span style="color:#fabd2f">Sprintf</span>(messageFmt, args<span style="color:#fe8019">...</span>))
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (recorder <span style="color:#ff79c6">*</span>recorderImpl) <span style="color:#50fa7b">AnnotatedEventf</span>(object runtime.Object, annotations <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">string</span>, eventtype, reason, messageFmt <span style="color:#8be9fd">string</span>, args <span style="color:#ff79c6">...</span><span style="color:#8be9fd;font-style:italic">interface</span>{}) {
-</span></span><span style="display:flex;"><span>  recorder.<span style="color:#50fa7b">generateEvent</span>(object, annotations, eventtype, reason, fmt.<span style="color:#50fa7b">Sprintf</span>(messageFmt, args<span style="color:#ff79c6">...</span>))
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (recorder <span style="color:#fe8019">*</span>recorderImpl) <span style="color:#fabd2f">AnnotatedEventf</span>(object runtime.Object, annotations <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]<span style="color:#fabd2f">string</span>, eventtype, reason, messageFmt <span style="color:#fabd2f">string</span>, args <span style="color:#fe8019">...</span><span style="color:#fe8019">interface</span>{}) {
+</span></span><span style="display:flex;"><span>  recorder.<span style="color:#fabd2f">generateEvent</span>(object, annotations, eventtype, reason, fmt.<span style="color:#fabd2f">Sprintf</span>(messageFmt, args<span style="color:#fe8019">...</span>))
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>可以看到，recorderImpl 实现接口 EventRecorder 最终都会调用 <code>recorderImpl.generateEvent</code>, 其逻辑也是很简单：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (recorder <span style="color:#ff79c6">*</span>recorderImpl) <span style="color:#50fa7b">generateEvent</span>(object runtime.Object, annotations <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">string</span>, eventtype, reason, message <span style="color:#8be9fd">string</span>) {
-</span></span><span style="display:flex;"><span>  ref, err <span style="color:#ff79c6">:=</span> ref.<span style="color:#50fa7b">GetReference</span>(recorder.scheme, object)
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Could not construct reference to: &#39;%#v&#39; due to: &#39;%v&#39;. Will not report event: &#39;%v&#39; &#39;%v&#39; &#39;%v&#39;&#34;</span>, object, err, eventtype, reason, message)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (recorder <span style="color:#fe8019">*</span>recorderImpl) <span style="color:#fabd2f">generateEvent</span>(object runtime.Object, annotations <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]<span style="color:#fabd2f">string</span>, eventtype, reason, message <span style="color:#fabd2f">string</span>) {
+</span></span><span style="display:flex;"><span>  ref, err <span style="color:#fe8019">:=</span> ref.<span style="color:#fabd2f">GetReference</span>(recorder.scheme, object)
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;Could not construct reference to: &#39;%#v&#39; due to: &#39;%v&#39;. Will not report event: &#39;%v&#39; &#39;%v&#39; &#39;%v&#39;&#34;</span>, object, err, eventtype, reason, message)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> !util.<span style="color:#50fa7b">ValidateEventType</span>(eventtype) {
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Unsupported event type: &#39;%v&#39;&#34;</span>, eventtype)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> !util.<span style="color:#fabd2f">ValidateEventType</span>(eventtype) {
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;Unsupported event type: &#39;%v&#39;&#34;</span>, eventtype)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 构造core资源Event</span>
-</span></span><span style="display:flex;"><span>  event <span style="color:#ff79c6">:=</span> recorder.<span style="color:#50fa7b">makeEvent</span>(ref, annotations, eventtype, reason, message)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 构造core资源Event</span>
+</span></span><span style="display:flex;"><span>  event <span style="color:#fe8019">:=</span> recorder.<span style="color:#fabd2f">makeEvent</span>(ref, annotations, eventtype, reason, message)
 </span></span><span style="display:flex;"><span>  event.Source = recorder.source
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// NOTE: events should be a non-blocking operation, but we also need to not</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// put this in a goroutine, otherwise we&#39;ll race to write to a closed channel</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// when we go to shut down this broadcaster.  Just drop events if we get overloaded,</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// and log an error if that happens (we&#39;ve configured the broadcaster to drop</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// outgoing events anyway).</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 把Event通过Broadcaster发出去</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> sent <span style="color:#ff79c6">:=</span> recorder.<span style="color:#50fa7b">ActionOrDrop</span>(watch.Added, event); !sent {
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unable to record event: too many queued events, dropped event %#v&#34;</span>, event)
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// NOTE: events should be a non-blocking operation, but we also need to not</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// put this in a goroutine, otherwise we&#39;ll race to write to a closed channel</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// when we go to shut down this broadcaster.  Just drop events if we get overloaded,</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// and log an error if that happens (we&#39;ve configured the broadcaster to drop</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// outgoing events anyway).</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 把Event通过Broadcaster发出去</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> sent <span style="color:#fe8019">:=</span> recorder.<span style="color:#fabd2f">ActionOrDrop</span>(watch.Added, event); !sent {
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;unable to record event: too many queued events, dropped event %#v&#34;</span>, event)
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">//  构造资源Event</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (recorder <span style="color:#ff79c6">*</span>recorderImpl) <span style="color:#50fa7b">makeEvent</span>(ref <span style="color:#ff79c6">*</span>v1.ObjectReference, annotations <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">string</span>, eventtype, reason, message <span style="color:#8be9fd">string</span>) <span style="color:#ff79c6">*</span>v1.Event {
-</span></span><span style="display:flex;"><span>  t <span style="color:#ff79c6">:=</span> metav1.Time{Time: recorder.clock.<span style="color:#50fa7b">Now</span>()}
-</span></span><span style="display:flex;"><span>  namespace <span style="color:#ff79c6">:=</span> ref.Namespace
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> namespace <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  构造资源Event</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (recorder <span style="color:#fe8019">*</span>recorderImpl) <span style="color:#fabd2f">makeEvent</span>(ref <span style="color:#fe8019">*</span>v1.ObjectReference, annotations <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]<span style="color:#fabd2f">string</span>, eventtype, reason, message <span style="color:#fabd2f">string</span>) <span style="color:#fe8019">*</span>v1.Event {
+</span></span><span style="display:flex;"><span>  t <span style="color:#fe8019">:=</span> metav1.Time{Time: recorder.clock.<span style="color:#fabd2f">Now</span>()}
+</span></span><span style="display:flex;"><span>  namespace <span style="color:#fe8019">:=</span> ref.Namespace
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> namespace <span style="color:#fe8019">==</span> <span style="color:#b8bb26">&#34;&#34;</span> {
 </span></span><span style="display:flex;"><span>    namespace = metav1.NamespaceDefault
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>v1.Event{
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>v1.Event{
 </span></span><span style="display:flex;"><span>    ObjectMeta: metav1.ObjectMeta{
-</span></span><span style="display:flex;"><span>      Name:        fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;%v.%x&#34;</span>, ref.Name, t.<span style="color:#50fa7b">UnixNano</span>()),
+</span></span><span style="display:flex;"><span>      Name:        fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;%v.%x&#34;</span>, ref.Name, t.<span style="color:#fabd2f">UnixNano</span>()),
 </span></span><span style="display:flex;"><span>      Namespace:   namespace,
 </span></span><span style="display:flex;"><span>      Annotations: annotations,
 </span></span><span style="display:flex;"><span>    },
-</span></span><span style="display:flex;"><span>    InvolvedObject: <span style="color:#ff79c6">*</span>ref,
+</span></span><span style="display:flex;"><span>    InvolvedObject: <span style="color:#fe8019">*</span>ref,
 </span></span><span style="display:flex;"><span>    Reason:         reason,
 </span></span><span style="display:flex;"><span>    Message:        message,
 </span></span><span style="display:flex;"><span>    FirstTimestamp: t,
 </span></span><span style="display:flex;"><span>    LastTimestamp:  t,
-</span></span><span style="display:flex;"><span>    Count:          <span style="color:#bd93f9">1</span>,
+</span></span><span style="display:flex;"><span>    Count:          <span style="color:#d3869b">1</span>,
 </span></span><span style="display:flex;"><span>    Type:           eventtype,
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p><code>watch.BroadcasterActionOrDrop</code> 的实现也很简单， 要么可以添加到队列（消费队列不满），要么直接丢弃（消费队列已经满了）：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/apimachinery/pkg/watch/mux.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// Action distributes the given event among all watchers, or drops it on the floor</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// if too many incoming actions are queued up.  Returns true if the action was sent,</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// false if dropped.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (m <span style="color:#ff79c6">*</span>Broadcaster) <span style="color:#50fa7b">ActionOrDrop</span>(action EventType, obj runtime.Object) <span style="color:#8be9fd">bool</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">select</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">case</span> m.incoming <span style="color:#ff79c6">&lt;-</span> Event{action, obj}:
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">default</span>:
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/apimachinery/pkg/watch/mux.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Action distributes the given event among all watchers, or drops it on the floor</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// if too many incoming actions are queued up.  Returns true if the action was sent,</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// false if dropped.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>Broadcaster) <span style="color:#fabd2f">ActionOrDrop</span>(action EventType, obj runtime.Object) <span style="color:#fabd2f">bool</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">case</span> m.incoming <span style="color:#fe8019">&lt;-</span> Event{action, obj}:
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">default</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="eventbroadcaster">EventBroadcaster</h2>
 <p>事件消费者， 也称为事件广播器，EventBroadcaster 消费 EventRecorder 记录的事件并将其分发给目前所有已连接的 boradcasterWatcher。分发过程有2种机制，分别是非阻塞和阻塞分发机制：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> EventBroadcaster <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">StartEventWatcher</span>(eventHandler <span style="color:#8be9fd;font-style:italic">func</span>(<span style="color:#ff79c6">*</span>v1.Event)) watch.Interface
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">StartRecordingToSink</span>(sink EventSink) watch.Interface
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">StartLogging</span>(logf <span style="color:#8be9fd;font-style:italic">func</span>(format <span style="color:#8be9fd">string</span>, args <span style="color:#ff79c6">...</span><span style="color:#8be9fd;font-style:italic">interface</span>{})) watch.Interface
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">StartStructuredLogging</span>(verbosity klog.Level) watch.Interface
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">NewRecorder</span>(scheme <span style="color:#ff79c6">*</span>runtime.Scheme, source v1.EventSource) EventRecorder
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Shutdown</span>()
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> EventBroadcaster <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">StartEventWatcher</span>(eventHandler <span style="color:#fe8019">func</span>(<span style="color:#fe8019">*</span>v1.Event)) watch.Interface
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">StartRecordingToSink</span>(sink EventSink) watch.Interface
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">StartLogging</span>(logf <span style="color:#fe8019">func</span>(format <span style="color:#fabd2f">string</span>, args <span style="color:#fe8019">...</span><span style="color:#fe8019">interface</span>{})) watch.Interface
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">StartStructuredLogging</span>(verbosity klog.Level) watch.Interface
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">NewRecorder</span>(scheme <span style="color:#fe8019">*</span>runtime.Scheme, source v1.EventSource) EventRecorder
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Shutdown</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><ul>
 <li>StartEventWatcher  创建一个新的 Watcher 来处理收到的 Event， 处理逻辑为传入的钩子函数 eventHandler</li>
@@ -367,30 +367,30 @@ kubernetes 的事件（Event）是一种资源对象，用于展示集群内发�
 <li>Shutdown  关闭 EventBroadcaster</li>
 </ul>
 <p>EventBroadcaster 的实现 eventBroadcasterImpl 的结构体如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> eventBroadcasterImpl <span style="color:#8be9fd;font-style:italic">struct</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">*</span>watch.Broadcaster
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> eventBroadcasterImpl <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">*</span>watch.Broadcaster
 </span></span><span style="display:flex;"><span>  sleepDuration time.Duration
 </span></span><span style="display:flex;"><span>  options       CorrelatorOptions
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>eventBroadcasterImpl 的创建：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// Creates a new event broadcaster.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewBroadcaster</span>() EventBroadcaster {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>eventBroadcasterImpl{
-</span></span><span style="display:flex;"><span>    Broadcaster:   watch.<span style="color:#50fa7b">NewLongQueueBroadcaster</span>(maxQueuedEvents, watch.DropIfChannelFull),
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Creates a new event broadcaster.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewBroadcaster</span>() EventBroadcaster {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>eventBroadcasterImpl{
+</span></span><span style="display:flex;"><span>    Broadcaster:   watch.<span style="color:#fabd2f">NewLongQueueBroadcaster</span>(maxQueuedEvents, watch.DropIfChannelFull),
 </span></span><span style="display:flex;"><span>    sleepDuration: defaultSleepDuration,
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewBroadcasterForTests</span>(sleepDuration time.Duration) EventBroadcaster {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>eventBroadcasterImpl{
-</span></span><span style="display:flex;"><span>    Broadcaster:   watch.<span style="color:#50fa7b">NewLongQueueBroadcaster</span>(maxQueuedEvents, watch.DropIfChannelFull),
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewBroadcasterForTests</span>(sleepDuration time.Duration) EventBroadcaster {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>eventBroadcasterImpl{
+</span></span><span style="display:flex;"><span>    Broadcaster:   watch.<span style="color:#fabd2f">NewLongQueueBroadcaster</span>(maxQueuedEvents, watch.DropIfChannelFull),
 </span></span><span style="display:flex;"><span>    sleepDuration: sleepDuration,
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewBroadcasterWithCorrelatorOptions</span>(options CorrelatorOptions) EventBroadcaster {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>eventBroadcasterImpl{
-</span></span><span style="display:flex;"><span>    Broadcaster:   watch.<span style="color:#50fa7b">NewLongQueueBroadcaster</span>(maxQueuedEvents, watch.DropIfChannelFull),
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewBroadcasterWithCorrelatorOptions</span>(options CorrelatorOptions) EventBroadcaster {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>eventBroadcasterImpl{
+</span></span><span style="display:flex;"><span>    Broadcaster:   watch.<span style="color:#fabd2f">NewLongQueueBroadcaster</span>(maxQueuedEvents, watch.DropIfChannelFull),
 </span></span><span style="display:flex;"><span>    sleepDuration: defaultSleepDuration,
 </span></span><span style="display:flex;"><span>    options:       options,
 </span></span><span style="display:flex;"><span>  }
@@ -398,116 +398,116 @@ kubernetes 的事件（Event）是一种资源对象，用于展示集群内发�
 </span></span></code></pre></div><p>需要注意的时候，在创建 EventBroadcasterImpl 其成员 watch.Broadcaster 已经启动起来了。</p>
 <h3 id="starteventwatcher">StartEventWatcher</h3>
 <p>eventBroadcasterImpl.StartEventWatcher 会创建一个新的 Watcher，每个 Watcher 在收到 Event 后的处理逻辑就是传入的 eventHandler。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// StartEventWatcher starts sending events received from this EventBroadcaster to the given event handler function.</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// The return value can be ignored or used to stop recording, if desired.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (e <span style="color:#ff79c6">*</span>eventBroadcasterImpl) <span style="color:#50fa7b">StartEventWatcher</span>(eventHandler <span style="color:#8be9fd;font-style:italic">func</span>(<span style="color:#ff79c6">*</span>v1.Event)) watch.Interface {
-</span></span><span style="display:flex;"><span>  watcher <span style="color:#ff79c6">:=</span> e.<span style="color:#50fa7b">Watch</span>()
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> utilruntime.<span style="color:#50fa7b">HandleCrash</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> watchEvent <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> watcher.<span style="color:#50fa7b">ResultChan</span>() {
-</span></span><span style="display:flex;"><span>      event, ok <span style="color:#ff79c6">:=</span> watchEvent.Object.(<span style="color:#ff79c6">*</span>v1.Event)
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">if</span> !ok {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// This is all local, so there&#39;s no reason this should</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// ever happen.</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">continue</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// StartEventWatcher starts sending events received from this EventBroadcaster to the given event handler function.</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// The return value can be ignored or used to stop recording, if desired.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (e <span style="color:#fe8019">*</span>eventBroadcasterImpl) <span style="color:#fabd2f">StartEventWatcher</span>(eventHandler <span style="color:#fe8019">func</span>(<span style="color:#fe8019">*</span>v1.Event)) watch.Interface {
+</span></span><span style="display:flex;"><span>  watcher <span style="color:#fe8019">:=</span> e.<span style="color:#fabd2f">Watch</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">go</span> <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">defer</span> utilruntime.<span style="color:#fabd2f">HandleCrash</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">for</span> watchEvent <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> watcher.<span style="color:#fabd2f">ResultChan</span>() {
+</span></span><span style="display:flex;"><span>      event, ok <span style="color:#fe8019">:=</span> watchEvent.Object.(<span style="color:#fe8019">*</span>v1.Event)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">if</span> !ok {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// This is all local, so there&#39;s no reason this should</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// ever happen.</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">continue</span>
 </span></span><span style="display:flex;"><span>      }
-</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">eventHandler</span>(event)
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">eventHandler</span>(event)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>  }()
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> watcher
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> watcher
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="startloggingstartstructuredlogging">StartLogging&amp;StartStructuredLogging</h3>
 <p><code>eventBroadcasterImpl.StartLogging</code> 和 <code>eventBroadcasterImpl.StartStructuredLogging</code> 就很好理解了，其实就是日志输出，唯一的区别是 <code>eventBroadcasterImpl.StartLogging</code> 传入了一个日志输出逻辑的钩子函数，<code>eventBroadcasterImpl.StartStructuredLogging</code> 是直接使用 klog 来进行日志输出。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// StartLogging starts sending events received from this EventBroadcaster to the given logging function.</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// The return value can be ignored or used to stop recording, if desired.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (e <span style="color:#ff79c6">*</span>eventBroadcasterImpl) <span style="color:#50fa7b">StartLogging</span>(logf <span style="color:#8be9fd;font-style:italic">func</span>(format <span style="color:#8be9fd">string</span>, args <span style="color:#ff79c6">...</span><span style="color:#8be9fd;font-style:italic">interface</span>{})) watch.Interface {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> e.<span style="color:#50fa7b">StartEventWatcher</span>(
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">func</span>(e <span style="color:#ff79c6">*</span>v1.Event) {
-</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">logf</span>(<span style="color:#f1fa8c">&#34;Event(%#v): type: &#39;%v&#39; reason: &#39;%v&#39; %v&#34;</span>, e.InvolvedObject, e.Type, e.Reason, e.Message)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// StartLogging starts sending events received from this EventBroadcaster to the given logging function.</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// The return value can be ignored or used to stop recording, if desired.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (e <span style="color:#fe8019">*</span>eventBroadcasterImpl) <span style="color:#fabd2f">StartLogging</span>(logf <span style="color:#fe8019">func</span>(format <span style="color:#fabd2f">string</span>, args <span style="color:#fe8019">...</span><span style="color:#fe8019">interface</span>{})) watch.Interface {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> e.<span style="color:#fabd2f">StartEventWatcher</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">func</span>(e <span style="color:#fe8019">*</span>v1.Event) {
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">logf</span>(<span style="color:#b8bb26">&#34;Event(%#v): type: &#39;%v&#39; reason: &#39;%v&#39; %v&#34;</span>, e.InvolvedObject, e.Type, e.Reason, e.Message)
 </span></span><span style="display:flex;"><span>    })
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// StartStructuredLogging starts sending events received from this EventBroadcaster to the structured logging function.</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// The return value can be ignored or used to stop recording, if desired.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (e <span style="color:#ff79c6">*</span>eventBroadcasterImpl) <span style="color:#50fa7b">StartStructuredLogging</span>(verbosity klog.Level) watch.Interface {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> e.<span style="color:#50fa7b">StartEventWatcher</span>(
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">func</span>(e <span style="color:#ff79c6">*</span>v1.Event) {
-</span></span><span style="display:flex;"><span>      klog.<span style="color:#50fa7b">V</span>(verbosity).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Event occurred&#34;</span>, <span style="color:#f1fa8c">&#34;object&#34;</span>, klog.<span style="color:#50fa7b">KRef</span>(e.InvolvedObject.Namespace, e.InvolvedObject.Name), <span style="color:#f1fa8c">&#34;kind&#34;</span>, e.InvolvedObject.Kind, <span style="color:#f1fa8c">&#34;apiVersion&#34;</span>, e.InvolvedObject.APIVersion, <span style="color:#f1fa8c">&#34;type&#34;</span>, e.Type, <span style="color:#f1fa8c">&#34;reason&#34;</span>, e.Reason, <span style="color:#f1fa8c">&#34;message&#34;</span>, e.Message)
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// StartStructuredLogging starts sending events received from this EventBroadcaster to the structured logging function.</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// The return value can be ignored or used to stop recording, if desired.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (e <span style="color:#fe8019">*</span>eventBroadcasterImpl) <span style="color:#fabd2f">StartStructuredLogging</span>(verbosity klog.Level) watch.Interface {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> e.<span style="color:#fabd2f">StartEventWatcher</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">func</span>(e <span style="color:#fe8019">*</span>v1.Event) {
+</span></span><span style="display:flex;"><span>      klog.<span style="color:#fabd2f">V</span>(verbosity).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Event occurred&#34;</span>, <span style="color:#b8bb26">&#34;object&#34;</span>, klog.<span style="color:#fabd2f">KRef</span>(e.InvolvedObject.Namespace, e.InvolvedObject.Name), <span style="color:#b8bb26">&#34;kind&#34;</span>, e.InvolvedObject.Kind, <span style="color:#b8bb26">&#34;apiVersion&#34;</span>, e.InvolvedObject.APIVersion, <span style="color:#b8bb26">&#34;type&#34;</span>, e.Type, <span style="color:#b8bb26">&#34;reason&#34;</span>, e.Reason, <span style="color:#b8bb26">&#34;message&#34;</span>, e.Message)
 </span></span><span style="display:flex;"><span>    })
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="newrecorder">NewRecorder</h3>
 <p>eventBroadcasterImpl.NewRecorder 创建一个 EventRecorder 实例从上面知道当调用 Event/Eventf/AnnotatedEventf 的时候，事件会又 EventBroadcaster 分发给各个 Watcher：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// NewRecorder returns an EventRecorder that records events with the given event source.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (e <span style="color:#ff79c6">*</span>eventBroadcasterImpl) <span style="color:#50fa7b">NewRecorder</span>(scheme <span style="color:#ff79c6">*</span>runtime.Scheme, source v1.EventSource) EventRecorder {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>recorderImpl{scheme, source, e.Broadcaster, clock.RealClock{}}
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// NewRecorder returns an EventRecorder that records events with the given event source.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (e <span style="color:#fe8019">*</span>eventBroadcasterImpl) <span style="color:#fabd2f">NewRecorder</span>(scheme <span style="color:#fe8019">*</span>runtime.Scheme, source v1.EventSource) EventRecorder {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>recorderImpl{scheme, source, e.Broadcaster, clock.RealClock{}}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="startrecordingtosink">StartRecordingToSink</h3>
 <p>eventBroadcasterImpl.StartRecordingToSink</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// StartRecordingToSink starts sending events received from the specified eventBroadcaster to the given sink.</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// The return value can be ignored or used to stop recording, if desired.</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// TODO: make me an object with parameterizable queue length and retry interval</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (e <span style="color:#ff79c6">*</span>eventBroadcasterImpl) <span style="color:#50fa7b">StartRecordingToSink</span>(sink EventSink) watch.Interface {
-</span></span><span style="display:flex;"><span>  eventCorrelator <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">NewEventCorrelatorWithOptions</span>(e.options)
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> e.<span style="color:#50fa7b">StartEventWatcher</span>(
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">func</span>(event <span style="color:#ff79c6">*</span>v1.Event) {
-</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">recordToSink</span>(sink, event, eventCorrelator, e.sleepDuration)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// StartRecordingToSink starts sending events received from the specified eventBroadcaster to the given sink.</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// The return value can be ignored or used to stop recording, if desired.</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// TODO: make me an object with parameterizable queue length and retry interval</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (e <span style="color:#fe8019">*</span>eventBroadcasterImpl) <span style="color:#fabd2f">StartRecordingToSink</span>(sink EventSink) watch.Interface {
+</span></span><span style="display:flex;"><span>  eventCorrelator <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">NewEventCorrelatorWithOptions</span>(e.options)
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> e.<span style="color:#fabd2f">StartEventWatcher</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">func</span>(event <span style="color:#fe8019">*</span>v1.Event) {
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">recordToSink</span>(sink, event, eventCorrelator, e.sleepDuration)
 </span></span><span style="display:flex;"><span>    })
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>recordToSink 负责把事件发送到 apiserver，这里的 sink 其实就是和 apiserver 交互的 restclient， event 是要发送的事件，eventCorrelator 在发送事件之前先对事件进行预处理：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">recordToSink</span>(sink EventSink, event <span style="color:#ff79c6">*</span>v1.Event, eventCorrelator <span style="color:#ff79c6">*</span>EventCorrelator, sleepDuration time.Duration) {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">...</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">//对事件进行预处理</span>
-</span></span><span style="display:flex;"><span>  result, err <span style="color:#ff79c6">:=</span> eventCorrelator.<span style="color:#50fa7b">EventCorrelate</span>(event)
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">...</span>
-</span></span><span style="display:flex;"><span>  tries <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">for</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 把事件发送给apiserver，其实就是存储在etcd中， 根据这段代码逻辑，是有失败重试机制</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 重试不超过 maxTriesPerEvent，即12此，每次重试都有间隔 defaultSleepDuration = 10s</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> <span style="color:#50fa7b">recordEvent</span>(sink, result.Event, result.Patch, result.Event.Count &gt; <span style="color:#bd93f9">1</span>, eventCorrelator) {
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">break</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">recordToSink</span>(sink EventSink, event <span style="color:#fe8019">*</span>v1.Event, eventCorrelator <span style="color:#fe8019">*</span>EventCorrelator, sleepDuration time.Duration) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">...</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8ec07c">//对事件进行预处理</span>
+</span></span><span style="display:flex;"><span>  result, err <span style="color:#fe8019">:=</span> eventCorrelator.<span style="color:#fabd2f">EventCorrelate</span>(event)
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">...</span>
+</span></span><span style="display:flex;"><span>  tries <span style="color:#fe8019">:=</span> <span style="color:#d3869b">0</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">for</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 把事件发送给apiserver，其实就是存储在etcd中， 根据这段代码逻辑，是有失败重试机制</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 重试不超过 maxTriesPerEvent，即12此，每次重试都有间隔 defaultSleepDuration = 10s</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> <span style="color:#fabd2f">recordEvent</span>(sink, result.Event, result.Patch, result.Event.Count &gt; <span style="color:#d3869b">1</span>, eventCorrelator) {
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">break</span>
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    tries<span style="color:#ff79c6">++</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> tries <span style="color:#ff79c6">&gt;=</span> maxTriesPerEvent {
-</span></span><span style="display:flex;"><span>      klog.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Unable to write event &#39;%#v&#39; (retry limit exceeded!)&#34;</span>, event)
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">break</span>
+</span></span><span style="display:flex;"><span>    tries<span style="color:#fe8019">++</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> tries <span style="color:#fe8019">&gt;=</span> maxTriesPerEvent {
+</span></span><span style="display:flex;"><span>      klog.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;Unable to write event &#39;%#v&#39; (retry limit exceeded!)&#34;</span>, event)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">break</span>
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Randomize the first sleep so that various clients won&#39;t all be</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// synced up if the master goes down.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> tries <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">1</span> {
-</span></span><span style="display:flex;"><span>      time.<span style="color:#50fa7b">Sleep</span>(time.<span style="color:#50fa7b">Duration</span>(<span style="color:#8be9fd;font-style:italic">float64</span>(sleepDuration) <span style="color:#ff79c6">*</span> rand.<span style="color:#50fa7b">Float64</span>()))
-</span></span><span style="display:flex;"><span>    } <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>      time.<span style="color:#50fa7b">Sleep</span>(sleepDuration)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Randomize the first sleep so that various clients won&#39;t all be</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// synced up if the master goes down.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> tries <span style="color:#fe8019">==</span> <span style="color:#d3869b">1</span> {
+</span></span><span style="display:flex;"><span>      time.<span style="color:#fabd2f">Sleep</span>(time.<span style="color:#fabd2f">Duration</span>(<span style="color:#fabd2f">float64</span>(sleepDuration) <span style="color:#fe8019">*</span> rand.<span style="color:#fabd2f">Float64</span>()))
+</span></span><span style="display:flex;"><span>    } <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>      time.<span style="color:#fabd2f">Sleep</span>(sleepDuration)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>结合上面代码中的注释，recordToSink 的逻辑很好理解：recordToSink 先对事件进行预处理，然后在把事件发送给 apiserver。这里说的预处理其实就是对事件进行聚合处理，不然的话冗余的存储会对etcd是个不小的压力，对apiserver也是。先来看看聚合器的实现。</p>
 <h2 id="eventcorrelator">EventCorrelator</h2>
 <p>EventCorrelator 是日志聚合器，</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> EventCorrelator <span style="color:#8be9fd;font-style:italic">struct</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> EventCorrelator <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>  filterFunc EventFilterFunc
-</span></span><span style="display:flex;"><span>  aggregator <span style="color:#ff79c6">*</span>EventAggregator
-</span></span><span style="display:flex;"><span>  logger <span style="color:#ff79c6">*</span>eventLogger
+</span></span><span style="display:flex;"><span>  aggregator <span style="color:#fe8019">*</span>EventAggregator
+</span></span><span style="display:flex;"><span>  logger <span style="color:#fe8019">*</span>eventLogger
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>从上面 EventCorrelator 的定义可以看出，其作用就是进行过滤，把相似的事件进行聚合操作，把相同的事件记录到一起：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// EventCorrelate filters, aggregates, counts, and de-duplicates all incoming events</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>EventCorrelator) <span style="color:#50fa7b">EventCorrelate</span>(newEvent <span style="color:#ff79c6">*</span>v1.Event) (<span style="color:#ff79c6">*</span>EventCorrelateResult, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> newEvent <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;event is nil&#34;</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// EventCorrelate filters, aggregates, counts, and de-duplicates all incoming events</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (c <span style="color:#fe8019">*</span>EventCorrelator) <span style="color:#fabd2f">EventCorrelate</span>(newEvent <span style="color:#fe8019">*</span>v1.Event) (<span style="color:#fe8019">*</span>EventCorrelateResult, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> newEvent <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;event is nil&#34;</span>)
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        aggregateEvent, ckey <span style="color:#ff79c6">:=</span> c.aggregator.<span style="color:#50fa7b">EventAggregate</span>(newEvent)
-</span></span><span style="display:flex;"><span>        observedEvent, patch, err <span style="color:#ff79c6">:=</span> c.logger.<span style="color:#50fa7b">eventObserve</span>(aggregateEvent, ckey)
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> c.<span style="color:#50fa7b">filterFunc</span>(observedEvent) {
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>EventCorrelateResult{Skip: <span style="color:#ff79c6">true</span>}, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>        aggregateEvent, ckey <span style="color:#fe8019">:=</span> c.aggregator.<span style="color:#fabd2f">EventAggregate</span>(newEvent)
+</span></span><span style="display:flex;"><span>        observedEvent, patch, err <span style="color:#fe8019">:=</span> c.logger.<span style="color:#fabd2f">eventObserve</span>(aggregateEvent, ckey)
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> c.<span style="color:#fabd2f">filterFunc</span>(observedEvent) {
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>EventCorrelateResult{Skip: <span style="color:#fe8019">true</span>}, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>EventCorrelateResult{Event: observedEvent, Patch: patch}, err
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>EventCorrelateResult{Event: observedEvent, Patch: patch}, err
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>这里用到 <code>github.com/golang/groupcache/lru</code> 作为事件的存储。具体的过滤，聚合以及记录逻辑，这里不做详细讲解，请自行查看代码。</p>
 <h2 id="eventsink">EventSink</h2>
 <p>上面说到，事件预处理后会发送到 apiserver， kubernetes 这里提供了接口 EventSink：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> EventSink <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Create</span>(event <span style="color:#ff79c6">*</span>v1.Event) (<span style="color:#ff79c6">*</span>v1.Event, <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Update</span>(event <span style="color:#ff79c6">*</span>v1.Event) (<span style="color:#ff79c6">*</span>v1.Event, <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Patch</span>(oldEvent <span style="color:#ff79c6">*</span>v1.Event, data []<span style="color:#8be9fd">byte</span>) (<span style="color:#ff79c6">*</span>v1.Event, <span style="color:#8be9fd">error</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> EventSink <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Create</span>(event <span style="color:#fe8019">*</span>v1.Event) (<span style="color:#fe8019">*</span>v1.Event, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Update</span>(event <span style="color:#fe8019">*</span>v1.Event) (<span style="color:#fe8019">*</span>v1.Event, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Patch</span>(oldEvent <span style="color:#fe8019">*</span>v1.Event, data []<span style="color:#fabd2f">byte</span>) (<span style="color:#fe8019">*</span>v1.Event, <span style="color:#fabd2f">error</span>)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>可以看 <code>tools/event/event_broadcaster.go</code>中的实现，逻辑很简单。</p>
 <h2 id="总结">总结</h2>

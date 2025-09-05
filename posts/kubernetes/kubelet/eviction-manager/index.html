@@ -248,10 +248,10 @@
 <p>这里就不深入代码来说了，简单来说是利用了cgroups 的 event_control 特性，即 监控 cgroup 中的一个文件fd(形如[memory|cpu|xxx].xxx_xxx_xx)， 然后给一个阀值，以及一个监听的fd(一般都是epoll_create)写入到 cgroups.event_control，每次到达阀值的时候，会触发事件，然后就是监听fd事件处理的逻辑了。</p>
 <p>memoryThresholdNotifier 就利用（封装）了这个特性实现了 ThresholdNotifier 接口。 阀值触发器产生的事件都会写入到管道 memoryThresholdNotifier.event，每次阀值触发器触发事件的时候会调用的回调函数 memoryThresholdNotifier.handler。</p>
 <p>memoryThresholdNotifier 的启动很简单，就是监听 memoryThresholdNotifier.event，一有事件发生，立即调用回调函数</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (m <span style="color:#ff79c6">*</span>memoryThresholdNotifier) <span style="color:#50fa7b">Start</span>() {
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: created memoryThresholdNotifier&#34;</span>, <span style="color:#f1fa8c">&#34;notifier&#34;</span>, m.<span style="color:#50fa7b">Description</span>())
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> <span style="color:#ff79c6">range</span> m.events {
-</span></span><span style="display:flex;"><span>        m.<span style="color:#50fa7b">handler</span>(fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;eviction manager: %s crossed&#34;</span>, m.<span style="color:#50fa7b">Description</span>()))
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>memoryThresholdNotifier) <span style="color:#fabd2f">Start</span>() {
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: created memoryThresholdNotifier&#34;</span>, <span style="color:#b8bb26">&#34;notifier&#34;</span>, m.<span style="color:#fabd2f">Description</span>())
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">for</span> <span style="color:#fe8019">range</span> m.events {
+</span></span><span style="display:flex;"><span>        m.<span style="color:#fabd2f">handler</span>(fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;eviction manager: %s crossed&#34;</span>, m.<span style="color:#fabd2f">Description</span>()))
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>然后就是 memoryThresholdNotifier.UpdateThreshold， 其做了如下两件事：</p>
@@ -259,80 +259,80 @@
 <li>根据最新的 node 的状态汇总，更新阀值</li>
 <li>如果阀值监听器已经启动了，因为在逻辑上是旧的监听器，所以需要先停止该阀值监听器，并重新拉起来阀值监听器</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (m <span style="color:#ff79c6">*</span>memoryThresholdNotifier) <span style="color:#50fa7b">UpdateThreshold</span>(summary <span style="color:#ff79c6">*</span>statsapi.Summary) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>	memoryStats <span style="color:#ff79c6">:=</span> summary.Node.Memory
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#50fa7b">isAllocatableEvictionThreshold</span>(m.threshold) {
-</span></span><span style="display:flex;"><span>		allocatableContainer, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getSysContainer</span>(summary.Node.SystemContainers, statsapi.SystemContainerPods)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> err
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>memoryThresholdNotifier) <span style="color:#fabd2f">UpdateThreshold</span>(summary <span style="color:#fe8019">*</span>statsapi.Summary) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>	memoryStats <span style="color:#fe8019">:=</span> summary.Node.Memory
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">isAllocatableEvictionThreshold</span>(m.threshold) {
+</span></span><span style="display:flex;"><span>		allocatableContainer, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">getSysContainer</span>(summary.Node.SystemContainers, statsapi.SystemContainerPods)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>		memoryStats = allocatableContainer.Memory
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> memoryStats <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">||</span> memoryStats.UsageBytes <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">||</span> memoryStats.WorkingSetBytes <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">||</span> memoryStats.AvailableBytes <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;summary was incomplete.  Expected MemoryStats and all subfields to be non-nil, but got %+v&#34;</span>, memoryStats)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> memoryStats <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span> memoryStats.UsageBytes <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span> memoryStats.WorkingSetBytes <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span> memoryStats.AvailableBytes <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;summary was incomplete.  Expected MemoryStats and all subfields to be non-nil, but got %+v&#34;</span>, memoryStats)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Set threshold on usage to capacity - eviction_hard + inactive_file,</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// since we want to be notified when working_set = capacity - eviction_hard</span>
-</span></span><span style="display:flex;"><span>	inactiveFile <span style="color:#ff79c6">:=</span> resource.<span style="color:#50fa7b">NewQuantity</span>(<span style="color:#8be9fd;font-style:italic">int64</span>(<span style="color:#ff79c6">*</span>memoryStats.UsageBytes<span style="color:#ff79c6">-*</span>memoryStats.WorkingSetBytes), resource.BinarySI)
-</span></span><span style="display:flex;"><span>	capacity <span style="color:#ff79c6">:=</span> resource.<span style="color:#50fa7b">NewQuantity</span>(<span style="color:#8be9fd;font-style:italic">int64</span>(<span style="color:#ff79c6">*</span>memoryStats.AvailableBytes<span style="color:#ff79c6">+*</span>memoryStats.WorkingSetBytes), resource.BinarySI)
-</span></span><span style="display:flex;"><span>	evictionThresholdQuantity <span style="color:#ff79c6">:=</span> evictionapi.<span style="color:#50fa7b">GetThresholdQuantity</span>(m.threshold.Value, capacity)
-</span></span><span style="display:flex;"><span>	memcgThreshold <span style="color:#ff79c6">:=</span> capacity.<span style="color:#50fa7b">DeepCopy</span>()
-</span></span><span style="display:flex;"><span>	memcgThreshold.<span style="color:#50fa7b">Sub</span>(<span style="color:#ff79c6">*</span>evictionThresholdQuantity)
-</span></span><span style="display:flex;"><span>	memcgThreshold.<span style="color:#50fa7b">Add</span>(<span style="color:#ff79c6">*</span>inactiveFile)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Set threshold on usage to capacity - eviction_hard + inactive_file,</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// since we want to be notified when working_set = capacity - eviction_hard</span>
+</span></span><span style="display:flex;"><span>	inactiveFile <span style="color:#fe8019">:=</span> resource.<span style="color:#fabd2f">NewQuantity</span>(<span style="color:#fabd2f">int64</span>(<span style="color:#fe8019">*</span>memoryStats.UsageBytes<span style="color:#fe8019">-*</span>memoryStats.WorkingSetBytes), resource.BinarySI)
+</span></span><span style="display:flex;"><span>	capacity <span style="color:#fe8019">:=</span> resource.<span style="color:#fabd2f">NewQuantity</span>(<span style="color:#fabd2f">int64</span>(<span style="color:#fe8019">*</span>memoryStats.AvailableBytes<span style="color:#fe8019">+*</span>memoryStats.WorkingSetBytes), resource.BinarySI)
+</span></span><span style="display:flex;"><span>	evictionThresholdQuantity <span style="color:#fe8019">:=</span> evictionapi.<span style="color:#fabd2f">GetThresholdQuantity</span>(m.threshold.Value, capacity)
+</span></span><span style="display:flex;"><span>	memcgThreshold <span style="color:#fe8019">:=</span> capacity.<span style="color:#fabd2f">DeepCopy</span>()
+</span></span><span style="display:flex;"><span>	memcgThreshold.<span style="color:#fabd2f">Sub</span>(<span style="color:#fe8019">*</span>evictionThresholdQuantity)
+</span></span><span style="display:flex;"><span>	memcgThreshold.<span style="color:#fabd2f">Add</span>(<span style="color:#fe8019">*</span>inactiveFile)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: setting notifier to capacity&#34;</span>, <span style="color:#f1fa8c">&#34;notifier&#34;</span>, m.<span style="color:#50fa7b">Description</span>(), <span style="color:#f1fa8c">&#34;capacity&#34;</span>, memcgThreshold.<span style="color:#50fa7b">String</span>())
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> m.notifier <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		m.notifier.<span style="color:#50fa7b">Stop</span>()
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: setting notifier to capacity&#34;</span>, <span style="color:#b8bb26">&#34;notifier&#34;</span>, m.<span style="color:#fabd2f">Description</span>(), <span style="color:#b8bb26">&#34;capacity&#34;</span>, memcgThreshold.<span style="color:#fabd2f">String</span>())
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> m.notifier <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		m.notifier.<span style="color:#fabd2f">Stop</span>()
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	newNotifier, err <span style="color:#ff79c6">:=</span> m.factory.<span style="color:#50fa7b">NewCgroupNotifier</span>(m.cgroupPath, memoryUsageAttribute, memcgThreshold.<span style="color:#50fa7b">Value</span>())
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>	newNotifier, err <span style="color:#fe8019">:=</span> m.factory.<span style="color:#fabd2f">NewCgroupNotifier</span>(m.cgroupPath, memoryUsageAttribute, memcgThreshold.<span style="color:#fabd2f">Value</span>())
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>	m.notifier = newNotifier
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> m.notifier.<span style="color:#50fa7b">Start</span>(m.events)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">go</span> m.notifier.<span style="color:#fabd2f">Start</span>(m.events)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="实现">实现</h2>
 <p>接口 Manager 定义了 eviction manager 的通用方法：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/kubelet/eviction/types.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Manager <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Start</span>(diskInfoProvider DiskInfoProvider, podFunc ActivePodsFunc, podCleanedUpFunc PodCleanedUpFunc, monitoringInterval time.Duration)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">IsUnderMemoryPressure</span>() <span style="color:#8be9fd">bool</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">IsUnderDiskPressure</span>() <span style="color:#8be9fd">bool</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">IsUnderPIDPressure</span>() <span style="color:#8be9fd">bool</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/eviction/types.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> Manager <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Start</span>(diskInfoProvider DiskInfoProvider, podFunc ActivePodsFunc, podCleanedUpFunc PodCleanedUpFunc, monitoringInterval time.Duration)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">IsUnderMemoryPressure</span>() <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">IsUnderDiskPressure</span>() <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">IsUnderPIDPressure</span>() <span style="color:#fabd2f">bool</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>结构体 managerImpl 实现了该方法， 通过调用 start 方法运行 eviction manager，如果开启了内存阀值监测，根据上一小节，每次到达内存阀值的时候会出发事件并调用 synchronize，同时也会在后台每间隔10秒执行 synchronize：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (m <span style="color:#ff79c6">*</span>managerImpl) <span style="color:#50fa7b">Start</span>(diskInfoProvider DiskInfoProvider, podFunc ActivePodsFunc, podCleanedUpFunc PodCleanedUpFunc, monitoringInterval time.Duration) {
-</span></span><span style="display:flex;"><span>	thresholdHandler <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">func</span>(message <span style="color:#8be9fd">string</span>) {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">InfoS</span>(message)
-</span></span><span style="display:flex;"><span>		m.<span style="color:#50fa7b">synchronize</span>(diskInfoProvider, podFunc)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>managerImpl) <span style="color:#fabd2f">Start</span>(diskInfoProvider DiskInfoProvider, podFunc ActivePodsFunc, podCleanedUpFunc PodCleanedUpFunc, monitoringInterval time.Duration) {
+</span></span><span style="display:flex;"><span>	thresholdHandler <span style="color:#fe8019">:=</span> <span style="color:#fe8019">func</span>(message <span style="color:#fabd2f">string</span>) {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">InfoS</span>(message)
+</span></span><span style="display:flex;"><span>		m.<span style="color:#fabd2f">synchronize</span>(diskInfoProvider, podFunc)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 如果开启内核的内存通知机制</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> m.config.KernelMemcgNotification {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, threshold <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> m.config.Thresholds {
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// 只匹配内存相关的阈值配置</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> threshold.Signal <span style="color:#ff79c6">==</span> evictionapi.SignalMemoryAvailable <span style="color:#ff79c6">||</span> threshold.Signal <span style="color:#ff79c6">==</span> evictionapi.SignalAllocatableMemoryAvailable {
-</span></span><span style="display:flex;"><span>				notifier, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">NewMemoryThresholdNotifier</span>(threshold, m.config.PodCgroupRoot, <span style="color:#ff79c6">&amp;</span>CgroupNotifierFactory{}, thresholdHandler)
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>					klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: failed to create memory threshold notifier&#34;</span>, <span style="color:#f1fa8c">&#34;err&#34;</span>, err)
-</span></span><span style="display:flex;"><span>				} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// 启动事件内存检测</span>
-</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">go</span> notifier.<span style="color:#50fa7b">Start</span>()
-</span></span><span style="display:flex;"><span>					m.thresholdNotifiers = <span style="color:#8be9fd;font-style:italic">append</span>(m.thresholdNotifiers, notifier)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 如果开启内核的内存通知机制</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> m.config.KernelMemcgNotification {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> _, threshold <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> m.config.Thresholds {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// 只匹配内存相关的阈值配置</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> threshold.Signal <span style="color:#fe8019">==</span> evictionapi.SignalMemoryAvailable <span style="color:#fe8019">||</span> threshold.Signal <span style="color:#fe8019">==</span> evictionapi.SignalAllocatableMemoryAvailable {
+</span></span><span style="display:flex;"><span>				notifier, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">NewMemoryThresholdNotifier</span>(threshold, m.config.PodCgroupRoot, <span style="color:#fe8019">&amp;</span>CgroupNotifierFactory{}, thresholdHandler)
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>					klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: failed to create memory threshold notifier&#34;</span>, <span style="color:#b8bb26">&#34;err&#34;</span>, err)
+</span></span><span style="display:flex;"><span>				} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>					<span style="color:#928374;font-style:italic">// 启动事件内存检测</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#fe8019">go</span> notifier.<span style="color:#fabd2f">Start</span>()
+</span></span><span style="display:flex;"><span>					m.thresholdNotifiers = <span style="color:#fabd2f">append</span>(m.thresholdNotifiers, notifier)
 </span></span><span style="display:flex;"><span>				}
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 后台协程执行 eviction manager  的 synchronize 方法</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> evictedPods <span style="color:#ff79c6">:=</span> m.<span style="color:#50fa7b">synchronize</span>(diskInfoProvider, podFunc); evictedPods <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: pods evicted, waiting for pod to be cleaned up&#34;</span>, <span style="color:#f1fa8c">&#34;pods&#34;</span>, klog.<span style="color:#50fa7b">KObjs</span>(evictedPods))
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// 阻塞等待驱逐的 pods 都被清理.</span>
-</span></span><span style="display:flex;"><span>				m.<span style="color:#50fa7b">waitForPodsCleanup</span>(podCleanedUpFunc, evictedPods)
-</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// 间隔 10 秒</span>
-</span></span><span style="display:flex;"><span>				time.<span style="color:#50fa7b">Sleep</span>(monitoringInterval)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 后台协程执行 eviction manager  的 synchronize 方法</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">go</span> <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> evictedPods <span style="color:#fe8019">:=</span> m.<span style="color:#fabd2f">synchronize</span>(diskInfoProvider, podFunc); evictedPods <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: pods evicted, waiting for pod to be cleaned up&#34;</span>, <span style="color:#b8bb26">&#34;pods&#34;</span>, klog.<span style="color:#fabd2f">KObjs</span>(evictedPods))
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// 阻塞等待驱逐的 pods 都被清理.</span>
+</span></span><span style="display:flex;"><span>				m.<span style="color:#fabd2f">waitForPodsCleanup</span>(podCleanedUpFunc, evictedPods)
+</span></span><span style="display:flex;"><span>			} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// 间隔 10 秒</span>
+</span></span><span style="display:flex;"><span>				time.<span style="color:#fabd2f">Sleep</span>(monitoringInterval)
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}()
@@ -350,233 +350,233 @@
 </ul>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (m <span style="color:#ff79c6">*</span>managerImpl) <span style="color:#50fa7b">synchronize</span>(diskInfoProvider DiskInfoProvider, podFunc ActivePodsFunc) []<span style="color:#ff79c6">*</span>v1.Pod {
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// if we have nothing to do, just return</span>
-</span></span><span style="display:flex;"><span>	thresholds <span style="color:#ff79c6">:=</span> m.config.Thresholds
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(thresholds) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> <span style="color:#ff79c6">&amp;&amp;</span> !m.localStorageCapacityIsolation {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>managerImpl) <span style="color:#fabd2f">synchronize</span>(diskInfoProvider DiskInfoProvider, podFunc ActivePodsFunc) []<span style="color:#fe8019">*</span>v1.Pod {
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// if we have nothing to do, just return</span>
+</span></span><span style="display:flex;"><span>	thresholds <span style="color:#fe8019">:=</span> m.config.Thresholds
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(thresholds) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> <span style="color:#fe8019">&amp;&amp;</span> !m.localStorageCapacityIsolation {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: synchronize housekeeping&#34;</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// build the ranking functions (if not yet known)</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// TODO: have a function in cadvisor that lets us know if global housekeeping has completed</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> m.dedicatedImageFs <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		hasImageFs, ok <span style="color:#ff79c6">:=</span> diskInfoProvider.<span style="color:#50fa7b">HasDedicatedImageFs</span>()
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> ok <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: synchronize housekeeping&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// build the ranking functions (if not yet known)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// TODO: have a function in cadvisor that lets us know if global housekeeping has completed</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> m.dedicatedImageFs <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		hasImageFs, ok <span style="color:#fe8019">:=</span> diskInfoProvider.<span style="color:#fabd2f">HasDedicatedImageFs</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> ok <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		m.dedicatedImageFs = <span style="color:#ff79c6">&amp;</span>hasImageFs
-</span></span><span style="display:flex;"><span>		m.signalToRankFunc = <span style="color:#50fa7b">buildSignalToRankFunc</span>(hasImageFs)
-</span></span><span style="display:flex;"><span>		m.signalToNodeReclaimFuncs = <span style="color:#50fa7b">buildSignalToNodeReclaimFuncs</span>(m.imageGC, m.containerGC, hasImageFs)
+</span></span><span style="display:flex;"><span>		m.dedicatedImageFs = <span style="color:#fe8019">&amp;</span>hasImageFs
+</span></span><span style="display:flex;"><span>		m.signalToRankFunc = <span style="color:#fabd2f">buildSignalToRankFunc</span>(hasImageFs)
+</span></span><span style="display:flex;"><span>		m.signalToNodeReclaimFuncs = <span style="color:#fabd2f">buildSignalToNodeReclaimFuncs</span>(m.imageGC, m.containerGC, hasImageFs)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取活动的 pods </span>
-</span></span><span style="display:flex;"><span>	activePods <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">podFunc</span>()
-</span></span><span style="display:flex;"><span>	updateStats <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取当前节点的资源使用情况, 比如 cpu/memory等</span>
-</span></span><span style="display:flex;"><span>	summary, err <span style="color:#ff79c6">:=</span> m.summaryProvider.<span style="color:#50fa7b">Get</span>(updateStats)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Eviction manager: failed to get summary stats&#34;</span>)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取活动的 pods </span>
+</span></span><span style="display:flex;"><span>	activePods <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">podFunc</span>()
+</span></span><span style="display:flex;"><span>	updateStats <span style="color:#fe8019">:=</span> <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取当前节点的资源使用情况, 比如 cpu/memory等</span>
+</span></span><span style="display:flex;"><span>	summary, err <span style="color:#fe8019">:=</span> m.summaryProvider.<span style="color:#fabd2f">Get</span>(updateStats)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Eviction manager: failed to get summary stats&#34;</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 超过间隔阀值, 调用 notifier 的 UpdateThreshold 接口，具体看上述阀值触发器小节</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> m.clock.<span style="color:#50fa7b">Since</span>(m.thresholdsLastUpdated) &gt; notifierRefreshInterval {
-</span></span><span style="display:flex;"><span>		m.thresholdsLastUpdated = m.clock.<span style="color:#50fa7b">Now</span>()
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, notifier <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> m.thresholdNotifiers {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> notifier.<span style="color:#50fa7b">UpdateThreshold</span>(summary); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: failed to update notifier&#34;</span>, <span style="color:#f1fa8c">&#34;notifier&#34;</span>, notifier.<span style="color:#50fa7b">Description</span>(), <span style="color:#f1fa8c">&#34;err&#34;</span>, err)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 超过间隔阀值, 调用 notifier 的 UpdateThreshold 接口，具体看上述阀值触发器小节</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> m.clock.<span style="color:#fabd2f">Since</span>(m.thresholdsLastUpdated) &gt; notifierRefreshInterval {
+</span></span><span style="display:flex;"><span>		m.thresholdsLastUpdated = m.clock.<span style="color:#fabd2f">Now</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> _, notifier <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> m.thresholdNotifiers {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> notifier.<span style="color:#fabd2f">UpdateThreshold</span>(summary); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: failed to update notifier&#34;</span>, <span style="color:#b8bb26">&#34;notifier&#34;</span>, notifier.<span style="color:#fabd2f">Description</span>(), <span style="color:#b8bb26">&#34;err&#34;</span>, err)
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// make observations and get a function to derive pod usage stats relative to those observations.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 构建资源管理器, 记录各个资源类型 available, capacity, time 三个值.</span>
-</span></span><span style="display:flex;"><span>	observations, statsFunc <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">makeSignalObservations</span>(summary)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">debugLogObservations</span>(<span style="color:#f1fa8c">&#34;observations&#34;</span>, observations)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// make observations and get a function to derive pod usage stats relative to those observations.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 构建资源管理器, 记录各个资源类型 available, capacity, time 三个值.</span>
+</span></span><span style="display:flex;"><span>	observations, statsFunc <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">makeSignalObservations</span>(summary)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">debugLogObservations</span>(<span style="color:#b8bb26">&#34;observations&#34;</span>, observations)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// determine the set of thresholds met independent of grace period</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 通过thresholdsMet检查observations值和thresholds阈值之间的大小，如果超过阈值则都添加到results；</span>
-</span></span><span style="display:flex;"><span>	thresholds = <span style="color:#50fa7b">thresholdsMet</span>(thresholds, observations, <span style="color:#ff79c6">false</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">debugLogThresholdsWithObservation</span>(<span style="color:#f1fa8c">&#34;thresholds - ignoring grace period&#34;</span>, thresholds, observations)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// determine the set of thresholds met independent of grace period</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 通过thresholdsMet检查observations值和thresholds阈值之间的大小，如果超过阈值则都添加到results；</span>
+</span></span><span style="display:flex;"><span>	thresholds = <span style="color:#fabd2f">thresholdsMet</span>(thresholds, observations, <span style="color:#fe8019">false</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">debugLogThresholdsWithObservation</span>(<span style="color:#b8bb26">&#34;thresholds - ignoring grace period&#34;</span>, thresholds, observations)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// determine the set of thresholds previously met that have not yet satisfied the associated min-reclaim</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(m.thresholdsMet) &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>		thresholdsNotYetResolved <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">thresholdsMet</span>(m.thresholdsMet, observations, <span style="color:#ff79c6">true</span>)
-</span></span><span style="display:flex;"><span>		thresholds = <span style="color:#50fa7b">mergeThresholds</span>(thresholds, thresholdsNotYetResolved)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// determine the set of thresholds previously met that have not yet satisfied the associated min-reclaim</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(m.thresholdsMet) &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		thresholdsNotYetResolved <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">thresholdsMet</span>(m.thresholdsMet, observations, <span style="color:#fe8019">true</span>)
+</span></span><span style="display:flex;"><span>		thresholds = <span style="color:#fabd2f">mergeThresholds</span>(thresholds, thresholdsNotYetResolved)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">debugLogThresholdsWithObservation</span>(<span style="color:#f1fa8c">&#34;thresholds - reclaim not satisfied&#34;</span>, thresholds, observations)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">debugLogThresholdsWithObservation</span>(<span style="color:#b8bb26">&#34;thresholds - reclaim not satisfied&#34;</span>, thresholds, observations)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// track when a threshold was first observed</span>
-</span></span><span style="display:flex;"><span>	now <span style="color:#ff79c6">:=</span> m.clock.<span style="color:#50fa7b">Now</span>()
-</span></span><span style="display:flex;"><span>	thresholdsFirstObservedAt <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">thresholdsFirstObservedAt</span>(thresholds, m.thresholdsFirstObservedAt, now)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// track when a threshold was first observed</span>
+</span></span><span style="display:flex;"><span>	now <span style="color:#fe8019">:=</span> m.clock.<span style="color:#fabd2f">Now</span>()
+</span></span><span style="display:flex;"><span>	thresholdsFirstObservedAt <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">thresholdsFirstObservedAt</span>(thresholds, m.thresholdsFirstObservedAt, now)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// the set of node conditions that are triggered by currently observed thresholds</span>
-</span></span><span style="display:flex;"><span>	nodeConditions <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">nodeConditions</span>(thresholds)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(nodeConditions) &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: node conditions - observed&#34;</span>, <span style="color:#f1fa8c">&#34;nodeCondition&#34;</span>, nodeConditions)
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// track when a node condition was last observed</span>
-</span></span><span style="display:flex;"><span>	nodeConditionsLastObservedAt <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">nodeConditionsLastObservedAt</span>(nodeConditions, m.nodeConditionsLastObservedAt, now)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// node conditions report true if it has been observed within the transition period window</span>
-</span></span><span style="display:flex;"><span>	nodeConditions = <span style="color:#50fa7b">nodeConditionsObservedSince</span>(nodeConditionsLastObservedAt, m.config.PressureTransitionPeriod, now)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(nodeConditions) &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: node conditions - transition period not met&#34;</span>, <span style="color:#f1fa8c">&#34;nodeCondition&#34;</span>, nodeConditions)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// the set of node conditions that are triggered by currently observed thresholds</span>
+</span></span><span style="display:flex;"><span>	nodeConditions <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">nodeConditions</span>(thresholds)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(nodeConditions) &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: node conditions - observed&#34;</span>, <span style="color:#b8bb26">&#34;nodeCondition&#34;</span>, nodeConditions)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// determine the set of thresholds we need to drive eviction behavior (i.e. all grace periods are met)</span>
-</span></span><span style="display:flex;"><span>	thresholds = <span style="color:#50fa7b">thresholdsMetGracePeriod</span>(thresholdsFirstObservedAt, now)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">debugLogThresholdsWithObservation</span>(<span style="color:#f1fa8c">&#34;thresholds - grace periods satisfied&#34;</span>, thresholds, observations)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// track when a node condition was last observed</span>
+</span></span><span style="display:flex;"><span>	nodeConditionsLastObservedAt <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">nodeConditionsLastObservedAt</span>(nodeConditions, m.nodeConditionsLastObservedAt, now)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// update internal state</span>
-</span></span><span style="display:flex;"><span>	m.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// node conditions report true if it has been observed within the transition period window</span>
+</span></span><span style="display:flex;"><span>	nodeConditions = <span style="color:#fabd2f">nodeConditionsObservedSince</span>(nodeConditionsLastObservedAt, m.config.PressureTransitionPeriod, now)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(nodeConditions) &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: node conditions - transition period not met&#34;</span>, <span style="color:#b8bb26">&#34;nodeCondition&#34;</span>, nodeConditions)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// determine the set of thresholds we need to drive eviction behavior (i.e. all grace periods are met)</span>
+</span></span><span style="display:flex;"><span>	thresholds = <span style="color:#fabd2f">thresholdsMetGracePeriod</span>(thresholdsFirstObservedAt, now)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">debugLogThresholdsWithObservation</span>(<span style="color:#b8bb26">&#34;thresholds - grace periods satisfied&#34;</span>, thresholds, observations)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// update internal state</span>
+</span></span><span style="display:flex;"><span>	m.<span style="color:#fabd2f">Lock</span>()
 </span></span><span style="display:flex;"><span>	m.nodeConditions = nodeConditions
 </span></span><span style="display:flex;"><span>	m.thresholdsFirstObservedAt = thresholdsFirstObservedAt
 </span></span><span style="display:flex;"><span>	m.nodeConditionsLastObservedAt = nodeConditionsLastObservedAt
 </span></span><span style="display:flex;"><span>	m.thresholdsMet = thresholds
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// determine the set of thresholds whose stats have been updated since the last sync</span>
-</span></span><span style="display:flex;"><span>	thresholds = <span style="color:#50fa7b">thresholdsUpdatedStats</span>(thresholds, observations, m.lastObservations)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">debugLogThresholdsWithObservation</span>(<span style="color:#f1fa8c">&#34;thresholds - updated stats&#34;</span>, thresholds, observations)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// determine the set of thresholds whose stats have been updated since the last sync</span>
+</span></span><span style="display:flex;"><span>	thresholds = <span style="color:#fabd2f">thresholdsUpdatedStats</span>(thresholds, observations, m.lastObservations)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">debugLogThresholdsWithObservation</span>(<span style="color:#b8bb26">&#34;thresholds - updated stats&#34;</span>, thresholds, observations)
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>	m.lastObservations = observations
-</span></span><span style="display:flex;"><span>	m.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>	m.<span style="color:#fabd2f">Unlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// evict pods if there is a resource usage violation from local volume temporary storage</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// If eviction happens in localStorageEviction function, skip the rest of eviction action</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> m.localStorageCapacityIsolation {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> evictedPods <span style="color:#ff79c6">:=</span> m.<span style="color:#50fa7b">localStorageEviction</span>(activePods, statsFunc); <span style="color:#8be9fd;font-style:italic">len</span>(evictedPods) &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> evictedPods
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// evict pods if there is a resource usage violation from local volume temporary storage</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// If eviction happens in localStorageEviction function, skip the rest of eviction action</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> m.localStorageCapacityIsolation {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> evictedPods <span style="color:#fe8019">:=</span> m.<span style="color:#fabd2f">localStorageEviction</span>(activePods, statsFunc); <span style="color:#fabd2f">len</span>(evictedPods) &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> evictedPods
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 没有匹配的阀值</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(thresholds) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: no resources are starved&#34;</span>)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 没有匹配的阀值</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(thresholds) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: no resources are starved&#34;</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// rank the thresholds by eviction priority</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 排序</span>
-</span></span><span style="display:flex;"><span>	sort.<span style="color:#50fa7b">Sort</span>(<span style="color:#50fa7b">byEvictionPriority</span>(thresholds))
-</span></span><span style="display:flex;"><span>	thresholdToReclaim, resourceToReclaim, foundAny <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getReclaimableThreshold</span>(thresholds)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !foundAny {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// rank the thresholds by eviction priority</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 排序</span>
+</span></span><span style="display:flex;"><span>	sort.<span style="color:#fabd2f">Sort</span>(<span style="color:#fabd2f">byEvictionPriority</span>(thresholds))
+</span></span><span style="display:flex;"><span>	thresholdToReclaim, resourceToReclaim, foundAny <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">getReclaimableThreshold</span>(thresholds)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !foundAny {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: attempting to reclaim&#34;</span>, <span style="color:#f1fa8c">&#34;resourceName&#34;</span>, resourceToReclaim)
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: attempting to reclaim&#34;</span>, <span style="color:#b8bb26">&#34;resourceName&#34;</span>, resourceToReclaim)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// record an event about the resources we are now attempting to reclaim via eviction</span>
-</span></span><span style="display:flex;"><span>	m.recorder.<span style="color:#50fa7b">Eventf</span>(m.nodeRef, v1.EventTypeWarning, <span style="color:#f1fa8c">&#34;EvictionThresholdMet&#34;</span>, <span style="color:#f1fa8c">&#34;Attempting to reclaim %s&#34;</span>, resourceToReclaim)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// record an event about the resources we are now attempting to reclaim via eviction</span>
+</span></span><span style="display:flex;"><span>	m.recorder.<span style="color:#fabd2f">Eventf</span>(m.nodeRef, v1.EventTypeWarning, <span style="color:#b8bb26">&#34;EvictionThresholdMet&#34;</span>, <span style="color:#b8bb26">&#34;Attempting to reclaim %s&#34;</span>, resourceToReclaim)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// check if there are node-level resources we can reclaim to reduce pressure before evicting end-user pods.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 先进行 imageGC 和 containerGC 垃圾回收清理</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> m.<span style="color:#50fa7b">reclaimNodeLevelResources</span>(thresholdToReclaim.Signal, resourceToReclaim) {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: able to reduce resource pressure without evicting pods.&#34;</span>, <span style="color:#f1fa8c">&#34;resourceName&#34;</span>, resourceToReclaim)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: must evict pod(s) to reclaim&#34;</span>, <span style="color:#f1fa8c">&#34;resourceName&#34;</span>, resourceToReclaim)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// rank the pods for eviction</span>
-</span></span><span style="display:flex;"><span>	rank, ok <span style="color:#ff79c6">:=</span> m.signalToRankFunc[thresholdToReclaim.Signal]
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">ErrorS</span>(<span style="color:#ff79c6">nil</span>, <span style="color:#f1fa8c">&#34;Eviction manager: no ranking function for signal&#34;</span>, <span style="color:#f1fa8c">&#34;threshold&#34;</span>, thresholdToReclaim.Signal)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// check if there are node-level resources we can reclaim to reduce pressure before evicting end-user pods.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 先进行 imageGC 和 containerGC 垃圾回收清理</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> m.<span style="color:#fabd2f">reclaimNodeLevelResources</span>(thresholdToReclaim.Signal, resourceToReclaim) {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: able to reduce resource pressure without evicting pods.&#34;</span>, <span style="color:#b8bb26">&#34;resourceName&#34;</span>, resourceToReclaim)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// the only candidates viable for eviction are those pods that had anything running.</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(activePods) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">ErrorS</span>(<span style="color:#ff79c6">nil</span>, <span style="color:#f1fa8c">&#34;Eviction manager: eviction thresholds have been met, but no pods are active to evict&#34;</span>)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: must evict pod(s) to reclaim&#34;</span>, <span style="color:#b8bb26">&#34;resourceName&#34;</span>, resourceToReclaim)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// rank the pods for eviction</span>
+</span></span><span style="display:flex;"><span>	rank, ok <span style="color:#fe8019">:=</span> m.signalToRankFunc[thresholdToReclaim.Signal]
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !ok {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">ErrorS</span>(<span style="color:#fe8019">nil</span>, <span style="color:#b8bb26">&#34;Eviction manager: no ranking function for signal&#34;</span>, <span style="color:#b8bb26">&#34;threshold&#34;</span>, thresholdToReclaim.Signal)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// rank the running pods for eviction for the specified resource</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 对 pods 进行资源的占用进行排序</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">rank</span>(activePods, statsFunc)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// the only candidates viable for eviction are those pods that had anything running.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(activePods) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">ErrorS</span>(<span style="color:#fe8019">nil</span>, <span style="color:#b8bb26">&#34;Eviction manager: eviction thresholds have been met, but no pods are active to evict&#34;</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
+</span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: pods ranked for eviction&#34;</span>, <span style="color:#f1fa8c">&#34;pods&#34;</span>, klog.<span style="color:#50fa7b">KObjs</span>(activePods))
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// rank the running pods for eviction for the specified resource</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 对 pods 进行资源的占用进行排序</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">rank</span>(activePods, statsFunc)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">//record age of metrics for met thresholds that we are using for evictions.</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, t <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> thresholds {
-</span></span><span style="display:flex;"><span>		timeObserved <span style="color:#ff79c6">:=</span> observations[t.Signal].time
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !timeObserved.<span style="color:#50fa7b">IsZero</span>() {
-</span></span><span style="display:flex;"><span>			metrics.EvictionStatsAge.<span style="color:#50fa7b">WithLabelValues</span>(<span style="color:#8be9fd;font-style:italic">string</span>(t.Signal)).<span style="color:#50fa7b">Observe</span>(metrics.<span style="color:#50fa7b">SinceInSeconds</span>(timeObserved.Time))
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: pods ranked for eviction&#34;</span>, <span style="color:#b8bb26">&#34;pods&#34;</span>, klog.<span style="color:#fabd2f">KObjs</span>(activePods))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#8ec07c">//record age of metrics for met thresholds that we are using for evictions.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> _, t <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> thresholds {
+</span></span><span style="display:flex;"><span>		timeObserved <span style="color:#fe8019">:=</span> observations[t.Signal].time
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !timeObserved.<span style="color:#fabd2f">IsZero</span>() {
+</span></span><span style="display:flex;"><span>			metrics.EvictionStatsAge.<span style="color:#fabd2f">WithLabelValues</span>(<span style="color:#fabd2f">string</span>(t.Signal)).<span style="color:#fabd2f">Observe</span>(metrics.<span style="color:#fabd2f">SinceInSeconds</span>(timeObserved.Time))
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 每次至多只能删掉一个 pod, 删掉就退出, 等待下次调度循环</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> activePods {
-</span></span><span style="display:flex;"><span>		pod <span style="color:#ff79c6">:=</span> activePods[i]
-</span></span><span style="display:flex;"><span>		gracePeriodOverride <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">int64</span>(<span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !<span style="color:#50fa7b">isHardEvictionThreshold</span>(thresholdToReclaim) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 每次至多只能删掉一个 pod, 删掉就退出, 等待下次调度循环</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> i <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> activePods {
+</span></span><span style="display:flex;"><span>		pod <span style="color:#fe8019">:=</span> activePods[i]
+</span></span><span style="display:flex;"><span>		gracePeriodOverride <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">int64</span>(<span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !<span style="color:#fabd2f">isHardEvictionThreshold</span>(thresholdToReclaim) {
 </span></span><span style="display:flex;"><span>			gracePeriodOverride = m.config.MaxPodGracePeriodSeconds
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		message, annotations <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">evictionMessage</span>(resourceToReclaim, pod, statsFunc)
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 驱逐 pod</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> m.<span style="color:#50fa7b">evictPod</span>(pod, gracePeriodOverride, message, annotations) {
-</span></span><span style="display:flex;"><span>			metrics.Evictions.<span style="color:#50fa7b">WithLabelValues</span>(<span style="color:#8be9fd;font-style:italic">string</span>(thresholdToReclaim.Signal)).<span style="color:#50fa7b">Inc</span>()
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> []<span style="color:#ff79c6">*</span>v1.Pod{pod}
+</span></span><span style="display:flex;"><span>		message, annotations <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">evictionMessage</span>(resourceToReclaim, pod, statsFunc)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 驱逐 pod</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> m.<span style="color:#fabd2f">evictPod</span>(pod, gracePeriodOverride, message, annotations) {
+</span></span><span style="display:flex;"><span>			metrics.Evictions.<span style="color:#fabd2f">WithLabelValues</span>(<span style="color:#fabd2f">string</span>(thresholdToReclaim.Signal)).<span style="color:#fabd2f">Inc</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> []<span style="color:#fe8019">*</span>v1.Pod{pod}
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: unable to evict any pods from the node&#34;</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: unable to evict any pods from the node&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
 
 <h3 id="evictpod">evictPod</h3>
 <p>通过 evictPod 来驱逐 Pod：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (m <span style="color:#ff79c6">*</span>managerImpl) <span style="color:#50fa7b">evictPod</span>(pod <span style="color:#ff79c6">*</span>v1.Pod, gracePeriodOverride <span style="color:#8be9fd">int64</span>, evictMsg <span style="color:#8be9fd">string</span>, annotations <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">bool</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// If the pod is marked as critical and static, and support for critical pod annotations is enabled,</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// do not evict such pods. Static pods are not re-admitted after evictions.</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// https://github.com/kubernetes/kubernetes/issues/40573 has more details.</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> kubelettypes.<span style="color:#50fa7b">IsCriticalPod</span>(pod) {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">ErrorS</span>(<span style="color:#ff79c6">nil</span>, <span style="color:#f1fa8c">&#34;Eviction manager: cannot evict a critical pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>managerImpl) <span style="color:#fabd2f">evictPod</span>(pod <span style="color:#fe8019">*</span>v1.Pod, gracePeriodOverride <span style="color:#fabd2f">int64</span>, evictMsg <span style="color:#fabd2f">string</span>, annotations <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]<span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">bool</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// If the pod is marked as critical and static, and support for critical pod annotations is enabled,</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// do not evict such pods. Static pods are not re-admitted after evictions.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// https://github.com/kubernetes/kubernetes/issues/40573 has more details.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> kubelettypes.<span style="color:#fabd2f">IsCriticalPod</span>(pod) {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">ErrorS</span>(<span style="color:#fe8019">nil</span>, <span style="color:#b8bb26">&#34;Eviction manager: cannot evict a critical pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// record that we are evicting the pod</span>
-</span></span><span style="display:flex;"><span>	m.recorder.<span style="color:#50fa7b">AnnotatedEventf</span>(pod, annotations, v1.EventTypeWarning, Reason, evictMsg)
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// this is a blocking call and should only return when the pod and its containers are killed.</span>
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Evicting pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod), <span style="color:#f1fa8c">&#34;podUID&#34;</span>, pod.UID, <span style="color:#f1fa8c">&#34;message&#34;</span>, evictMsg)
-</span></span><span style="display:flex;"><span>	err <span style="color:#ff79c6">:=</span> m.<span style="color:#50fa7b">killPodFunc</span>(pod, <span style="color:#ff79c6">true</span>, <span style="color:#ff79c6">&amp;</span>gracePeriodOverride, <span style="color:#8be9fd;font-style:italic">func</span>(status <span style="color:#ff79c6">*</span>v1.PodStatus) {
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// record that we are evicting the pod</span>
+</span></span><span style="display:flex;"><span>	m.recorder.<span style="color:#fabd2f">AnnotatedEventf</span>(pod, annotations, v1.EventTypeWarning, Reason, evictMsg)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// this is a blocking call and should only return when the pod and its containers are killed.</span>
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Evicting pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;podUID&#34;</span>, pod.UID, <span style="color:#b8bb26">&#34;message&#34;</span>, evictMsg)
+</span></span><span style="display:flex;"><span>	err <span style="color:#fe8019">:=</span> m.<span style="color:#fabd2f">killPodFunc</span>(pod, <span style="color:#fe8019">true</span>, <span style="color:#fe8019">&amp;</span>gracePeriodOverride, <span style="color:#fe8019">func</span>(status <span style="color:#fe8019">*</span>v1.PodStatus) {
 </span></span><span style="display:flex;"><span>		status.Phase = v1.PodFailed
 </span></span><span style="display:flex;"><span>		status.Reason = Reason
 </span></span><span style="display:flex;"><span>		status.Message = evictMsg
 </span></span><span style="display:flex;"><span>	})
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Eviction manager: pod failed to evict&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Eviction manager: pod is evicted successfully&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Eviction manager: pod failed to evict&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Eviction manager: pod is evicted successfully&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>上述代码中的 killPodFunc 是 killPodNow，通过 <code>podWorkers.UpdatePod</code> 来杀死 Pod。 podWrokers 实现了接口 PodWorkers，可以理解这是一个<strong>协程池</strong>，每个 pod 都有自己独立的协程执行方法 managePodLoop，managePodLoop 的实现请自行查阅源码：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">killPodNow</span>(podWorkers PodWorkers, recorder record.EventRecorder) eviction.KillPodFunc {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#8be9fd;font-style:italic">func</span>(pod <span style="color:#ff79c6">*</span>v1.Pod, isEvicted <span style="color:#8be9fd">bool</span>, gracePeriodOverride <span style="color:#ff79c6">*</span><span style="color:#8be9fd">int64</span>, statusFn <span style="color:#8be9fd;font-style:italic">func</span>(<span style="color:#ff79c6">*</span>v1.PodStatus)) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// determine the grace period to use when killing the pod</span>
-</span></span><span style="display:flex;"><span>		gracePeriod <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">int64</span>(<span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> gracePeriodOverride <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			gracePeriod = <span style="color:#ff79c6">*</span>gracePeriodOverride
-</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> pod.Spec.TerminationGracePeriodSeconds <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			gracePeriod = <span style="color:#ff79c6">*</span>pod.Spec.TerminationGracePeriodSeconds
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">killPodNow</span>(podWorkers PodWorkers, recorder record.EventRecorder) eviction.KillPodFunc {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">func</span>(pod <span style="color:#fe8019">*</span>v1.Pod, isEvicted <span style="color:#fabd2f">bool</span>, gracePeriodOverride <span style="color:#fe8019">*</span><span style="color:#fabd2f">int64</span>, statusFn <span style="color:#fe8019">func</span>(<span style="color:#fe8019">*</span>v1.PodStatus)) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// determine the grace period to use when killing the pod</span>
+</span></span><span style="display:flex;"><span>		gracePeriod <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">int64</span>(<span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> gracePeriodOverride <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			gracePeriod = <span style="color:#fe8019">*</span>gracePeriodOverride
+</span></span><span style="display:flex;"><span>		} <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span> pod.Spec.TerminationGracePeriodSeconds <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			gracePeriod = <span style="color:#fe8019">*</span>pod.Spec.TerminationGracePeriodSeconds
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// we timeout and return an error if we don&#39;t get a callback within a reasonable time.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// the default timeout is relative to the grace period (we settle on 10s to wait for kubelet-&gt;runtime traffic to complete in sigkill)</span>
-</span></span><span style="display:flex;"><span>		timeout <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">int64</span>(gracePeriod <span style="color:#ff79c6">+</span> (gracePeriod <span style="color:#ff79c6">/</span> <span style="color:#bd93f9">2</span>))
-</span></span><span style="display:flex;"><span>		minTimeout <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">int64</span>(<span style="color:#bd93f9">10</span>)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> timeout &lt; minTimeout {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// we timeout and return an error if we don&#39;t get a callback within a reasonable time.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// the default timeout is relative to the grace period (we settle on 10s to wait for kubelet-&gt;runtime traffic to complete in sigkill)</span>
+</span></span><span style="display:flex;"><span>		timeout <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">int64</span>(gracePeriod <span style="color:#fe8019">+</span> (gracePeriod <span style="color:#fe8019">/</span> <span style="color:#d3869b">2</span>))
+</span></span><span style="display:flex;"><span>		minTimeout <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">int64</span>(<span style="color:#d3869b">10</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> timeout &lt; minTimeout {
 </span></span><span style="display:flex;"><span>			timeout = minTimeout
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		timeoutDuration <span style="color:#ff79c6">:=</span> time.<span style="color:#50fa7b">Duration</span>(timeout) <span style="color:#ff79c6">*</span> time.Second
+</span></span><span style="display:flex;"><span>		timeoutDuration <span style="color:#fe8019">:=</span> time.<span style="color:#fabd2f">Duration</span>(timeout) <span style="color:#fe8019">*</span> time.Second
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// open a channel we block against until we get a result</span>
-</span></span><span style="display:flex;"><span>		ch <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}, <span style="color:#bd93f9">1</span>)
-</span></span><span style="display:flex;"><span>		podWorkers.<span style="color:#50fa7b">UpdatePod</span>(UpdatePodOptions{
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// open a channel we block against until we get a result</span>
+</span></span><span style="display:flex;"><span>		ch <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}, <span style="color:#d3869b">1</span>)
+</span></span><span style="display:flex;"><span>		podWorkers.<span style="color:#fabd2f">UpdatePod</span>(UpdatePodOptions{
 </span></span><span style="display:flex;"><span>			Pod:        pod,
 </span></span><span style="display:flex;"><span>			UpdateType: kubetypes.SyncPodKill,
-</span></span><span style="display:flex;"><span>			KillPodOptions: <span style="color:#ff79c6">&amp;</span>KillPodOptions{
+</span></span><span style="display:flex;"><span>			KillPodOptions: <span style="color:#fe8019">&amp;</span>KillPodOptions{
 </span></span><span style="display:flex;"><span>				CompletedCh:                              ch,
 </span></span><span style="display:flex;"><span>				Evict:                                    isEvicted,
 </span></span><span style="display:flex;"><span>				PodStatusFunc:                            statusFn,
@@ -584,13 +584,13 @@
 </span></span><span style="display:flex;"><span>			},
 </span></span><span style="display:flex;"><span>		})
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// wait for either a response, or a timeout</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">select</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>ch:
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>time.<span style="color:#50fa7b">After</span>(timeoutDuration):
-</span></span><span style="display:flex;"><span>			recorder.<span style="color:#50fa7b">Eventf</span>(pod, v1.EventTypeWarning, events.ExceededGracePeriod, <span style="color:#f1fa8c">&#34;Container runtime did not kill the pod within specified grace period.&#34;</span>)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;timeout waiting to kill pod&#34;</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// wait for either a response, or a timeout</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>ch:
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>time.<span style="color:#fabd2f">After</span>(timeoutDuration):
+</span></span><span style="display:flex;"><span>			recorder.<span style="color:#fabd2f">Eventf</span>(pod, v1.EventTypeWarning, events.ExceededGracePeriod, <span style="color:#b8bb26">&#34;Container runtime did not kill the pod within specified grace period.&#34;</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;timeout waiting to kill pod&#34;</span>)
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}

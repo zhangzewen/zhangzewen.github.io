@@ -300,11 +300,11 @@
         <div>
           <h2 id="c-迭代器的种类">c++ 迭代器的种类</h2>
 <p>在STL中，迭代器的种类可以分为输入迭代器、输出迭代器、前向迭代器、双向迭代器、随机访问迭代器：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">input_iterator_tag</span> {};  <span style="color:#6272a4">// 输入迭代器
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">output_iterator_tag</span> {}; <span style="color:#6272a4">// 输出迭代器
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">forward_iterator_tag</span> <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">public</span> input_iterator_tag {};  <span style="color:#6272a4">// 向前迭代器
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">bidirectional_iterator_tag</span> <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">public</span> forward_iterator_tag {}; <span style="color:#6272a4">// 双向迭代器
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">random_access_iterator_tag</span> <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">public</span> bidirectional_iterator_tag {}; <span style="color:#6272a4">// 随机访问迭代器
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> input_iterator_tag {};  <span style="color:#928374;font-style:italic">// 输入迭代器
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> output_iterator_tag {}; <span style="color:#928374;font-style:italic">// 输出迭代器
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> forward_iterator_tag <span style="color:#fe8019">:</span> <span style="color:#fe8019">public</span> input_iterator_tag {};  <span style="color:#928374;font-style:italic">// 向前迭代器
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> bidirectional_iterator_tag <span style="color:#fe8019">:</span> <span style="color:#fe8019">public</span> forward_iterator_tag {}; <span style="color:#928374;font-style:italic">// 双向迭代器
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> random_access_iterator_tag <span style="color:#fe8019">:</span> <span style="color:#fe8019">public</span> bidirectional_iterator_tag {}; <span style="color:#928374;font-style:italic">// 随机访问迭代器
 </span></span></span></code></pre></div><p>输入迭代器指向的位置只能被顺序读取：</p>
         </div>
 
@@ -324,33 +324,33 @@
         <div>
           <h2 id="item-31-避免使用默认的变量捕获方式">Item 31 避免使用默认的变量捕获方式</h2>
 <p><code>c++11</code>的<code>lambda</code>表达式有两种变量的捕获方式：按值(复制)捕获和引用捕获(默认模式)。在采用引用模式(默认<code>[&amp;]</code>会捕获定义<code>lambda</code>表达式作用域下的所有变量, <code>[&amp;params]</code>为显示捕获定义<code>lambda</code>表达式作用域下特定的变量)下，如果不加注意的话,<code>lambda</code>表达式很容易走出引用变量的作用域范围，造成悬空引用，会产生未定义的错误。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;iostream&gt;</span><span style="color:#ff79c6">
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;functional&gt;</span><span style="color:#ff79c6">
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;string&gt;</span><span style="color:#ff79c6">
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">A</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;iostream&gt;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;functional&gt;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;string&gt;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span><span style="color:#fe8019">class</span> A
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span> <span style="color:#ff79c6">public</span><span style="color:#ff79c6">:</span>
-</span></span><span style="display:flex;"><span>    A() <span style="color:#ff79c6">:</span> name_(<span style="color:#f1fa8c">&#34;default&#34;</span>){}
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">void</span> <span style="color:#50fa7b">Print</span>() <span style="color:#ff79c6">const</span> {
-</span></span><span style="display:flex;"><span>        std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;A::Print: &#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> name_ <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+</span></span><span style="display:flex;"><span> <span style="color:#fe8019">public</span><span style="color:#fe8019">:</span>
+</span></span><span style="display:flex;"><span>    A() <span style="color:#fe8019">:</span> name_(<span style="color:#b8bb26">&#34;default&#34;</span>){}
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">void</span> <span style="color:#fabd2f">Print</span>() <span style="color:#fe8019">const</span> {
+</span></span><span style="display:flex;"><span>        std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;A::Print: &#34;</span> <span style="color:#fe8019">&lt;&lt;</span> name_ <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span> <span style="color:#ff79c6">private</span><span style="color:#ff79c6">:</span>
-</span></span><span style="display:flex;"><span>        std<span style="color:#ff79c6">::</span>string name_;
+</span></span><span style="display:flex;"><span> <span style="color:#fe8019">private</span><span style="color:#fe8019">:</span>
+</span></span><span style="display:flex;"><span>        std<span style="color:#fe8019">::</span>string name_;
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">typedef</span> std<span style="color:#ff79c6">::</span>function<span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">void</span>()<span style="color:#ff79c6">&gt;</span> func;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">typedef</span> std<span style="color:#fe8019">::</span>function<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">void</span>()<span style="color:#fe8019">&gt;</span> func;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">int</span> <span style="color:#50fa7b">main</span>(<span style="color:#8be9fd">int</span> argc, <span style="color:#8be9fd">char</span><span style="color:#ff79c6">**</span> argv)
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">int</span> <span style="color:#fabd2f">main</span>(<span style="color:#fabd2f">int</span> argc, <span style="color:#fabd2f">char</span><span style="color:#fe8019">**</span> argv)
 </span></span><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>    func target;
 </span></span><span style="display:flex;"><span>    {
 </span></span><span style="display:flex;"><span>        A a;
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">auto</span> f <span style="color:#ff79c6">=</span> [<span style="color:#ff79c6">&amp;</span>](){ a.Print();};
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">//auto f = [&amp;a](){ a.Print();};
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        target <span style="color:#ff79c6">=</span> f;
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">auto</span> f <span style="color:#fe8019">=</span> [<span style="color:#fe8019">&amp;</span>](){ a.Print();};
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">//auto f = [&amp;a](){ a.Print();};
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        target <span style="color:#fe8019">=</span> f;
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>    target();
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>在我自己机器下的测试结果为</p>
         </div>
@@ -389,7 +389,7 @@
 
         <div>
           <p>.gdbinit 能够将gdb基本命令添加到文件中以避免每次启动gdb 进行 debug 时候输入他们，例如</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>b main
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>b main
 </span></span><span style="display:flex;"><span>r
 </span></span><span style="display:flex;"><span>b main.c:56
 </span></span><span style="display:flex;"><span>c

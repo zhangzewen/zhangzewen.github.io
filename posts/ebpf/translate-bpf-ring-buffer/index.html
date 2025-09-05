@@ -290,148 +290,148 @@ BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲
 <h1 id="代码展示">代码展示</h1>
 <p>为了展示BPF环形缓冲区API，将它们与BPF perfbuf进行比较，并了解它们在实践中通常如何使用，我编写了一个小的<a href="https://github.com/anakryiko/bpf-ringbuf-examples">bpf-ringbuf-examples project</a>项目，我们将在本文的其余部分中进行详细介绍。</p>
 <p>这个仓库实现了相同BPF应用程序的三个变体，它追踪所有进程的execs，捕获新进程的生成。每一个<code>exec()</code>，进程ID（<code>pid</code>）、进程名称（<code>comm</code>）和可执行文件路径（filename）都被捕获到一个样本中，并发送到用户态进行后续处理（在我们的演示中，仅仅是将所有这些printf()到标准输出）。下面是所有三个示例的输出的结果示例（别忘了用<code>sudo</code>运行它）：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>  $ sudo ./ringbuf-reserve-submit    <span style="color:#6272a4"># or ./ringbuf-output, or ./perfbuf-output</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>  $ sudo ./ringbuf-reserve-submit    <span style="color:#928374;font-style:italic"># or ./ringbuf-output, or ./perfbuf-output</span>
 </span></span><span style="display:flex;"><span>  TIME     EVENT PID     COMM             FILENAME
-</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232062</span> sh               /bin/sh
-</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232062</span> timeout          /usr/bin/timeout
-</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232063</span> ipmitool         /usr/bin/ipmitool
-</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232065</span> env              /usr/bin/env
-</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232066</span> env              /usr/bin/env
-</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232065</span> timeout          /bin/timeout
-</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232066</span> timeout          /bin/timeout
-</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232067</span> sh               /bin/sh
-</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#bd93f9">3232068</span> sh               /bin/sh
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#d3869b">3232062</span> sh               /bin/sh
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#d3869b">3232062</span> timeout          /usr/bin/timeout
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#d3869b">3232063</span> ipmitool         /usr/bin/ipmitool
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#d3869b">3232065</span> env              /usr/bin/env
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#d3869b">3232066</span> env              /usr/bin/env
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#d3869b">3232065</span> timeout          /bin/timeout
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#d3869b">3232066</span> timeout          /bin/timeout
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#d3869b">3232067</span> sh               /bin/sh
+</span></span><span style="display:flex;"><span>  19:17:39 EXEC  <span style="color:#d3869b">3232068</span> sh               /bin/sh
 </span></span><span style="display:flex;"><span>  ^C
 </span></span></code></pre></div><p>下面是从BPF程序发送并在用户态应用程序的消费的样本数据的<a href="(https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/common.h#L22-L30)">C结构体定义</a>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">#define TASK_COMM_LEN 16
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>  <span style="color:#ff79c6">#define MAX_FILENAME_LEN 512
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">/* definition of a sample sent to user-space from BPF program */</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> event {
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">int</span> pid;
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">char</span> comm[TASK_COMM_LEN];
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">char</span> filename[MAX_FILENAME_LEN];
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#8ec07c">#define TASK_COMM_LEN 16
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span>  <span style="color:#8ec07c">#define MAX_FILENAME_LEN 512
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">/* definition of a sample sent to user-space from BPF program */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> event {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> pid;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">char</span> comm[TASK_COMM_LEN];
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">char</span> filename[MAX_FILENAME_LEN];
 </span></span><span style="display:flex;"><span>  };
 </span></span></code></pre></div><h2 id="bpf-perfbuf-bpf_perf_event_output">BPF perfbuf: bpf_perf_event_output()</h2>
 <p>让我们从一个BPF perfbuf用例开始，其BPF部分可以在<a href="(https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/perfbuf-output.bpf.c)">这里</a>找到。</p>
 <p>首先，我们从内核的<code>&lt;linux/bpf.h&gt;</code>中引入一些基础的BPF定义，从libbpf的<code>&lt;bpf/bpf_helpers.h&gt;</code>中引入BPF助手函数，以及从<code>&quot;common.h&quot;</code>中引入应用程序的类型，该文件在BPF和用户态代码之间共享。我们还指定我们的程序在双GPL-2.0/BSD-3许可下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#6272a4">// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">/* Copyright (c) 2020 Andrii Nakryiko */</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;linux/bpf.h&gt;</span><span style="color:#ff79c6">
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>  <span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;bpf/bpf_helpers.h&gt;</span><span style="color:#ff79c6">
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>  <span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&#34;common.h&#34;</span><span style="color:#ff79c6">
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">char</span> LICENSE[] <span style="color:#50fa7b">SEC</span>(<span style="color:#f1fa8c">&#34;license&#34;</span>) <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;Dual BSD/GPL&#34;</span>;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">/* Copyright (c) 2020 Andrii Nakryiko */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;linux/bpf.h&gt;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span>  <span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;bpf/bpf_helpers.h&gt;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span>  <span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&#34;common.h&#34;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">char</span> LICENSE[] <span style="color:#fabd2f">SEC</span>(<span style="color:#b8bb26">&#34;license&#34;</span>) <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;Dual BSD/GPL&#34;</span>;
 </span></span></code></pre></div><p>接下来，我们将BPF perfbuf定义为一个<code>BPF_MAP_TYPE_PERF_EVENT_ARRAY</code>。无需定义max_entries属性，因为libbpf会负责这个，并会自动将其大小设置为系统上可用的CPU数量。每个per-CPU缓冲区的大小是从用户态单独指定的，我们随后讨论这个问题。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#6272a4">/* BPF perfbuf map */</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">__uint</span>(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">__uint</span>(key_size, <span style="color:#ff79c6">sizeof</span>(<span style="color:#8be9fd">int</span>));
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">__uint</span>(value_size, <span style="color:#ff79c6">sizeof</span>(<span style="color:#8be9fd">int</span>));
-</span></span><span style="display:flex;"><span>  } pb <span style="color:#50fa7b">SEC</span>(<span style="color:#f1fa8c">&#34;.maps&#34;</span>);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">/* BPF perfbuf map */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">__uint</span>(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">__uint</span>(key_size, <span style="color:#fe8019">sizeof</span>(<span style="color:#fabd2f">int</span>));
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">__uint</span>(value_size, <span style="color:#fe8019">sizeof</span>(<span style="color:#fabd2f">int</span>));
+</span></span><span style="display:flex;"><span>  } pb <span style="color:#fabd2f">SEC</span>(<span style="color:#b8bb26">&#34;.maps&#34;</span>);
 </span></span></code></pre></div><p>因为样本（在<a href="https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/common.h#L6-20">common.h</a>中定义的<code>struct event</code>）相当大（&gt;512字节，因为我将捕获的文件名的最大大小设置为512字节），我们不能在栈上准备数据。所以我们使用大小为1的per-CPU数组作为临时存储：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">__uint</span>(type, BPF_MAP_TYPE_PERCPU_ARRAY);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">__uint</span>(max_entries, <span style="color:#bd93f9">1</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">__type</span>(key, <span style="color:#8be9fd">int</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">__type</span>(value, <span style="color:#ff79c6">struct</span> event);
-</span></span><span style="display:flex;"><span>  } heap <span style="color:#50fa7b">SEC</span>(<span style="color:#f1fa8c">&#34;.maps&#34;</span>);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">__uint</span>(type, BPF_MAP_TYPE_PERCPU_ARRAY);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">__uint</span>(max_entries, <span style="color:#d3869b">1</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">__type</span>(key, <span style="color:#fabd2f">int</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">__type</span>(value, <span style="color:#fe8019">struct</span> event);
+</span></span><span style="display:flex;"><span>  } heap <span style="color:#fabd2f">SEC</span>(<span style="color:#b8bb26">&#34;.maps&#34;</span>);
 </span></span></code></pre></div><p>现在我们定义BPF程序主体，并指定它应该附加到<code>sched:sched_process_exec</code>上，该程序在每次成功的<code>exec()</code>系统调用时触发。<code>struct trace_event_raw_sched_process_exec</code>也在<a href="https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/common.h#L6-20">common.h</a>中定义，只是从Linux源代码中复制/粘贴过来的。它定义了该特定跟踪点的输入数据的布局。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#50fa7b">SEC</span>(<span style="color:#f1fa8c">&#34;tp/sched/sched_process_exec&#34;</span>)
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">int</span> <span style="color:#50fa7b">handle_exec</span>(<span style="color:#ff79c6">struct</span> trace_event_raw_sched_process_exec <span style="color:#ff79c6">*</span>ctx)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fabd2f">SEC</span>(<span style="color:#b8bb26">&#34;tp/sched/sched_process_exec&#34;</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> <span style="color:#fabd2f">handle_exec</span>(<span style="color:#fe8019">struct</span> trace_event_raw_sched_process_exec <span style="color:#fe8019">*</span>ctx)
 </span></span><span style="display:flex;"><span>  {
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">unsigned</span> fname_off <span style="color:#ff79c6">=</span> ctx<span style="color:#ff79c6">-&gt;</span>__data_loc_filename <span style="color:#ff79c6">&amp;</span> <span style="color:#bd93f9">0xFFFF</span>;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> event <span style="color:#ff79c6">*</span>e;
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">int</span> zero <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">unsigned</span> fname_off <span style="color:#fe8019">=</span> ctx<span style="color:#fe8019">-&gt;</span>__data_loc_filename <span style="color:#fe8019">&amp;</span> <span style="color:#d3869b">0xFFFF</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> event <span style="color:#fe8019">*</span>e;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> zero <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  e <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bpf_map_lookup_elem</span>(<span style="color:#ff79c6">&amp;</span>heap, <span style="color:#ff79c6">&amp;</span>zero);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span>e) <span style="color:#6272a4">/* can&#39;t happen */</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  e <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bpf_map_lookup_elem</span>(<span style="color:#fe8019">&amp;</span>heap, <span style="color:#fe8019">&amp;</span>zero);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (<span style="color:#fe8019">!</span>e) <span style="color:#928374;font-style:italic">/* can&#39;t happen */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  e<span style="color:#ff79c6">-&gt;</span>pid <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bpf_get_current_pid_tgid</span>() <span style="color:#ff79c6">&gt;&gt;</span> <span style="color:#bd93f9">32</span>;
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">bpf_get_current_comm</span>(<span style="color:#ff79c6">&amp;</span>e<span style="color:#ff79c6">-&gt;</span>comm, <span style="color:#ff79c6">sizeof</span>(e<span style="color:#ff79c6">-&gt;</span>comm));
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">bpf_probe_read_str</span>(<span style="color:#ff79c6">&amp;</span>e<span style="color:#ff79c6">-&gt;</span>filename, <span style="color:#ff79c6">sizeof</span>(e<span style="color:#ff79c6">-&gt;</span>filename), (<span style="color:#8be9fd">void</span> <span style="color:#ff79c6">*</span>)ctx <span style="color:#ff79c6">+</span> fname_off);
+</span></span><span style="display:flex;"><span>  e<span style="color:#fe8019">-&gt;</span>pid <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bpf_get_current_pid_tgid</span>() <span style="color:#fe8019">&gt;&gt;</span> <span style="color:#d3869b">32</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">bpf_get_current_comm</span>(<span style="color:#fe8019">&amp;</span>e<span style="color:#fe8019">-&gt;</span>comm, <span style="color:#fe8019">sizeof</span>(e<span style="color:#fe8019">-&gt;</span>comm));
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">bpf_probe_read_str</span>(<span style="color:#fe8019">&amp;</span>e<span style="color:#fe8019">-&gt;</span>filename, <span style="color:#fe8019">sizeof</span>(e<span style="color:#fe8019">-&gt;</span>filename), (<span style="color:#fabd2f">void</span> <span style="color:#fe8019">*</span>)ctx <span style="color:#fe8019">+</span> fname_off);
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">bpf_perf_event_output</span>(ctx, <span style="color:#ff79c6">&amp;</span>pb, BPF_F_CURRENT_CPU, e, <span style="color:#ff79c6">sizeof</span>(<span style="color:#ff79c6">*</span>e));
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">bpf_perf_event_output</span>(ctx, <span style="color:#fe8019">&amp;</span>pb, BPF_F_CURRENT_CPU, e, <span style="color:#fe8019">sizeof</span>(<span style="color:#fe8019">*</span>e));
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>  }
 </span></span></code></pre></div><p>BPF程序逻辑非常简单直接。它获取样本的临时存储，并用跟踪点上下文中的数据填充它。完成后，它调用<code>bpf_perf_event_output()</code>将样本发送到当前CPU的BPF perfbuf。这个API在当前CPU的perf缓冲区中为<code>struct event</code>预留空间，从<code>e</code>复制<code>sizeof(*e)</code>字节的数据到该预留空间，完成后它将通知用户态新数据可用。此时，epoll子系统将唤醒用户态处理程序，并传递指向该数据副本的指针以进行处理。</p>
 <p>这实际上就是BPF测的全部内容。和其他现代BPF应用程序相比而言已非常简单明了。</p>
 <p>现在让我们快速浏览一下<a href="https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/perfbuf-output.c">用户态代码</a>。它依赖于BPF skeleton（您可以在<a href="https://nakryiko.com/posts/bcc-to-libbpf-howto-guide/#bpf-skeleton-and-bpf-app-lifecycle">这里</a>阅读更多相关信息），所以它非常短而直接。在进行少量的初始设置（设置libbpf日志处理程序，中断处理程序，提升<code>RLIMIT_MEMLOCK</code>限制以供BPF系统使用）后，它只是打开并加载BPF skeleton。如果所有这些都成功，然后我们使用libbpf的用户态API <code>perf_buffer__new()</code> 来创建一个perf缓冲区消费者实例：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> perf_buffer <span style="color:#ff79c6">*</span>pb <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">NULL</span>;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> perf_buffer_opts pb_opts <span style="color:#ff79c6">=</span> {};
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> perfbuf_output_bpf <span style="color:#ff79c6">*</span>skel;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> perf_buffer <span style="color:#fe8019">*</span>pb <span style="color:#fe8019">=</span> <span style="color:#fabd2f">NULL</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> perf_buffer_opts pb_opts <span style="color:#fe8019">=</span> {};
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> perfbuf_output_bpf <span style="color:#fe8019">*</span>skel;
 </span></span><span style="display:flex;"><span>  
 </span></span><span style="display:flex;"><span>  ...
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">/* Set up ring buffer polling */</span>
-</span></span><span style="display:flex;"><span>  pb_opts.sample_cb <span style="color:#ff79c6">=</span> handle_event;
-</span></span><span style="display:flex;"><span>  pb <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">perf_buffer__new</span>(<span style="color:#50fa7b">bpf_map__fd</span>(skel<span style="color:#ff79c6">-&gt;</span>maps.pb), <span style="color:#bd93f9">8</span> <span style="color:#6272a4">/* 32KB per CPU */</span>, <span style="color:#ff79c6">&amp;</span>pb_opts);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (<span style="color:#50fa7b">libbpf_get_error</span>(pb)) {
-</span></span><span style="display:flex;"><span>  err <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>;
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">fprintf</span>(stderr, <span style="color:#f1fa8c">&#34;Failed to create perf buffer</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">goto</span> cleanup;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">/* Set up ring buffer polling */</span>
+</span></span><span style="display:flex;"><span>  pb_opts.sample_cb <span style="color:#fe8019">=</span> handle_event;
+</span></span><span style="display:flex;"><span>  pb <span style="color:#fe8019">=</span> <span style="color:#fabd2f">perf_buffer__new</span>(<span style="color:#fabd2f">bpf_map__fd</span>(skel<span style="color:#fe8019">-&gt;</span>maps.pb), <span style="color:#d3869b">8</span> <span style="color:#928374;font-style:italic">/* 32KB per CPU */</span>, <span style="color:#fe8019">&amp;</span>pb_opts);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (<span style="color:#fabd2f">libbpf_get_error</span>(pb)) {
+</span></span><span style="display:flex;"><span>  err <span style="color:#fe8019">=</span> <span style="color:#fe8019">-</span><span style="color:#d3869b">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">fprintf</span>(stderr, <span style="color:#b8bb26">&#34;Failed to create perf buffer</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">goto</span> cleanup;
 </span></span><span style="display:flex;"><span>  }
 </span></span></code></pre></div><p>在这里，我们指定了每个per-CPU缓冲区为32KB（8页x每页4096字节），并且对于每个提交的样本，libbpf将调用我们的handle_event()回调函数，该函数只是用printf()输出数据：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#8be9fd">void</span> <span style="color:#50fa7b">handle_event</span>(<span style="color:#8be9fd">void</span> <span style="color:#ff79c6">*</span>ctx, <span style="color:#8be9fd">int</span> cpu, <span style="color:#8be9fd">void</span> <span style="color:#ff79c6">*</span>data, <span style="color:#8be9fd">unsigned</span> <span style="color:#8be9fd">int</span> data_sz)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fabd2f">void</span> <span style="color:#fabd2f">handle_event</span>(<span style="color:#fabd2f">void</span> <span style="color:#fe8019">*</span>ctx, <span style="color:#fabd2f">int</span> cpu, <span style="color:#fabd2f">void</span> <span style="color:#fe8019">*</span>data, <span style="color:#fabd2f">unsigned</span> <span style="color:#fabd2f">int</span> data_sz)
 </span></span><span style="display:flex;"><span>  {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">const</span> <span style="color:#ff79c6">struct</span> event <span style="color:#ff79c6">*</span>e <span style="color:#ff79c6">=</span> data;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> tm <span style="color:#ff79c6">*</span>tm;
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">char</span> ts[<span style="color:#bd93f9">32</span>];
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">time_t</span> t;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">const</span> <span style="color:#fe8019">struct</span> event <span style="color:#fe8019">*</span>e <span style="color:#fe8019">=</span> data;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> tm <span style="color:#fe8019">*</span>tm;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">char</span> ts[<span style="color:#d3869b">32</span>];
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">time_t</span> t;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">time</span>(<span style="color:#ff79c6">&amp;</span>t);
-</span></span><span style="display:flex;"><span>  tm <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">localtime</span>(<span style="color:#ff79c6">&amp;</span>t);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">strftime</span>(ts, <span style="color:#ff79c6">sizeof</span>(ts), <span style="color:#f1fa8c">&#34;%H:%M:%S&#34;</span>, tm);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">time</span>(<span style="color:#fe8019">&amp;</span>t);
+</span></span><span style="display:flex;"><span>  tm <span style="color:#fe8019">=</span> <span style="color:#fabd2f">localtime</span>(<span style="color:#fe8019">&amp;</span>t);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">strftime</span>(ts, <span style="color:#fe8019">sizeof</span>(ts), <span style="color:#b8bb26">&#34;%H:%M:%S&#34;</span>, tm);
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;%-8s %-5s %-7d %-16s %s</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>, ts, <span style="color:#f1fa8c">&#34;EXEC&#34;</span>, e<span style="color:#ff79c6">-&gt;</span>pid, e<span style="color:#ff79c6">-&gt;</span>comm, e<span style="color:#ff79c6">-&gt;</span>filename);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">printf</span>(<span style="color:#b8bb26">&#34;%-8s %-5s %-7d %-16s %s</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>, ts, <span style="color:#b8bb26">&#34;EXEC&#34;</span>, e<span style="color:#fe8019">-&gt;</span>pid, e<span style="color:#fe8019">-&gt;</span>comm, e<span style="color:#fe8019">-&gt;</span>filename);
 </span></span><span style="display:flex;"><span>  }
 </span></span></code></pre></div><p>最后一步，一旦数据变得可用，就会持续消耗，直到需要退出（例如用户按下<code>Ctrl-C</code>）：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#6272a4">/* Process events */</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;%-8s %-5s %-7s %-16s %s</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#f1fa8c">&#34;TIME&#34;</span>, <span style="color:#f1fa8c">&#34;EVENT&#34;</span>, <span style="color:#f1fa8c">&#34;PID&#34;</span>, <span style="color:#f1fa8c">&#34;COMM&#34;</span>, <span style="color:#f1fa8c">&#34;FILENAME&#34;</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">while</span> (<span style="color:#ff79c6">!</span>exiting) {
-</span></span><span style="display:flex;"><span>  err <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">perf_buffer__poll</span>(pb, <span style="color:#bd93f9">100</span> <span style="color:#6272a4">/* timeout, ms */</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">/* Ctrl-C will cause -EINTR */</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">-</span>EINTR) {
-</span></span><span style="display:flex;"><span>  	err <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
-</span></span><span style="display:flex;"><span>  	<span style="color:#ff79c6">break</span>;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">/* Process events */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">printf</span>(<span style="color:#b8bb26">&#34;%-8s %-5s %-7s %-16s %s</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#b8bb26">&#34;TIME&#34;</span>, <span style="color:#b8bb26">&#34;EVENT&#34;</span>, <span style="color:#b8bb26">&#34;PID&#34;</span>, <span style="color:#b8bb26">&#34;COMM&#34;</span>, <span style="color:#b8bb26">&#34;FILENAME&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">while</span> (<span style="color:#fe8019">!</span>exiting) {
+</span></span><span style="display:flex;"><span>  err <span style="color:#fe8019">=</span> <span style="color:#fabd2f">perf_buffer__poll</span>(pb, <span style="color:#d3869b">100</span> <span style="color:#928374;font-style:italic">/* timeout, ms */</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">/* Ctrl-C will cause -EINTR */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (err <span style="color:#fe8019">==</span> <span style="color:#fe8019">-</span>EINTR) {
+</span></span><span style="display:flex;"><span>  	err <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span>  	<span style="color:#fe8019">break</span>;
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (err <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0</span>) {
-</span></span><span style="display:flex;"><span>  	<span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;Error polling perf buffer: %d</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>, err);
-</span></span><span style="display:flex;"><span>  	<span style="color:#ff79c6">break</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (err <span style="color:#fe8019">&lt;</span> <span style="color:#d3869b">0</span>) {
+</span></span><span style="display:flex;"><span>  	<span style="color:#fabd2f">printf</span>(<span style="color:#b8bb26">&#34;Error polling perf buffer: %d</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>, err);
+</span></span><span style="display:flex;"><span>  	<span style="color:#fe8019">break</span>;
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>  }
 </span></span></code></pre></div><h2 id="bpf-ringbuf-bpf_ringbuf_output">BPF ringbuf: bpf_ringbuf_output()</h2>
 <p>BPF ringbuf的<code>bpf_ringbuf_output()</code> API是为了遵循BPF perfbuf的<code>bpf_perf_event_output()</code>的语义而设计的，以使迁移变得非常简单。为了展示使用上有多么相似和接近，我将直接展示<code>perfbuf-output</code>和<code>ringbuf-output</code>示例之间的差异。您可以在Github上查看完整的<a href="https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/ringbuf-output.bpf.c">BPF侧代码</a>和<a href="https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/ringbuf-output.c">用户态代码</a>。</p>
 <p>以下是BPF侧的差异：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>  --src/perfbuf-output.bpf.c	2020-10-25 18:52:22.247019800 -0700
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>  --src/perfbuf-output.bpf.c	2020-10-25 18:52:22.247019800 -0700
 </span></span><span style="display:flex;"><span>  +++ src/ringbuf-output.bpf.c	2020-10-25 18:44:14.510630322 -0700
 </span></span><span style="display:flex;"><span>  @@ -6,12 +6,11 @@
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  char LICENSE<span style="color:#ff79c6">[]</span> SEC<span style="color:#ff79c6">(</span><span style="color:#f1fa8c">&#34;license&#34;</span><span style="color:#ff79c6">)</span> <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;Dual BSD/GPL&#34;</span>;
+</span></span><span style="display:flex;"><span>  char LICENSE<span style="color:#fe8019">[]</span> SEC<span style="color:#fe8019">(</span><span style="color:#b8bb26">&#34;license&#34;</span><span style="color:#fe8019">)</span> <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;Dual BSD/GPL&#34;</span>;
 </span></span><span style="display:flex;"><span>  
 </span></span><span style="display:flex;"><span>  -/* BPF perfbuf map */
 </span></span><span style="display:flex;"><span>  +/* BPF ringbuf map */
-</span></span><span style="display:flex;"><span>  struct <span style="color:#ff79c6">{</span>
-</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#ff79c6">(</span>type, BPF_MAP_TYPE_PERF_EVENT_ARRAY<span style="color:#ff79c6">)</span>;
-</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#ff79c6">(</span>key_size, sizeof<span style="color:#ff79c6">(</span>int<span style="color:#ff79c6">))</span>;
-</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#ff79c6">(</span>value_size, sizeof<span style="color:#ff79c6">(</span>int<span style="color:#ff79c6">))</span>;
-</span></span><span style="display:flex;"><span>  -<span style="color:#ff79c6">}</span> pb SEC<span style="color:#ff79c6">(</span><span style="color:#f1fa8c">&#34;.maps&#34;</span><span style="color:#ff79c6">)</span>;
-</span></span><span style="display:flex;"><span>  +	__uint<span style="color:#ff79c6">(</span>type, BPF_MAP_TYPE_RINGBUF<span style="color:#ff79c6">)</span>;
-</span></span><span style="display:flex;"><span>  +	__uint<span style="color:#ff79c6">(</span>max_entries, <span style="color:#bd93f9">256</span> * <span style="color:#bd93f9">1024</span> /* <span style="color:#bd93f9">256</span> KB */<span style="color:#ff79c6">)</span>;
-</span></span><span style="display:flex;"><span>  +<span style="color:#ff79c6">}</span> rb SEC<span style="color:#ff79c6">(</span><span style="color:#f1fa8c">&#34;.maps&#34;</span><span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  struct <span style="color:#fe8019">{</span>
+</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#fe8019">(</span>type, BPF_MAP_TYPE_PERF_EVENT_ARRAY<span style="color:#fe8019">)</span>;
+</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#fe8019">(</span>key_size, sizeof<span style="color:#fe8019">(</span>int<span style="color:#fe8019">))</span>;
+</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#fe8019">(</span>value_size, sizeof<span style="color:#fe8019">(</span>int<span style="color:#fe8019">))</span>;
+</span></span><span style="display:flex;"><span>  -<span style="color:#fe8019">}</span> pb SEC<span style="color:#fe8019">(</span><span style="color:#b8bb26">&#34;.maps&#34;</span><span style="color:#fe8019">)</span>;
+</span></span><span style="display:flex;"><span>  +	__uint<span style="color:#fe8019">(</span>type, BPF_MAP_TYPE_RINGBUF<span style="color:#fe8019">)</span>;
+</span></span><span style="display:flex;"><span>  +	__uint<span style="color:#fe8019">(</span>max_entries, <span style="color:#d3869b">256</span> * <span style="color:#d3869b">1024</span> /* <span style="color:#d3869b">256</span> KB */<span style="color:#fe8019">)</span>;
+</span></span><span style="display:flex;"><span>  +<span style="color:#fe8019">}</span> rb SEC<span style="color:#fe8019">(</span><span style="color:#b8bb26">&#34;.maps&#34;</span><span style="color:#fe8019">)</span>;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  struct <span style="color:#ff79c6">{</span>
-</span></span><span style="display:flex;"><span>  __uint<span style="color:#ff79c6">(</span>type, BPF_MAP_TYPE_PERCPU_ARRAY<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  struct <span style="color:#fe8019">{</span>
+</span></span><span style="display:flex;"><span>  __uint<span style="color:#fe8019">(</span>type, BPF_MAP_TYPE_PERCPU_ARRAY<span style="color:#fe8019">)</span>;
 </span></span><span style="display:flex;"><span>  @@ -35,7 +34,7 @@
-</span></span><span style="display:flex;"><span>  bpf_get_current_comm<span style="color:#ff79c6">(</span>&amp;e-&gt;comm, sizeof<span style="color:#ff79c6">(</span>e-&gt;comm<span style="color:#ff79c6">))</span>;
-</span></span><span style="display:flex;"><span>  bpf_probe_read_str<span style="color:#ff79c6">(</span>&amp;e-&gt;filename, sizeof<span style="color:#ff79c6">(</span>e-&gt;filename<span style="color:#ff79c6">)</span>, <span style="color:#ff79c6">(</span>void *<span style="color:#ff79c6">)</span>ctx + fname_off<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  bpf_get_current_comm<span style="color:#fe8019">(</span>&amp;e-&gt;comm, sizeof<span style="color:#fe8019">(</span>e-&gt;comm<span style="color:#fe8019">))</span>;
+</span></span><span style="display:flex;"><span>  bpf_probe_read_str<span style="color:#fe8019">(</span>&amp;e-&gt;filename, sizeof<span style="color:#fe8019">(</span>e-&gt;filename<span style="color:#fe8019">)</span>, <span style="color:#fe8019">(</span>void *<span style="color:#fe8019">)</span>ctx + fname_off<span style="color:#fe8019">)</span>;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  -	bpf_perf_event_output<span style="color:#ff79c6">(</span>ctx, &amp;pb, BPF_F_CURRENT_CPU, e, sizeof<span style="color:#ff79c6">(</span>*e<span style="color:#ff79c6">))</span>;
-</span></span><span style="display:flex;"><span>  +	bpf_ringbuf_output<span style="color:#ff79c6">(</span>&amp;rb, e, sizeof<span style="color:#ff79c6">(</span>*e<span style="color:#ff79c6">)</span>, 0<span style="color:#ff79c6">)</span>;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> 0;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">}</span>
+</span></span><span style="display:flex;"><span>  -	bpf_perf_event_output<span style="color:#fe8019">(</span>ctx, &amp;pb, BPF_F_CURRENT_CPU, e, sizeof<span style="color:#fe8019">(</span>*e<span style="color:#fe8019">))</span>;
+</span></span><span style="display:flex;"><span>  +	bpf_ringbuf_output<span style="color:#fe8019">(</span>&amp;rb, e, sizeof<span style="color:#fe8019">(</span>*e<span style="color:#fe8019">)</span>, 0<span style="color:#fe8019">)</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> 0;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">}</span>
 </span></span></code></pre></div><p>只有两个简单的更改：</p>
 <ol>
 <li>
@@ -443,39 +443,39 @@ BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲
 </ol>
 <p>这是BPF侧唯一的两个不同之处。</p>
 <p>在用户态侧，改动也很小。忽略<code>perf_buffer</code> &lt;-&gt; <code>ring_buffer</code>的重命名，它归结为仅仅两个更改。首先，事件处理程序回调的定义现在可以返回一个错误（这将终止消费者循环），并且它不接受产生事件的CPU的索引：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>  -void handle_event<span style="color:#ff79c6">(</span>void *ctx, int cpu, void *data, unsigned int data_sz<span style="color:#ff79c6">)</span>
-</span></span><span style="display:flex;"><span>  +int handle_event<span style="color:#ff79c6">(</span>void *ctx, void *data, size_t data_sz<span style="color:#ff79c6">)</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">{</span>
-</span></span><span style="display:flex;"><span>  const struct event *e <span style="color:#ff79c6">=</span> data;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>  -void handle_event<span style="color:#fe8019">(</span>void *ctx, int cpu, void *data, unsigned int data_sz<span style="color:#fe8019">)</span>
+</span></span><span style="display:flex;"><span>  +int handle_event<span style="color:#fe8019">(</span>void *ctx, void *data, size_t data_sz<span style="color:#fe8019">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">{</span>
+</span></span><span style="display:flex;"><span>  const struct event *e <span style="color:#fe8019">=</span> data;
 </span></span><span style="display:flex;"><span>  struct tm *tm;
 </span></span></code></pre></div><p>如果需要知道CPU索引的话，你需要在BPF侧程序明确在样本中记录。另外，<code>ring_buffer</code> API没有提供对丢失样本的回调函数，而<code>perf_buffer</code>是有的。如果有必要，这也需要在BPF侧明确地处理。这样做是为了减小在一个共享（跨多个CPU）的环形缓冲区中的锁竞争，并且在不需要的时候不付出额外的代价。实际上，除了报告这个情况，往往没什么实际操作能做，可以通过明确的BPF代码更有效和方便地完成。</p>
 <p>第二个不同点是一个稍微简洁些的 <code>ring_buffer__new()</code> API，它允许指定回调而不求助于额外的选项结构。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#6272a4">/* Set up ring buffer polling */</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">-</span>	pb_opts.sample_cb <span style="color:#ff79c6">=</span> handle_event;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">-</span>	pb <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">perf_buffer__new</span>(<span style="color:#50fa7b">bpf_map__fd</span>(skel<span style="color:#ff79c6">-&gt;</span>maps.pb), <span style="color:#bd93f9">8</span> <span style="color:#6272a4">/* 32KB per CPU */</span>, <span style="color:#ff79c6">&amp;</span>pb_opts);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">-</span>	<span style="color:#ff79c6">if</span> (<span style="color:#50fa7b">libbpf_get_error</span>(pb)) {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">+</span>	rb <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">ring_buffer__new</span>(<span style="color:#50fa7b">bpf_map__fd</span>(skel<span style="color:#ff79c6">-&gt;</span>maps.rb), handle_event, <span style="color:#8be9fd;font-style:italic">NULL</span>, <span style="color:#8be9fd;font-style:italic">NULL</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">+</span>	<span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span>rb) {
-</span></span><span style="display:flex;"><span>  	err <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">-</span>		<span style="color:#50fa7b">fprintf</span>(stderr, <span style="color:#f1fa8c">&#34;Failed to create perf buffer</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">+</span>		<span style="color:#50fa7b">fprintf</span>(stderr, <span style="color:#f1fa8c">&#34;Failed to create ring buffer</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>);
-</span></span><span style="display:flex;"><span>  	<span style="color:#ff79c6">goto</span> cleanup;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">/* Set up ring buffer polling */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">-</span>	pb_opts.sample_cb <span style="color:#fe8019">=</span> handle_event;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">-</span>	pb <span style="color:#fe8019">=</span> <span style="color:#fabd2f">perf_buffer__new</span>(<span style="color:#fabd2f">bpf_map__fd</span>(skel<span style="color:#fe8019">-&gt;</span>maps.pb), <span style="color:#d3869b">8</span> <span style="color:#928374;font-style:italic">/* 32KB per CPU */</span>, <span style="color:#fe8019">&amp;</span>pb_opts);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">-</span>	<span style="color:#fe8019">if</span> (<span style="color:#fabd2f">libbpf_get_error</span>(pb)) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">+</span>	rb <span style="color:#fe8019">=</span> <span style="color:#fabd2f">ring_buffer__new</span>(<span style="color:#fabd2f">bpf_map__fd</span>(skel<span style="color:#fe8019">-&gt;</span>maps.rb), handle_event, <span style="color:#fabd2f">NULL</span>, <span style="color:#fabd2f">NULL</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">+</span>	<span style="color:#fe8019">if</span> (<span style="color:#fe8019">!</span>rb) {
+</span></span><span style="display:flex;"><span>  	err <span style="color:#fe8019">=</span> <span style="color:#fe8019">-</span><span style="color:#d3869b">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">-</span>		<span style="color:#fabd2f">fprintf</span>(stderr, <span style="color:#b8bb26">&#34;Failed to create perf buffer</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">+</span>		<span style="color:#fabd2f">fprintf</span>(stderr, <span style="color:#b8bb26">&#34;Failed to create ring buffer</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>);
+</span></span><span style="display:flex;"><span>  	<span style="color:#fe8019">goto</span> cleanup;
 </span></span><span style="display:flex;"><span>  }
 </span></span></code></pre></div><p>通过这样做，简单地用 <code>ring_buffer__poll()</code> 替换 <code>perf_buffer__poll()</code> 就能让你以完全相同的方式开始消费环形缓冲区的数据。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;%-8s %-5s %-7s %-16s %s</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>,
-</span></span><span style="display:flex;"><span>         <span style="color:#f1fa8c">&#34;TIME&#34;</span>, <span style="color:#f1fa8c">&#34;EVENT&#34;</span>, <span style="color:#f1fa8c">&#34;PID&#34;</span>, <span style="color:#f1fa8c">&#34;COMM&#34;</span>, <span style="color:#f1fa8c">&#34;FILENAME&#34;</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">while</span> (<span style="color:#ff79c6">!</span>exiting) {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">-</span>		err <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">perf_buffer__poll</span>(pb, <span style="color:#bd93f9">100</span> <span style="color:#6272a4">/* timeout, ms */</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">+</span>		err <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">ring_buffer__poll</span>(rb, <span style="color:#bd93f9">100</span> <span style="color:#6272a4">/* timeout, ms */</span>);
-</span></span><span style="display:flex;"><span>  	<span style="color:#6272a4">/* Ctrl-C will cause -EINTR */</span>
-</span></span><span style="display:flex;"><span>  	<span style="color:#ff79c6">if</span> (err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">-</span>EINTR) {
-</span></span><span style="display:flex;"><span>  		err <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
-</span></span><span style="display:flex;"><span>  		<span style="color:#ff79c6">break</span>;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fabd2f">printf</span>(<span style="color:#b8bb26">&#34;%-8s %-5s %-7s %-16s %s</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>,
+</span></span><span style="display:flex;"><span>         <span style="color:#b8bb26">&#34;TIME&#34;</span>, <span style="color:#b8bb26">&#34;EVENT&#34;</span>, <span style="color:#b8bb26">&#34;PID&#34;</span>, <span style="color:#b8bb26">&#34;COMM&#34;</span>, <span style="color:#b8bb26">&#34;FILENAME&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">while</span> (<span style="color:#fe8019">!</span>exiting) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">-</span>		err <span style="color:#fe8019">=</span> <span style="color:#fabd2f">perf_buffer__poll</span>(pb, <span style="color:#d3869b">100</span> <span style="color:#928374;font-style:italic">/* timeout, ms */</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">+</span>		err <span style="color:#fe8019">=</span> <span style="color:#fabd2f">ring_buffer__poll</span>(rb, <span style="color:#d3869b">100</span> <span style="color:#928374;font-style:italic">/* timeout, ms */</span>);
+</span></span><span style="display:flex;"><span>  	<span style="color:#928374;font-style:italic">/* Ctrl-C will cause -EINTR */</span>
+</span></span><span style="display:flex;"><span>  	<span style="color:#fe8019">if</span> (err <span style="color:#fe8019">==</span> <span style="color:#fe8019">-</span>EINTR) {
+</span></span><span style="display:flex;"><span>  		err <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span>  		<span style="color:#fe8019">break</span>;
 </span></span><span style="display:flex;"><span>  	}
-</span></span><span style="display:flex;"><span>  	<span style="color:#ff79c6">if</span> (err <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0</span>) {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">-</span>			<span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;Error polling perf buffer: %d</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>, err);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">+</span>			<span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;Error polling ring buffer: %d</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>, err);
-</span></span><span style="display:flex;"><span>  		<span style="color:#ff79c6">break</span>;
+</span></span><span style="display:flex;"><span>  	<span style="color:#fe8019">if</span> (err <span style="color:#fe8019">&lt;</span> <span style="color:#d3869b">0</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">-</span>			<span style="color:#fabd2f">printf</span>(<span style="color:#b8bb26">&#34;Error polling perf buffer: %d</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>, err);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">+</span>			<span style="color:#fabd2f">printf</span>(<span style="color:#b8bb26">&#34;Error polling ring buffer: %d</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>, err);
+</span></span><span style="display:flex;"><span>  		<span style="color:#fe8019">break</span>;
 </span></span><span style="display:flex;"><span>  	}
 </span></span><span style="display:flex;"><span>  }
 </span></span></code></pre></div><h2 id="bpf-ringbuf-reservesubmit-api">BPF ringbuf: reserve/submit API</h2>
@@ -483,40 +483,40 @@ BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲
 <p>这就是 bpf_ringbuf_reserve()/bpf_ringbuf_submit() API 派上用场的地方。Reserve 允许您做到这一点：尽早预留空间或确定这是不可能的（在这种情况下返回 <code>NULL</code>）。如果我们无法获得足够的数据来提交样本，我们可以跳过捕获所有数据的资源消耗。但如果预留成功，那么我们有一个保证，即一旦完成数据收集，将其发布到用户态永远不会失败。也就是说，如果 <code>bpf_ringbuf_reserve()</code> 返回一个非 NULL 指针，后续的 <code>bpf_ringbuf_submit()</code> 总是会成功。</p>
 <p>此外，环形缓冲区本身中的预留空间在提交之前对用户态是不可见的，因此可以自由地用于构建样本，无论这是多么复杂和多步骤的操作。并且它消除了额外内存复制和临时存储空间的需要。唯一的限制是预留大小必须在验证时对 BPF 验证器来说是已知的，因此具有动态大小的样本将必须使用 <code>bpf_ringbuf_output()</code> 进行处理，并支付额外复制的代价。</p>
 <p>但在大多数情况下，您应该更倾向于使用 reserve/submit。以下是 BPF 测程序代码的差异（完整的 <a href="https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/ringbuf-reserve-submit.bpf.c">BPF侧代码</a>  和 <a href="https://github.com/anakryiko/bpf-ringbuf-examples/blob/main/src/ringbuf-reserve-submit.c">用户态代码</a> 在 Github 上）：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>  --src/ringbuf-output.bpf.c	2020-10-25 18:44:14.510630322 -0700
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>  --src/ringbuf-output.bpf.c	2020-10-25 18:44:14.510630322 -0700
 </span></span><span style="display:flex;"><span>  +++ src/ringbuf-reserve-submit.bpf.c	2020-10-25 18:36:53.409470270 -0700
 </span></span><span style="display:flex;"><span>  @@ -12,29 +12,21 @@
-</span></span><span style="display:flex;"><span>  __uint<span style="color:#ff79c6">(</span>max_entries, <span style="color:#bd93f9">256</span> * <span style="color:#bd93f9">1024</span> /* <span style="color:#bd93f9">256</span> KB */<span style="color:#ff79c6">)</span>;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">}</span> rb SEC<span style="color:#ff79c6">(</span><span style="color:#f1fa8c">&#34;.maps&#34;</span><span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  __uint<span style="color:#fe8019">(</span>max_entries, <span style="color:#d3869b">256</span> * <span style="color:#d3869b">1024</span> /* <span style="color:#d3869b">256</span> KB */<span style="color:#fe8019">)</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">}</span> rb SEC<span style="color:#fe8019">(</span><span style="color:#b8bb26">&#34;.maps&#34;</span><span style="color:#fe8019">)</span>;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  -struct <span style="color:#ff79c6">{</span>
-</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#ff79c6">(</span>type, BPF_MAP_TYPE_PERCPU_ARRAY<span style="color:#ff79c6">)</span>;
-</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#ff79c6">(</span>max_entries, 1<span style="color:#ff79c6">)</span>;
-</span></span><span style="display:flex;"><span>  -	__type<span style="color:#ff79c6">(</span>key, int<span style="color:#ff79c6">)</span>;
-</span></span><span style="display:flex;"><span>  -	__type<span style="color:#ff79c6">(</span>value, struct event<span style="color:#ff79c6">)</span>;
-</span></span><span style="display:flex;"><span>  -<span style="color:#ff79c6">}</span> heap SEC<span style="color:#ff79c6">(</span><span style="color:#f1fa8c">&#34;.maps&#34;</span><span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  -struct <span style="color:#fe8019">{</span>
+</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#fe8019">(</span>type, BPF_MAP_TYPE_PERCPU_ARRAY<span style="color:#fe8019">)</span>;
+</span></span><span style="display:flex;"><span>  -	__uint<span style="color:#fe8019">(</span>max_entries, 1<span style="color:#fe8019">)</span>;
+</span></span><span style="display:flex;"><span>  -	__type<span style="color:#fe8019">(</span>key, int<span style="color:#fe8019">)</span>;
+</span></span><span style="display:flex;"><span>  -	__type<span style="color:#fe8019">(</span>value, struct event<span style="color:#fe8019">)</span>;
+</span></span><span style="display:flex;"><span>  -<span style="color:#fe8019">}</span> heap SEC<span style="color:#fe8019">(</span><span style="color:#b8bb26">&#34;.maps&#34;</span><span style="color:#fe8019">)</span>;
 </span></span><span style="display:flex;"><span>  -
-</span></span><span style="display:flex;"><span>  SEC<span style="color:#ff79c6">(</span><span style="color:#f1fa8c">&#34;tp/sched/sched_process_exec&#34;</span><span style="color:#ff79c6">)</span>
-</span></span><span style="display:flex;"><span>  int handle_exec<span style="color:#ff79c6">(</span>struct trace_event_raw_sched_process_exec *ctx<span style="color:#ff79c6">)</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">{</span>
-</span></span><span style="display:flex;"><span>  unsigned <span style="color:#8be9fd;font-style:italic">fname_off</span> <span style="color:#ff79c6">=</span> ctx-&gt;__data_loc_filename &amp; 0xFFFF;
+</span></span><span style="display:flex;"><span>  SEC<span style="color:#fe8019">(</span><span style="color:#b8bb26">&#34;tp/sched/sched_process_exec&#34;</span><span style="color:#fe8019">)</span>
+</span></span><span style="display:flex;"><span>  int handle_exec<span style="color:#fe8019">(</span>struct trace_event_raw_sched_process_exec *ctx<span style="color:#fe8019">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">{</span>
+</span></span><span style="display:flex;"><span>  unsigned fname_off <span style="color:#fe8019">=</span> ctx-&gt;__data_loc_filename &amp; 0xFFFF;
 </span></span><span style="display:flex;"><span>  struct event *e;
-</span></span><span style="display:flex;"><span>  -	int <span style="color:#8be9fd;font-style:italic">zero</span> <span style="color:#ff79c6">=</span> 0;
+</span></span><span style="display:flex;"><span>  -	int zero <span style="color:#fe8019">=</span> 0;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  -	<span style="color:#8be9fd;font-style:italic">e</span> <span style="color:#ff79c6">=</span> bpf_map_lookup_elem<span style="color:#ff79c6">(</span>&amp;heap, &amp;zero<span style="color:#ff79c6">)</span>;
-</span></span><span style="display:flex;"><span>  -	<span style="color:#ff79c6">if</span> <span style="color:#ff79c6">(</span>!e<span style="color:#ff79c6">)</span> /* can&#39;t happen */
-</span></span><span style="display:flex;"><span>  +	<span style="color:#8be9fd;font-style:italic">e</span> <span style="color:#ff79c6">=</span> bpf_ringbuf_reserve<span style="color:#ff79c6">(</span>&amp;rb, sizeof<span style="color:#ff79c6">(</span>*e<span style="color:#ff79c6">)</span>, 0<span style="color:#ff79c6">)</span>;
-</span></span><span style="display:flex;"><span>  +	<span style="color:#ff79c6">if</span> <span style="color:#ff79c6">(</span>!e<span style="color:#ff79c6">)</span>
-</span></span><span style="display:flex;"><span>  	<span style="color:#ff79c6">return</span> 0;
+</span></span><span style="display:flex;"><span>  -	e <span style="color:#fe8019">=</span> bpf_map_lookup_elem<span style="color:#fe8019">(</span>&amp;heap, &amp;zero<span style="color:#fe8019">)</span>;
+</span></span><span style="display:flex;"><span>  -	<span style="color:#fe8019">if</span> <span style="color:#fe8019">(</span>!e<span style="color:#fe8019">)</span> /* can&#39;t happen */
+</span></span><span style="display:flex;"><span>  +	e <span style="color:#fe8019">=</span> bpf_ringbuf_reserve<span style="color:#fe8019">(</span>&amp;rb, sizeof<span style="color:#fe8019">(</span>*e<span style="color:#fe8019">)</span>, 0<span style="color:#fe8019">)</span>;
+</span></span><span style="display:flex;"><span>  +	<span style="color:#fe8019">if</span> <span style="color:#fe8019">(</span>!e<span style="color:#fe8019">)</span>
+</span></span><span style="display:flex;"><span>  	<span style="color:#fe8019">return</span> 0;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  e-&gt;pid <span style="color:#ff79c6">=</span> bpf_get_current_pid_tgid<span style="color:#ff79c6">()</span> &gt;&gt; 32;
-</span></span><span style="display:flex;"><span>  bpf_get_current_comm<span style="color:#ff79c6">(</span>&amp;e-&gt;comm, sizeof<span style="color:#ff79c6">(</span>e-&gt;comm<span style="color:#ff79c6">))</span>;
-</span></span><span style="display:flex;"><span>  bpf_probe_read_str<span style="color:#ff79c6">(</span>&amp;e-&gt;filename, sizeof<span style="color:#ff79c6">(</span>e-&gt;filename<span style="color:#ff79c6">)</span>, <span style="color:#ff79c6">(</span>void *<span style="color:#ff79c6">)</span>ctx + fname_off<span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  e-&gt;pid <span style="color:#fe8019">=</span> bpf_get_current_pid_tgid<span style="color:#fe8019">()</span> &gt;&gt; 32;
+</span></span><span style="display:flex;"><span>  bpf_get_current_comm<span style="color:#fe8019">(</span>&amp;e-&gt;comm, sizeof<span style="color:#fe8019">(</span>e-&gt;comm<span style="color:#fe8019">))</span>;
+</span></span><span style="display:flex;"><span>  bpf_probe_read_str<span style="color:#fe8019">(</span>&amp;e-&gt;filename, sizeof<span style="color:#fe8019">(</span>e-&gt;filename<span style="color:#fe8019">)</span>, <span style="color:#fe8019">(</span>void *<span style="color:#fe8019">)</span>ctx + fname_off<span style="color:#fe8019">)</span>;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  -	bpf_ringbuf_output<span style="color:#ff79c6">(</span>&amp;rb, e, sizeof<span style="color:#ff79c6">(</span>*e<span style="color:#ff79c6">)</span>, 0<span style="color:#ff79c6">)</span>;
-</span></span><span style="display:flex;"><span>  +	bpf_ringbuf_submit<span style="color:#ff79c6">(</span>e, 0<span style="color:#ff79c6">)</span>;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> 0;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">}</span>
+</span></span><span style="display:flex;"><span>  -	bpf_ringbuf_output<span style="color:#fe8019">(</span>&amp;rb, e, sizeof<span style="color:#fe8019">(</span>*e<span style="color:#fe8019">)</span>, 0<span style="color:#fe8019">)</span>;
+</span></span><span style="display:flex;"><span>  +	bpf_ringbuf_submit<span style="color:#fe8019">(</span>e, 0<span style="color:#fe8019">)</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> 0;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">}</span>
 </span></span></code></pre></div><p>per-CPU数组被弃用，取而代之的是我们使用 <code>bpf_ringbuf_reserve()</code> 的结果来填充数据样本。</p>
 <p>The user-space part is exactly the same (modulo the name of the BPF skeleton object), which makes sense because in the end you are consuming exactly the same data from the BPF ring buffer.</p>
 <p>用户态测代码完全相同（模数为 BPF 骨架对象的名称），因为最终你从 BPF 环形缓冲区中消耗的是完全相同的数据。</p>

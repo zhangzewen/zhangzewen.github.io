@@ -251,86 +251,86 @@ Kubernetes 根据 Pod 中 Containers Resource 的 request 和 limit 的值来定
 <p>对于每一种 Resource 都可以将容器分为三中 QoS Classes: <strong>Guaranteed</strong>, <strong>Burstable</strong>, and <strong>Best-Effort</strong>，它们的QoS级别依次递减。</p>
 <h3 id="guaranteed">Guaranteed</h3>
 <p>如果 Pod 中所有 Container 的所有 Resource 的 <code>limit</code> 和 <code>request</code> 都相等且不为 0，则这个 Pod 的 QoS Class 就是 Guaranteed：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">apiVersion</span>: v1
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">kind</span>: Pod
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">metadata</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">name</span>: qos-demo
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">namespace</span>: qos-example
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">spec</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">containers</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: qos-demo-ctr
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">image</span>: nginx
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">resources</span>:
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">limits</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">memory</span>: <span style="color:#f1fa8c">&#34;200Mi&#34;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">cpu</span>: <span style="color:#f1fa8c">&#34;700m&#34;</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">requests</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">memory</span>: <span style="color:#f1fa8c">&#34;200Mi&#34;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">cpu</span>: <span style="color:#f1fa8c">&#34;700m&#34;</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#fb4934">apiVersion</span>: v1
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">kind</span>: Pod
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#fb4934">name</span>: qos-demo
+</span></span><span style="display:flex;"><span>  <span style="color:#fb4934">namespace</span>: qos-example
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#fb4934">containers</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#fb4934">name</span>: qos-demo-ctr
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">image</span>: nginx
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">resources</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#fb4934">limits</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#fb4934">memory</span>: <span style="color:#b8bb26">&#34;200Mi&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fb4934">cpu</span>: <span style="color:#b8bb26">&#34;700m&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#fb4934">requests</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#fb4934">memory</span>: <span style="color:#b8bb26">&#34;200Mi&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fb4934">cpu</span>: <span style="color:#b8bb26">&#34;700m&#34;</span>
 </span></span></code></pre></div><p>需要注意的是如果在资源请求的时候只是设置了 <code>limit.cpu</code> 或则 <code>limit.memory</code>，kubernetes 也会自动补上相应的 <code>request.cpu</code> 或者 <code>request.memory</code>，所以如果 resource 同时设置了 <code>limit.cpu</code> 和 <code>limit.memory</code> 的话，该 Pod 的 QoS Class 也是 Guaranteed。</p>
 <h3 id="best-effort">Best-Effort</h3>
 <p>如果 Pod 中所有容器的所有 Resource 的 request 和 limit 都没有赋值，则这个 Pod 的 QoS Class 就是 Best-Effort：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">apiVersion</span>: v1
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">kind</span>: Pod
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">metadata</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">name</span>: qos-demo-3
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">namespace</span>: qos-example
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">spec</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">containers</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: qos-demo-3-ctr
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">image</span>: nginx
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#fb4934">apiVersion</span>: v1
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">kind</span>: Pod
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#fb4934">name</span>: qos-demo-3
+</span></span><span style="display:flex;"><span>  <span style="color:#fb4934">namespace</span>: qos-example
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#fb4934">containers</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#fb4934">name</span>: qos-demo-3-ctr
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">image</span>: nginx
 </span></span></code></pre></div><h3 id="burstable">Burstable</h3>
 <p>除了符合 Guaranteed 和 Best-Effort 的场景，其他场景的 Pod QoS Class 都属于 Burstable：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">apiVersion</span>: v1
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">kind</span>: Pod
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">metadata</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">name</span>: qos-demo-2
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">namespace</span>: qos-example
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">spec</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">containers</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: qos-demo-2-ctr
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">image</span>: nginx
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">resources</span>:
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">limits</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">memory</span>: <span style="color:#f1fa8c">&#34;200Mi&#34;</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">requests</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">memory</span>: <span style="color:#f1fa8c">&#34;100Mi&#34;</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#fb4934">apiVersion</span>: v1
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">kind</span>: Pod
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#fb4934">name</span>: qos-demo-2
+</span></span><span style="display:flex;"><span>  <span style="color:#fb4934">namespace</span>: qos-example
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#fb4934">containers</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#fb4934">name</span>: qos-demo-2-ctr
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">image</span>: nginx
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">resources</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#fb4934">limits</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#fb4934">memory</span>: <span style="color:#b8bb26">&#34;200Mi&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#fb4934">requests</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#fb4934">memory</span>: <span style="color:#b8bb26">&#34;100Mi&#34;</span>
 </span></span></code></pre></div><h2 id="源码解析">源码解析</h2>
 <p>QoS的源码位于：<code>pkg/kubelet/qos</code>，代码逻辑很简单：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>├── doc.go
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>├── doc.go
 </span></span><span style="display:flex;"><span>├── policy.go
 </span></span><span style="display:flex;"><span>└── policy_test.go
 </span></span></code></pre></div><p>上面讨论的各个 QoS Class 对应的 <code>OOM_SCORE_ADJ</code> 定义如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">const</span> (
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// KubeletOOMScoreAdj is the OOM score adjustment for Kubelet</span>
-</span></span><span style="display:flex;"><span>    KubeletOOMScoreAdj <span style="color:#8be9fd">int</span> = <span style="color:#ff79c6">-</span><span style="color:#bd93f9">999</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// KubeProxyOOMScoreAdj is the OOM score adjustment for kube-proxy</span>
-</span></span><span style="display:flex;"><span>    KubeProxyOOMScoreAdj  <span style="color:#8be9fd">int</span> = <span style="color:#ff79c6">-</span><span style="color:#bd93f9">999</span>
-</span></span><span style="display:flex;"><span>    guaranteedOOMScoreAdj <span style="color:#8be9fd">int</span> = <span style="color:#ff79c6">-</span><span style="color:#bd93f9">997</span>
-</span></span><span style="display:flex;"><span>    besteffortOOMScoreAdj <span style="color:#8be9fd">int</span> = <span style="color:#bd93f9">1000</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">const</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// KubeletOOMScoreAdj is the OOM score adjustment for Kubelet</span>
+</span></span><span style="display:flex;"><span>    KubeletOOMScoreAdj <span style="color:#fabd2f">int</span> = <span style="color:#fe8019">-</span><span style="color:#d3869b">999</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// KubeProxyOOMScoreAdj is the OOM score adjustment for kube-proxy</span>
+</span></span><span style="display:flex;"><span>    KubeProxyOOMScoreAdj  <span style="color:#fabd2f">int</span> = <span style="color:#fe8019">-</span><span style="color:#d3869b">999</span>
+</span></span><span style="display:flex;"><span>    guaranteedOOMScoreAdj <span style="color:#fabd2f">int</span> = <span style="color:#fe8019">-</span><span style="color:#d3869b">997</span>
+</span></span><span style="display:flex;"><span>    besteffortOOMScoreAdj <span style="color:#fabd2f">int</span> = <span style="color:#d3869b">1000</span>
 </span></span><span style="display:flex;"><span>)
 </span></span></code></pre></div><p>容器的 OOM_SCORE_ADJ 的计算方法逻辑如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">GetContainerOOMScoreAdjust</span>(pod <span style="color:#ff79c6">*</span>v1.Pod, container <span style="color:#ff79c6">*</span>v1.Container, memoryCapacity <span style="color:#8be9fd">int64</span>) <span style="color:#8be9fd">int</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> types.<span style="color:#50fa7b">IsNodeCriticalPod</span>(pod) {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> guaranteedOOMScoreAdj
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">GetContainerOOMScoreAdjust</span>(pod <span style="color:#fe8019">*</span>v1.Pod, container <span style="color:#fe8019">*</span>v1.Container, memoryCapacity <span style="color:#fabd2f">int64</span>) <span style="color:#fabd2f">int</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> types.<span style="color:#fabd2f">IsNodeCriticalPod</span>(pod) {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> guaranteedOOMScoreAdj
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">switch</span> v1qos.<span style="color:#50fa7b">GetPodQOS</span>(pod) {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> v1.PodQOSGuaranteed:
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> guaranteedOOMScoreAdj
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> v1.PodQOSBestEffort:
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> besteffortOOMScoreAdj
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">switch</span> v1qos.<span style="color:#fabd2f">GetPodQOS</span>(pod) {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> v1.PodQOSGuaranteed:
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> guaranteedOOMScoreAdj
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> v1.PodQOSBestEffort:
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> besteffortOOMScoreAdj
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	memoryRequest <span style="color:#ff79c6">:=</span> container.Resources.Requests.<span style="color:#50fa7b">Memory</span>().<span style="color:#50fa7b">Value</span>()
-</span></span><span style="display:flex;"><span>	oomScoreAdjust <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">1000</span> <span style="color:#ff79c6">-</span> (<span style="color:#bd93f9">1000</span><span style="color:#ff79c6">*</span>memoryRequest)<span style="color:#ff79c6">/</span>memoryCapacity
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">int</span>(oomScoreAdjust) &lt; (<span style="color:#bd93f9">1000</span> <span style="color:#ff79c6">+</span> guaranteedOOMScoreAdj) {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> (<span style="color:#bd93f9">1000</span> <span style="color:#ff79c6">+</span> guaranteedOOMScoreAdj)
+</span></span><span style="display:flex;"><span>	memoryRequest <span style="color:#fe8019">:=</span> container.Resources.Requests.<span style="color:#fabd2f">Memory</span>().<span style="color:#fabd2f">Value</span>()
+</span></span><span style="display:flex;"><span>	oomScoreAdjust <span style="color:#fe8019">:=</span> <span style="color:#d3869b">1000</span> <span style="color:#fe8019">-</span> (<span style="color:#d3869b">1000</span><span style="color:#fe8019">*</span>memoryRequest)<span style="color:#fe8019">/</span>memoryCapacity
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">int</span>(oomScoreAdjust) &lt; (<span style="color:#d3869b">1000</span> <span style="color:#fe8019">+</span> guaranteedOOMScoreAdj) {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> (<span style="color:#d3869b">1000</span> <span style="color:#fe8019">+</span> guaranteedOOMScoreAdj)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">int</span>(oomScoreAdjust) <span style="color:#ff79c6">==</span> besteffortOOMScoreAdj {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#8be9fd;font-style:italic">int</span>(oomScoreAdjust <span style="color:#ff79c6">-</span> <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">int</span>(oomScoreAdjust) <span style="color:#fe8019">==</span> besteffortOOMScoreAdj {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fabd2f">int</span>(oomScoreAdjust <span style="color:#fe8019">-</span> <span style="color:#d3869b">1</span>)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#8be9fd;font-style:italic">int</span>(oomScoreAdjust)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fabd2f">int</span>(oomScoreAdjust)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>在上述的代码中，主要是干了如下：</p>
 <ul>
@@ -342,69 +342,69 @@ Kubernetes 根据 Pod 中 Containers Resource 的 request 和 limit 的值来定
 <p>然后是 GetPodQOS 的实现， 这个就无需说了，逻辑就按照上面对 QoS Class 定义来参照就行了，这里就贴出源码，不做进一步分析：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">GetPodQOS</span>(pod <span style="color:#ff79c6">*</span>v1.Pod) v1.PodQOSClass {
-</span></span><span style="display:flex;"><span>    requests <span style="color:#ff79c6">:=</span> v1.ResourceList{}
-</span></span><span style="display:flex;"><span>    limits <span style="color:#ff79c6">:=</span> v1.ResourceList{}
-</span></span><span style="display:flex;"><span>    zeroQuantity <span style="color:#ff79c6">:=</span> resource.<span style="color:#50fa7b">MustParse</span>(<span style="color:#f1fa8c">&#34;0&#34;</span>)
-</span></span><span style="display:flex;"><span>    isGuaranteed <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>    allContainers <span style="color:#ff79c6">:=</span> []v1.Container{}
-</span></span><span style="display:flex;"><span>    allContainers = <span style="color:#8be9fd;font-style:italic">append</span>(allContainers, pod.Spec.Containers<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>    allContainers = <span style="color:#8be9fd;font-style:italic">append</span>(allContainers, pod.Spec.InitContainers<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> _, container <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> allContainers {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// process requests</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">for</span> name, quantity <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> container.Resources.Requests {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> !<span style="color:#50fa7b">isSupportedQoSComputeResource</span>(name) {
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">continue</span>
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">GetPodQOS</span>(pod <span style="color:#fe8019">*</span>v1.Pod) v1.PodQOSClass {
+</span></span><span style="display:flex;"><span>    requests <span style="color:#fe8019">:=</span> v1.ResourceList{}
+</span></span><span style="display:flex;"><span>    limits <span style="color:#fe8019">:=</span> v1.ResourceList{}
+</span></span><span style="display:flex;"><span>    zeroQuantity <span style="color:#fe8019">:=</span> resource.<span style="color:#fabd2f">MustParse</span>(<span style="color:#b8bb26">&#34;0&#34;</span>)
+</span></span><span style="display:flex;"><span>    isGuaranteed <span style="color:#fe8019">:=</span> <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>    allContainers <span style="color:#fe8019">:=</span> []v1.Container{}
+</span></span><span style="display:flex;"><span>    allContainers = <span style="color:#fabd2f">append</span>(allContainers, pod.Spec.Containers<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>    allContainers = <span style="color:#fabd2f">append</span>(allContainers, pod.Spec.InitContainers<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">for</span> _, container <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> allContainers {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// process requests</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">for</span> name, quantity <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> container.Resources.Requests {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> !<span style="color:#fabd2f">isSupportedQoSComputeResource</span>(name) {
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">continue</span>
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> quantity.<span style="color:#50fa7b">Cmp</span>(zeroQuantity) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">1</span> {
-</span></span><span style="display:flex;"><span>                delta <span style="color:#ff79c6">:=</span> quantity.<span style="color:#50fa7b">DeepCopy</span>()
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">if</span> _, exists <span style="color:#ff79c6">:=</span> requests[name]; !exists {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> quantity.<span style="color:#fabd2f">Cmp</span>(zeroQuantity) <span style="color:#fe8019">==</span> <span style="color:#d3869b">1</span> {
+</span></span><span style="display:flex;"><span>                delta <span style="color:#fe8019">:=</span> quantity.<span style="color:#fabd2f">DeepCopy</span>()
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">if</span> _, exists <span style="color:#fe8019">:=</span> requests[name]; !exists {
 </span></span><span style="display:flex;"><span>                    requests[name] = delta
-</span></span><span style="display:flex;"><span>                } <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>                    delta.<span style="color:#50fa7b">Add</span>(requests[name])
+</span></span><span style="display:flex;"><span>                } <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>                    delta.<span style="color:#fabd2f">Add</span>(requests[name])
 </span></span><span style="display:flex;"><span>                    requests[name] = delta
 </span></span><span style="display:flex;"><span>                }
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// process limits</span>
-</span></span><span style="display:flex;"><span>        qosLimitsFound <span style="color:#ff79c6">:=</span> sets.<span style="color:#50fa7b">NewString</span>()
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">for</span> name, quantity <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> container.Resources.Limits {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> !<span style="color:#50fa7b">isSupportedQoSComputeResource</span>(name) {
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// process limits</span>
+</span></span><span style="display:flex;"><span>        qosLimitsFound <span style="color:#fe8019">:=</span> sets.<span style="color:#fabd2f">NewString</span>()
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">for</span> name, quantity <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> container.Resources.Limits {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> !<span style="color:#fabd2f">isSupportedQoSComputeResource</span>(name) {
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">continue</span>
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> quantity.<span style="color:#50fa7b">Cmp</span>(zeroQuantity) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">1</span> {
-</span></span><span style="display:flex;"><span>                qosLimitsFound.<span style="color:#50fa7b">Insert</span>(<span style="color:#8be9fd;font-style:italic">string</span>(name))
-</span></span><span style="display:flex;"><span>                delta <span style="color:#ff79c6">:=</span> quantity.<span style="color:#50fa7b">DeepCopy</span>()
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">if</span> _, exists <span style="color:#ff79c6">:=</span> limits[name]; !exists {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> quantity.<span style="color:#fabd2f">Cmp</span>(zeroQuantity) <span style="color:#fe8019">==</span> <span style="color:#d3869b">1</span> {
+</span></span><span style="display:flex;"><span>                qosLimitsFound.<span style="color:#fabd2f">Insert</span>(<span style="color:#fabd2f">string</span>(name))
+</span></span><span style="display:flex;"><span>                delta <span style="color:#fe8019">:=</span> quantity.<span style="color:#fabd2f">DeepCopy</span>()
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">if</span> _, exists <span style="color:#fe8019">:=</span> limits[name]; !exists {
 </span></span><span style="display:flex;"><span>                    limits[name] = delta
-</span></span><span style="display:flex;"><span>                } <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>                    delta.<span style="color:#50fa7b">Add</span>(limits[name])
+</span></span><span style="display:flex;"><span>                } <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>                    delta.<span style="color:#fabd2f">Add</span>(limits[name])
 </span></span><span style="display:flex;"><span>                    limits[name] = delta
 </span></span><span style="display:flex;"><span>                }
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> !qosLimitsFound.<span style="color:#50fa7b">HasAll</span>(<span style="color:#8be9fd;font-style:italic">string</span>(v1.ResourceMemory), <span style="color:#8be9fd;font-style:italic">string</span>(v1.ResourceCPU)) {
-</span></span><span style="display:flex;"><span>            isGuaranteed = <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> !qosLimitsFound.<span style="color:#fabd2f">HasAll</span>(<span style="color:#fabd2f">string</span>(v1.ResourceMemory), <span style="color:#fabd2f">string</span>(v1.ResourceCPU)) {
+</span></span><span style="display:flex;"><span>            isGuaranteed = <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(requests) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> <span style="color:#ff79c6">&amp;&amp;</span> <span style="color:#8be9fd;font-style:italic">len</span>(limits) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> v1.PodQOSBestEffort
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(requests) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> <span style="color:#fe8019">&amp;&amp;</span> <span style="color:#fabd2f">len</span>(limits) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> v1.PodQOSBestEffort
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Check is requests match limits for all resources.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> isGuaranteed {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">for</span> name, req <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> requests {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> lim, exists <span style="color:#ff79c6">:=</span> limits[name]; !exists <span style="color:#ff79c6">||</span> lim.<span style="color:#50fa7b">Cmp</span>(req) <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>                isGuaranteed = <span style="color:#ff79c6">false</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">break</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Check is requests match limits for all resources.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> isGuaranteed {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">for</span> name, req <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> requests {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> lim, exists <span style="color:#fe8019">:=</span> limits[name]; !exists <span style="color:#fe8019">||</span> lim.<span style="color:#fabd2f">Cmp</span>(req) <span style="color:#fe8019">!=</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>                isGuaranteed = <span style="color:#fe8019">false</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">break</span>
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> isGuaranteed <span style="color:#ff79c6">&amp;&amp;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#8be9fd;font-style:italic">len</span>(requests) <span style="color:#ff79c6">==</span> <span style="color:#8be9fd;font-style:italic">len</span>(limits) {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> v1.PodQOSGuaranteed
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> isGuaranteed <span style="color:#fe8019">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">len</span>(requests) <span style="color:#fe8019">==</span> <span style="color:#fabd2f">len</span>(limits) {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> v1.PodQOSGuaranteed
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> v1.PodQOSBurstable
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> v1.PodQOSBurstable
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>

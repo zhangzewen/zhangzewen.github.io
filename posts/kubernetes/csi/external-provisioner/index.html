@@ -243,9 +243,9 @@
   <div>
     <h2 id="前言">前言</h2>
 <p><a href="https://github.com/kubernetes-csi/external-provisioner.git">external-provisioner</a> 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 <a href="https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/">sig-storage-lib-external-provisioner</a> 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 <a href="https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/">PV Controller</a> 的工作。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Provisioner <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Provision</span>(context.Context, ProvisionOptions) (<span style="color:#ff79c6">*</span>v1.PersistentVolume, ProvisioningState, <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Delete</span>(context.Context, <span style="color:#ff79c6">*</span>v1.PersistentVolume) <span style="color:#8be9fd">error</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Provisioner <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Provision</span>(context.Context, ProvisionOptions) (<span style="color:#fe8019">*</span>v1.PersistentVolume, ProvisioningState, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Delete</span>(context.Context, <span style="color:#fe8019">*</span>v1.PersistentVolume) <span style="color:#fabd2f">error</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="volume-的创建和删除csiprovisioner">Volume 的创建和删除：csiProvisioner</h2>
 <h3 id="创建-volume">创建 Volume</h3>
@@ -257,32 +257,32 @@
 </ul>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>csiProvisioner) <span style="color:#50fa7b">Provision</span>(ctx context.Context, options controller.ProvisionOptions) (<span style="color:#ff79c6">*</span>v1.PersistentVolume, controller.ProvisioningState, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>	claim <span style="color:#ff79c6">:=</span> options.PVC
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//通过检查PVC的.metadata.annotations的键&#34;volume.kubernetes.io/storage-provisioner&#34;/&#34;volume.beta.kubernetes.io/storage-provisioner&#34;</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 来获取provisioner</span>
-</span></span><span style="display:flex;"><span>	provisioner, ok <span style="color:#ff79c6">:=</span> claim.Annotations[annStorageProvisioner]
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok {
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>csiProvisioner) <span style="color:#fabd2f">Provision</span>(ctx context.Context, options controller.ProvisionOptions) (<span style="color:#fe8019">*</span>v1.PersistentVolume, controller.ProvisioningState, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>	claim <span style="color:#fe8019">:=</span> options.PVC
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//通过检查PVC的.metadata.annotations的键&#34;volume.kubernetes.io/storage-provisioner&#34;/&#34;volume.beta.kubernetes.io/storage-provisioner&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 来获取provisioner</span>
+</span></span><span style="display:flex;"><span>	provisioner, ok <span style="color:#fe8019">:=</span> claim.Annotations[annStorageProvisioner]
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !ok {
 </span></span><span style="display:flex;"><span>		provisioner = claim.Annotations[annBetaStorageProvisioner]
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 需要注意的是p.driverName,在main函数的时候通过CSI gRPC调用来获取的drivername</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 还需要判断.metadata.annotations[&#34;pv.kubernetes.io/migrated-to&#34;]的值是不是driverName</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> provisioner <span style="color:#ff79c6">!=</span> p.driverName <span style="color:#ff79c6">&amp;&amp;</span> claim.Annotations[annMigratedTo] <span style="color:#ff79c6">!=</span> p.driverName {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// The storage provisioner annotation may not equal driver name but the</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// PVC could have annotation &#34;migrated-to&#34; which is the new way to</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// signal a PVC is migrated (k8s v1.17+)</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, controller.ProvisioningFinished, <span style="color:#ff79c6">&amp;</span>controller.IgnoredError{
-</span></span><span style="display:flex;"><span>			Reason: fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;PVC annotated with external-provisioner name %s does not match provisioner driver name %s. This could mean the PVC is not migrated&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 需要注意的是p.driverName,在main函数的时候通过CSI gRPC调用来获取的drivername</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 还需要判断.metadata.annotations[&#34;pv.kubernetes.io/migrated-to&#34;]的值是不是driverName</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> provisioner <span style="color:#fe8019">!=</span> p.driverName <span style="color:#fe8019">&amp;&amp;</span> claim.Annotations[annMigratedTo] <span style="color:#fe8019">!=</span> p.driverName {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// The storage provisioner annotation may not equal driver name but the</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// PVC could have annotation &#34;migrated-to&#34; which is the new way to</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// signal a PVC is migrated (k8s v1.17+)</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, controller.ProvisioningFinished, <span style="color:#fe8019">&amp;</span>controller.IgnoredError{
+</span></span><span style="display:flex;"><span>			Reason: fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;PVC annotated with external-provisioner name %s does not match provisioner driver name %s. This could mean the PVC is not migrated&#34;</span>,
 </span></span><span style="display:flex;"><span>				provisioner,
 </span></span><span style="display:flex;"><span>				p.driverName),
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// gRPC通信，通过 CSI plugin 创建 Volume</span>
-</span></span><span style="display:flex;"><span>	rep, err <span style="color:#ff79c6">:=</span> p.csiClient.<span style="color:#50fa7b">CreateVolume</span>(createCtx, req)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建成功后，构建 pv 资源对象</span>
-</span></span><span style="display:flex;"><span>	pv <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>v1.PersistentVolume{
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// gRPC通信，通过 CSI plugin 创建 Volume</span>
+</span></span><span style="display:flex;"><span>	rep, err <span style="color:#fe8019">:=</span> p.csiClient.<span style="color:#fabd2f">CreateVolume</span>(createCtx, req)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 创建成功后，构建 pv 资源对象</span>
+</span></span><span style="display:flex;"><span>	pv <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>v1.PersistentVolume{
 </span></span><span style="display:flex;"><span>		ObjectMeta: metav1.ObjectMeta{
 </span></span><span style="display:flex;"><span>			Name: pvName,
 </span></span><span style="display:flex;"><span>		},
@@ -290,28 +290,28 @@
 </span></span><span style="display:flex;"><span>			AccessModes:  options.PVC.Spec.AccessModes,
 </span></span><span style="display:flex;"><span>			MountOptions: options.StorageClass.MountOptions,
 </span></span><span style="display:flex;"><span>			Capacity: v1.ResourceList{
-</span></span><span style="display:flex;"><span>				v1.<span style="color:#50fa7b">ResourceName</span>(v1.ResourceStorage): <span style="color:#50fa7b">bytesToQuantity</span>(respCap),
+</span></span><span style="display:flex;"><span>				v1.<span style="color:#fabd2f">ResourceName</span>(v1.ResourceStorage): <span style="color:#fabd2f">bytesToQuantity</span>(respCap),
 </span></span><span style="display:flex;"><span>			},
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// TODO wait for CSI VolumeSource API</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// TODO wait for CSI VolumeSource API</span>
 </span></span><span style="display:flex;"><span>			PersistentVolumeSource: v1.PersistentVolumeSource{
 </span></span><span style="display:flex;"><span>				CSI: result.csiPVSource,
 </span></span><span style="display:flex;"><span>			},
 </span></span><span style="display:flex;"><span>		},
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">//  返回该资源对象</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> pv, controller.ProvisioningFinished, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">//  返回该资源对象</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> pv, controller.ProvisioningFinished, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
 
 <h3 id="删除-volume">删除 Volume</h3>
 <p><code>csiProvisioner.Delete</code> 通过 <a href="https://github.com/container-storage-interface/spec.git">CSI 接口</a> 提供的 Controller Service 和 CSI plugin 通信（调用DeleteVolume）来删除 Volume：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>csiProvisioner) <span style="color:#50fa7b">Delete</span>(ctx context.Context, volume <span style="color:#ff79c6">*</span>v1.PersistentVolume) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// gRPC通信，通过 CSI plugin 删除 Volume</span>
-</span></span><span style="display:flex;"><span>	_, err = p.csiClient.<span style="color:#50fa7b">DeleteVolume</span>(deleteCtx, <span style="color:#ff79c6">&amp;</span>req)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>csiProvisioner) <span style="color:#fabd2f">Delete</span>(ctx context.Context, volume <span style="color:#fe8019">*</span>v1.PersistentVolume) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// gRPC通信，通过 CSI plugin 删除 Volume</span>
+</span></span><span style="display:flex;"><span>	_, err = p.csiClient.<span style="color:#fabd2f">DeleteVolume</span>(deleteCtx, <span style="color:#fe8019">&amp;</span>req)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p><img src="/images/kubernetes/csi/external-provisioner.png" alt="external-provisioner"></p>
 

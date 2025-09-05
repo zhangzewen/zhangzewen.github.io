@@ -232,46 +232,46 @@ Pod 是 kubernetes 里最小调度单元，一个 Pod 里面可以包含由多�
 <p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
 <p>Pod 是 kubernetes 里最小调度单元，一个 Pod 里面可以包含由多个容器。 这些容器之间通过 linux namespace 来共享资源以及和宿主节点环境隔离。Pod 里面最基础的容器是 pause 容器，它是 Pod 启动的时候，首先创建的容器，其他的业务容器都依赖该 pause 容器，毕竟它提供了可共享的 linux namspace。</p>
 <p>Pause 容器的代码不到 100 行：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>static void <span style="color:#50fa7b">sigdown</span>(<span style="color:#8be9fd">int</span> signo) {
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">psignal</span>(signo, <span style="color:#f1fa8c">&#34;Shutting down, got signal&#34;</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 直接正常退出进程</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">exit</span>(<span style="color:#bd93f9">0</span>);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>static void <span style="color:#fabd2f">sigdown</span>(<span style="color:#fabd2f">int</span> signo) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">psignal</span>(signo, <span style="color:#b8bb26">&#34;Shutting down, got signal&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 直接正常退出进程</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">exit</span>(<span style="color:#d3869b">0</span>);
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>static void <span style="color:#50fa7b">sigreap</span>(<span style="color:#8be9fd">int</span> signo) {
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// waitpid 监听子进程退出, WNOHANG 是非阻塞标记, 当没有找到子进程退出时, 不会阻塞</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">while</span> (<span style="color:#50fa7b">waitpid</span>(<span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>, NULL, WNOHANG) &gt; <span style="color:#bd93f9">0</span>)
+</span></span><span style="display:flex;"><span>static void <span style="color:#fabd2f">sigreap</span>(<span style="color:#fabd2f">int</span> signo) {
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// waitpid 监听子进程退出, WNOHANG 是非阻塞标记, 当没有找到子进程退出时, 不会阻塞</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">while</span> (<span style="color:#fabd2f">waitpid</span>(<span style="color:#fe8019">-</span><span style="color:#d3869b">1</span>, NULL, WNOHANG) &gt; <span style="color:#d3869b">0</span>)
 </span></span><span style="display:flex;"><span>    ;
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">int</span> <span style="color:#50fa7b">main</span>(<span style="color:#8be9fd">int</span> argc, char <span style="color:#ff79c6">**</span>argv) {
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">int</span> i;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">for</span> (i = <span style="color:#bd93f9">1</span>; i &lt; argc; <span style="color:#ff79c6">++</span>i) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> (!<span style="color:#50fa7b">strcasecmp</span>(argv[i], <span style="color:#f1fa8c">&#34;-v&#34;</span>)) {
-</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;pause.c %s\n&#34;</span>, <span style="color:#50fa7b">VERSION_STRING</span>(VERSION));
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">int</span> <span style="color:#fabd2f">main</span>(<span style="color:#fabd2f">int</span> argc, char <span style="color:#fe8019">**</span>argv) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> i;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">for</span> (i = <span style="color:#d3869b">1</span>; i &lt; argc; <span style="color:#fe8019">++</span>i) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> (!<span style="color:#fabd2f">strcasecmp</span>(argv[i], <span style="color:#b8bb26">&#34;-v&#34;</span>)) {
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">printf</span>(<span style="color:#b8bb26">&#34;pause.c %s\n&#34;</span>, <span style="color:#fabd2f">VERSION_STRING</span>(VERSION));
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (<span style="color:#50fa7b">getpid</span>() <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">1</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* Not an error because pause sees use outside of infra containers. */</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">fprintf</span>(stderr, <span style="color:#f1fa8c">&#34;Warning: pause should be the first process\n&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (<span style="color:#fabd2f">getpid</span>() <span style="color:#fe8019">!=</span> <span style="color:#d3869b">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* Not an error because pause sees use outside of infra containers. */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">fprintf</span>(stderr, <span style="color:#b8bb26">&#34;Warning: pause should be the first process\n&#34;</span>);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 注册信号和回调方法</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// SIGINT 和 SIGTERM 都是正常退出，参考上面的回调函数sigdown</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (<span style="color:#50fa7b">sigaction</span>(SIGINT, <span style="color:#ff79c6">&amp;</span>(<span style="color:#8be9fd;font-style:italic">struct</span> sigaction){.sa_handler = sigdown}, NULL) &lt; <span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">1</span>;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (<span style="color:#50fa7b">sigaction</span>(SIGTERM, <span style="color:#ff79c6">&amp;</span>(<span style="color:#8be9fd;font-style:italic">struct</span> sigaction){.sa_handler = sigdown}, NULL) &lt; <span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">2</span>;
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// SIGCHLD ,回收子进程</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (<span style="color:#50fa7b">sigaction</span>(SIGCHLD, <span style="color:#ff79c6">&amp;</span>(<span style="color:#8be9fd;font-style:italic">struct</span> sigaction){.sa_handler = sigreap,
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 注册信号和回调方法</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// SIGINT 和 SIGTERM 都是正常退出，参考上面的回调函数sigdown</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (<span style="color:#fabd2f">sigaction</span>(SIGINT, <span style="color:#fe8019">&amp;</span>(<span style="color:#fe8019">struct</span> sigaction){.sa_handler = sigdown}, NULL) &lt; <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#d3869b">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (<span style="color:#fabd2f">sigaction</span>(SIGTERM, <span style="color:#fe8019">&amp;</span>(<span style="color:#fe8019">struct</span> sigaction){.sa_handler = sigdown}, NULL) &lt; <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#d3869b">2</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// SIGCHLD ,回收子进程</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (<span style="color:#fabd2f">sigaction</span>(SIGCHLD, <span style="color:#fe8019">&amp;</span>(<span style="color:#fe8019">struct</span> sigaction){.sa_handler = sigreap,
 </span></span><span style="display:flex;"><span>                                             .sa_flags = SA_NOCLDSTOP},
-</span></span><span style="display:flex;"><span>                NULL) &lt; <span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">3</span>;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">for</span> (;;)
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">pause</span>(); <span style="color:#6272a4">// 进程进入休眠，监听上诉注册信号的发生</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">fprintf</span>(stderr, <span style="color:#f1fa8c">&#34;Error: infinite loop terminated\n&#34;</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">42</span>;
+</span></span><span style="display:flex;"><span>                NULL) &lt; <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#d3869b">3</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">for</span> (;;)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">pause</span>(); <span style="color:#928374;font-style:italic">// 进程进入休眠，监听上诉注册信号的发生</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">fprintf</span>(stderr, <span style="color:#b8bb26">&#34;Error: infinite loop terminated\n&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#d3869b">42</span>;
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>从上面的代码可以看出 pause 容器做如下事情：</p>
 <ul>

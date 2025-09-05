@@ -253,13 +253,13 @@ kubernetes 支持三种 container 探针：startupProbe、readinessProbe、liven
 <p>kubernetes 支持三种 container 探针：startupProbe、readinessProbe、livenessProbe。 livenessProbe 决定是否要重启容器，readinessProbe 确认是服务是否可用，startupProbe 是为了避免 container 启动时间过长使得 liveness 失败而造成无限重启的场景。</p>
 <h2 id="探针">探针</h2>
 <p>探针在源码中是通过 prober 来定义的：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> prober <span style="color:#8be9fd;font-style:italic">struct</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 具体的探测方法 exec/http/tcp/grpc</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> prober <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 具体的探测方法 exec/http/tcp/grpc</span>
 </span></span><span style="display:flex;"><span>	exec   execprobe.Prober
 </span></span><span style="display:flex;"><span>	http   httpprobe.Prober
 </span></span><span style="display:flex;"><span>	tcp    tcpprobe.Prober
 </span></span><span style="display:flex;"><span>	grpc   grpcprobe.Prober
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//runner可以让exec配置的command可以在容器中运行</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//runner可以让exec配置的command可以在容器中运行</span>
 </span></span><span style="display:flex;"><span>	runner kubecontainer.CommandRunner
 </span></span><span style="display:flex;"><span>	recorder record.EventRecorder
 </span></span><span style="display:flex;"><span>}
@@ -267,150 +267,150 @@ kubernetes 支持三种 container 探针：startupProbe、readinessProbe、liven
 需要注意的是 Exec 的执行又被 execInContainer 封装了一层，他实现了 <code>cmd.Exec</code> 接口，其底层的实现还是调用 <code>prober.runner</code> 来在容器内部执行命令，具体的可以看代码，为了篇幅这里不再赘述。</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (pb <span style="color:#ff79c6">*</span>prober) <span style="color:#50fa7b">runProbe</span>(probeType probeType, p <span style="color:#ff79c6">*</span>v1.Probe, pod <span style="color:#ff79c6">*</span>v1.Pod, status v1.PodStatus, container v1.Container, containerID kubecontainer.ContainerID) (probe.Result, <span style="color:#8be9fd">string</span>, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>	timeout <span style="color:#ff79c6">:=</span> time.<span style="color:#50fa7b">Duration</span>(p.TimeoutSeconds) <span style="color:#ff79c6">*</span> time.Second
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> p.Exec <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Exec-Probe runProbe&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod), <span style="color:#f1fa8c">&#34;containerName&#34;</span>, container.Name, <span style="color:#f1fa8c">&#34;execCommand&#34;</span>, p.Exec.Command)
-</span></span><span style="display:flex;"><span>		command <span style="color:#ff79c6">:=</span> kubecontainer.<span style="color:#50fa7b">ExpandContainerCommandOnlyStatic</span>(p.Exec.Command, container.Env)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> pb.exec.<span style="color:#50fa7b">Probe</span>(pb.<span style="color:#50fa7b">newExecInContainer</span>(container, containerID, command, timeout))
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (pb <span style="color:#fe8019">*</span>prober) <span style="color:#fabd2f">runProbe</span>(probeType probeType, p <span style="color:#fe8019">*</span>v1.Probe, pod <span style="color:#fe8019">*</span>v1.Pod, status v1.PodStatus, container v1.Container, containerID kubecontainer.ContainerID) (probe.Result, <span style="color:#fabd2f">string</span>, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>	timeout <span style="color:#fe8019">:=</span> time.<span style="color:#fabd2f">Duration</span>(p.TimeoutSeconds) <span style="color:#fe8019">*</span> time.Second
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> p.Exec <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Exec-Probe runProbe&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;containerName&#34;</span>, container.Name, <span style="color:#b8bb26">&#34;execCommand&#34;</span>, p.Exec.Command)
+</span></span><span style="display:flex;"><span>		command <span style="color:#fe8019">:=</span> kubecontainer.<span style="color:#fabd2f">ExpandContainerCommandOnlyStatic</span>(p.Exec.Command, container.Env)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> pb.exec.<span style="color:#fabd2f">Probe</span>(pb.<span style="color:#fabd2f">newExecInContainer</span>(container, containerID, command, timeout))
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> p.HTTPGet <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		scheme <span style="color:#ff79c6">:=</span> strings.<span style="color:#50fa7b">ToLower</span>(<span style="color:#8be9fd;font-style:italic">string</span>(p.HTTPGet.Scheme))
-</span></span><span style="display:flex;"><span>		host <span style="color:#ff79c6">:=</span> p.HTTPGet.Host
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> host <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> p.HTTPGet <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		scheme <span style="color:#fe8019">:=</span> strings.<span style="color:#fabd2f">ToLower</span>(<span style="color:#fabd2f">string</span>(p.HTTPGet.Scheme))
+</span></span><span style="display:flex;"><span>		host <span style="color:#fe8019">:=</span> p.HTTPGet.Host
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> host <span style="color:#fe8019">==</span> <span style="color:#b8bb26">&#34;&#34;</span> {
 </span></span><span style="display:flex;"><span>			host = status.PodIP
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		port, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">extractPort</span>(p.HTTPGet.Port, container)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> probe.Unknown, <span style="color:#f1fa8c">&#34;&#34;</span>, err
+</span></span><span style="display:flex;"><span>		port, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">extractPort</span>(p.HTTPGet.Port, container)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> probe.Unknown, <span style="color:#b8bb26">&#34;&#34;</span>, err
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		path <span style="color:#ff79c6">:=</span> p.HTTPGet.Path
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;HTTP-Probe&#34;</span>, <span style="color:#f1fa8c">&#34;scheme&#34;</span>, scheme, <span style="color:#f1fa8c">&#34;host&#34;</span>, host, <span style="color:#f1fa8c">&#34;port&#34;</span>, port, <span style="color:#f1fa8c">&#34;path&#34;</span>, path, <span style="color:#f1fa8c">&#34;timeout&#34;</span>, timeout)
-</span></span><span style="display:flex;"><span>		url <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">formatURL</span>(scheme, host, port, path)
-</span></span><span style="display:flex;"><span>		headers <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">buildHeader</span>(p.HTTPGet.HTTPHeaders)
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;HTTP-Probe Headers&#34;</span>, <span style="color:#f1fa8c">&#34;headers&#34;</span>, headers)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> pb.http.<span style="color:#50fa7b">Probe</span>(url, headers, timeout)
+</span></span><span style="display:flex;"><span>		path <span style="color:#fe8019">:=</span> p.HTTPGet.Path
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;HTTP-Probe&#34;</span>, <span style="color:#b8bb26">&#34;scheme&#34;</span>, scheme, <span style="color:#b8bb26">&#34;host&#34;</span>, host, <span style="color:#b8bb26">&#34;port&#34;</span>, port, <span style="color:#b8bb26">&#34;path&#34;</span>, path, <span style="color:#b8bb26">&#34;timeout&#34;</span>, timeout)
+</span></span><span style="display:flex;"><span>		url <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">formatURL</span>(scheme, host, port, path)
+</span></span><span style="display:flex;"><span>		headers <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">buildHeader</span>(p.HTTPGet.HTTPHeaders)
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;HTTP-Probe Headers&#34;</span>, <span style="color:#b8bb26">&#34;headers&#34;</span>, headers)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> pb.http.<span style="color:#fabd2f">Probe</span>(url, headers, timeout)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> p.TCPSocket <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		port, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">extractPort</span>(p.TCPSocket.Port, container)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> probe.Unknown, <span style="color:#f1fa8c">&#34;&#34;</span>, err
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> p.TCPSocket <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		port, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">extractPort</span>(p.TCPSocket.Port, container)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> probe.Unknown, <span style="color:#b8bb26">&#34;&#34;</span>, err
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		host <span style="color:#ff79c6">:=</span> p.TCPSocket.Host
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> host <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>		host <span style="color:#fe8019">:=</span> p.TCPSocket.Host
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> host <span style="color:#fe8019">==</span> <span style="color:#b8bb26">&#34;&#34;</span> {
 </span></span><span style="display:flex;"><span>			host = status.PodIP
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;TCP-Probe&#34;</span>, <span style="color:#f1fa8c">&#34;host&#34;</span>, host, <span style="color:#f1fa8c">&#34;port&#34;</span>, port, <span style="color:#f1fa8c">&#34;timeout&#34;</span>, timeout)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> pb.tcp.<span style="color:#50fa7b">Probe</span>(host, port, timeout)
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;TCP-Probe&#34;</span>, <span style="color:#b8bb26">&#34;host&#34;</span>, host, <span style="color:#b8bb26">&#34;port&#34;</span>, port, <span style="color:#b8bb26">&#34;timeout&#34;</span>, timeout)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> pb.tcp.<span style="color:#fabd2f">Probe</span>(host, port, timeout)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> utilfeature.DefaultFeatureGate.<span style="color:#50fa7b">Enabled</span>(kubefeatures.GRPCContainerProbe) <span style="color:#ff79c6">&amp;&amp;</span> p.GRPC <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		host <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>(status.PodIP)
-</span></span><span style="display:flex;"><span>		service <span style="color:#ff79c6">:=</span> p.GRPC.Service
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;GRPC-Probe&#34;</span>, <span style="color:#f1fa8c">&#34;host&#34;</span>, host, <span style="color:#f1fa8c">&#34;service&#34;</span>, service, <span style="color:#f1fa8c">&#34;port&#34;</span>, p.GRPC.Port, <span style="color:#f1fa8c">&#34;timeout&#34;</span>, timeout)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> pb.grpc.<span style="color:#50fa7b">Probe</span>(<span style="color:#ff79c6">*</span>host, <span style="color:#ff79c6">*</span>service, <span style="color:#8be9fd;font-style:italic">int</span>(p.GRPC.Port), timeout)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> utilfeature.DefaultFeatureGate.<span style="color:#fabd2f">Enabled</span>(kubefeatures.GRPCContainerProbe) <span style="color:#fe8019">&amp;&amp;</span> p.GRPC <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		host <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>(status.PodIP)
+</span></span><span style="display:flex;"><span>		service <span style="color:#fe8019">:=</span> p.GRPC.Service
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;GRPC-Probe&#34;</span>, <span style="color:#b8bb26">&#34;host&#34;</span>, host, <span style="color:#b8bb26">&#34;service&#34;</span>, service, <span style="color:#b8bb26">&#34;port&#34;</span>, p.GRPC.Port, <span style="color:#b8bb26">&#34;timeout&#34;</span>, timeout)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> pb.grpc.<span style="color:#fabd2f">Probe</span>(<span style="color:#fe8019">*</span>host, <span style="color:#fe8019">*</span>service, <span style="color:#fabd2f">int</span>(p.GRPC.Port), timeout)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Failed to find probe builder for container&#34;</span>, <span style="color:#f1fa8c">&#34;containerName&#34;</span>, container.Name)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> probe.Unknown, <span style="color:#f1fa8c">&#34;&#34;</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;missing probe handler for %s:%s&#34;</span>, format.<span style="color:#50fa7b">Pod</span>(pod), container.Name)
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Failed to find probe builder for container&#34;</span>, <span style="color:#b8bb26">&#34;containerName&#34;</span>, container.Name)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> probe.Unknown, <span style="color:#b8bb26">&#34;&#34;</span>, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;missing probe handler for %s:%s&#34;</span>, format.<span style="color:#fabd2f">Pod</span>(pod), container.Name)
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (pb <span style="color:#ff79c6">*</span>prober) <span style="color:#50fa7b">runProbeWithRetries</span>(probeType probeType, p <span style="color:#ff79c6">*</span>v1.Probe, pod <span style="color:#ff79c6">*</span>v1.Pod, status v1.PodStatus, container v1.Container, containerID kubecontainer.ContainerID, retries <span style="color:#8be9fd">int</span>) (probe.Result, <span style="color:#8be9fd">string</span>, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> err <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> result probe.Result
-</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> output <span style="color:#8be9fd">string</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; retries; i<span style="color:#ff79c6">++</span> {
-</span></span><span style="display:flex;"><span>		result, output, err = pb.<span style="color:#50fa7b">runProbe</span>(probeType, p, pod, status, container, containerID)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> result, output, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (pb <span style="color:#fe8019">*</span>prober) <span style="color:#fabd2f">runProbeWithRetries</span>(probeType probeType, p <span style="color:#fe8019">*</span>v1.Probe, pod <span style="color:#fe8019">*</span>v1.Pod, status v1.PodStatus, container v1.Container, containerID kubecontainer.ContainerID, retries <span style="color:#fabd2f">int</span>) (probe.Result, <span style="color:#fabd2f">string</span>, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">var</span> err <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">var</span> result probe.Result
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">var</span> output <span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> i <span style="color:#fe8019">:=</span> <span style="color:#d3869b">0</span>; i &lt; retries; i<span style="color:#fe8019">++</span> {
+</span></span><span style="display:flex;"><span>		result, output, err = pb.<span style="color:#fabd2f">runProbe</span>(probeType, p, pod, status, container, containerID)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> result, output, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> result, output, err
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> result, output, err
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
 
 <h2 id="探针管理器">探针管理器</h2>
 <p>如下是探针管理器的接口 Manager：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/kubelet/prober/prober_manager.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Manager <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">AddPod</span>(pod <span style="color:#ff79c6">*</span>v1.Pod)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">StopLivenessAndStartup</span>(pod <span style="color:#ff79c6">*</span>v1.Pod)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">RemovePod</span>(pod <span style="color:#ff79c6">*</span>v1.Pod)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">CleanupPods</span>(desiredPods <span style="color:#8be9fd;font-style:italic">map</span>[types.UID]sets.Empty)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">UpdatePodStatus</span>(types.UID, <span style="color:#ff79c6">*</span>v1.PodStatus)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/prober/prober_manager.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> Manager <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">AddPod</span>(pod <span style="color:#fe8019">*</span>v1.Pod)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">StopLivenessAndStartup</span>(pod <span style="color:#fe8019">*</span>v1.Pod)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">RemovePod</span>(pod <span style="color:#fe8019">*</span>v1.Pod)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">CleanupPods</span>(desiredPods <span style="color:#fe8019">map</span>[types.UID]sets.Empty)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">UpdatePodStatus</span>(types.UID, <span style="color:#fe8019">*</span>v1.PodStatus)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>结构体 manager 实现了该接口：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/kubelet/prober/prober_manager.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> manager <span style="color:#8be9fd;font-style:italic">struct</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 干活的goroutine</span>
-</span></span><span style="display:flex;"><span>	workers <span style="color:#8be9fd;font-style:italic">map</span>[probeKey]<span style="color:#ff79c6">*</span>worker
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/prober/prober_manager.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> manager <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 干活的goroutine</span>
+</span></span><span style="display:flex;"><span>	workers <span style="color:#fe8019">map</span>[probeKey]<span style="color:#fe8019">*</span>worker
 </span></span><span style="display:flex;"><span>	workerLock sync.RWMutex
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 状态管理器</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 状态管理器</span>
 </span></span><span style="display:flex;"><span>	statusManager status.Manager
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 探测结果</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 探测结果</span>
 </span></span><span style="display:flex;"><span>	readinessManager results.Manager
 </span></span><span style="display:flex;"><span>	livenessManager results.Manager
 </span></span><span style="display:flex;"><span>	startupManager results.Manager
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 具体的 probe 实例</span>
-</span></span><span style="display:flex;"><span>	prober <span style="color:#ff79c6">*</span>prober
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 启动时间, 为了后面做探针的 delay</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 具体的 probe 实例</span>
+</span></span><span style="display:flex;"><span>	prober <span style="color:#fe8019">*</span>prober
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 启动时间, 为了后面做探针的 delay</span>
 </span></span><span style="display:flex;"><span>	start time.Time
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="addpod添加探针">AddPod：添加探针</h3>
 <p>它通过 AddPod 方法为每一个配置了探针的 container 创建对应的探针 worker：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/kubelet/prober/prober_manager.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (m <span style="color:#ff79c6">*</span>manager) <span style="color:#50fa7b">AddPod</span>(pod <span style="color:#ff79c6">*</span>v1.Pod) {
-</span></span><span style="display:flex;"><span>	m.workerLock.<span style="color:#50fa7b">Lock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> m.workerLock.<span style="color:#50fa7b">Unlock</span>()
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/prober/prober_manager.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>manager) <span style="color:#fabd2f">AddPod</span>(pod <span style="color:#fe8019">*</span>v1.Pod) {
+</span></span><span style="display:flex;"><span>	m.workerLock.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> m.workerLock.<span style="color:#fabd2f">Unlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	key <span style="color:#ff79c6">:=</span> probeKey{podUID: pod.UID}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, c <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> pod.Spec.Containers {
+</span></span><span style="display:flex;"><span>	key <span style="color:#fe8019">:=</span> probeKey{podUID: pod.UID}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> _, c <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> pod.Spec.Containers {
 </span></span><span style="display:flex;"><span>		key.containerName = c.Name
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 拉起来startup 探针的干活Goroutine</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> c.StartupProbe <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 拉起来startup 探针的干活Goroutine</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> c.StartupProbe <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>			key.probeType = startup
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// (podUID， containerName， ProbeType)构成标志worker的实现的唯一标识</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 现判断是否已经存在干活的goroutine了，如果存在直接返回</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> _, ok <span style="color:#ff79c6">:=</span> m.workers[key]; ok {
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">8</span>).<span style="color:#50fa7b">ErrorS</span>(<span style="color:#ff79c6">nil</span>, <span style="color:#f1fa8c">&#34;Startup probe already exists for container&#34;</span>,
-</span></span><span style="display:flex;"><span>					<span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod), <span style="color:#f1fa8c">&#34;containerName&#34;</span>, c.Name)
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// (podUID， containerName， ProbeType)构成标志worker的实现的唯一标识</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 现判断是否已经存在干活的goroutine了，如果存在直接返回</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> _, ok <span style="color:#fe8019">:=</span> m.workers[key]; ok {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">8</span>).<span style="color:#fabd2f">ErrorS</span>(<span style="color:#fe8019">nil</span>, <span style="color:#b8bb26">&#34;Startup probe already exists for container&#34;</span>,
+</span></span><span style="display:flex;"><span>					<span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;containerName&#34;</span>, c.Name)
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 不存在创建干活goroutine，然后做下记录并拉起来一个goroutine来运行探针探测逻辑</span>
-</span></span><span style="display:flex;"><span>			w <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">newWorker</span>(m, startup, pod, c)
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 不存在创建干活goroutine，然后做下记录并拉起来一个goroutine来运行探针探测逻辑</span>
+</span></span><span style="display:flex;"><span>			w <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">newWorker</span>(m, startup, pod, c)
 </span></span><span style="display:flex;"><span>			m.workers[key] = w
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">go</span> w.<span style="color:#50fa7b">run</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">go</span> w.<span style="color:#fabd2f">run</span>()
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>         <span style="color:#6272a4">// 同上</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> c.ReadinessProbe <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>         <span style="color:#928374;font-style:italic">// 同上</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> c.ReadinessProbe <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>			key.probeType = readiness
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> _, ok <span style="color:#ff79c6">:=</span> m.workers[key]; ok {
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">8</span>).<span style="color:#50fa7b">ErrorS</span>(<span style="color:#ff79c6">nil</span>, <span style="color:#f1fa8c">&#34;Readiness probe already exists for container&#34;</span>,
-</span></span><span style="display:flex;"><span>					<span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod), <span style="color:#f1fa8c">&#34;containerName&#34;</span>, c.Name)
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> _, ok <span style="color:#fe8019">:=</span> m.workers[key]; ok {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">8</span>).<span style="color:#fabd2f">ErrorS</span>(<span style="color:#fe8019">nil</span>, <span style="color:#b8bb26">&#34;Readiness probe already exists for container&#34;</span>,
+</span></span><span style="display:flex;"><span>					<span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;containerName&#34;</span>, c.Name)
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			w <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">newWorker</span>(m, readiness, pod, c)
+</span></span><span style="display:flex;"><span>			w <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">newWorker</span>(m, readiness, pod, c)
 </span></span><span style="display:flex;"><span>			m.workers[key] = w
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">go</span> w.<span style="color:#50fa7b">run</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">go</span> w.<span style="color:#fabd2f">run</span>()
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 同上</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> c.LivenessProbe <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 同上</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> c.LivenessProbe <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>			key.probeType = liveness
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> _, ok <span style="color:#ff79c6">:=</span> m.workers[key]; ok {
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">8</span>).<span style="color:#50fa7b">ErrorS</span>(<span style="color:#ff79c6">nil</span>, <span style="color:#f1fa8c">&#34;Liveness probe already exists for container&#34;</span>,
-</span></span><span style="display:flex;"><span>					<span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod), <span style="color:#f1fa8c">&#34;containerName&#34;</span>, c.Name)
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> _, ok <span style="color:#fe8019">:=</span> m.workers[key]; ok {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">8</span>).<span style="color:#fabd2f">ErrorS</span>(<span style="color:#fe8019">nil</span>, <span style="color:#b8bb26">&#34;Liveness probe already exists for container&#34;</span>,
+</span></span><span style="display:flex;"><span>					<span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;containerName&#34;</span>, c.Name)
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			w <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">newWorker</span>(m, liveness, pod, c)
+</span></span><span style="display:flex;"><span>			w <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">newWorker</span>(m, liveness, pod, c)
 </span></span><span style="display:flex;"><span>			m.workers[key] = w
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">go</span> w.<span style="color:#50fa7b">run</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">go</span> w.<span style="color:#fabd2f">run</span>()
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
@@ -419,50 +419,50 @@ kubernetes 支持三种 container 探针：startupProbe、readinessProbe、liven
 
 <h3 id="removepod移除探针">RemovePod：移除探针</h3>
 <p>kubelet 在停止 Pod 时, 先调用 StopLivenessAndStartup 停止 liveness 和 startup 探针, 再进行 killPod，之后再调用 RemovePod 来移除所有的探针：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/kubelet/kubelet.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (kl <span style="color:#ff79c6">*</span>Kubelet) <span style="color:#50fa7b">syncTerminatingPod</span>(ctx context.Context, pod <span style="color:#ff79c6">*</span>v1.Pod, podStatus <span style="color:#ff79c6">*</span>kubecontainer.PodStatus, runningPod <span style="color:#ff79c6">*</span>kubecontainer.Pod, gracePeriod <span style="color:#ff79c6">*</span><span style="color:#8be9fd">int64</span>, podStatusFn <span style="color:#8be9fd;font-style:italic">func</span>(<span style="color:#ff79c6">*</span>v1.PodStatus)) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//...</span>
-</span></span><span style="display:flex;"><span>	kl.probeManager.<span style="color:#50fa7b">StopLivenessAndStartup</span>(pod)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/kubelet.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (kl <span style="color:#fe8019">*</span>Kubelet) <span style="color:#fabd2f">syncTerminatingPod</span>(ctx context.Context, pod <span style="color:#fe8019">*</span>v1.Pod, podStatus <span style="color:#fe8019">*</span>kubecontainer.PodStatus, runningPod <span style="color:#fe8019">*</span>kubecontainer.Pod, gracePeriod <span style="color:#fe8019">*</span><span style="color:#fabd2f">int64</span>, podStatusFn <span style="color:#fe8019">func</span>(<span style="color:#fe8019">*</span>v1.PodStatus)) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//...</span>
+</span></span><span style="display:flex;"><span>	kl.probeManager.<span style="color:#fabd2f">StopLivenessAndStartup</span>(pod)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	p <span style="color:#ff79c6">:=</span> kubecontainer.<span style="color:#50fa7b">ConvertPodStatusToRunningPod</span>(kl.<span style="color:#50fa7b">getRuntime</span>().<span style="color:#50fa7b">Type</span>(), podStatus)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> kl.<span style="color:#50fa7b">killPod</span>(pod, p, gracePeriod); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		kl.recorder.<span style="color:#50fa7b">Eventf</span>(pod, v1.EventTypeWarning, events.FailedToKillPod, <span style="color:#f1fa8c">&#34;error killing pod: %v&#34;</span>, err)
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// there was an error killing the pod, so we return that error directly</span>
-</span></span><span style="display:flex;"><span>		utilruntime.<span style="color:#50fa7b">HandleError</span>(err)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>	p <span style="color:#fe8019">:=</span> kubecontainer.<span style="color:#fabd2f">ConvertPodStatusToRunningPod</span>(kl.<span style="color:#fabd2f">getRuntime</span>().<span style="color:#fabd2f">Type</span>(), podStatus)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> kl.<span style="color:#fabd2f">killPod</span>(pod, p, gracePeriod); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		kl.recorder.<span style="color:#fabd2f">Eventf</span>(pod, v1.EventTypeWarning, events.FailedToKillPod, <span style="color:#b8bb26">&#34;error killing pod: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// there was an error killing the pod, so we return that error directly</span>
+</span></span><span style="display:flex;"><span>		utilruntime.<span style="color:#fabd2f">HandleError</span>(err)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Once the containers are stopped, we can stop probing for liveness and readiness.</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// TODO: once a pod is terminal, certain probes (liveness exec) could be stopped immediately after</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">//   the detection of a container shutdown or (for readiness) after the first failure. Tracked as</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">//   https://github.com/kubernetes/kubernetes/issues/107894 although may not be worth optimizing.</span>
-</span></span><span style="display:flex;"><span>	kl.probeManager.<span style="color:#50fa7b">RemovePod</span>(pod)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Once the containers are stopped, we can stop probing for liveness and readiness.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// TODO: once a pod is terminal, certain probes (liveness exec) could be stopped immediately after</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">//   the detection of a container shutdown or (for readiness) after the first failure. Tracked as</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">//   https://github.com/kubernetes/kubernetes/issues/107894 although may not be worth optimizing.</span>
+</span></span><span style="display:flex;"><span>	kl.probeManager.<span style="color:#fabd2f">RemovePod</span>(pod)
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//...</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>RemovePod 将与该 Pod 关联的所有 worker 全都 stop 并移出 <a href="#worker%E7%9A%84%E5%AE%9E%E7%8E%B0">workers</a>，同时从对应的 result manager 中删除缓存的结果（这个是<a href="#worker%E7%9A%84%E5%AE%9E%E7%8E%B0">worker</a>干的事情）。 CleanupPods 会清除多余的 workers，这些 <a href="#worker%E7%9A%84%E5%AE%9E%E7%8E%B0">worker</a> 所探测的 Pod 已经不在当前节点之上，可能是被主动删除、漂移等情况（也就是这些 Pod 不在 desiredPods 中）。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (m <span style="color:#ff79c6">*</span>manager) <span style="color:#50fa7b">RemovePod</span>(pod <span style="color:#ff79c6">*</span>v1.Pod) {
-</span></span><span style="display:flex;"><span>	m.workerLock.<span style="color:#50fa7b">RLock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> m.workerLock.<span style="color:#50fa7b">RUnlock</span>()
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>manager) <span style="color:#fabd2f">RemovePod</span>(pod <span style="color:#fe8019">*</span>v1.Pod) {
+</span></span><span style="display:flex;"><span>	m.workerLock.<span style="color:#fabd2f">RLock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> m.workerLock.<span style="color:#fabd2f">RUnlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	key <span style="color:#ff79c6">:=</span> probeKey{podUID: pod.UID}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, c <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> pod.Spec.Containers {
+</span></span><span style="display:flex;"><span>	key <span style="color:#fe8019">:=</span> probeKey{podUID: pod.UID}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> _, c <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> pod.Spec.Containers {
 </span></span><span style="display:flex;"><span>		key.containerName = c.Name
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, probeType <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> [<span style="color:#ff79c6">...</span>]probeType{readiness, liveness, startup} {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> _, probeType <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> [<span style="color:#fe8019">...</span>]probeType{readiness, liveness, startup} {
 </span></span><span style="display:flex;"><span>			key.probeType = probeType
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> worker, ok <span style="color:#ff79c6">:=</span> m.workers[key]; ok {
-</span></span><span style="display:flex;"><span>				worker.<span style="color:#50fa7b">stop</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> worker, ok <span style="color:#fe8019">:=</span> m.workers[key]; ok {
+</span></span><span style="display:flex;"><span>				worker.<span style="color:#fabd2f">stop</span>()
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (m <span style="color:#ff79c6">*</span>manager) <span style="color:#50fa7b">CleanupPods</span>(desiredPods <span style="color:#8be9fd;font-style:italic">map</span>[types.UID]sets.Empty) {
-</span></span><span style="display:flex;"><span>	m.workerLock.<span style="color:#50fa7b">RLock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> m.workerLock.<span style="color:#50fa7b">RUnlock</span>()
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>manager) <span style="color:#fabd2f">CleanupPods</span>(desiredPods <span style="color:#fe8019">map</span>[types.UID]sets.Empty) {
+</span></span><span style="display:flex;"><span>	m.workerLock.<span style="color:#fabd2f">RLock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> m.workerLock.<span style="color:#fabd2f">RUnlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> key, worker <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> m.workers {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> _, ok <span style="color:#ff79c6">:=</span> desiredPods[key.podUID]; !ok {
-</span></span><span style="display:flex;"><span>			worker.<span style="color:#50fa7b">stop</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> key, worker <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> m.workers {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> _, ok <span style="color:#fe8019">:=</span> desiredPods[key.podUID]; !ok {
+</span></span><span style="display:flex;"><span>			worker.<span style="color:#fabd2f">stop</span>()
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
@@ -470,58 +470,58 @@ kubernetes 支持三种 container 探针：startupProbe、readinessProbe、liven
 <p>UpdatePodStatus 由 kubelet 在 syncPod 中调用，用来根据缓存的探测结果来更新 container 的 Started、Ready字段。
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/kubelet/kubelet_pods.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (kl <span style="color:#ff79c6">*</span>Kubelet) <span style="color:#50fa7b">generateAPIPodStatus</span>(pod <span style="color:#ff79c6">*</span>v1.Pod, podStatus <span style="color:#ff79c6">*</span>kubecontainer.PodStatus) v1.PodStatus {
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Generating pod status&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// ensure the probe managers have up to date status for containers</span>
-</span></span><span style="display:flex;"><span>	kl.probeManager.<span style="color:#50fa7b">UpdatePodStatus</span>(pod.UID, s)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/kubelet_pods.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (kl <span style="color:#fe8019">*</span>Kubelet) <span style="color:#fabd2f">generateAPIPodStatus</span>(pod <span style="color:#fe8019">*</span>v1.Pod, podStatus <span style="color:#fe8019">*</span>kubecontainer.PodStatus) v1.PodStatus {
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Generating pod status&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// ensure the probe managers have up to date status for containers</span>
+</span></span><span style="display:flex;"><span>	kl.probeManager.<span style="color:#fabd2f">UpdatePodStatus</span>(pod.UID, s)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/kubelet/prober/prober_manager.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (m <span style="color:#ff79c6">*</span>manager) <span style="color:#50fa7b">UpdatePodStatus</span>(podUID types.UID, podStatus <span style="color:#ff79c6">*</span>v1.PodStatus) {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i, c <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> podStatus.ContainerStatuses {
-</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">var</span> started <span style="color:#8be9fd">bool</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> c.State.Running <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			started = <span style="color:#ff79c6">false</span>
-</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> result, ok <span style="color:#ff79c6">:=</span> m.startupManager.<span style="color:#50fa7b">Get</span>(kubecontainer.<span style="color:#50fa7b">ParseContainerID</span>(c.ContainerID)); ok {
-</span></span><span style="display:flex;"><span>			started = result <span style="color:#ff79c6">==</span> results.Success
-</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// The check whether there is a probe which hasn&#39;t run yet.</span>
-</span></span><span style="display:flex;"><span>			_, exists <span style="color:#ff79c6">:=</span> m.<span style="color:#50fa7b">getWorker</span>(podUID, c.Name, startup)
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/prober/prober_manager.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>manager) <span style="color:#fabd2f">UpdatePodStatus</span>(podUID types.UID, podStatus <span style="color:#fe8019">*</span>v1.PodStatus) {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> i, c <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> podStatus.ContainerStatuses {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">var</span> started <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> c.State.Running <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			started = <span style="color:#fe8019">false</span>
+</span></span><span style="display:flex;"><span>		} <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span> result, ok <span style="color:#fe8019">:=</span> m.startupManager.<span style="color:#fabd2f">Get</span>(kubecontainer.<span style="color:#fabd2f">ParseContainerID</span>(c.ContainerID)); ok {
+</span></span><span style="display:flex;"><span>			started = result <span style="color:#fe8019">==</span> results.Success
+</span></span><span style="display:flex;"><span>		} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// The check whether there is a probe which hasn&#39;t run yet.</span>
+</span></span><span style="display:flex;"><span>			_, exists <span style="color:#fe8019">:=</span> m.<span style="color:#fabd2f">getWorker</span>(podUID, c.Name, startup)
 </span></span><span style="display:flex;"><span>			started = !exists
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		podStatus.ContainerStatuses[i].Started = <span style="color:#ff79c6">&amp;</span>started
+</span></span><span style="display:flex;"><span>		podStatus.ContainerStatuses[i].Started = <span style="color:#fe8019">&amp;</span>started
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> started {
-</span></span><span style="display:flex;"><span>			<span style="color:#8be9fd;font-style:italic">var</span> ready <span style="color:#8be9fd">bool</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> c.State.Running <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>				ready = <span style="color:#ff79c6">false</span>
-</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> result, ok <span style="color:#ff79c6">:=</span> m.readinessManager.<span style="color:#50fa7b">Get</span>(kubecontainer.<span style="color:#50fa7b">ParseContainerID</span>(c.ContainerID)); ok <span style="color:#ff79c6">&amp;&amp;</span> result <span style="color:#ff79c6">==</span> results.Success {
-</span></span><span style="display:flex;"><span>				ready = <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// The check whether there is a probe which hasn&#39;t run yet.</span>
-</span></span><span style="display:flex;"><span>				w, exists <span style="color:#ff79c6">:=</span> m.<span style="color:#50fa7b">getWorker</span>(podUID, c.Name, readiness)
-</span></span><span style="display:flex;"><span>				ready = !exists <span style="color:#6272a4">// no readinessProbe -&gt; always ready</span>
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> exists {
-</span></span><span style="display:flex;"><span>					<span style="color:#6272a4">// Trigger an immediate run of the readinessProbe to update ready state</span>
-</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">select</span> {
-</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">case</span> w.manualTriggerCh <span style="color:#ff79c6">&lt;-</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}{}:
-</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">default</span>: <span style="color:#6272a4">// Non-blocking.</span>
-</span></span><span style="display:flex;"><span>						klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Failed to trigger a manual run&#34;</span>, <span style="color:#f1fa8c">&#34;probe&#34;</span>, w.probeType.<span style="color:#50fa7b">String</span>())
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> started {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">var</span> ready <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> c.State.Running <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				ready = <span style="color:#fe8019">false</span>
+</span></span><span style="display:flex;"><span>			} <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span> result, ok <span style="color:#fe8019">:=</span> m.readinessManager.<span style="color:#fabd2f">Get</span>(kubecontainer.<span style="color:#fabd2f">ParseContainerID</span>(c.ContainerID)); ok <span style="color:#fe8019">&amp;&amp;</span> result <span style="color:#fe8019">==</span> results.Success {
+</span></span><span style="display:flex;"><span>				ready = <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>			} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// The check whether there is a probe which hasn&#39;t run yet.</span>
+</span></span><span style="display:flex;"><span>				w, exists <span style="color:#fe8019">:=</span> m.<span style="color:#fabd2f">getWorker</span>(podUID, c.Name, readiness)
+</span></span><span style="display:flex;"><span>				ready = !exists <span style="color:#928374;font-style:italic">// no readinessProbe -&gt; always ready</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> exists {
+</span></span><span style="display:flex;"><span>					<span style="color:#928374;font-style:italic">// Trigger an immediate run of the readinessProbe to update ready state</span>
+</span></span><span style="display:flex;"><span>					<span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>					<span style="color:#fe8019">case</span> w.manualTriggerCh <span style="color:#fe8019">&lt;-</span> <span style="color:#fe8019">struct</span>{}{}:
+</span></span><span style="display:flex;"><span>					<span style="color:#fe8019">default</span>: <span style="color:#928374;font-style:italic">// Non-blocking.</span>
+</span></span><span style="display:flex;"><span>						klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Failed to trigger a manual run&#34;</span>, <span style="color:#b8bb26">&#34;probe&#34;</span>, w.probeType.<span style="color:#fabd2f">String</span>())
 </span></span><span style="display:flex;"><span>					}
 </span></span><span style="display:flex;"><span>				}
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>			podStatus.ContainerStatuses[i].Ready = ready
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// init containers are ready if they have exited with success or if a readiness probe has</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// succeeded.</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i, c <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> podStatus.InitContainerStatuses {
-</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">var</span> ready <span style="color:#8be9fd">bool</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> c.State.Terminated <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> c.State.Terminated.ExitCode <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>			ready = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// init containers are ready if they have exited with success or if a readiness probe has</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// succeeded.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> i, c <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> podStatus.InitContainerStatuses {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">var</span> ready <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> c.State.Terminated <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span> c.State.Terminated.ExitCode <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>			ready = <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>		podStatus.InitContainerStatuses[i].Ready = ready
 </span></span><span style="display:flex;"><span>	}
@@ -533,49 +533,49 @@ kubernetes 支持三种 container 探针：startupProbe、readinessProbe、liven
 <p>worker 是真正干活的部分，在<a href="#%E6%8E%A2%E9%92%88%E7%AE%A1%E7%90%86">探针管理器</a>的 AddPod 方法中，会 run 对应的 worker，具体的 run 方法如下：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// run periodically probes the container.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (w <span style="color:#ff79c6">*</span>worker) <span style="color:#50fa7b">run</span>() {
-</span></span><span style="display:flex;"><span>	probeTickerPeriod <span style="color:#ff79c6">:=</span> time.<span style="color:#50fa7b">Duration</span>(w.spec.PeriodSeconds) <span style="color:#ff79c6">*</span> time.Second
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// run periodically probes the container.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (w <span style="color:#fe8019">*</span>worker) <span style="color:#fabd2f">run</span>() {
+</span></span><span style="display:flex;"><span>	probeTickerPeriod <span style="color:#fe8019">:=</span> time.<span style="color:#fabd2f">Duration</span>(w.spec.PeriodSeconds) <span style="color:#fe8019">*</span> time.Second
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 随机等待一段时间，为了应对kubelet重启</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> probeTickerPeriod &gt; time.<span style="color:#50fa7b">Since</span>(w.probeManager.start) {
-</span></span><span style="display:flex;"><span>		time.<span style="color:#50fa7b">Sleep</span>(time.<span style="color:#50fa7b">Duration</span>(rand.<span style="color:#50fa7b">Float64</span>() <span style="color:#ff79c6">*</span> <span style="color:#8be9fd;font-style:italic">float64</span>(probeTickerPeriod)))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 随机等待一段时间，为了应对kubelet重启</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> probeTickerPeriod &gt; time.<span style="color:#fabd2f">Since</span>(w.probeManager.start) {
+</span></span><span style="display:flex;"><span>		time.<span style="color:#fabd2f">Sleep</span>(time.<span style="color:#fabd2f">Duration</span>(rand.<span style="color:#fabd2f">Float64</span>() <span style="color:#fe8019">*</span> <span style="color:#fabd2f">float64</span>(probeTickerPeriod)))
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	probeTicker <span style="color:#ff79c6">:=</span> time.<span style="color:#50fa7b">NewTicker</span>(probeTickerPeriod)
+</span></span><span style="display:flex;"><span>	probeTicker <span style="color:#fe8019">:=</span> time.<span style="color:#fabd2f">NewTicker</span>(probeTickerPeriod)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// worker stop之后的清理工作</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Clean up.</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 停止ticker</span>
-</span></span><span style="display:flex;"><span>		probeTicker.<span style="color:#50fa7b">Stop</span>()
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 清理缓存  </span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !w.containerID.<span style="color:#50fa7b">IsEmpty</span>() {
-</span></span><span style="display:flex;"><span>			w.resultsManager.<span style="color:#50fa7b">Remove</span>(w.containerID)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// worker stop之后的清理工作</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Clean up.</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 停止ticker</span>
+</span></span><span style="display:flex;"><span>		probeTicker.<span style="color:#fabd2f">Stop</span>()
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 清理缓存  </span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !w.containerID.<span style="color:#fabd2f">IsEmpty</span>() {
+</span></span><span style="display:flex;"><span>			w.resultsManager.<span style="color:#fabd2f">Remove</span>(w.containerID)
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 从workers记录中删除</span>
-</span></span><span style="display:flex;"><span>		w.probeManager.<span style="color:#50fa7b">removeWorker</span>(w.pod.UID, w.container.Name, w.probeType)
-</span></span><span style="display:flex;"><span>		ProberResults.<span style="color:#50fa7b">Delete</span>(w.proberResultsSuccessfulMetricLabels)
-</span></span><span style="display:flex;"><span>		ProberResults.<span style="color:#50fa7b">Delete</span>(w.proberResultsFailedMetricLabels)
-</span></span><span style="display:flex;"><span>		ProberResults.<span style="color:#50fa7b">Delete</span>(w.proberResultsUnknownMetricLabels)
-</span></span><span style="display:flex;"><span>		ProberDuration.<span style="color:#50fa7b">Delete</span>(w.proberDurationSuccessfulMetricLabels)
-</span></span><span style="display:flex;"><span>		ProberDuration.<span style="color:#50fa7b">Delete</span>(w.proberDurationUnknownMetricLabels)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 从workers记录中删除</span>
+</span></span><span style="display:flex;"><span>		w.probeManager.<span style="color:#fabd2f">removeWorker</span>(w.pod.UID, w.container.Name, w.probeType)
+</span></span><span style="display:flex;"><span>		ProberResults.<span style="color:#fabd2f">Delete</span>(w.proberResultsSuccessfulMetricLabels)
+</span></span><span style="display:flex;"><span>		ProberResults.<span style="color:#fabd2f">Delete</span>(w.proberResultsFailedMetricLabels)
+</span></span><span style="display:flex;"><span>		ProberResults.<span style="color:#fabd2f">Delete</span>(w.proberResultsUnknownMetricLabels)
+</span></span><span style="display:flex;"><span>		ProberDuration.<span style="color:#fabd2f">Delete</span>(w.proberDurationSuccessfulMetricLabels)
+</span></span><span style="display:flex;"><span>		ProberDuration.<span style="color:#fabd2f">Delete</span>(w.proberDurationUnknownMetricLabels)
 </span></span><span style="display:flex;"><span>	}()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 定期执行doProbe，来进行探针探测</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 定期执行doProbe，来进行探针探测</span>
 </span></span><span style="display:flex;"><span>probeLoop:
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> w.<span style="color:#50fa7b">doProbe</span>() {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Wait for next probe tick.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">select</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 退出    </span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>w.stopCh:
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">break</span> probeLoop
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 定期探测</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>probeTicker.C:
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 手动触发</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>w.manualTriggerCh:
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// continue</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> w.<span style="color:#fabd2f">doProbe</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Wait for next probe tick.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 退出    </span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>w.stopCh:
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">break</span> probeLoop
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 定期探测</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>probeTicker.C:
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 手动触发</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>w.manualTriggerCh:
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// continue</span>
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
@@ -585,182 +585,182 @@ kubernetes 支持三种 container 探针：startupProbe、readinessProbe、liven
 <p>doProbe 方法是 worker 中最重要的地方，它会完成一次完整的探测，并缓存探测结果。具体内容如下所示：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (w <span style="color:#ff79c6">*</span>worked) <span style="color:#50fa7b">doProbe</span>() (keepGoing <span style="color:#8be9fd">bool</span>) {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> <span style="color:#8be9fd;font-style:italic">func</span>() { <span style="color:#8be9fd;font-style:italic">recover</span>() }() <span style="color:#6272a4">// Actually eat panics (HandleCrash takes care of logging)</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> runtime.<span style="color:#50fa7b">HandleCrash</span>(<span style="color:#8be9fd;font-style:italic">func</span>(_ <span style="color:#8be9fd;font-style:italic">interface</span>{}) { keepGoing = <span style="color:#ff79c6">true</span> })
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (w <span style="color:#fe8019">*</span>worked) <span style="color:#fabd2f">doProbe</span>() (keepGoing <span style="color:#fabd2f">bool</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> <span style="color:#fe8019">func</span>() { <span style="color:#fabd2f">recover</span>() }() <span style="color:#928374;font-style:italic">// Actually eat panics (HandleCrash takes care of logging)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> runtime.<span style="color:#fabd2f">HandleCrash</span>(<span style="color:#fe8019">func</span>(_ <span style="color:#fe8019">interface</span>{}) { keepGoing = <span style="color:#fe8019">true</span> })
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	startTime <span style="color:#ff79c6">:=</span> time.<span style="color:#50fa7b">Now</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获得pod的status信息</span>
-</span></span><span style="display:flex;"><span>	status, ok <span style="color:#ff79c6">:=</span> w.probeManager.statusManager.<span style="color:#50fa7b">GetPodStatus</span>(w.pod.UID)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;No status for pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(w.pod))
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	startTime <span style="color:#fe8019">:=</span> time.<span style="color:#fabd2f">Now</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获得pod的status信息</span>
+</span></span><span style="display:flex;"><span>	status, ok <span style="color:#fe8019">:=</span> w.probeManager.statusManager.<span style="color:#fabd2f">GetPodStatus</span>(w.pod.UID)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !ok {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;No status for pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(w.pod))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Worker应该终止，如果pod已经终止了</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> status.Phase <span style="color:#ff79c6">==</span> v1.PodFailed <span style="color:#ff79c6">||</span> status.Phase <span style="color:#ff79c6">==</span> v1.PodSucceeded {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Pod is terminated, exiting probe worker&#34;</span>,
-</span></span><span style="display:flex;"><span>			<span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(w.pod), <span style="color:#f1fa8c">&#34;phase&#34;</span>, status.Phase)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Worker应该终止，如果pod已经终止了</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> status.Phase <span style="color:#fe8019">==</span> v1.PodFailed <span style="color:#fe8019">||</span> status.Phase <span style="color:#fe8019">==</span> v1.PodSucceeded {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Pod is terminated, exiting probe worker&#34;</span>,
+</span></span><span style="display:flex;"><span>			<span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(w.pod), <span style="color:#b8bb26">&#34;phase&#34;</span>, status.Phase)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取containers的信息</span>
-</span></span><span style="display:flex;"><span>	c, ok <span style="color:#ff79c6">:=</span> podutil.<span style="color:#50fa7b">GetContainerStatus</span>(status.ContainerStatuses, w.container.Name)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok <span style="color:#ff79c6">||</span> <span style="color:#8be9fd;font-style:italic">len</span>(c.ContainerID) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Either the container has not been created yet, or it was deleted.</span>
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Probe target container not found&#34;</span>,
-</span></span><span style="display:flex;"><span>			<span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(w.pod), <span style="color:#f1fa8c">&#34;containerName&#34;</span>, w.container.Name)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span> <span style="color:#6272a4">// Wait for more information.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取containers的信息</span>
+</span></span><span style="display:flex;"><span>	c, ok <span style="color:#fe8019">:=</span> podutil.<span style="color:#fabd2f">GetContainerStatus</span>(status.ContainerStatuses, w.container.Name)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !ok <span style="color:#fe8019">||</span> <span style="color:#fabd2f">len</span>(c.ContainerID) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Either the container has not been created yet, or it was deleted.</span>
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Probe target container not found&#34;</span>,
+</span></span><span style="display:flex;"><span>			<span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(w.pod), <span style="color:#b8bb26">&#34;containerName&#34;</span>, w.container.Name)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span> <span style="color:#928374;font-style:italic">// Wait for more information.</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 当worker首次运行（containerID为空）或container被重建</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> w.containerID.<span style="color:#50fa7b">String</span>() <span style="color:#ff79c6">!=</span> c.ContainerID {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !w.containerID.<span style="color:#50fa7b">IsEmpty</span>() {
-</span></span><span style="display:flex;"><span>			w.resultsManager.<span style="color:#50fa7b">Remove</span>(w.containerID)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 当worker首次运行（containerID为空）或container被重建</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> w.containerID.<span style="color:#fabd2f">String</span>() <span style="color:#fe8019">!=</span> c.ContainerID {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !w.containerID.<span style="color:#fabd2f">IsEmpty</span>() {
+</span></span><span style="display:flex;"><span>			w.resultsManager.<span style="color:#fabd2f">Remove</span>(w.containerID)
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		w.containerID = kubecontainer.<span style="color:#50fa7b">ParseContainerID</span>(c.ContainerID)
-</span></span><span style="display:flex;"><span>		w.resultsManager.<span style="color:#50fa7b">Set</span>(w.containerID, w.initialValue, w.pod)
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 拿到了新的container，恢复probing.</span>
-</span></span><span style="display:flex;"><span>		w.onHold = <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>		w.containerID = kubecontainer.<span style="color:#fabd2f">ParseContainerID</span>(c.ContainerID)
+</span></span><span style="display:flex;"><span>		w.resultsManager.<span style="color:#fabd2f">Set</span>(w.containerID, w.initialValue, w.pod)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 拿到了新的container，恢复probing.</span>
+</span></span><span style="display:flex;"><span>		w.onHold = <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> w.onHold {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Worker is on hold until there is a new container.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> w.onHold {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Worker is on hold until there is a new container.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// container没有处于running状态</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> c.State.Running <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Non-running container probed&#34;</span>,
-</span></span><span style="display:flex;"><span>			<span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(w.pod), <span style="color:#f1fa8c">&#34;containerName&#34;</span>, w.container.Name)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !w.containerID.<span style="color:#50fa7b">IsEmpty</span>() {
-</span></span><span style="display:flex;"><span>			w.resultsManager.<span style="color:#50fa7b">Set</span>(w.containerID, results.Failure, w.pod)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// container没有处于running状态</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> c.State.Running <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Non-running container probed&#34;</span>,
+</span></span><span style="display:flex;"><span>			<span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(w.pod), <span style="color:#b8bb26">&#34;containerName&#34;</span>, w.container.Name)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !w.containerID.<span style="color:#fabd2f">IsEmpty</span>() {
+</span></span><span style="display:flex;"><span>			w.resultsManager.<span style="color:#fabd2f">Set</span>(w.containerID, results.Failure, w.pod)
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Abort if the container will not be restarted.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> c.State.Terminated <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">||</span>
-</span></span><span style="display:flex;"><span>			w.pod.Spec.RestartPolicy <span style="color:#ff79c6">!=</span> v1.RestartPolicyNever
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Abort if the container will not be restarted.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> c.State.Terminated <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span>
+</span></span><span style="display:flex;"><span>			w.pod.Spec.RestartPolicy <span style="color:#fe8019">!=</span> v1.RestartPolicyNever
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 在 graceful shutdown 阶段</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> w.pod.ObjectMeta.DeletionTimestamp <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> (w.probeType <span style="color:#ff79c6">==</span> liveness <span style="color:#ff79c6">||</span> w.probeType <span style="color:#ff79c6">==</span> startup) {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Pod deletion requested, setting probe result to success&#34;</span>,
-</span></span><span style="display:flex;"><span>			<span style="color:#f1fa8c">&#34;probeType&#34;</span>, w.probeType, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(w.pod), <span style="color:#f1fa8c">&#34;containerName&#34;</span>, w.container.Name)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> w.probeType <span style="color:#ff79c6">==</span> startup {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Pod deletion requested before container has fully started&#34;</span>,
-</span></span><span style="display:flex;"><span>				<span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(w.pod), <span style="color:#f1fa8c">&#34;containerName&#34;</span>, w.container.Name)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 在 graceful shutdown 阶段</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> w.pod.ObjectMeta.DeletionTimestamp <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span> (w.probeType <span style="color:#fe8019">==</span> liveness <span style="color:#fe8019">||</span> w.probeType <span style="color:#fe8019">==</span> startup) {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Pod deletion requested, setting probe result to success&#34;</span>,
+</span></span><span style="display:flex;"><span>			<span style="color:#b8bb26">&#34;probeType&#34;</span>, w.probeType, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(w.pod), <span style="color:#b8bb26">&#34;containerName&#34;</span>, w.container.Name)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> w.probeType <span style="color:#fe8019">==</span> startup {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Pod deletion requested before container has fully started&#34;</span>,
+</span></span><span style="display:flex;"><span>				<span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(w.pod), <span style="color:#b8bb26">&#34;containerName&#34;</span>, w.container.Name)
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Set a last result to ensure quiet shutdown.</span>
-</span></span><span style="display:flex;"><span>		w.resultsManager.<span style="color:#50fa7b">Set</span>(w.containerID, results.Success, w.pod)
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Stop probing at this point.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Set a last result to ensure quiet shutdown.</span>
+</span></span><span style="display:flex;"><span>		w.resultsManager.<span style="color:#fabd2f">Set</span>(w.containerID, results.Success, w.pod)
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Stop probing at this point.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Probe disabled for InitialDelaySeconds.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 探针探测要在 InitialDelaySeconds 间隔后才启用</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">int32</span>(time.<span style="color:#50fa7b">Since</span>(c.State.Running.StartedAt.Time).<span style="color:#50fa7b">Seconds</span>()) &lt; w.spec.InitialDelaySeconds {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Probe disabled for InitialDelaySeconds.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 探针探测要在 InitialDelaySeconds 间隔后才启用</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">int32</span>(time.<span style="color:#fabd2f">Since</span>(c.State.Running.StartedAt.Time).<span style="color:#fabd2f">Seconds</span>()) &lt; w.spec.InitialDelaySeconds {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> c.Started <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> <span style="color:#ff79c6">*</span>c.Started {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Stop probing for startup once container has started.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// we keep it running to make sure it will work for restarted container.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> w.probeType <span style="color:#ff79c6">==</span> startup {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> c.Started <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span> <span style="color:#fe8019">*</span>c.Started {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Stop probing for startup once container has started.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// we keep it running to make sure it will work for restarted container.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> w.probeType <span style="color:#fe8019">==</span> startup {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Disable other probes until container has started.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> w.probeType <span style="color:#ff79c6">!=</span> startup {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Disable other probes until container has started.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> w.probeType <span style="color:#fe8019">!=</span> startup {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Note, exec probe does NOT have access to pod environment variables or downward API</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 执行一次真正的探针探测，并得到返回结果</span>
-</span></span><span style="display:flex;"><span>	result, err <span style="color:#ff79c6">:=</span> w.probeManager.prober.<span style="color:#50fa7b">probe</span>(w.probeType, w.pod, status, w.container, w.containerID)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Prober error, throw away the result.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Note, exec probe does NOT have access to pod environment variables or downward API</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 执行一次真正的探针探测，并得到返回结果</span>
+</span></span><span style="display:flex;"><span>	result, err <span style="color:#fe8019">:=</span> w.probeManager.prober.<span style="color:#fabd2f">probe</span>(w.probeType, w.pod, status, w.container, w.containerID)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Prober error, throw away the result.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">switch</span> result {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> results.Success:
-</span></span><span style="display:flex;"><span>		ProberResults.<span style="color:#50fa7b">With</span>(w.proberResultsSuccessfulMetricLabels).<span style="color:#50fa7b">Inc</span>()
-</span></span><span style="display:flex;"><span>		ProberDuration.<span style="color:#50fa7b">With</span>(w.proberDurationSuccessfulMetricLabels).<span style="color:#50fa7b">Observe</span>(time.<span style="color:#50fa7b">Since</span>(startTime).<span style="color:#50fa7b">Seconds</span>())
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> results.Failure:
-</span></span><span style="display:flex;"><span>		ProberResults.<span style="color:#50fa7b">With</span>(w.proberResultsFailedMetricLabels).<span style="color:#50fa7b">Inc</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">default</span>:
-</span></span><span style="display:flex;"><span>		ProberResults.<span style="color:#50fa7b">With</span>(w.proberResultsUnknownMetricLabels).<span style="color:#50fa7b">Inc</span>()
-</span></span><span style="display:flex;"><span>		ProberDuration.<span style="color:#50fa7b">With</span>(w.proberDurationUnknownMetricLabels).<span style="color:#50fa7b">Observe</span>(time.<span style="color:#50fa7b">Since</span>(startTime).<span style="color:#50fa7b">Seconds</span>())
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">switch</span> result {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> results.Success:
+</span></span><span style="display:flex;"><span>		ProberResults.<span style="color:#fabd2f">With</span>(w.proberResultsSuccessfulMetricLabels).<span style="color:#fabd2f">Inc</span>()
+</span></span><span style="display:flex;"><span>		ProberDuration.<span style="color:#fabd2f">With</span>(w.proberDurationSuccessfulMetricLabels).<span style="color:#fabd2f">Observe</span>(time.<span style="color:#fabd2f">Since</span>(startTime).<span style="color:#fabd2f">Seconds</span>())
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> results.Failure:
+</span></span><span style="display:flex;"><span>		ProberResults.<span style="color:#fabd2f">With</span>(w.proberResultsFailedMetricLabels).<span style="color:#fabd2f">Inc</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">default</span>:
+</span></span><span style="display:flex;"><span>		ProberResults.<span style="color:#fabd2f">With</span>(w.proberResultsUnknownMetricLabels).<span style="color:#fabd2f">Inc</span>()
+</span></span><span style="display:flex;"><span>		ProberDuration.<span style="color:#fabd2f">With</span>(w.proberDurationUnknownMetricLabels).<span style="color:#fabd2f">Observe</span>(time.<span style="color:#fabd2f">Since</span>(startTime).<span style="color:#fabd2f">Seconds</span>())
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 记录失败/成功的次数</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> w.lastResult <span style="color:#ff79c6">==</span> result {
-</span></span><span style="display:flex;"><span>		w.resultRun<span style="color:#ff79c6">++</span>
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 记录失败/成功的次数</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> w.lastResult <span style="color:#fe8019">==</span> result {
+</span></span><span style="display:flex;"><span>		w.resultRun<span style="color:#fe8019">++</span>
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> {
 </span></span><span style="display:flex;"><span>		w.lastResult = result
-</span></span><span style="display:flex;"><span>		w.resultRun = <span style="color:#bd93f9">1</span>
+</span></span><span style="display:flex;"><span>		w.resultRun = <span style="color:#d3869b">1</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 如果失败/成功的次数小于设置的阈值就继续运行探针，直到达到阈值</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> (result <span style="color:#ff79c6">==</span> results.Failure <span style="color:#ff79c6">&amp;&amp;</span> w.resultRun &lt; <span style="color:#8be9fd;font-style:italic">int</span>(w.spec.FailureThreshold)) <span style="color:#ff79c6">||</span>
-</span></span><span style="display:flex;"><span>		(result <span style="color:#ff79c6">==</span> results.Success <span style="color:#ff79c6">&amp;&amp;</span> w.resultRun &lt; <span style="color:#8be9fd;font-style:italic">int</span>(w.spec.SuccessThreshold)) {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Success or failure is below threshold - leave the probe state unchanged.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 如果失败/成功的次数小于设置的阈值就继续运行探针，直到达到阈值</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> (result <span style="color:#fe8019">==</span> results.Failure <span style="color:#fe8019">&amp;&amp;</span> w.resultRun &lt; <span style="color:#fabd2f">int</span>(w.spec.FailureThreshold)) <span style="color:#fe8019">||</span>
+</span></span><span style="display:flex;"><span>		(result <span style="color:#fe8019">==</span> results.Success <span style="color:#fe8019">&amp;&amp;</span> w.resultRun &lt; <span style="color:#fabd2f">int</span>(w.spec.SuccessThreshold)) {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Success or failure is below threshold - leave the probe state unchanged.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 缓存探测结果</span>
-</span></span><span style="display:flex;"><span>	w.resultsManager.<span style="color:#50fa7b">Set</span>(w.containerID, result, w.pod)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 重置计数</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> (w.probeType <span style="color:#ff79c6">==</span> liveness <span style="color:#ff79c6">||</span> w.probeType <span style="color:#ff79c6">==</span> startup) <span style="color:#ff79c6">&amp;&amp;</span> result <span style="color:#ff79c6">==</span> results.Failure {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// The container fails a liveness/startup check, it will need to be restarted.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Stop probing until we see a new container ID. This is to reduce the</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// chance of hitting #21751, where running `docker exec` when a</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// container is being stopped may lead to corrupted container state.</span>
-</span></span><span style="display:flex;"><span>		w.onHold = <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>		w.resultRun = <span style="color:#bd93f9">0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 缓存探测结果</span>
+</span></span><span style="display:flex;"><span>	w.resultsManager.<span style="color:#fabd2f">Set</span>(w.containerID, result, w.pod)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 重置计数</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> (w.probeType <span style="color:#fe8019">==</span> liveness <span style="color:#fe8019">||</span> w.probeType <span style="color:#fe8019">==</span> startup) <span style="color:#fe8019">&amp;&amp;</span> result <span style="color:#fe8019">==</span> results.Failure {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// The container fails a liveness/startup check, it will need to be restarted.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Stop probing until we see a new container ID. This is to reduce the</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// chance of hitting #21751, where running `docker exec` when a</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// container is being stopped may lead to corrupted container state.</span>
+</span></span><span style="display:flex;"><span>		w.onHold = <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>		w.resultRun = <span style="color:#d3869b">0</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
 
 <h3 id="与-kubelet-主循环的交互">与 kubelet 主循环的交互</h3>
 <p>如上述 doProbe 的执行逻辑中可以知道：探测到 Pod 异常且符合阈值后, 调用 <code>resultsManager.Set</code> 通过管道传递状态事件：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/kubelet/prober/results/results_manager.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (m <span style="color:#ff79c6">*</span>manager) <span style="color:#50fa7b">Set</span>(id kubecontainer.ContainerID, result Result, pod <span style="color:#ff79c6">*</span>v1.Pod) {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> m.<span style="color:#50fa7b">setInternal</span>(id, result) {
-</span></span><span style="display:flex;"><span>		m.updates <span style="color:#ff79c6">&lt;-</span> Update{id, result, pod.UID}
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/prober/results/results_manager.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>manager) <span style="color:#fabd2f">Set</span>(id kubecontainer.ContainerID, result Result, pod <span style="color:#fe8019">*</span>v1.Pod) {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> m.<span style="color:#fabd2f">setInternal</span>(id, result) {
+</span></span><span style="display:flex;"><span>		m.updates <span style="color:#fe8019">&lt;-</span> Update{id, result, pod.UID}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>kubelet 主循环调度 syncLoop 里的 syncLoopIteration 会监听该管道。当有事件通知时，先更改 statusManager 状态并通过 handleProbeSync 执行 <code>podWorkers.UpdatePod</code> 容器更新逻辑。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (kl <span style="color:#ff79c6">*</span>Kubelet) <span style="color:#50fa7b">syncLoopIteration</span>(configCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> kubetypes.PodUpdate, handler SyncHandler,
-</span></span><span style="display:flex;"><span>	syncCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> time.Time, housekeepingCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> time.Time, plegCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>pleg.PodLifecycleEvent) <span style="color:#8be9fd">bool</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">select</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> update <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>kl.livenessManager.<span style="color:#50fa7b">Updates</span>():
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> update.Result <span style="color:#ff79c6">==</span> proberesults.Failure {
-</span></span><span style="display:flex;"><span>			<span style="color:#50fa7b">handleProbeSync</span>(kl, update, handler, <span style="color:#f1fa8c">&#34;liveness&#34;</span>, <span style="color:#f1fa8c">&#34;unhealthy&#34;</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (kl <span style="color:#fe8019">*</span>Kubelet) <span style="color:#fabd2f">syncLoopIteration</span>(configCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> kubetypes.PodUpdate, handler SyncHandler,
+</span></span><span style="display:flex;"><span>	syncCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> time.Time, housekeepingCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> time.Time, plegCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">*</span>pleg.PodLifecycleEvent) <span style="color:#fabd2f">bool</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> update <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&lt;-</span>kl.livenessManager.<span style="color:#fabd2f">Updates</span>():
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> update.Result <span style="color:#fe8019">==</span> proberesults.Failure {
+</span></span><span style="display:flex;"><span>			<span style="color:#fabd2f">handleProbeSync</span>(kl, update, handler, <span style="color:#b8bb26">&#34;liveness&#34;</span>, <span style="color:#b8bb26">&#34;unhealthy&#34;</span>)
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> update <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>kl.readinessManager.<span style="color:#50fa7b">Updates</span>():
-</span></span><span style="display:flex;"><span>		ready <span style="color:#ff79c6">:=</span> update.Result <span style="color:#ff79c6">==</span> proberesults.Success
-</span></span><span style="display:flex;"><span>		kl.statusManager.<span style="color:#50fa7b">SetContainerReadiness</span>(update.PodUID, update.ContainerID, ready)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> update <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&lt;-</span>kl.readinessManager.<span style="color:#fabd2f">Updates</span>():
+</span></span><span style="display:flex;"><span>		ready <span style="color:#fe8019">:=</span> update.Result <span style="color:#fe8019">==</span> proberesults.Success
+</span></span><span style="display:flex;"><span>		kl.statusManager.<span style="color:#fabd2f">SetContainerReadiness</span>(update.PodUID, update.ContainerID, ready)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		status <span style="color:#ff79c6">:=</span> <span style="color:#f1fa8c">&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> ready {
-</span></span><span style="display:flex;"><span>			status = <span style="color:#f1fa8c">&#34;ready&#34;</span>
+</span></span><span style="display:flex;"><span>		status <span style="color:#fe8019">:=</span> <span style="color:#b8bb26">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> ready {
+</span></span><span style="display:flex;"><span>			status = <span style="color:#b8bb26">&#34;ready&#34;</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#50fa7b">handleProbeSync</span>(kl, update, handler, <span style="color:#f1fa8c">&#34;readiness&#34;</span>, status)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> update <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>kl.startupManager.<span style="color:#50fa7b">Updates</span>():
-</span></span><span style="display:flex;"><span>		started <span style="color:#ff79c6">:=</span> update.Result <span style="color:#ff79c6">==</span> proberesults.Success
-</span></span><span style="display:flex;"><span>		kl.statusManager.<span style="color:#50fa7b">SetContainerStartup</span>(update.PodUID, update.ContainerID, started)
+</span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">handleProbeSync</span>(kl, update, handler, <span style="color:#b8bb26">&#34;readiness&#34;</span>, status)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> update <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&lt;-</span>kl.startupManager.<span style="color:#fabd2f">Updates</span>():
+</span></span><span style="display:flex;"><span>		started <span style="color:#fe8019">:=</span> update.Result <span style="color:#fe8019">==</span> proberesults.Success
+</span></span><span style="display:flex;"><span>		kl.statusManager.<span style="color:#fabd2f">SetContainerStartup</span>(update.PodUID, update.ContainerID, started)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		status <span style="color:#ff79c6">:=</span> <span style="color:#f1fa8c">&#34;unhealthy&#34;</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> started {
-</span></span><span style="display:flex;"><span>			status = <span style="color:#f1fa8c">&#34;started&#34;</span>
+</span></span><span style="display:flex;"><span>		status <span style="color:#fe8019">:=</span> <span style="color:#b8bb26">&#34;unhealthy&#34;</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> started {
+</span></span><span style="display:flex;"><span>			status = <span style="color:#b8bb26">&#34;started&#34;</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#50fa7b">handleProbeSync</span>(kl, update, handler, <span style="color:#f1fa8c">&#34;startup&#34;</span>, status)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">handleProbeSync</span>(kl, update, handler, <span style="color:#b8bb26">&#34;startup&#34;</span>, status)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
   </div>

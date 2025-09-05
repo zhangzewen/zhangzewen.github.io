@@ -254,24 +254,24 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
 <p>如果启动参数 <code>--cleanup</code> 设置为 true，则清理 iptables 和 ipvs 规则并退出。</p>
 </li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (o <span style="color:#ff79c6">*</span>Options) <span style="color:#50fa7b">Run</span>() <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">defer</span> <span style="color:#8be9fd;font-style:italic">close</span>(o.errCh)
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 如果指定了 --write-config-to 参数，则将默认的配置文件写到指定文件并退出</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(o.WriteConfigTo) &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> o.<span style="color:#50fa7b">writeConfigFile</span>()
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (o <span style="color:#fe8019">*</span>Options) <span style="color:#fabd2f">Run</span>() <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">defer</span> <span style="color:#fabd2f">close</span>(o.errCh)
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 如果指定了 --write-config-to 参数，则将默认的配置文件写到指定文件并退出</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(o.WriteConfigTo) &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> o.<span style="color:#fabd2f">writeConfigFile</span>()
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 初始化 ProxyServer 对象</span>
-</span></span><span style="display:flex;"><span>  proxyServer, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">NewProxyServer</span>(o)
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 初始化 ProxyServer 对象</span>
+</span></span><span style="display:flex;"><span>  proxyServer, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">NewProxyServer</span>(o)
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 如果启动参数 --cleanup 设置为 true，则清理 iptables 和 ipvs 规则并退出</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> o.CleanupAndExit {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> proxyServer.<span style="color:#50fa7b">CleanupAndExit</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 如果启动参数 --cleanup 设置为 true，则清理 iptables 和 ipvs 规则并退出</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> o.CleanupAndExit {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> proxyServer.<span style="color:#fabd2f">CleanupAndExit</span>()
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  o.proxyServer = proxyServer
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> o.<span style="color:#50fa7b">runLoop</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> o.<span style="color:#fabd2f">runLoop</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>Run 方法中主要调用了 NewProxyServer 方法来初始化 ProxyServer，然后会调用 runLoop 启动主循环，继续看初始化 ProxyServer 的具体实现：</p>
 <ul>
@@ -281,142 +281,142 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
 </ul>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewProxyServer</span>(o <span style="color:#ff79c6">*</span>Options) (<span style="color:#ff79c6">*</span>ProxyServer, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#50fa7b">newProxyServer</span>(o.config, o.CleanupAndExit, o.master)
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewProxyServer</span>(o <span style="color:#fe8019">*</span>Options) (<span style="color:#fe8019">*</span>ProxyServer, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fabd2f">newProxyServer</span>(o.config, o.CleanupAndExit, o.master)
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">newProxyServer</span>(
-</span></span><span style="display:flex;"><span>    config <span style="color:#ff79c6">*</span>proxyconfigapi.KubeProxyConfiguration,
-</span></span><span style="display:flex;"><span>    cleanupAndExit <span style="color:#8be9fd">bool</span>,
-</span></span><span style="display:flex;"><span>    master <span style="color:#8be9fd">string</span>) (<span style="color:#ff79c6">*</span>ProxyServer, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">......</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">newProxyServer</span>(
+</span></span><span style="display:flex;"><span>    config <span style="color:#fe8019">*</span>proxyconfigapi.KubeProxyConfiguration,
+</span></span><span style="display:flex;"><span>    cleanupAndExit <span style="color:#fabd2f">bool</span>,
+</span></span><span style="display:flex;"><span>    master <span style="color:#fabd2f">string</span>) (<span style="color:#fe8019">*</span>ProxyServer, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">......</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> c, err <span style="color:#ff79c6">:=</span> configz.<span style="color:#50fa7b">New</span>(proxyconfigapi.GroupName); err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        c.<span style="color:#50fa7b">Set</span>(config)
-</span></span><span style="display:flex;"><span>    } <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unable to register configz: %s&#34;</span>, err)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> c, err <span style="color:#fe8019">:=</span> configz.<span style="color:#fabd2f">New</span>(proxyconfigapi.GroupName); err <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        c.<span style="color:#fabd2f">Set</span>(config)
+</span></span><span style="display:flex;"><span>    } <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;unable to register configz: %s&#34;</span>, err)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">...</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 关键依赖工具 iptables/ipvs/ipset/kernel，实例化这些工具的接口</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> iptInterface utiliptables.Interface
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> ipvsInterface utilipvs.Interface
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> kernelHandler ipvs.KernelHandler
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> ipsetInterface utilipset.Interface
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 关键依赖工具 iptables/ipvs/ipset/kernel，实例化这些工具的接口</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">var</span> iptInterface utiliptables.Interface
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">var</span> ipvsInterface utilipvs.Interface
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">var</span> kernelHandler ipvs.KernelHandler
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">var</span> ipsetInterface utilipset.Interface
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    execer <span style="color:#ff79c6">:=</span> exec.<span style="color:#50fa7b">New</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 检测是否支持ipvs</span>
-</span></span><span style="display:flex;"><span>    kernelHandler = ipvs.<span style="color:#50fa7b">NewLinuxKernelHandler</span>()
-</span></span><span style="display:flex;"><span>    ipsetInterface = utilipset.<span style="color:#50fa7b">New</span>(execer)
-</span></span><span style="display:flex;"><span>    canUseIPVS, err <span style="color:#ff79c6">:=</span> ipvs.<span style="color:#50fa7b">CanUseIPVSProxier</span>(kernelHandler, ipsetInterface, config.IPVS.Scheduler)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">string</span>(config.Mode) <span style="color:#ff79c6">==</span> proxyModeIPVS <span style="color:#ff79c6">&amp;&amp;</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>    	klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Can&#39;t use the IPVS proxier&#34;</span>)
+</span></span><span style="display:flex;"><span>    execer <span style="color:#fe8019">:=</span> exec.<span style="color:#fabd2f">New</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 检测是否支持ipvs</span>
+</span></span><span style="display:flex;"><span>    kernelHandler = ipvs.<span style="color:#fabd2f">NewLinuxKernelHandler</span>()
+</span></span><span style="display:flex;"><span>    ipsetInterface = utilipset.<span style="color:#fabd2f">New</span>(execer)
+</span></span><span style="display:flex;"><span>    canUseIPVS, err <span style="color:#fe8019">:=</span> ipvs.<span style="color:#fabd2f">CanUseIPVSProxier</span>(kernelHandler, ipsetInterface, config.IPVS.Scheduler)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> <span style="color:#fabd2f">string</span>(config.Mode) <span style="color:#fe8019">==</span> proxyModeIPVS <span style="color:#fe8019">&amp;&amp;</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>    	klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Can&#39;t use the IPVS proxier&#34;</span>)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">...</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取当前kube-proxy实例所在宿主机的hostname</span>
-</span></span><span style="display:flex;"><span>    hostname, err <span style="color:#ff79c6">:=</span> utilnode.<span style="color:#50fa7b">GetHostname</span>(config.HostnameOverride)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>    	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, err
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取当前kube-proxy实例所在宿主机的hostname</span>
+</span></span><span style="display:flex;"><span>    hostname, err <span style="color:#fe8019">:=</span> utilnode.<span style="color:#fabd2f">GetHostname</span>(config.HostnameOverride)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>    	<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, err
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 初始化 kube client 和 event client, 用于和 apiserver通信，</span>
-</span></span><span style="display:flex;"><span>    client, eventClient, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">createClients</span>(config.ClientConnection, master)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, err
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 初始化 kube client 和 event client, 用于和 apiserver通信，</span>
+</span></span><span style="display:flex;"><span>    client, eventClient, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">createClients</span>(config.ClientConnection, master)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, err
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取宿主机 IP</span>
-</span></span><span style="display:flex;"><span>    nodeIP <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">detectNodeIP</span>(client, hostname, config.BindAddress)
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Detected node IP&#34;</span>, <span style="color:#f1fa8c">&#34;address&#34;</span>, nodeIP.<span style="color:#50fa7b">String</span>())
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取宿主机 IP</span>
+</span></span><span style="display:flex;"><span>    nodeIP <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">detectNodeIP</span>(client, hostname, config.BindAddress)
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Detected node IP&#34;</span>, <span style="color:#b8bb26">&#34;address&#34;</span>, nodeIP.<span style="color:#fabd2f">String</span>())
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">...</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 判断 proxyMode，其后根据 proxyMode 来 初始化 proxier，如iptable/ipvs</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> proxier proxy.Provider
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> detectLocalMode proxyconfigapi.LocalMode
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 判断 proxyMode，其后根据 proxyMode 来 初始化 proxier，如iptable/ipvs</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">var</span> proxier proxy.Provider
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">var</span> detectLocalMode proxyconfigapi.LocalMode
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    proxyMode <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getProxyMode</span>(<span style="color:#8be9fd;font-style:italic">string</span>(config.Mode), canUseIPVS, iptables.LinuxKernelCompatTester{})
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取本地数据包判定方法</span>
-</span></span><span style="display:flex;"><span>    detectLocalMode, err = <span style="color:#50fa7b">getDetectLocalMode</span>(config)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取 IP 协议栈，默认的是ipv4</span>
-</span></span><span style="display:flex;"><span>    primaryProtocol <span style="color:#ff79c6">:=</span> utiliptables.ProtocolIPv4
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> netutils.<span style="color:#50fa7b">IsIPv6</span>(nodeIP) {
+</span></span><span style="display:flex;"><span>    proxyMode <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">getProxyMode</span>(<span style="color:#fabd2f">string</span>(config.Mode), canUseIPVS, iptables.LinuxKernelCompatTester{})
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取本地数据包判定方法</span>
+</span></span><span style="display:flex;"><span>    detectLocalMode, err = <span style="color:#fabd2f">getDetectLocalMode</span>(config)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取 IP 协议栈，默认的是ipv4</span>
+</span></span><span style="display:flex;"><span>    primaryProtocol <span style="color:#fe8019">:=</span> utiliptables.ProtocolIPv4
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> netutils.<span style="color:#fabd2f">IsIPv6</span>(nodeIP) {
 </span></span><span style="display:flex;"><span>    	primaryProtocol = utiliptables.ProtocolIPv6
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> proxyMode <span style="color:#ff79c6">==</span> proxyModeIPTables {
-</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">0</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Using iptables Proxier.&#34;</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> config.IPTables.MasqueradeBit <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unable to read IPTables MasqueradeBit from config&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> proxyMode <span style="color:#fe8019">==</span> proxyModeIPTables {
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">0</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Using iptables Proxier.&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> config.IPTables.MasqueradeBit <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;unable to read IPTables MasqueradeBit from config&#34;</span>)
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 初始化 iptables 模式的 proxier</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> dualStack {
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 双协议栈</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>        } <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#8be9fd;font-style:italic">var</span> localDetector proxyutiliptables.LocalTrafficDetector
-</span></span><span style="display:flex;"><span>	    localDetector, err = <span style="color:#50fa7b">getLocalDetector</span>(detectLocalMode, config, iptInterface, nodeInfo)
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 初始化 iptables 模式的 proxier</span>
-</span></span><span style="display:flex;"><span>            proxier, err = iptables.<span style="color:#50fa7b">NewProxier</span>(
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 初始化 iptables 模式的 proxier</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> dualStack {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 双协议栈</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>        } <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">var</span> localDetector proxyutiliptables.LocalTrafficDetector
+</span></span><span style="display:flex;"><span>	    localDetector, err = <span style="color:#fabd2f">getLocalDetector</span>(detectLocalMode, config, iptInterface, nodeInfo)
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 初始化 iptables 模式的 proxier</span>
+</span></span><span style="display:flex;"><span>            proxier, err = iptables.<span style="color:#fabd2f">NewProxier</span>(
+</span></span><span style="display:flex;"><span>                <span style="color:#8ec07c">//...</span>
 </span></span><span style="display:flex;"><span>            )
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>            metrics.<span style="color:#50fa7b">RegisterMetrics</span>()
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>            metrics.<span style="color:#fabd2f">RegisterMetrics</span>()
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>    } <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> proxyMode <span style="color:#ff79c6">==</span> proxyModeIPVS {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 判断是够启用了双栈</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> dualStack {
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 双栈模式</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>        } <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>	    <span style="color:#8be9fd;font-style:italic">var</span> localDetector proxyutiliptables.LocalTrafficDetector
-</span></span><span style="display:flex;"><span>	    localDetector, err = <span style="color:#50fa7b">getLocalDetector</span>(detectLocalMode, config, iptInterface, nodeInfo)
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 初始化 ipvs 模式的 proxier</span>
-</span></span><span style="display:flex;"><span>            proxier, err = ipvs.<span style="color:#50fa7b">NewProxier</span>(
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>    } <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span> proxyMode <span style="color:#fe8019">==</span> proxyModeIPVS {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 判断是够启用了双栈</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> dualStack {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 双栈模式</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>        } <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>	    <span style="color:#fe8019">var</span> localDetector proxyutiliptables.LocalTrafficDetector
+</span></span><span style="display:flex;"><span>	    localDetector, err = <span style="color:#fabd2f">getLocalDetector</span>(detectLocalMode, config, iptInterface, nodeInfo)
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 初始化 ipvs 模式的 proxier</span>
+</span></span><span style="display:flex;"><span>            proxier, err = ipvs.<span style="color:#fabd2f">NewProxier</span>(
+</span></span><span style="display:flex;"><span>                <span style="color:#8ec07c">//...</span>
 </span></span><span style="display:flex;"><span>            )
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>        metrics.<span style="color:#50fa7b">RegisterMetrics</span>()
-</span></span><span style="display:flex;"><span>    } <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 初始化 userspace 模式的 proxier，现在很少使用这种模式了</span>
-</span></span><span style="display:flex;"><span>        proxier, err = userspace.<span style="color:#50fa7b">NewProxier</span>(
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>        metrics.<span style="color:#fabd2f">RegisterMetrics</span>()
+</span></span><span style="display:flex;"><span>    } <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 初始化 userspace 模式的 proxier，现在很少使用这种模式了</span>
+</span></span><span style="display:flex;"><span>        proxier, err = userspace.<span style="color:#fabd2f">NewProxier</span>(
+</span></span><span style="display:flex;"><span>            <span style="color:#8ec07c">//...</span>
 </span></span><span style="display:flex;"><span>        )
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// ...</span>
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建 ProxyServer 实例，其实现了接口k8s.io/kubernetes/cmd/kube-proxy/app/server.go#proxyRun接口</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>ProxyServer{
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">//...</span>
-</span></span><span style="display:flex;"><span>    }, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 创建 ProxyServer 实例，其实现了接口k8s.io/kubernetes/cmd/kube-proxy/app/server.go#proxyRun接口</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>ProxyServer{
+</span></span><span style="display:flex;"><span>        <span style="color:#8ec07c">//...</span>
+</span></span><span style="display:flex;"><span>    }, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
 
 <p>runLoop 方法主要是启动 proxy Server：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (o <span style="color:#ff79c6">*</span>Options) <span style="color:#50fa7b">runLoop</span>() <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 1.watch 配置文件变化</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> o.watcher <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        o.watcher.<span style="color:#50fa7b">Run</span>()
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (o <span style="color:#fe8019">*</span>Options) <span style="color:#fabd2f">runLoop</span>() <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 1.watch 配置文件变化</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> o.watcher <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        o.watcher.<span style="color:#fabd2f">Run</span>()
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 2.以 goroutine 方式启动 proxyServer</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>        err <span style="color:#ff79c6">:=</span> o.proxyServer.<span style="color:#50fa7b">Run</span>()
-</span></span><span style="display:flex;"><span>        o.errCh <span style="color:#ff79c6">&lt;-</span> err
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 2.以 goroutine 方式启动 proxyServer</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">go</span> <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>        err <span style="color:#fe8019">:=</span> o.proxyServer.<span style="color:#fabd2f">Run</span>()
+</span></span><span style="display:flex;"><span>        o.errCh <span style="color:#fe8019">&lt;-</span> err
 </span></span><span style="display:flex;"><span>    }()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> {
-</span></span><span style="display:flex;"><span>        err <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>o.errCh
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">for</span> {
+</span></span><span style="display:flex;"><span>        err <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&lt;-</span>o.errCh
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
@@ -431,86 +431,86 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
 </ul>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (s <span style="color:#ff79c6">*</span>ProxyServer) <span style="color:#50fa7b">Run</span>() <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//...</span>
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (s <span style="color:#fe8019">*</span>ProxyServer) <span style="color:#fabd2f">Run</span>() <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//...</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 进程 OOMScore，避免进程因 oom 被杀掉，此处默认值为 -999</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> oomAdjuster <span style="color:#ff79c6">*</span>oom.OOMAdjuster
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> s.OOMScoreAdj <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        oomAdjuster = oom.<span style="color:#50fa7b">NewOOMAdjuster</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> oomAdjuster.<span style="color:#50fa7b">ApplyOOMScoreAdj</span>(<span style="color:#bd93f9">0</span>, <span style="color:#8be9fd;font-style:italic">int</span>(<span style="color:#ff79c6">*</span>s.OOMScoreAdj)); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>	    klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Failed to apply OOMScore&#34;</span>, <span style="color:#f1fa8c">&#34;err&#34;</span>, err)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 进程 OOMScore，避免进程因 oom 被杀掉，此处默认值为 -999</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">var</span> oomAdjuster <span style="color:#fe8019">*</span>oom.OOMAdjuster
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> s.OOMScoreAdj <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        oomAdjuster = oom.<span style="color:#fabd2f">NewOOMAdjuster</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> oomAdjuster.<span style="color:#fabd2f">ApplyOOMScoreAdj</span>(<span style="color:#d3869b">0</span>, <span style="color:#fabd2f">int</span>(<span style="color:#fe8019">*</span>s.OOMScoreAdj)); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>	    klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Failed to apply OOMScore&#34;</span>, <span style="color:#b8bb26">&#34;err&#34;</span>, err)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//...</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 按需启动 healthz server</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">serveHealthz</span>(s.HealthzServer, errCh)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 按需启动 healthz server</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">serveHealthz</span>(s.HealthzServer, errCh)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 按需启动 metrics server</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">serveMetrics</span>(s.MetricsBindAddress, s.ProxyMode, s.EnableProfiling, errCh)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 按需启动 metrics server</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">serveMetrics</span>(s.MetricsBindAddress, s.ProxyMode, s.EnableProfiling, errCh)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 配置 conntrack，设置内核参数 nf_conntrack_tcp_timeout_established 和 nf_conntrack_tcp_timeout_close_wait</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> s.Conntracker <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        max, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getConntrackMax</span>(s.ConntrackConfiguration)
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 配置 conntrack，设置内核参数 nf_conntrack_tcp_timeout_established 和 nf_conntrack_tcp_timeout_close_wait</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> s.Conntracker <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        max, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">getConntrackMax</span>(s.ConntrackConfiguration)
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> max &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>            err <span style="color:#ff79c6">:=</span> s.Conntracker.<span style="color:#50fa7b">SetMax</span>(max)
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> max &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>            err <span style="color:#fe8019">:=</span> s.Conntracker.<span style="color:#fabd2f">SetMax</span>(max)
+</span></span><span style="display:flex;"><span>            <span style="color:#8ec07c">//...</span>
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> s.ConntrackConfiguration.TCPEstablishedTimeout <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> s.ConntrackConfiguration.TCPEstablishedTimeout.Duration &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>            timeout <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">int</span>(s.ConntrackConfiguration.TCPEstablishedTimeout.Duration <span style="color:#ff79c6">/</span> time.Second)
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> s.Conntracker.<span style="color:#50fa7b">SetTCPEstablishedTimeout</span>(timeout); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> s.ConntrackConfiguration.TCPEstablishedTimeout <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span> s.ConntrackConfiguration.TCPEstablishedTimeout.Duration &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>            timeout <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">int</span>(s.ConntrackConfiguration.TCPEstablishedTimeout.Duration <span style="color:#fe8019">/</span> time.Second)
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> s.Conntracker.<span style="color:#fabd2f">SetTCPEstablishedTimeout</span>(timeout); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> s.ConntrackConfiguration.TCPCloseWaitTimeout <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> s.ConntrackConfiguration.TCPCloseWaitTimeout.Duration &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>            timeout <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">int</span>(s.ConntrackConfiguration.TCPCloseWaitTimeout.Duration <span style="color:#ff79c6">/</span> time.Second)
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> s.Conntracker.<span style="color:#50fa7b">SetTCPCloseWaitTimeout</span>(timeout); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> s.ConntrackConfiguration.TCPCloseWaitTimeout <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span> s.ConntrackConfiguration.TCPCloseWaitTimeout.Duration &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>            timeout <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">int</span>(s.ConntrackConfiguration.TCPCloseWaitTimeout.Duration <span style="color:#fe8019">/</span> time.Second)
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> s.Conntracker.<span style="color:#fabd2f">SetTCPCloseWaitTimeout</span>(timeout); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//...</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 启动 informer 监听 Services 和 Endpoints 或者 EndpointSlices 信息</span>
-</span></span><span style="display:flex;"><span>    informerFactory <span style="color:#ff79c6">:=</span> informers.<span style="color:#50fa7b">NewSharedInformerFactoryWithOptions</span>(s.Client, s.ConfigSyncPeriod,
-</span></span><span style="display:flex;"><span>        informers.<span style="color:#50fa7b">WithTweakListOptions</span>(<span style="color:#8be9fd;font-style:italic">func</span>(options <span style="color:#ff79c6">*</span>metav1.ListOptions) {
-</span></span><span style="display:flex;"><span>            options.LabelSelector = labelSelector.<span style="color:#50fa7b">String</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 启动 informer 监听 Services 和 Endpoints 或者 EndpointSlices 信息</span>
+</span></span><span style="display:flex;"><span>    informerFactory <span style="color:#fe8019">:=</span> informers.<span style="color:#fabd2f">NewSharedInformerFactoryWithOptions</span>(s.Client, s.ConfigSyncPeriod,
+</span></span><span style="display:flex;"><span>        informers.<span style="color:#fabd2f">WithTweakListOptions</span>(<span style="color:#fe8019">func</span>(options <span style="color:#fe8019">*</span>metav1.ListOptions) {
+</span></span><span style="display:flex;"><span>            options.LabelSelector = labelSelector.<span style="color:#fabd2f">String</span>()
 </span></span><span style="display:flex;"><span>        }))
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 将 proxier 注册到 serviceConfig、endpointsConfig 中</span>
-</span></span><span style="display:flex;"><span>    serviceConfig <span style="color:#ff79c6">:=</span> config.<span style="color:#50fa7b">NewServiceConfig</span>(informerFactory.<span style="color:#50fa7b">Core</span>().<span style="color:#50fa7b">V1</span>().<span style="color:#50fa7b">Services</span>(), s.ConfigSyncPeriod)
-</span></span><span style="display:flex;"><span>    serviceConfig.<span style="color:#50fa7b">RegisterEventHandler</span>(s.Proxier)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> serviceConfig.<span style="color:#50fa7b">Run</span>(wait.NeverStop)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 将 proxier 注册到 serviceConfig、endpointsConfig 中</span>
+</span></span><span style="display:flex;"><span>    serviceConfig <span style="color:#fe8019">:=</span> config.<span style="color:#fabd2f">NewServiceConfig</span>(informerFactory.<span style="color:#fabd2f">Core</span>().<span style="color:#fabd2f">V1</span>().<span style="color:#fabd2f">Services</span>(), s.ConfigSyncPeriod)
+</span></span><span style="display:flex;"><span>    serviceConfig.<span style="color:#fabd2f">RegisterEventHandler</span>(s.Proxier)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">go</span> serviceConfig.<span style="color:#fabd2f">Run</span>(wait.NeverStop)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> endpointsHandler, ok <span style="color:#ff79c6">:=</span> s.Proxier.(config.EndpointsHandler); ok <span style="color:#ff79c6">&amp;&amp;</span> !s.UseEndpointSlices {
-</span></span><span style="display:flex;"><span>    	endpointsConfig <span style="color:#ff79c6">:=</span> config.<span style="color:#50fa7b">NewEndpointsConfig</span>(informerFactory.<span style="color:#50fa7b">Core</span>().<span style="color:#50fa7b">V1</span>().<span style="color:#50fa7b">Endpoints</span>(), s.ConfigSyncPeriod)
-</span></span><span style="display:flex;"><span>    	endpointsConfig.<span style="color:#50fa7b">RegisterEventHandler</span>(endpointsHandler)
-</span></span><span style="display:flex;"><span>    	<span style="color:#ff79c6">go</span> endpointsConfig.<span style="color:#50fa7b">Run</span>(wait.NeverStop)
-</span></span><span style="display:flex;"><span>    } <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>    	endpointSliceConfig <span style="color:#ff79c6">:=</span> config.<span style="color:#50fa7b">NewEndpointSliceConfig</span>(informerFactory.<span style="color:#50fa7b">Discovery</span>().<span style="color:#50fa7b">V1</span>().<span style="color:#50fa7b">EndpointSlices</span>(), s.ConfigSyncPeriod)
-</span></span><span style="display:flex;"><span>    	endpointSliceConfig.<span style="color:#50fa7b">RegisterEventHandler</span>(s.Proxier)
-</span></span><span style="display:flex;"><span>    	<span style="color:#ff79c6">go</span> endpointSliceConfig.<span style="color:#50fa7b">Run</span>(wait.NeverStop)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> endpointsHandler, ok <span style="color:#fe8019">:=</span> s.Proxier.(config.EndpointsHandler); ok <span style="color:#fe8019">&amp;&amp;</span> !s.UseEndpointSlices {
+</span></span><span style="display:flex;"><span>    	endpointsConfig <span style="color:#fe8019">:=</span> config.<span style="color:#fabd2f">NewEndpointsConfig</span>(informerFactory.<span style="color:#fabd2f">Core</span>().<span style="color:#fabd2f">V1</span>().<span style="color:#fabd2f">Endpoints</span>(), s.ConfigSyncPeriod)
+</span></span><span style="display:flex;"><span>    	endpointsConfig.<span style="color:#fabd2f">RegisterEventHandler</span>(endpointsHandler)
+</span></span><span style="display:flex;"><span>    	<span style="color:#fe8019">go</span> endpointsConfig.<span style="color:#fabd2f">Run</span>(wait.NeverStop)
+</span></span><span style="display:flex;"><span>    } <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>    	endpointSliceConfig <span style="color:#fe8019">:=</span> config.<span style="color:#fabd2f">NewEndpointSliceConfig</span>(informerFactory.<span style="color:#fabd2f">Discovery</span>().<span style="color:#fabd2f">V1</span>().<span style="color:#fabd2f">EndpointSlices</span>(), s.ConfigSyncPeriod)
+</span></span><span style="display:flex;"><span>    	endpointSliceConfig.<span style="color:#fabd2f">RegisterEventHandler</span>(s.Proxier)
+</span></span><span style="display:flex;"><span>    	<span style="color:#fe8019">go</span> endpointSliceConfig.<span style="color:#fabd2f">Run</span>(wait.NeverStop)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 启动 informer</span>
-</span></span><span style="display:flex;"><span>    informerFactory.<span style="color:#50fa7b">Start</span>(wait.NeverStop)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>    s.<span style="color:#50fa7b">birthCry</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 启动 informer</span>
+</span></span><span style="display:flex;"><span>    informerFactory.<span style="color:#fabd2f">Start</span>(wait.NeverStop)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>    s.<span style="color:#fabd2f">birthCry</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 启动 proxier 主循环</span>
-</span></span><span style="display:flex;"><span>    s.Proxier.<span style="color:#50fa7b">SyncLoop</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&lt;-</span>errCh
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 启动 proxier 主循环</span>
+</span></span><span style="display:flex;"><span>    s.Proxier.<span style="color:#fabd2f">SyncLoop</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">&lt;-</span>errCh
 </span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (s <span style="color:#ff79c6">*</span>ProxyServer) <span style="color:#50fa7b">birthCry</span>() {
-</span></span><span style="display:flex;"><span>	s.Recorder.<span style="color:#50fa7b">Eventf</span>(s.NodeRef, <span style="color:#ff79c6">nil</span>, api.EventTypeNormal, <span style="color:#f1fa8c">&#34;Starting&#34;</span>, <span style="color:#f1fa8c">&#34;StartKubeProxy&#34;</span>, <span style="color:#f1fa8c">&#34;&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (s <span style="color:#fe8019">*</span>ProxyServer) <span style="color:#fabd2f">birthCry</span>() {
+</span></span><span style="display:flex;"><span>	s.Recorder.<span style="color:#fabd2f">Eventf</span>(s.NodeRef, <span style="color:#fe8019">nil</span>, api.EventTypeNormal, <span style="color:#b8bb26">&#34;Starting&#34;</span>, <span style="color:#b8bb26">&#34;StartKubeProxy&#34;</span>, <span style="color:#b8bb26">&#34;&#34;</span>)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
@@ -519,20 +519,20 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
 <p>kube-proxy 通过 ServiceConfig 封装了 services 资源的新增/删除/更新事件注册到 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/informer/">informer</a> 的逻辑，真正的资源新增/删除/更新事件的回调函数由 proxier 提供，而且 proxier 会被加入到 ServiceConfig 的回调句柄列表中：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/proxy/config/config.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// ServiceConfig tracks a set of service configurations.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> ServiceConfig <span style="color:#8be9fd;font-style:italic">struct</span> {
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/proxy/config/config.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// ServiceConfig tracks a set of service configurations.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> ServiceConfig <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>	listerSynced  cache.InformerSynced
 </span></span><span style="display:flex;"><span>	eventHandlers []ServiceHandler
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// NewServiceConfig creates a new ServiceConfig.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewServiceConfig</span>(serviceInformer coreinformers.ServiceInformer, resyncPeriod time.Duration) <span style="color:#ff79c6">*</span>ServiceConfig {
-</span></span><span style="display:flex;"><span>	result <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>ServiceConfig{
-</span></span><span style="display:flex;"><span>		listerSynced: serviceInformer.<span style="color:#50fa7b">Informer</span>().HasSynced,
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// NewServiceConfig creates a new ServiceConfig.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewServiceConfig</span>(serviceInformer coreinformers.ServiceInformer, resyncPeriod time.Duration) <span style="color:#fe8019">*</span>ServiceConfig {
+</span></span><span style="display:flex;"><span>	result <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>ServiceConfig{
+</span></span><span style="display:flex;"><span>		listerSynced: serviceInformer.<span style="color:#fabd2f">Informer</span>().HasSynced,
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	serviceInformer.<span style="color:#50fa7b">Informer</span>().<span style="color:#50fa7b">AddEventHandlerWithResyncPeriod</span>(
+</span></span><span style="display:flex;"><span>	serviceInformer.<span style="color:#fabd2f">Informer</span>().<span style="color:#fabd2f">AddEventHandlerWithResyncPeriod</span>(
 </span></span><span style="display:flex;"><span>		cache.ResourceEventHandlerFuncs{
 </span></span><span style="display:flex;"><span>			AddFunc:    result.handleAddService,
 </span></span><span style="display:flex;"><span>			UpdateFunc: result.handleUpdateService,
@@ -541,76 +541,76 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
 </span></span><span style="display:flex;"><span>		resyncPeriod,
 </span></span><span style="display:flex;"><span>	)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> result
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> result
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 添加回调句柄，其实就是各个proxier</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>ServiceConfig) <span style="color:#50fa7b">RegisterEventHandler</span>(handler ServiceHandler) {
-</span></span><span style="display:flex;"><span>	c.eventHandlers = <span style="color:#8be9fd;font-style:italic">append</span>(c.eventHandlers, handler)
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 添加回调句柄，其实就是各个proxier</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (c <span style="color:#fe8019">*</span>ServiceConfig) <span style="color:#fabd2f">RegisterEventHandler</span>(handler ServiceHandler) {
+</span></span><span style="display:flex;"><span>	c.eventHandlers = <span style="color:#fabd2f">append</span>(c.eventHandlers, handler)
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>ServiceConfig) <span style="color:#50fa7b">Run</span>(stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}) {
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Starting service config controller&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (c <span style="color:#fe8019">*</span>ServiceConfig) <span style="color:#fabd2f">Run</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}) {
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Starting service config controller&#34;</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 首次启动, 等待数据同步到缓存</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !cache.<span style="color:#50fa7b">WaitForNamedCacheSync</span>(<span style="color:#f1fa8c">&#34;service config&#34;</span>, stopCh, c.listerSynced) {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 首次启动, 等待数据同步到缓存</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !cache.<span style="color:#fabd2f">WaitForNamedCacheSync</span>(<span style="color:#b8bb26">&#34;service config&#34;</span>, stopCh, c.listerSynced) {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> c.eventHandlers {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Calling handler.OnServiceSynced()&#34;</span>)
-</span></span><span style="display:flex;"><span>		c.eventHandlers[i].<span style="color:#50fa7b">OnServiceSynced</span>()
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 处理 service 添加事件</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>ServiceConfig) <span style="color:#50fa7b">handleAddService</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
-</span></span><span style="display:flex;"><span>	service, ok <span style="color:#ff79c6">:=</span> obj.(<span style="color:#ff79c6">*</span>v1.Service)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok {
-</span></span><span style="display:flex;"><span>		utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unexpected object type: %v&#34;</span>, obj))
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> c.eventHandlers {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Calling handler.OnServiceAdd&#34;</span>)
-</span></span><span style="display:flex;"><span>		c.eventHandlers[i].<span style="color:#50fa7b">OnServiceAdd</span>(service)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> i <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> c.eventHandlers {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Calling handler.OnServiceSynced()&#34;</span>)
+</span></span><span style="display:flex;"><span>		c.eventHandlers[i].<span style="color:#fabd2f">OnServiceSynced</span>()
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 处理 service 更新事件</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>ServiceConfig) <span style="color:#50fa7b">handleUpdateService</span>(oldObj, newObj <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
-</span></span><span style="display:flex;"><span>	oldService, ok <span style="color:#ff79c6">:=</span> oldObj.(<span style="color:#ff79c6">*</span>v1.Service)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok {
-</span></span><span style="display:flex;"><span>		utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unexpected object type: %v&#34;</span>, oldObj))
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 处理 service 添加事件</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (c <span style="color:#fe8019">*</span>ServiceConfig) <span style="color:#fabd2f">handleAddService</span>(obj <span style="color:#fe8019">interface</span>{}) {
+</span></span><span style="display:flex;"><span>	service, ok <span style="color:#fe8019">:=</span> obj.(<span style="color:#fe8019">*</span>v1.Service)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !ok {
+</span></span><span style="display:flex;"><span>		utilruntime.<span style="color:#fabd2f">HandleError</span>(fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;unexpected object type: %v&#34;</span>, obj))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	service, ok <span style="color:#ff79c6">:=</span> newObj.(<span style="color:#ff79c6">*</span>v1.Service)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok {
-</span></span><span style="display:flex;"><span>		utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unexpected object type: %v&#34;</span>, newObj))
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> c.eventHandlers {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Calling handler.OnServiceUpdate&#34;</span>)
-</span></span><span style="display:flex;"><span>		c.eventHandlers[i].<span style="color:#50fa7b">OnServiceUpdate</span>(oldService, service)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> i <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> c.eventHandlers {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Calling handler.OnServiceAdd&#34;</span>)
+</span></span><span style="display:flex;"><span>		c.eventHandlers[i].<span style="color:#fabd2f">OnServiceAdd</span>(service)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 处理 service 删除事件</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>ServiceConfig) <span style="color:#50fa7b">handleDeleteService</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
-</span></span><span style="display:flex;"><span>	service, ok <span style="color:#ff79c6">:=</span> obj.(<span style="color:#ff79c6">*</span>v1.Service)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok {
-</span></span><span style="display:flex;"><span>		tombstone, ok <span style="color:#ff79c6">:=</span> obj.(cache.DeletedFinalStateUnknown)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !ok {
-</span></span><span style="display:flex;"><span>			utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unexpected object type: %v&#34;</span>, obj))
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 处理 service 更新事件</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (c <span style="color:#fe8019">*</span>ServiceConfig) <span style="color:#fabd2f">handleUpdateService</span>(oldObj, newObj <span style="color:#fe8019">interface</span>{}) {
+</span></span><span style="display:flex;"><span>	oldService, ok <span style="color:#fe8019">:=</span> oldObj.(<span style="color:#fe8019">*</span>v1.Service)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !ok {
+</span></span><span style="display:flex;"><span>		utilruntime.<span style="color:#fabd2f">HandleError</span>(fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;unexpected object type: %v&#34;</span>, oldObj))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	service, ok <span style="color:#fe8019">:=</span> newObj.(<span style="color:#fe8019">*</span>v1.Service)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !ok {
+</span></span><span style="display:flex;"><span>		utilruntime.<span style="color:#fabd2f">HandleError</span>(fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;unexpected object type: %v&#34;</span>, newObj))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> i <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> c.eventHandlers {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Calling handler.OnServiceUpdate&#34;</span>)
+</span></span><span style="display:flex;"><span>		c.eventHandlers[i].<span style="color:#fabd2f">OnServiceUpdate</span>(oldService, service)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 处理 service 删除事件</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (c <span style="color:#fe8019">*</span>ServiceConfig) <span style="color:#fabd2f">handleDeleteService</span>(obj <span style="color:#fe8019">interface</span>{}) {
+</span></span><span style="display:flex;"><span>	service, ok <span style="color:#fe8019">:=</span> obj.(<span style="color:#fe8019">*</span>v1.Service)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !ok {
+</span></span><span style="display:flex;"><span>		tombstone, ok <span style="color:#fe8019">:=</span> obj.(cache.DeletedFinalStateUnknown)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !ok {
+</span></span><span style="display:flex;"><span>			utilruntime.<span style="color:#fabd2f">HandleError</span>(fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;unexpected object type: %v&#34;</span>, obj))
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> service, ok = tombstone.Obj.(<span style="color:#ff79c6">*</span>v1.Service); !ok {
-</span></span><span style="display:flex;"><span>			utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unexpected object type: %v&#34;</span>, obj))
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> service, ok = tombstone.Obj.(<span style="color:#fe8019">*</span>v1.Service); !ok {
+</span></span><span style="display:flex;"><span>			utilruntime.<span style="color:#fabd2f">HandleError</span>(fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;unexpected object type: %v&#34;</span>, obj))
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> c.eventHandlers {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Calling handler.OnServiceDelete&#34;</span>)
-</span></span><span style="display:flex;"><span>		c.eventHandlers[i].<span style="color:#50fa7b">OnServiceDelete</span>(service)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> i <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> c.eventHandlers {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Calling handler.OnServiceDelete&#34;</span>)
+</span></span><span style="display:flex;"><span>		c.eventHandlers[i].<span style="color:#fabd2f">OnServiceDelete</span>(service)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
@@ -620,19 +620,19 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
 <h2 id="三种代理模式">三种代理模式</h2>
 <p>上述所说的 proxier 其实是 kube-proxy 支持的三种代理模式: iptables, ipvs, userspace 它们其中一种的实例。 默认的模式是 iptables，userspace 已经不常用。</p>
 <p>kube-proxy 提供了接口 Provider 来抽象代理模式，即真正干活的 proxier， 上述中的 ProxyServer 只是用来做一些通用的事务，以及决定使用哪一种代理模式。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Provider <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// endpointslice 资源删除/新增/更新事件处理接口</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Provider <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// endpointslice 资源删除/新增/更新事件处理接口</span>
 </span></span><span style="display:flex;"><span>  config.EndpointSliceHandler
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// service 资源删除/新增/更新事件回调处理接口</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// service 资源删除/新增/更新事件回调处理接口</span>
 </span></span><span style="display:flex;"><span>  config.ServiceHandler
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// node  资源删除/新增/更新事件回调处理接口</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// node  资源删除/新增/更新事件回调处理接口</span>
 </span></span><span style="display:flex;"><span>  config.NodeHandler
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Sync immediately synchronizes the Provider&#39;s current state to proxy rules.</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Sync</span>()
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// SyncLoop runs periodic work.</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// This is expected to run as a goroutine or as the main loop of the app.</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// It does not return.</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">SyncLoop</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Sync immediately synchronizes the Provider&#39;s current state to proxy rules.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Sync</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// SyncLoop runs periodic work.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// This is expected to run as a goroutine or as the main loop of the app.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// It does not return.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">SyncLoop</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>由于篇幅有限，<code>iptables</code> 和 <code>ipvs</code> 的解析请查看如下文章：</p>
 <p><a href="https://www.zhangzewen.net/posts/kubernetes/kube-proxy/iptables/">kube-proxy iptables 模式</a></p>

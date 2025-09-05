@@ -273,16 +273,16 @@
           <blockquote>
 <p>本篇文章基于 client-go release-1.25 分支</p></blockquote>
 <p><code>Controller</code>是一个接口，该接口的实例的主要作用是构建和启动 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/">reflector</a>。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Controller <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Run</span>(stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{})
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">HasSynced</span>() <span style="color:#8be9fd">bool</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">LastSyncResourceVersion</span>() <span style="color:#8be9fd">string</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> Controller <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Run</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{})
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">HasSynced</span>() <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">LastSyncResourceVersion</span>() <span style="color:#fabd2f">string</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> controller <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> controller <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>  config         Config
-</span></span><span style="display:flex;"><span>  reflector      <span style="color:#ff79c6">*</span>Reflector
+</span></span><span style="display:flex;"><span>  reflector      <span style="color:#fe8019">*</span>Reflector
 </span></span><span style="display:flex;"><span>  reflectorMutex sync.RWMutex
 </span></span><span style="display:flex;"><span>  clock          clock.Clock
 </span></span><span style="display:flex;"><span>}

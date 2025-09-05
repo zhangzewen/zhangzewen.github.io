@@ -88,7 +88,7 @@ struct input_iterator_tag {}; // 输入迭代器 struct output_iterator_tag {}; 
       },
       "datePublished": "2025-03-02T09:43:31+08:00",
       "dateModified": "2025-03-02T09:43:31+08:00",
-      "description": "\u003ch2 id=\"c-迭代器的种类\"\u003ec++ 迭代器的种类\u003c/h2\u003e\n\u003cp\u003e在STL中，迭代器的种类可以分为输入迭代器、输出迭代器、前向迭代器、双向迭代器、随机访问迭代器：\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-cpp\" data-lang=\"cpp\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  \u003cspan style=\"color:#ff79c6\"\u003estruct\u003c/span\u003e \u003cspan style=\"color:#50fa7b\"\u003einput_iterator_tag\u003c/span\u003e {};  \u003cspan style=\"color:#6272a4\"\u003e// 输入迭代器\n\u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#6272a4\"\u003e\u003c/span\u003e  \u003cspan style=\"color:#ff79c6\"\u003estruct\u003c/span\u003e \u003cspan style=\"color:#50fa7b\"\u003eoutput_iterator_tag\u003c/span\u003e {}; \u003cspan style=\"color:#6272a4\"\u003e// 输出迭代器\n\u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#6272a4\"\u003e\u003c/span\u003e  \u003cspan style=\"color:#ff79c6\"\u003estruct\u003c/span\u003e \u003cspan style=\"color:#50fa7b\"\u003eforward_iterator_tag\u003c/span\u003e \u003cspan style=\"color:#ff79c6\"\u003e:\u003c/span\u003e \u003cspan style=\"color:#ff79c6\"\u003epublic\u003c/span\u003e input_iterator_tag {};  \u003cspan style=\"color:#6272a4\"\u003e// 向前迭代器\n\u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#6272a4\"\u003e\u003c/span\u003e  \u003cspan style=\"color:#ff79c6\"\u003estruct\u003c/span\u003e \u003cspan style=\"color:#50fa7b\"\u003ebidirectional_iterator_tag\u003c/span\u003e \u003cspan style=\"color:#ff79c6\"\u003e:\u003c/span\u003e \u003cspan style=\"color:#ff79c6\"\u003epublic\u003c/span\u003e forward_iterator_tag {}; \u003cspan style=\"color:#6272a4\"\u003e// 双向迭代器\n\u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#6272a4\"\u003e\u003c/span\u003e  \u003cspan style=\"color:#ff79c6\"\u003estruct\u003c/span\u003e \u003cspan style=\"color:#50fa7b\"\u003erandom_access_iterator_tag\u003c/span\u003e \u003cspan style=\"color:#ff79c6\"\u003e:\u003c/span\u003e \u003cspan style=\"color:#ff79c6\"\u003epublic\u003c/span\u003e bidirectional_iterator_tag {}; \u003cspan style=\"color:#6272a4\"\u003e// 随机访问迭代器\n\u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003e输入迭代器指向的位置只能被顺序读取：\u003c/p\u003e",
+      "description": "\u003ch2 id=\"c-迭代器的种类\"\u003ec++ 迭代器的种类\u003c/h2\u003e\n\u003cp\u003e在STL中，迭代器的种类可以分为输入迭代器、输出迭代器、前向迭代器、双向迭代器、随机访问迭代器：\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-cpp\" data-lang=\"cpp\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  \u003cspan style=\"color:#fe8019\"\u003estruct\u003c/span\u003e input_iterator_tag {};  \u003cspan style=\"color:#928374;font-style:italic\"\u003e// 输入迭代器\n\u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#928374;font-style:italic\"\u003e\u003c/span\u003e  \u003cspan style=\"color:#fe8019\"\u003estruct\u003c/span\u003e output_iterator_tag {}; \u003cspan style=\"color:#928374;font-style:italic\"\u003e// 输出迭代器\n\u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#928374;font-style:italic\"\u003e\u003c/span\u003e  \u003cspan style=\"color:#fe8019\"\u003estruct\u003c/span\u003e forward_iterator_tag \u003cspan style=\"color:#fe8019\"\u003e:\u003c/span\u003e \u003cspan style=\"color:#fe8019\"\u003epublic\u003c/span\u003e input_iterator_tag {};  \u003cspan style=\"color:#928374;font-style:italic\"\u003e// 向前迭代器\n\u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#928374;font-style:italic\"\u003e\u003c/span\u003e  \u003cspan style=\"color:#fe8019\"\u003estruct\u003c/span\u003e bidirectional_iterator_tag \u003cspan style=\"color:#fe8019\"\u003e:\u003c/span\u003e \u003cspan style=\"color:#fe8019\"\u003epublic\u003c/span\u003e forward_iterator_tag {}; \u003cspan style=\"color:#928374;font-style:italic\"\u003e// 双向迭代器\n\u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#928374;font-style:italic\"\u003e\u003c/span\u003e  \u003cspan style=\"color:#fe8019\"\u003estruct\u003c/span\u003e random_access_iterator_tag \u003cspan style=\"color:#fe8019\"\u003e:\u003c/span\u003e \u003cspan style=\"color:#fe8019\"\u003epublic\u003c/span\u003e bidirectional_iterator_tag {}; \u003cspan style=\"color:#928374;font-style:italic\"\u003e// 随机访问迭代器\n\u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003e输入迭代器指向的位置只能被顺序读取：\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -237,50 +237,50 @@ struct input_iterator_tag {}; // 输入迭代器 struct output_iterator_tag {}; 
   <div>
     <h2 id="c-迭代器的种类">c++ 迭代器的种类</h2>
 <p>在STL中，迭代器的种类可以分为输入迭代器、输出迭代器、前向迭代器、双向迭代器、随机访问迭代器：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">input_iterator_tag</span> {};  <span style="color:#6272a4">// 输入迭代器
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">output_iterator_tag</span> {}; <span style="color:#6272a4">// 输出迭代器
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">forward_iterator_tag</span> <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">public</span> input_iterator_tag {};  <span style="color:#6272a4">// 向前迭代器
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">bidirectional_iterator_tag</span> <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">public</span> forward_iterator_tag {}; <span style="color:#6272a4">// 双向迭代器
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">random_access_iterator_tag</span> <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">public</span> bidirectional_iterator_tag {}; <span style="color:#6272a4">// 随机访问迭代器
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> input_iterator_tag {};  <span style="color:#928374;font-style:italic">// 输入迭代器
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> output_iterator_tag {}; <span style="color:#928374;font-style:italic">// 输出迭代器
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> forward_iterator_tag <span style="color:#fe8019">:</span> <span style="color:#fe8019">public</span> input_iterator_tag {};  <span style="color:#928374;font-style:italic">// 向前迭代器
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> bidirectional_iterator_tag <span style="color:#fe8019">:</span> <span style="color:#fe8019">public</span> forward_iterator_tag {}; <span style="color:#928374;font-style:italic">// 双向迭代器
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> random_access_iterator_tag <span style="color:#fe8019">:</span> <span style="color:#fe8019">public</span> bidirectional_iterator_tag {}; <span style="color:#928374;font-style:italic">// 随机访问迭代器
 </span></span></span></code></pre></div><p>输入迭代器指向的位置只能被顺序读取：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Tp</span>, <span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Distance</span><span style="color:#ff79c6">&gt;</span> <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">input_iterator</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> input_iterator_tag iterator_category;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp                value_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Distance          difference_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp<span style="color:#ff79c6">*</span>               pointer;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp<span style="color:#ff79c6">&amp;</span>               reference;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">class</span> _Tp, <span style="color:#fe8019">class</span> _Distance<span style="color:#fe8019">&gt;</span> <span style="color:#fe8019">struct</span> input_iterator {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> input_iterator_tag iterator_category;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp                value_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Distance          difference_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp<span style="color:#fe8019">*</span>               pointer;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp<span style="color:#fe8019">&amp;</span>               reference;
 </span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><p>输出迭代器指向的位置只能被顺序写入：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">output_iterator</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> output_iterator_tag iterator_category;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#8be9fd">void</span>                value_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#8be9fd">void</span>                difference_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#8be9fd">void</span>                pointer;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#8be9fd">void</span>                reference;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">struct</span> output_iterator {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> output_iterator_tag iterator_category;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fabd2f">void</span>                value_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fabd2f">void</span>                difference_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fabd2f">void</span>                pointer;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fabd2f">void</span>                reference;
 </span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><p>向前迭代器只能自增不能自减，是一种特殊输入迭代器：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Tp</span>, <span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Distance</span><span style="color:#ff79c6">&gt;</span> <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">forward_iterator</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> forward_iterator_tag iterator_category;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp                  value_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Distance            difference_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp<span style="color:#ff79c6">*</span>                 pointer;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp<span style="color:#ff79c6">&amp;</span>                 reference;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">class</span> _Tp, <span style="color:#fe8019">class</span> _Distance<span style="color:#fe8019">&gt;</span> <span style="color:#fe8019">struct</span> forward_iterator {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> forward_iterator_tag iterator_category;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp                  value_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Distance            difference_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp<span style="color:#fe8019">*</span>                 pointer;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp<span style="color:#fe8019">&amp;</span>                 reference;
 </span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><p>双向迭代器既能自增，又能自减，是一种特殊的能够自减的向前迭代器：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Tp</span>, <span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Distance</span><span style="color:#ff79c6">&gt;</span> <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">bidirectional_iterator</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> bidirectional_iterator_tag iterator_category;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp                        value_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Distance                  difference_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp<span style="color:#ff79c6">*</span>                       pointer;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp<span style="color:#ff79c6">&amp;</span>                       reference;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">class</span> _Tp, <span style="color:#fe8019">class</span> _Distance<span style="color:#fe8019">&gt;</span> <span style="color:#fe8019">struct</span> bidirectional_iterator {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> bidirectional_iterator_tag iterator_category;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp                        value_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Distance                  difference_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp<span style="color:#fe8019">*</span>                       pointer;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp<span style="color:#fe8019">&amp;</span>                       reference;
 </span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><p>随机访问迭代器既能自增，又能自减，是一种特殊的双向迭代器，即它不像双向迭代器那样自增或者自减一个单位，随机访问迭代器可以自增或者自减n个单位：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Tp</span>, <span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Distance</span><span style="color:#ff79c6">&gt;</span> <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">random_access_iterator</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> random_access_iterator_tag iterator_category;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp                        value_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Distance                  difference_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp<span style="color:#ff79c6">*</span>                       pointer;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp<span style="color:#ff79c6">&amp;</span>                       reference;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">class</span> _Tp, <span style="color:#fe8019">class</span> _Distance<span style="color:#fe8019">&gt;</span> <span style="color:#fe8019">struct</span> random_access_iterator {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> random_access_iterator_tag iterator_category;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp                        value_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Distance                  difference_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp<span style="color:#fe8019">*</span>                       pointer;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp<span style="color:#fe8019">&amp;</span>                       reference;
 </span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><p>这些迭代器定义中的：</p>
 <ul>
@@ -292,94 +292,94 @@ struct input_iterator_tag {}; // 输入迭代器 struct output_iterator_tag {}; 
 </ul>
 <h2 id="萃取">萃取</h2>
 <p>迭代器信息的萃取：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Iterator</span><span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">iterator_traits</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#ff79c6">typename</span> _Iterator<span style="color:#ff79c6">::</span>iterator_category iterator_category;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#ff79c6">typename</span> _Iterator<span style="color:#ff79c6">::</span>value_type        value_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#ff79c6">typename</span> _Iterator<span style="color:#ff79c6">::</span>difference_type   difference_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#ff79c6">typename</span> _Iterator<span style="color:#ff79c6">::</span>pointer           pointer;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#ff79c6">typename</span> _Iterator<span style="color:#ff79c6">::</span>reference         reference;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">class</span> _Iterator<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> iterator_traits {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fe8019">typename</span> _Iterator<span style="color:#fe8019">::</span>iterator_category iterator_category;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fe8019">typename</span> _Iterator<span style="color:#fe8019">::</span>value_type        value_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fe8019">typename</span> _Iterator<span style="color:#fe8019">::</span>difference_type   difference_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fe8019">typename</span> _Iterator<span style="color:#fe8019">::</span>pointer           pointer;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fe8019">typename</span> _Iterator<span style="color:#fe8019">::</span>reference         reference;
 </span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><p>针对对指针的特例化，因为原始的指针内部是没有定义相关的数据类型：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Tp</span><span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">iterator_traits</span><span style="color:#ff79c6">&lt;</span>_Tp<span style="color:#ff79c6">*&gt;</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> random_access_iterator_tag iterator_category;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp                         value_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> ptrdiff_t                   difference_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp<span style="color:#ff79c6">*</span>                        pointer;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp<span style="color:#ff79c6">&amp;</span>                        reference;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">class</span> _Tp<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> iterator_traits<span style="color:#fe8019">&lt;</span>_Tp<span style="color:#fe8019">*&gt;</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> random_access_iterator_tag iterator_category;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp                         value_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> ptrdiff_t                   difference_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp<span style="color:#fe8019">*</span>                        pointer;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp<span style="color:#fe8019">&amp;</span>                        reference;
 </span></span><span style="display:flex;"><span>};
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Tp</span><span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">iterator_traits</span><span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">const</span> _Tp<span style="color:#ff79c6">*&gt;</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> random_access_iterator_tag iterator_category;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Tp                         value_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> ptrdiff_t                   difference_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#ff79c6">const</span> _Tp<span style="color:#ff79c6">*</span>                  pointer;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#ff79c6">const</span> _Tp<span style="color:#ff79c6">&amp;</span>                  reference;
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">class</span> _Tp<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> iterator_traits<span style="color:#fe8019">&lt;</span><span style="color:#fe8019">const</span> _Tp<span style="color:#fe8019">*&gt;</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> random_access_iterator_tag iterator_category;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Tp                         value_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> ptrdiff_t                   difference_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fe8019">const</span> _Tp<span style="color:#fe8019">*</span>                  pointer;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fe8019">const</span> _Tp<span style="color:#fe8019">&amp;</span>                  reference;
 </span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><p><code>iterator_category</code> 函数所返回的是迭代器中<code>iterator_category</code>类型的实例：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Iter</span><span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">inline</span> <span style="color:#ff79c6">typename</span> iterator_traits<span style="color:#ff79c6">&lt;</span>_Iter<span style="color:#ff79c6">&gt;::</span>iterator_category
-</span></span><span style="display:flex;"><span>__iterator_category(<span style="color:#ff79c6">const</span> _Iter<span style="color:#ff79c6">&amp;</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">class</span> _Iter<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">inline</span> <span style="color:#fe8019">typename</span> iterator_traits<span style="color:#fe8019">&lt;</span>_Iter<span style="color:#fe8019">&gt;::</span>iterator_category
+</span></span><span style="display:flex;"><span>__iterator_category(<span style="color:#fe8019">const</span> _Iter<span style="color:#fe8019">&amp;</span>)
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#ff79c6">typename</span> iterator_traits<span style="color:#ff79c6">&lt;</span>_Iter<span style="color:#ff79c6">&gt;::</span>iterator_category _Category;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#50fa7b">_Category</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fe8019">typename</span> iterator_traits<span style="color:#fe8019">&lt;</span>_Iter<span style="color:#fe8019">&gt;::</span>iterator_category _Category;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#fabd2f">_Category</span>();
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Iter</span><span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">inline</span> <span style="color:#ff79c6">typename</span> iterator_traits<span style="color:#ff79c6">&lt;</span>_Iter<span style="color:#ff79c6">&gt;::</span>iterator_category
-</span></span><span style="display:flex;"><span>iterator_category(<span style="color:#ff79c6">const</span> _Iter<span style="color:#ff79c6">&amp;</span> __i) { <span style="color:#ff79c6">return</span> <span style="color:#50fa7b">__iterator_category</span>(__i); }
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">class</span> _Iter<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">inline</span> <span style="color:#fe8019">typename</span> iterator_traits<span style="color:#fe8019">&lt;</span>_Iter<span style="color:#fe8019">&gt;::</span>iterator_category
+</span></span><span style="display:flex;"><span>iterator_category(<span style="color:#fe8019">const</span> _Iter<span style="color:#fe8019">&amp;</span> __i) { <span style="color:#fe8019">return</span> <span style="color:#fabd2f">__iterator_category</span>(__i); }
 </span></span></code></pre></div><h2 id="逆向迭代器">逆向迭代器</h2>
 <p>逆向迭代器顾名思义其自增和自减的方向与其封装的迭代器正好是反过来的</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Iterator</span><span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">reverse_iterator</span> 
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">class</span> _Iterator<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">class</span> reverse_iterator 
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">protected</span><span style="color:#ff79c6">:</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">protected</span><span style="color:#fe8019">:</span>
 </span></span><span style="display:flex;"><span>  _Iterator current;
 </span></span><span style="display:flex;"><span>  ...
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">public</span><span style="color:#ff79c6">:</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">public</span><span style="color:#fe8019">:</span>
 </span></span><span style="display:flex;"><span>  reverse_iterator() {}
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">explicit</span> <span style="color:#50fa7b">reverse_iterator</span>(iterator_type __x) <span style="color:#ff79c6">:</span> current(__x) {}
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">explicit</span> <span style="color:#fabd2f">reverse_iterator</span>(iterator_type __x) <span style="color:#fe8019">:</span> current(__x) {}
 </span></span><span style="display:flex;"><span>  ...
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 自增时，封装的迭代器自减
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  _Self<span style="color:#ff79c6">&amp;</span> <span style="color:#ff79c6">operator</span><span style="color:#ff79c6">++</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">--</span>current;
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">*</span><span style="color:#ff79c6">this</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 自增时，封装的迭代器自减
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  _Self<span style="color:#fe8019">&amp;</span> <span style="color:#fe8019">operator</span><span style="color:#fe8019">++</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">--</span>current;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">*</span><span style="color:#fe8019">this</span>;
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>  ...
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 自减时，封装的迭代器自增
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  _Self<span style="color:#ff79c6">&amp;</span> <span style="color:#ff79c6">operator</span><span style="color:#ff79c6">--</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">++</span>current;
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">*</span><span style="color:#ff79c6">this</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 自减时，封装的迭代器自增
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  _Self<span style="color:#fe8019">&amp;</span> <span style="color:#fe8019">operator</span><span style="color:#fe8019">--</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">++</span>current;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">*</span><span style="color:#fe8019">this</span>;
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>  ...
 </span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><h2 id="insert-迭代器">insert 迭代器</h2>
 <p><code>insert_iterator</code> 用于向容器指定位置插入元素，容器必须实现<code>insert</code>成员方法：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">_Container</span><span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">insert_iterator</span> {
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">protected</span><span style="color:#ff79c6">:</span>
-</span></span><span style="display:flex;"><span>  _Container<span style="color:#ff79c6">*</span> container;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typename</span> _Container<span style="color:#ff79c6">::</span>iterator iter;
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">public</span><span style="color:#ff79c6">:</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> _Container          container_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> output_iterator_tag iterator_category;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#8be9fd">void</span>                value_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#8be9fd">void</span>                difference_type;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#8be9fd">void</span>                pointer;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">typedef</span> <span style="color:#8be9fd">void</span>                reference;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">class</span> _Container<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">class</span> insert_iterator {
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">protected</span><span style="color:#fe8019">:</span>
+</span></span><span style="display:flex;"><span>  _Container<span style="color:#fe8019">*</span> container;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typename</span> _Container<span style="color:#fe8019">::</span>iterator iter;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">public</span><span style="color:#fe8019">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> _Container          container_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> output_iterator_tag iterator_category;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fabd2f">void</span>                value_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fabd2f">void</span>                difference_type;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fabd2f">void</span>                pointer;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">typedef</span> <span style="color:#fabd2f">void</span>                reference;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  insert_iterator(_Container<span style="color:#ff79c6">&amp;</span> __x, <span style="color:#ff79c6">typename</span> _Container<span style="color:#ff79c6">::</span>iterator __i) 
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">:</span> container(<span style="color:#ff79c6">&amp;</span>__x), iter(__i) {}
-</span></span><span style="display:flex;"><span>  insert_iterator<span style="color:#ff79c6">&lt;</span>_Container<span style="color:#ff79c6">&gt;&amp;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">operator</span><span style="color:#ff79c6">=</span>(<span style="color:#ff79c6">const</span> <span style="color:#ff79c6">typename</span> _Container<span style="color:#ff79c6">::</span>value_type<span style="color:#ff79c6">&amp;</span> __value) { 
-</span></span><span style="display:flex;"><span>    iter <span style="color:#ff79c6">=</span> container<span style="color:#ff79c6">-&gt;</span>insert(iter, __value);
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">++</span>iter;
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">*</span><span style="color:#ff79c6">this</span>;
+</span></span><span style="display:flex;"><span>  insert_iterator(_Container<span style="color:#fe8019">&amp;</span> __x, <span style="color:#fe8019">typename</span> _Container<span style="color:#fe8019">::</span>iterator __i) 
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">:</span> container(<span style="color:#fe8019">&amp;</span>__x), iter(__i) {}
+</span></span><span style="display:flex;"><span>  insert_iterator<span style="color:#fe8019">&lt;</span>_Container<span style="color:#fe8019">&gt;&amp;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">operator</span><span style="color:#fe8019">=</span>(<span style="color:#fe8019">const</span> <span style="color:#fe8019">typename</span> _Container<span style="color:#fe8019">::</span>value_type<span style="color:#fe8019">&amp;</span> __value) { 
+</span></span><span style="display:flex;"><span>    iter <span style="color:#fe8019">=</span> container<span style="color:#fe8019">-&gt;</span>insert(iter, __value);
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">++</span>iter;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">*</span><span style="color:#fe8019">this</span>;
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  insert_iterator<span style="color:#ff79c6">&lt;</span>_Container<span style="color:#ff79c6">&gt;&amp;</span> <span style="color:#ff79c6">operator</span><span style="color:#ff79c6">*</span>() { <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">*</span><span style="color:#ff79c6">this</span>; }
-</span></span><span style="display:flex;"><span>  insert_iterator<span style="color:#ff79c6">&lt;</span>_Container<span style="color:#ff79c6">&gt;&amp;</span> <span style="color:#ff79c6">operator</span><span style="color:#ff79c6">++</span>() { <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">*</span><span style="color:#ff79c6">this</span>; }
-</span></span><span style="display:flex;"><span>  insert_iterator<span style="color:#ff79c6">&lt;</span>_Container<span style="color:#ff79c6">&gt;&amp;</span> <span style="color:#ff79c6">operator</span><span style="color:#ff79c6">++</span>(<span style="color:#8be9fd">int</span>) { <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">*</span><span style="color:#ff79c6">this</span>; }
+</span></span><span style="display:flex;"><span>  insert_iterator<span style="color:#fe8019">&lt;</span>_Container<span style="color:#fe8019">&gt;&amp;</span> <span style="color:#fe8019">operator</span><span style="color:#fe8019">*</span>() { <span style="color:#fe8019">return</span> <span style="color:#fe8019">*</span><span style="color:#fe8019">this</span>; }
+</span></span><span style="display:flex;"><span>  insert_iterator<span style="color:#fe8019">&lt;</span>_Container<span style="color:#fe8019">&gt;&amp;</span> <span style="color:#fe8019">operator</span><span style="color:#fe8019">++</span>() { <span style="color:#fe8019">return</span> <span style="color:#fe8019">*</span><span style="color:#fe8019">this</span>; }
+</span></span><span style="display:flex;"><span>  insert_iterator<span style="color:#fe8019">&lt;</span>_Container<span style="color:#fe8019">&gt;&amp;</span> <span style="color:#fe8019">operator</span><span style="color:#fe8019">++</span>(<span style="color:#fabd2f">int</span>) { <span style="color:#fe8019">return</span> <span style="color:#fe8019">*</span><span style="color:#fe8019">this</span>; }
 </span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><p>执行<code>operator=</code>操作时，会操作在构造<code>insert_iterator</code> 传入的参数：容器以及容器的迭代器：</p>
 <ul>

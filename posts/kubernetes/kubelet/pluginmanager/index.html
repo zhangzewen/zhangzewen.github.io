@@ -267,11 +267,11 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
 <p>kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 的能力: CSI 和 Device。得益于 gRPC 和 Linux 的 inotify 实现了插件的动态管理。本片文章将详细讲解 kubelet 管理插件的逻辑，至于 CSI 和 Device 这两种类型的插件的详细内容，不在本片文章讨论范围之内，本片文章会在需要的地方提及一下，不会对理解本片文章造成困难。</p>
 <h2 id="插件的注册和注销">插件的注册和注销</h2>
 <p>插件的注册和注销是通过 gRPC 来实现的。插件信息的注册和注销依赖的是 gRPC, <a href="https://github.com/kubernetes/kubelet/blob/cf754f01dd7fb75278120a3f9e65b720bd166ae5/pkg/apis/pluginregistration/v1/api.proto#L8">PluginInfo 描述了插件的基本的信息</a>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-protobuf" data-lang="protobuf"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">message</span> <span style="color:#50fa7b">PluginInfo</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd">string</span> type <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>;
-</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd">string</span> name <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">2</span>;
-</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd">string</span> endpoint <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">3</span>;
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">repeated</span> <span style="color:#8be9fd">string</span> supported_versions <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">4</span>;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-protobuf" data-lang="protobuf"><span style="display:flex;"><span><span style="color:#fe8019">message</span> PluginInfo {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">string</span> type <span style="color:#fe8019">=</span> <span style="color:#d3869b">1</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">string</span> name <span style="color:#fe8019">=</span> <span style="color:#d3869b">2</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">string</span> endpoint <span style="color:#fe8019">=</span> <span style="color:#d3869b">3</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">repeated</span> <span style="color:#fabd2f">string</span> supported_versions <span style="color:#fe8019">=</span> <span style="color:#d3869b">4</span>;
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>其中：</p>
 <ul>
@@ -280,11 +280,11 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
 <li>endpoint：unix socket 文件的文件路径。</li>
 </ul>
 <p>当插件把插件信息告知 kubelet 之后，由 kubelet 的 csi 和 device 模块来进行注册，这里定义了一个接口 PluginHandler：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/kubelet/pluginmanager/cache/types.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> PluginHandler <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">ValidatePlugin</span>(pluginName <span style="color:#8be9fd">string</span>, endpoint <span style="color:#8be9fd">string</span>, versions []<span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">RegisterPlugin</span>(pluginName, endpoint <span style="color:#8be9fd">string</span>, versions []<span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">DeRegisterPlugin</span>(pluginName <span style="color:#8be9fd">string</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/pluginmanager/cache/types.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> PluginHandler <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">ValidatePlugin</span>(pluginName <span style="color:#fabd2f">string</span>, endpoint <span style="color:#fabd2f">string</span>, versions []<span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">RegisterPlugin</span>(pluginName, endpoint <span style="color:#fabd2f">string</span>, versions []<span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">DeRegisterPlugin</span>(pluginName <span style="color:#fabd2f">string</span>)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>这是 kubelet 的 csi 和 device 模块需要实现的接口，可以根据该接口的方法签名得知：</p>
 <ul>
@@ -294,20 +294,20 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
 <li>当插件的 unix 套接字删除的时候调用 DeRegisterPlugin 进行插件的注销。</li>
 </ul>
 <p>PluginHandler 的CSI Plugin 实现在：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>k8s.io/kubernetes/pkg/volume/csi/csi_plugin.go#RegistrationHandler
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>k8s.io/kubernetes/pkg/volume/csi/csi_plugin.go#RegistrationHandler
 </span></span></code></pre></div><p>Device Plugin的实现在：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>k8s.io/kubernetes/pkg/kubelet/cm/devicemanager/plugin/v1beta1/server.go#server
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>k8s.io/kubernetes/pkg/kubelet/cm/devicemanager/plugin/v1beta1/server.go#server
 </span></span></code></pre></div><p>详细的实现细节不在本篇文章讨论范围之内，这里可以先忽略，不影响后续阅读。</p>
 <p>插件的注册和注销逻辑生成器的代码实现在<code>k8s.io/kubernetes/pkg/kubelet/pluginmanager/operationexecutor</code>目录下，插件的注册流程和注销流程是<strong>程序生成</strong>出来的， 接口 OperationGenerator 描述了生成流程的函数签名规则：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> OperationGenerator <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">GenerateRegisterPluginFunc</span>(
-</span></span><span style="display:flex;"><span>        socketPath <span style="color:#8be9fd">string</span>,
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> OperationGenerator <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">GenerateRegisterPluginFunc</span>(
+</span></span><span style="display:flex;"><span>        socketPath <span style="color:#fabd2f">string</span>,
 </span></span><span style="display:flex;"><span>        timestamp time.Time,
-</span></span><span style="display:flex;"><span>        pluginHandlers <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]cache.PluginHandler,
-</span></span><span style="display:flex;"><span>        actualStateOfWorldUpdater ActualStateOfWorldUpdater) <span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">GenerateUnregisterPluginFunc</span>(
+</span></span><span style="display:flex;"><span>        pluginHandlers <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]cache.PluginHandler,
+</span></span><span style="display:flex;"><span>        actualStateOfWorldUpdater ActualStateOfWorldUpdater) <span style="color:#fe8019">func</span>() <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">GenerateUnregisterPluginFunc</span>(
 </span></span><span style="display:flex;"><span>        pluginInfo cache.PluginInfo,
-</span></span><span style="display:flex;"><span>        actualStateOfWorldUpdater ActualStateOfWorldUpdater) <span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>        actualStateOfWorldUpdater ActualStateOfWorldUpdater) <span style="color:#fe8019">func</span>() <span style="color:#fabd2f">error</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>结构体 operationGenerator 实现了该接口，下面来看看具体的实现。</p>
 <h3 id="插件的注册流程">插件的注册流程</h3>
@@ -322,74 +322,74 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
 </ul>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (og <span style="color:#ff79c6">*</span>operationGenerator) <span style="color:#50fa7b">GenerateRegisterPluginFunc</span>(
-</span></span><span style="display:flex;"><span>    socketPath <span style="color:#8be9fd">string</span>,
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (og <span style="color:#fe8019">*</span>operationGenerator) <span style="color:#fabd2f">GenerateRegisterPluginFunc</span>(
+</span></span><span style="display:flex;"><span>    socketPath <span style="color:#fabd2f">string</span>,
 </span></span><span style="display:flex;"><span>    timestamp time.Time,
-</span></span><span style="display:flex;"><span>    pluginHandlers <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]cache.PluginHandler,
-</span></span><span style="display:flex;"><span>    actualStateOfWorldUpdater ActualStateOfWorldUpdater) <span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>    pluginHandlers <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]cache.PluginHandler,
+</span></span><span style="display:flex;"><span>    actualStateOfWorldUpdater ActualStateOfWorldUpdater) <span style="color:#fe8019">func</span>() <span style="color:#fabd2f">error</span> {
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    registerPluginFunc <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 根据socket文件来创建链接</span>
-</span></span><span style="display:flex;"><span>        client, conn, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">dial</span>(socketPath, dialTimeoutDuration)
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// gRPC call</span>
-</span></span><span style="display:flex;"><span>        infoResp, err <span style="color:#ff79c6">:=</span> client.<span style="color:#50fa7b">GetInfo</span>(ctx, <span style="color:#ff79c6">&amp;</span>registerapi.InfoRequest{})
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">//根据plugin的type获取相应的PluginHandler</span>
-</span></span><span style="display:flex;"><span>        handler, ok <span style="color:#ff79c6">:=</span> pluginHandlers[infoResp.Type]
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// 设置endpoint， 即unix socket文件路径</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> infoResp.Endpoint <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>    registerPluginFunc <span style="color:#fe8019">:=</span> <span style="color:#fe8019">func</span>() <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 根据socket文件来创建链接</span>
+</span></span><span style="display:flex;"><span>        client, conn, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">dial</span>(socketPath, dialTimeoutDuration)
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// gRPC call</span>
+</span></span><span style="display:flex;"><span>        infoResp, err <span style="color:#fe8019">:=</span> client.<span style="color:#fabd2f">GetInfo</span>(ctx, <span style="color:#fe8019">&amp;</span>registerapi.InfoRequest{})
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#8ec07c">//根据plugin的type获取相应的PluginHandler</span>
+</span></span><span style="display:flex;"><span>        handler, ok <span style="color:#fe8019">:=</span> pluginHandlers[infoResp.Type]
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// 设置endpoint， 即unix socket文件路径</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> infoResp.Endpoint <span style="color:#fe8019">==</span> <span style="color:#b8bb26">&#34;&#34;</span> {
 </span></span><span style="display:flex;"><span>            infoResp.Endpoint = socketPath
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 调用ValidatePlugin</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> handler.<span style="color:#50fa7b">ValidatePlugin</span>(infoResp.Name, infoResp.Endpoint, infoResp.SupportedVersions); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> err = og.<span style="color:#50fa7b">notifyPlugin</span>(client, <span style="color:#ff79c6">false</span>, fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;RegisterPlugin error -- plugin validation failed with err: %v&#34;</span>, err)); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;RegisterPlugin error -- failed to send error at socket %s, err: %v&#34;</span>, socketPath, err)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 调用ValidatePlugin</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> handler.<span style="color:#fabd2f">ValidatePlugin</span>(infoResp.Name, infoResp.Endpoint, infoResp.SupportedVersions); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> err = og.<span style="color:#fabd2f">notifyPlugin</span>(client, <span style="color:#fe8019">false</span>, fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;RegisterPlugin error -- plugin validation failed with err: %v&#34;</span>, err)); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;RegisterPlugin error -- failed to send error at socket %s, err: %v&#34;</span>, socketPath, err)
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;RegisterPlugin error -- pluginHandler.ValidatePluginFunc failed&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;RegisterPlugin error -- pluginHandler.ValidatePluginFunc failed&#34;</span>)
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// 更新ASW</span>
-</span></span><span style="display:flex;"><span>        err = actualStateOfWorldUpdater.<span style="color:#50fa7b">AddPlugin</span>(cache.PluginInfo{
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// 更新ASW</span>
+</span></span><span style="display:flex;"><span>        err = actualStateOfWorldUpdater.<span style="color:#fabd2f">AddPlugin</span>(cache.PluginInfo{
 </span></span><span style="display:flex;"><span>            SocketPath: socketPath,
 </span></span><span style="display:flex;"><span>            Timestamp:  timestamp,
 </span></span><span style="display:flex;"><span>            Handler:    handler,
 </span></span><span style="display:flex;"><span>            Name:       infoResp.Name,
 </span></span><span style="display:flex;"><span>        })
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 调用RegisterPlugin注册插件</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> handler.<span style="color:#50fa7b">RegisterPlugin</span>(infoResp.Name, infoResp.Endpoint, infoResp.SupportedVersions); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> og.<span style="color:#50fa7b">notifyPlugin</span>(client, <span style="color:#ff79c6">false</span>, fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;RegisterPlugin error -- plugin registration failed with err: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 调用RegisterPlugin注册插件</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> handler.<span style="color:#fabd2f">RegisterPlugin</span>(infoResp.Name, infoResp.Endpoint, infoResp.SupportedVersions); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> og.<span style="color:#fabd2f">notifyPlugin</span>(client, <span style="color:#fe8019">false</span>, fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;RegisterPlugin error -- plugin registration failed with err: %v&#34;</span>, err))
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// Notify is called after register to guarantee that even if notify throws an error Register will always be called after validate</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 调用 gRPC，通知插件注册成功</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> og.<span style="color:#50fa7b">notifyPlugin</span>(client, <span style="color:#ff79c6">true</span>, <span style="color:#f1fa8c">&#34;&#34;</span>); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;RegisterPlugin error -- failed to send registration status at socket %s, err: %v&#34;</span>, socketPath, err)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// Notify is called after register to guarantee that even if notify throws an error Register will always be called after validate</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 调用 gRPC，通知插件注册成功</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> og.<span style="color:#fabd2f">notifyPlugin</span>(client, <span style="color:#fe8019">true</span>, <span style="color:#b8bb26">&#34;&#34;</span>); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;RegisterPlugin error -- failed to send registration status at socket %s, err: %v&#34;</span>, socketPath, err)
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> registerPluginFunc
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> registerPluginFunc
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (og <span style="color:#ff79c6">*</span>operationGenerator) <span style="color:#50fa7b">notifyPlugin</span>(client registerapi.RegistrationClient, registered <span style="color:#8be9fd">bool</span>, errStr <span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>    ctx, cancel <span style="color:#ff79c6">:=</span> context.<span style="color:#50fa7b">WithTimeout</span>(context.<span style="color:#50fa7b">Background</span>(), notifyTimeoutDuration)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> <span style="color:#50fa7b">cancel</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 生成gRPC response</span>
-</span></span><span style="display:flex;"><span>    status <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>registerapi.RegistrationStatus{
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (og <span style="color:#fe8019">*</span>operationGenerator) <span style="color:#fabd2f">notifyPlugin</span>(client registerapi.RegistrationClient, registered <span style="color:#fabd2f">bool</span>, errStr <span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>    ctx, cancel <span style="color:#fe8019">:=</span> context.<span style="color:#fabd2f">WithTimeout</span>(context.<span style="color:#fabd2f">Background</span>(), notifyTimeoutDuration)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">defer</span> <span style="color:#fabd2f">cancel</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 生成gRPC response</span>
+</span></span><span style="display:flex;"><span>    status <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>registerapi.RegistrationStatus{
 </span></span><span style="display:flex;"><span>        PluginRegistered: registered,
 </span></span><span style="display:flex;"><span>        Error:            errStr,
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 通知plugin，插件在kublet端注册成功</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> _, err <span style="color:#ff79c6">:=</span> client.<span style="color:#50fa7b">NotifyRegistrationStatus</span>(ctx, status); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> errors.<span style="color:#50fa7b">Wrap</span>(err, errStr)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 通知plugin，插件在kublet端注册成功</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> _, err <span style="color:#fe8019">:=</span> client.<span style="color:#fabd2f">NotifyRegistrationStatus</span>(ctx, status); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> errors.<span style="color:#fabd2f">Wrap</span>(err, errStr)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> errStr <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> errors.<span style="color:#50fa7b">New</span>(errStr)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> errStr <span style="color:#fe8019">!=</span> <span style="color:#b8bb26">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> errors.<span style="color:#fabd2f">New</span>(errStr)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
@@ -400,28 +400,28 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
 <li>更新 ASW cache。</li>
 <li>调用 <code>PluginHandler.DeRegisterPlugin</code> 来注销插件需要注意的是这里会修改<strong>全局的</strong>的 <strong>CSI Plugin Manager</strong>和 <strong>Device Plugin Manager</strong>。</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (og <span style="color:#ff79c6">*</span>operationGenerator) <span style="color:#50fa7b">GenerateUnregisterPluginFunc</span>(
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (og <span style="color:#fe8019">*</span>operationGenerator) <span style="color:#fabd2f">GenerateUnregisterPluginFunc</span>(
 </span></span><span style="display:flex;"><span>    pluginInfo cache.PluginInfo,
-</span></span><span style="display:flex;"><span>    actualStateOfWorldUpdater ActualStateOfWorldUpdater) <span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
+</span></span><span style="display:flex;"><span>    actualStateOfWorldUpdater ActualStateOfWorldUpdater) <span style="color:#fe8019">func</span>() <span style="color:#fabd2f">error</span> {
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    unregisterPluginFunc <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> pluginInfo.Handler <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;UnregisterPlugin error -- failed to get plugin handler for %s&#34;</span>, pluginInfo.SocketPath)
+</span></span><span style="display:flex;"><span>    unregisterPluginFunc <span style="color:#fe8019">:=</span> <span style="color:#fe8019">func</span>() <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> pluginInfo.Handler <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;UnregisterPlugin error -- failed to get plugin handler for %s&#34;</span>, pluginInfo.SocketPath)
 </span></span><span style="display:flex;"><span>        }   
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// We remove the plugin to the actual state of world cache before calling a plugin consumer&#39;s Unregister handle</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// so that if we receive a register event during Register Plugin, we can process it as a Register call.</span>
-</span></span><span style="display:flex;"><span>        actualStateOfWorldUpdater.<span style="color:#50fa7b">RemovePlugin</span>(pluginInfo.SocketPath)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// We remove the plugin to the actual state of world cache before calling a plugin consumer&#39;s Unregister handle</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// so that if we receive a register event during Register Plugin, we can process it as a Register call.</span>
+</span></span><span style="display:flex;"><span>        actualStateOfWorldUpdater.<span style="color:#fabd2f">RemovePlugin</span>(pluginInfo.SocketPath)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        pluginInfo.Handler.<span style="color:#50fa7b">DeRegisterPlugin</span>(pluginInfo.Name)
+</span></span><span style="display:flex;"><span>        pluginInfo.Handler.<span style="color:#fabd2f">DeRegisterPlugin</span>(pluginInfo.Name)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;DeRegisterPlugin called&#34;</span>, <span style="color:#f1fa8c">&#34;pluginName&#34;</span>, pluginInfo.Name, <span style="color:#f1fa8c">&#34;pluginHandler&#34;</span>, pluginInfo.Handler)
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span> 
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;DeRegisterPlugin called&#34;</span>, <span style="color:#b8bb26">&#34;pluginName&#34;</span>, pluginInfo.Name, <span style="color:#b8bb26">&#34;pluginHandler&#34;</span>, pluginInfo.Handler)
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span> 
 </span></span><span style="display:flex;"><span>    }   
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> unregisterPluginFunc
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> unregisterPluginFunc
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="执行器">执行器</h3>
 <p>接口 OperationExecutor 根据注册和注销生成了对应的执行指令，结构体 operationExecutor 实现了该接口：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> operationExecutor <span style="color:#8be9fd;font-style:italic">struct</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> operationExecutor <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>    pendingOperations goroutinemap.GoRoutineMap
 </span></span><span style="display:flex;"><span>    operationGenerator OperationGenerator
 </span></span><span style="display:flex;"><span>}
@@ -430,25 +430,25 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
 <li>operationGenerator：就上述 kubelet 端插件的<a href="#%E6%8F%92%E4%BB%B6%E7%9A%84%E6%B3%A8%E5%86%8C%E6%B5%81%E7%A8%8B">注册流程</a>和<a href="#%E6%8F%92%E4%BB%B6%E7%9A%84%E6%B3%A8%E9%94%80%E6%B5%81%E7%A8%8B">注销流程</a>。</li>
 </ul>
 <p>方法 RegisterPlugin 和 UnregisterPlugin 的实现很简单，就是生成 kubelet 端 plugin 的注册和注销逻辑生成器，然后启动 goroutine 去运行这些逻辑：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (oe <span style="color:#ff79c6">*</span>operationExecutor) <span style="color:#50fa7b">RegisterPlugin</span>(
-</span></span><span style="display:flex;"><span>    socketPath <span style="color:#8be9fd">string</span>,
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (oe <span style="color:#fe8019">*</span>operationExecutor) <span style="color:#fabd2f">RegisterPlugin</span>(
+</span></span><span style="display:flex;"><span>    socketPath <span style="color:#fabd2f">string</span>,
 </span></span><span style="display:flex;"><span>    timestamp time.Time,
-</span></span><span style="display:flex;"><span>    pluginHandlers <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]cache.PluginHandler,
-</span></span><span style="display:flex;"><span>    actualStateOfWorld ActualStateOfWorldUpdater) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>    generatedOperation <span style="color:#ff79c6">:=</span>
-</span></span><span style="display:flex;"><span>        oe.operationGenerator.<span style="color:#50fa7b">GenerateRegisterPluginFunc</span>(socketPath, timestamp, pluginHandlers, actualStateOfWorld)
+</span></span><span style="display:flex;"><span>    pluginHandlers <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]cache.PluginHandler,
+</span></span><span style="display:flex;"><span>    actualStateOfWorld ActualStateOfWorldUpdater) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>    generatedOperation <span style="color:#fe8019">:=</span>
+</span></span><span style="display:flex;"><span>        oe.operationGenerator.<span style="color:#fabd2f">GenerateRegisterPluginFunc</span>(socketPath, timestamp, pluginHandlers, actualStateOfWorld)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> oe.pendingOperations.<span style="color:#50fa7b">Run</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> oe.pendingOperations.<span style="color:#fabd2f">Run</span>(
 </span></span><span style="display:flex;"><span>        socketPath, generatedOperation)
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (oe <span style="color:#ff79c6">*</span>operationExecutor) <span style="color:#50fa7b">UnregisterPlugin</span>(
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (oe <span style="color:#fe8019">*</span>operationExecutor) <span style="color:#fabd2f">UnregisterPlugin</span>(
 </span></span><span style="display:flex;"><span>    pluginInfo cache.PluginInfo,
-</span></span><span style="display:flex;"><span>    actualStateOfWorld ActualStateOfWorldUpdater) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>    generatedOperation <span style="color:#ff79c6">:=</span>
-</span></span><span style="display:flex;"><span>        oe.operationGenerator.<span style="color:#50fa7b">GenerateUnregisterPluginFunc</span>(pluginInfo, actualStateOfWorld)
+</span></span><span style="display:flex;"><span>    actualStateOfWorld ActualStateOfWorldUpdater) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>    generatedOperation <span style="color:#fe8019">:=</span>
+</span></span><span style="display:flex;"><span>        oe.operationGenerator.<span style="color:#fabd2f">GenerateUnregisterPluginFunc</span>(pluginInfo, actualStateOfWorld)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> oe.pendingOperations.<span style="color:#50fa7b">Run</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> oe.pendingOperations.<span style="color:#fabd2f">Run</span>(
 </span></span><span style="display:flex;"><span>        pluginInfo.SocketPath, generatedOperation)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p><img src="/images/kubernetes/kubelet/pluginmanager/kubelet_plugin_manager_04.svg" alt="kubelet_plugin_manager_04"></p>
@@ -456,202 +456,202 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
 <p>插件服务发现用到了第三方的库<code>github.com/fsnotify/fsnotify</code>，在 linux 上使用到了 inotifiy 技术。 在这里是主要是监听 <code>/var/lib/kubelet/plugins_registry</code> 目录下的 unix socket 文件的状态，该目录在 kubelet 启动的时候会创建。插件都会在该目录下创建相应 unix socket 文件。</p>
 <p><img src="/images/kubernetes/kubelet/pluginmanager/kubelet_plugin_manager_01.svg" alt="kubelet_plugin_manager_01"></p>
 <h3 id="数据结构">数据结构</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Watcher <span style="color:#8be9fd;font-style:italic">struct</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 感知插件服务注册的socket的路径</span>
-</span></span><span style="display:flex;"><span>	path                <span style="color:#8be9fd">string</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Watcher <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 感知插件服务注册的socket的路径</span>
+</span></span><span style="display:flex;"><span>	path                <span style="color:#fabd2f">string</span>
 </span></span><span style="display:flex;"><span>	fs                  utilfs.Filesystem
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// inotify监测插件服务socket变化</span>
-</span></span><span style="display:flex;"><span>	fsWatcher           <span style="color:#ff79c6">*</span>fsnotify.Watcher
-</span></span><span style="display:flex;"><span>	stopped             <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 存储期望状态</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// inotify监测插件服务socket变化</span>
+</span></span><span style="display:flex;"><span>	fsWatcher           <span style="color:#fe8019">*</span>fsnotify.Watcher
+</span></span><span style="display:flex;"><span>	stopped             <span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 存储期望状态</span>
 </span></span><span style="display:flex;"><span>	desiredStateOfWorld cache.DesiredStateOfWorld
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="初始化">初始化</h3>
 <p>初始化其实就是创建对应的目录，即 <code>/var/lib/kubelet/plugins_registry</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (w <span style="color:#ff79c6">*</span>Watcher) <span style="color:#50fa7b">init</span>() <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Ensuring Plugin directory&#34;</span>, <span style="color:#f1fa8c">&#34;path&#34;</span>, w.path)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (w <span style="color:#fe8019">*</span>Watcher) <span style="color:#fabd2f">init</span>() <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Ensuring Plugin directory&#34;</span>, <span style="color:#b8bb26">&#34;path&#34;</span>, w.path)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> w.fs.<span style="color:#50fa7b">MkdirAll</span>(w.path, <span style="color:#bd93f9">0755</span>); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;error (re-)creating root %s: %v&#34;</span>, w.path, err)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> w.fs.<span style="color:#fabd2f">MkdirAll</span>(w.path, <span style="color:#d3869b">0755</span>); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;error (re-)creating root %s: %v&#34;</span>, w.path, err)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="插件服务发现核心逻辑">插件服务发现核心逻辑</h3>
 <p>初始化完成后，就是启动 goroutine 来监听 <code>/var/lib/kubelet/plugins_registry</code> 目录下unix socket 文件的变化状态：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// Start watches for the creation and deletion of plugin sockets at the path</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (w <span style="color:#ff79c6">*</span>Watcher) <span style="color:#50fa7b">Start</span>(stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 把该目录以及其下子目录加入到监听中去</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> w.<span style="color:#50fa7b">traversePluginDir</span>(w.path); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to traverse plugin socket path&#34;</span>, <span style="color:#f1fa8c">&#34;path&#34;</span>, w.path)
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Start watches for the creation and deletion of plugin sockets at the path</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (w <span style="color:#fe8019">*</span>Watcher) <span style="color:#fabd2f">Start</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 把该目录以及其下子目录加入到监听中去</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> w.<span style="color:#fabd2f">traversePluginDir</span>(w.path); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Failed to traverse plugin socket path&#34;</span>, <span style="color:#b8bb26">&#34;path&#34;</span>, w.path)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>(fsWatcher <span style="color:#ff79c6">*</span>fsnotify.Watcher) {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">for</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">select</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">case</span> event <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>fsWatcher.Events:
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">//如果发现对应目录的文件的变化，则会触发对应的事件</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">if</span> event.Op<span style="color:#ff79c6">&amp;</span>fsnotify.Create <span style="color:#ff79c6">==</span> fsnotify.Create {
-</span></span><span style="display:flex;"><span>                    <span style="color:#6272a4">// 文件创建事件</span>
-</span></span><span style="display:flex;"><span>                    err <span style="color:#ff79c6">:=</span> w.<span style="color:#50fa7b">handleCreateEvent</span>(event)
-</span></span><span style="display:flex;"><span>                    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>                        klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Error when handling create event&#34;</span>, <span style="color:#f1fa8c">&#34;event&#34;</span>, event)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">go</span> <span style="color:#fe8019">func</span>(fsWatcher <span style="color:#fe8019">*</span>fsnotify.Watcher) {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">for</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">case</span> event <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&lt;-</span>fsWatcher.Events:
+</span></span><span style="display:flex;"><span>                <span style="color:#8ec07c">//如果发现对应目录的文件的变化，则会触发对应的事件</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">if</span> event.Op<span style="color:#fe8019">&amp;</span>fsnotify.Create <span style="color:#fe8019">==</span> fsnotify.Create {
+</span></span><span style="display:flex;"><span>                    <span style="color:#928374;font-style:italic">// 文件创建事件</span>
+</span></span><span style="display:flex;"><span>                    err <span style="color:#fe8019">:=</span> w.<span style="color:#fabd2f">handleCreateEvent</span>(event)
+</span></span><span style="display:flex;"><span>                    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>                        klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Error when handling create event&#34;</span>, <span style="color:#b8bb26">&#34;event&#34;</span>, event)
 </span></span><span style="display:flex;"><span>                    }
-</span></span><span style="display:flex;"><span>                } <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> event.Op<span style="color:#ff79c6">&amp;</span>fsnotify.Remove <span style="color:#ff79c6">==</span> fsnotify.Remove { 
-</span></span><span style="display:flex;"><span>                    <span style="color:#6272a4">// 文件删除事件</span>
-</span></span><span style="display:flex;"><span>                    w.<span style="color:#50fa7b">handleDeleteEvent</span>(event)
+</span></span><span style="display:flex;"><span>                } <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span> event.Op<span style="color:#fe8019">&amp;</span>fsnotify.Remove <span style="color:#fe8019">==</span> fsnotify.Remove { 
+</span></span><span style="display:flex;"><span>                    <span style="color:#928374;font-style:italic">// 文件删除事件</span>
+</span></span><span style="display:flex;"><span>                    w.<span style="color:#fabd2f">handleDeleteEvent</span>(event)
 </span></span><span style="display:flex;"><span>                }
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">continue</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">case</span> err <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>fsWatcher.Errors:
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>                    klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;FsWatcher received error&#34;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">continue</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">case</span> err <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&lt;-</span>fsWatcher.Errors:
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>                    klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;FsWatcher received error&#34;</span>)
 </span></span><span style="display:flex;"><span>                }
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">continue</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">case</span> <span style="color:#ff79c6">&lt;-</span>stopCh:
-</span></span><span style="display:flex;"><span>                w.fsWatcher.<span style="color:#50fa7b">Close</span>()
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">continue</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>stopCh:
+</span></span><span style="display:flex;"><span>                w.fsWatcher.<span style="color:#fabd2f">Close</span>()
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }(fsWatcher)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
 
 <h4 id="create-事件回调">create 事件回调</h4>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (w <span style="color:#ff79c6">*</span>Watcher) <span style="color:#50fa7b">handleCreateEvent</span>(event fsnotify.Event) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 检测事件是不是创建目录</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> !fi.<span style="color:#50fa7b">IsDir</span>() { 
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 创建的不是目录，然后检测是不是 unix socket文件</span>
-</span></span><span style="display:flex;"><span>        isSocket, err <span style="color:#ff79c6">:=</span> util.<span style="color:#50fa7b">IsUnixDomainSocket</span>(util.<span style="color:#50fa7b">NormalizePath</span>(event.Name))
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 当创建的是unix socket文件时，处理注册回调</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> w.<span style="color:#50fa7b">handlePluginRegistration</span>(event.Name)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (w <span style="color:#fe8019">*</span>Watcher) <span style="color:#fabd2f">handleCreateEvent</span>(event fsnotify.Event) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 检测事件是不是创建目录</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> !fi.<span style="color:#fabd2f">IsDir</span>() { 
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 创建的不是目录，然后检测是不是 unix socket文件</span>
+</span></span><span style="display:flex;"><span>        isSocket, err <span style="color:#fe8019">:=</span> util.<span style="color:#fabd2f">IsUnixDomainSocket</span>(util.<span style="color:#fabd2f">NormalizePath</span>(event.Name))
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 当创建的是unix socket文件时，处理注册回调</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> w.<span style="color:#fabd2f">handlePluginRegistration</span>(event.Name)
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 进入到目录，把该目录以及其下的子目录加入到监听中</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> w.<span style="color:#50fa7b">traversePluginDir</span>(event.Name)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 进入到目录，把该目录以及其下的子目录加入到监听中</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> w.<span style="color:#fabd2f">traversePluginDir</span>(event.Name)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>处理注册回调的逻辑很简单，就是操作 desiredStateOfWorld 映射表：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (w <span style="color:#ff79c6">*</span>Watcher) <span style="color:#50fa7b">handlePluginRegistration</span>(socketPath <span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 把需要注册的插件的信息记录到 DSW 中</span>
-</span></span><span style="display:flex;"><span>    err <span style="color:#ff79c6">:=</span> w.desiredStateOfWorld.<span style="color:#50fa7b">AddOrUpdatePlugin</span>(socketPath)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//...</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (w <span style="color:#fe8019">*</span>Watcher) <span style="color:#fabd2f">handlePluginRegistration</span>(socketPath <span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 把需要注册的插件的信息记录到 DSW 中</span>
+</span></span><span style="display:flex;"><span>    err <span style="color:#fe8019">:=</span> w.desiredStateOfWorld.<span style="color:#fabd2f">AddOrUpdatePlugin</span>(socketPath)
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//...</span>
 </span></span></code></pre></div><h4 id="remove-事件回调">remove 事件回调</h4>
 <p>还是操作 desiredStateOfWorld 映射表：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (w <span style="color:#ff79c6">*</span>Watcher) <span style="color:#50fa7b">handleDeleteEvent</span>(event fsnotify.Event) {
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">6</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Handling delete event: %v&#34;</span>, event)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (w <span style="color:#fe8019">*</span>Watcher) <span style="color:#fabd2f">handleDeleteEvent</span>(event fsnotify.Event) {
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">6</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;Handling delete event: %v&#34;</span>, event)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	socketPath <span style="color:#ff79c6">:=</span> event.Name
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Removing socket path %s from desired state cache&#34;</span>, socketPath)
-</span></span><span style="display:flex;"><span>	w.desiredStateOfWorld.<span style="color:#50fa7b">RemovePlugin</span>(socketPath)
+</span></span><span style="display:flex;"><span>	socketPath <span style="color:#fe8019">:=</span> event.Name
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;Removing socket path %s from desired state cache&#34;</span>, socketPath)
+</span></span><span style="display:flex;"><span>	w.desiredStateOfWorld.<span style="color:#fabd2f">RemovePlugin</span>(socketPath)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="期望状态与实际状态">期望状态与实际状态</h2>
 <p>终于，在熟悉了<a href="#插件的注册和注销">插件的注册和注销</a>和<a href="#插件服务发现">插件服务发现</a>之后，期望状态与实际状态就很容易理解了。</p>
 <h3 id="插件信息">插件信息</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// PluginInfo holds information of a plugin</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> PluginInfo <span style="color:#8be9fd;font-style:italic">struct</span> {
-</span></span><span style="display:flex;"><span>    SocketPath <span style="color:#8be9fd">string</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// PluginInfo holds information of a plugin</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> PluginInfo <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>    SocketPath <span style="color:#fabd2f">string</span>
 </span></span><span style="display:flex;"><span>    Timestamp  time.Time
 </span></span><span style="display:flex;"><span>    Handler    PluginHandler
-</span></span><span style="display:flex;"><span>    Name       <span style="color:#8be9fd">string</span>
+</span></span><span style="display:flex;"><span>    Name       <span style="color:#fabd2f">string</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="期望状态和实际状态">期望状态和实际状态</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> actualStateOfWorld <span style="color:#8be9fd;font-style:italic">struct</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> actualStateOfWorld <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// socketFileToInfo is a map containing the set of successfully registered plugins</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// The keys are plugin socket file paths. The values are PluginInfo objects</span>
-</span></span><span style="display:flex;"><span>    socketFileToInfo <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]PluginInfo
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// socketFileToInfo is a map containing the set of successfully registered plugins</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// The keys are plugin socket file paths. The values are PluginInfo objects</span>
+</span></span><span style="display:flex;"><span>    socketFileToInfo <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]PluginInfo
 </span></span><span style="display:flex;"><span>    sync.RWMutex
 </span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> desiredStateOfWorld <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> desiredStateOfWorld <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// socketFileToInfo is a map containing the set of successfully registered plugins</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// The keys are plugin socket file paths. The values are PluginInfo objects</span>
-</span></span><span style="display:flex;"><span>    socketFileToInfo <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]PluginInfo
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// socketFileToInfo is a map containing the set of successfully registered plugins</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// The keys are plugin socket file paths. The values are PluginInfo objects</span>
+</span></span><span style="display:flex;"><span>    socketFileToInfo <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]PluginInfo
 </span></span><span style="display:flex;"><span>    sync.RWMutex
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>actualStateOfWorld 和 desiredStateOfWorld 分别实现了接口 ActualStateOfWorld 和 DesiredStateOfWorld，实现逻辑上很简单，就是对映射表的修改：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> ActualStateOfWorld <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">GetRegisteredPlugins</span>() []PluginInfo
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">AddPlugin</span>(pluginInfo PluginInfo) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">RemovePlugin</span>(socketPath <span style="color:#8be9fd">string</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">PluginExistsWithCorrectTimestamp</span>(pluginInfo PluginInfo) <span style="color:#8be9fd">bool</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> ActualStateOfWorld <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">GetRegisteredPlugins</span>() []PluginInfo
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">AddPlugin</span>(pluginInfo PluginInfo) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">RemovePlugin</span>(socketPath <span style="color:#fabd2f">string</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">PluginExistsWithCorrectTimestamp</span>(pluginInfo PluginInfo) <span style="color:#fabd2f">bool</span>
 </span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> DesiredStateOfWorld <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">AddOrUpdatePlugin</span>(socketPath <span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">RemovePlugin</span>(socketPath <span style="color:#8be9fd">string</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">GetPluginsToRegister</span>() []PluginInfo
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">PluginExists</span>(socketPath <span style="color:#8be9fd">string</span>) <span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> DesiredStateOfWorld <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">AddOrUpdatePlugin</span>(socketPath <span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">RemovePlugin</span>(socketPath <span style="color:#fabd2f">string</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">GetPluginsToRegister</span>() []PluginInfo
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">PluginExists</span>(socketPath <span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">bool</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="期望状态和实际状态协调">期望状态和实际状态协调</h3>
 <p>插件的实际状态都是慢慢的往期望状态上去协调的，协调的逻辑实现在<code>k8s.io/kubernetes/pkg/kubelet/pluginmanager/reconciler</code>下，是专门定期启动 goroutine 来实现，代码实现逻辑简单，可以直接结合<a href="#插件的注册和注销">插件的注册和注销</a>进行理解。</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (rc <span style="color:#ff79c6">*</span>reconciler) <span style="color:#50fa7b">Run</span>(stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}) {
-</span></span><span style="display:flex;"><span>    wait.<span style="color:#50fa7b">Until</span>(<span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>        rc.<span style="color:#50fa7b">reconcile</span>()
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (rc <span style="color:#fe8019">*</span>reconciler) <span style="color:#fabd2f">Run</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}) {
+</span></span><span style="display:flex;"><span>    wait.<span style="color:#fabd2f">Until</span>(<span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>        rc.<span style="color:#fabd2f">reconcile</span>()
 </span></span><span style="display:flex;"><span>    },
 </span></span><span style="display:flex;"><span>        rc.loopSleepDuration,
 </span></span><span style="display:flex;"><span>        stopCh)
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (rc <span style="color:#ff79c6">*</span>reconciler) <span style="color:#50fa7b">reconcile</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Unregisterations are triggered before registrations</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (rc <span style="color:#fe8019">*</span>reconciler) <span style="color:#fabd2f">reconcile</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Unregisterations are triggered before registrations</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Ensure plugins that should be unregistered are unregistered.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 首先从 ASW中获取已经注册过的插件信息</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> _, registeredPlugin <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> rc.actualStateOfWorld.<span style="color:#50fa7b">GetRegisteredPlugins</span>() {
-</span></span><span style="display:flex;"><span>        unregisterPlugin <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">false</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> !rc.desiredStateOfWorld.<span style="color:#50fa7b">PluginExists</span>(registeredPlugin.SocketPath) {
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 如果在DSW中检查不出来， 说明需要注销该插件，让ASW和DSW的状态相同</span>
-</span></span><span style="display:flex;"><span>            unregisterPlugin = <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>        } <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 如果存在，则需要比较状态，状态不一致，就需要重新注册，即先注销</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">for</span> _, dswPlugin <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> rc.desiredStateOfWorld.<span style="color:#50fa7b">GetPluginsToRegister</span>() {
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">if</span> dswPlugin.SocketPath <span style="color:#ff79c6">==</span> registeredPlugin.SocketPath <span style="color:#ff79c6">&amp;&amp;</span> dswPlugin.Timestamp <span style="color:#ff79c6">!=</span> registeredPlugin.Timestamp {
-</span></span><span style="display:flex;"><span>                    klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;An updated version of plugin has been found, unregistering the plugin first before reregistering&#34;</span>, <span style="color:#f1fa8c">&#34;plugin&#34;</span>, registeredPlugin)
-</span></span><span style="display:flex;"><span>                    unregisterPlugin = <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>                    <span style="color:#ff79c6">break</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Ensure plugins that should be unregistered are unregistered.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 首先从 ASW中获取已经注册过的插件信息</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">for</span> _, registeredPlugin <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> rc.actualStateOfWorld.<span style="color:#fabd2f">GetRegisteredPlugins</span>() {
+</span></span><span style="display:flex;"><span>        unregisterPlugin <span style="color:#fe8019">:=</span> <span style="color:#fe8019">false</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> !rc.desiredStateOfWorld.<span style="color:#fabd2f">PluginExists</span>(registeredPlugin.SocketPath) {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 如果在DSW中检查不出来， 说明需要注销该插件，让ASW和DSW的状态相同</span>
+</span></span><span style="display:flex;"><span>            unregisterPlugin = <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>        } <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 如果存在，则需要比较状态，状态不一致，就需要重新注册，即先注销</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">for</span> _, dswPlugin <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> rc.desiredStateOfWorld.<span style="color:#fabd2f">GetPluginsToRegister</span>() {
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">if</span> dswPlugin.SocketPath <span style="color:#fe8019">==</span> registeredPlugin.SocketPath <span style="color:#fe8019">&amp;&amp;</span> dswPlugin.Timestamp <span style="color:#fe8019">!=</span> registeredPlugin.Timestamp {
+</span></span><span style="display:flex;"><span>                    klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">5</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;An updated version of plugin has been found, unregistering the plugin first before reregistering&#34;</span>, <span style="color:#b8bb26">&#34;plugin&#34;</span>, registeredPlugin)
+</span></span><span style="display:flex;"><span>                    unregisterPlugin = <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#fe8019">break</span>
 </span></span><span style="display:flex;"><span>                }
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 注销插件逻辑</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> unregisterPlugin {
-</span></span><span style="display:flex;"><span>            klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Starting operationExecutor.UnregisterPlugin&#34;</span>, <span style="color:#f1fa8c">&#34;plugin&#34;</span>, registeredPlugin)
-</span></span><span style="display:flex;"><span>            err <span style="color:#ff79c6">:=</span> rc.operationExecutor.<span style="color:#50fa7b">UnregisterPlugin</span>(registeredPlugin, rc.actualStateOfWorld)
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span>
-</span></span><span style="display:flex;"><span>                !goroutinemap.<span style="color:#50fa7b">IsAlreadyExists</span>(err) <span style="color:#ff79c6">&amp;&amp;</span>
-</span></span><span style="display:flex;"><span>                !exponentialbackoff.<span style="color:#50fa7b">IsExponentialBackoff</span>(err) {
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// Ignore goroutinemap.IsAlreadyExists and exponentialbackoff.IsExponentialBackoff errors, they are expected.</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// Log all other errors.</span>
-</span></span><span style="display:flex;"><span>                klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;OperationExecutor.UnregisterPlugin failed&#34;</span>, <span style="color:#f1fa8c">&#34;plugin&#34;</span>, registeredPlugin)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 注销插件逻辑</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> unregisterPlugin {
+</span></span><span style="display:flex;"><span>            klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">5</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Starting operationExecutor.UnregisterPlugin&#34;</span>, <span style="color:#b8bb26">&#34;plugin&#34;</span>, registeredPlugin)
+</span></span><span style="display:flex;"><span>            err <span style="color:#fe8019">:=</span> rc.operationExecutor.<span style="color:#fabd2f">UnregisterPlugin</span>(registeredPlugin, rc.actualStateOfWorld)
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>                !goroutinemap.<span style="color:#fabd2f">IsAlreadyExists</span>(err) <span style="color:#fe8019">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>                !exponentialbackoff.<span style="color:#fabd2f">IsExponentialBackoff</span>(err) {
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// Ignore goroutinemap.IsAlreadyExists and exponentialbackoff.IsExponentialBackoff errors, they are expected.</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// Log all other errors.</span>
+</span></span><span style="display:flex;"><span>                klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;OperationExecutor.UnregisterPlugin failed&#34;</span>, <span style="color:#b8bb26">&#34;plugin&#34;</span>, registeredPlugin)
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>                klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">1</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;OperationExecutor.UnregisterPlugin started&#34;</span>, <span style="color:#f1fa8c">&#34;plugin&#34;</span>, registeredPlugin)
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> err <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>                klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">1</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;OperationExecutor.UnregisterPlugin started&#34;</span>, <span style="color:#b8bb26">&#34;plugin&#34;</span>, registeredPlugin)
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 便利DSW，根据不存在于ASW中的插件信息来注册插件</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> _, pluginToRegister <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> rc.desiredStateOfWorld.<span style="color:#50fa7b">GetPluginsToRegister</span>() {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> !rc.actualStateOfWorld.<span style="color:#50fa7b">PluginExistsWithCorrectTimestamp</span>(pluginToRegister) {
-</span></span><span style="display:flex;"><span>            klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Starting operationExecutor.RegisterPlugin&#34;</span>, <span style="color:#f1fa8c">&#34;plugin&#34;</span>, pluginToRegister)
-</span></span><span style="display:flex;"><span>            err <span style="color:#ff79c6">:=</span> rc.operationExecutor.<span style="color:#50fa7b">RegisterPlugin</span>(pluginToRegister.SocketPath, pluginToRegister.Timestamp, rc.<span style="color:#50fa7b">getHandlers</span>(), rc.actualStateOfWorld)
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span>
-</span></span><span style="display:flex;"><span>                !goroutinemap.<span style="color:#50fa7b">IsAlreadyExists</span>(err) <span style="color:#ff79c6">&amp;&amp;</span>
-</span></span><span style="display:flex;"><span>                !exponentialbackoff.<span style="color:#50fa7b">IsExponentialBackoff</span>(err) {
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// Ignore goroutinemap.IsAlreadyExists and exponentialbackoff.IsExponentialBackoff errors, they are expected.</span>
-</span></span><span style="display:flex;"><span>                klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;OperationExecutor.RegisterPlugin failed&#34;</span>, <span style="color:#f1fa8c">&#34;plugin&#34;</span>, pluginToRegister)
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// 便利DSW，根据不存在于ASW中的插件信息来注册插件</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">for</span> _, pluginToRegister <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> rc.desiredStateOfWorld.<span style="color:#fabd2f">GetPluginsToRegister</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> !rc.actualStateOfWorld.<span style="color:#fabd2f">PluginExistsWithCorrectTimestamp</span>(pluginToRegister) {
+</span></span><span style="display:flex;"><span>            klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">5</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Starting operationExecutor.RegisterPlugin&#34;</span>, <span style="color:#b8bb26">&#34;plugin&#34;</span>, pluginToRegister)
+</span></span><span style="display:flex;"><span>            err <span style="color:#fe8019">:=</span> rc.operationExecutor.<span style="color:#fabd2f">RegisterPlugin</span>(pluginToRegister.SocketPath, pluginToRegister.Timestamp, rc.<span style="color:#fabd2f">getHandlers</span>(), rc.actualStateOfWorld)
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>                !goroutinemap.<span style="color:#fabd2f">IsAlreadyExists</span>(err) <span style="color:#fe8019">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>                !exponentialbackoff.<span style="color:#fabd2f">IsExponentialBackoff</span>(err) {
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// Ignore goroutinemap.IsAlreadyExists and exponentialbackoff.IsExponentialBackoff errors, they are expected.</span>
+</span></span><span style="display:flex;"><span>                klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;OperationExecutor.RegisterPlugin failed&#34;</span>, <span style="color:#b8bb26">&#34;plugin&#34;</span>, pluginToRegister)
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>                klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">1</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;OperationExecutor.RegisterPlugin started&#34;</span>, <span style="color:#f1fa8c">&#34;plugin&#34;</span>, pluginToRegister)
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> err <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>                klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">1</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;OperationExecutor.RegisterPlugin started&#34;</span>, <span style="color:#b8bb26">&#34;plugin&#34;</span>, pluginToRegister)
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
@@ -661,18 +661,18 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
 
 <h2 id="kubelet-plugin-manager的启动流程">kubelet plugin manager的启动流程</h2>
 <p>kubelet 的 plugin manager 是通过 pluginManager 来实现的， 其实现了接口 PluginManager，其启动的逻辑如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (pm <span style="color:#ff79c6">*</span>pluginManager) <span style="color:#50fa7b">Run</span>(sourcesReady config.SourcesReady, stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> runtime.<span style="color:#50fa7b">HandleCrash</span>()
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (pm <span style="color:#fe8019">*</span>pluginManager) <span style="color:#fabd2f">Run</span>(sourcesReady config.SourcesReady, stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">defer</span> runtime.<span style="color:#fabd2f">HandleCrash</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    pm.desiredStateOfWorldPopulator.<span style="color:#50fa7b">Start</span>(stopCh)
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;The desired_state_of_world populator (plugin watcher) starts&#34;</span>)
+</span></span><span style="display:flex;"><span>    pm.desiredStateOfWorldPopulator.<span style="color:#fabd2f">Start</span>(stopCh)
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;The desired_state_of_world populator (plugin watcher) starts&#34;</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Starting Kubelet Plugin Manager&#34;</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> pm.reconciler.<span style="color:#50fa7b">Run</span>(stopCh)
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Starting Kubelet Plugin Manager&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">go</span> pm.reconciler.<span style="color:#fabd2f">Run</span>(stopCh)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    metrics.<span style="color:#50fa7b">Register</span>(pm.actualStateOfWorld, pm.desiredStateOfWorld)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&lt;-</span>stopCh
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Shutting down Kubelet Plugin Manager&#34;</span>)
+</span></span><span style="display:flex;"><span>    metrics.<span style="color:#fabd2f">Register</span>(pm.actualStateOfWorld, pm.desiredStateOfWorld)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">&lt;-</span>stopCh
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Shutting down Kubelet Plugin Manager&#34;</span>)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>结合上面几个小节的讲解，其逻辑就很简单了：</p>
 <ul>

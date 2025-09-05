@@ -247,80 +247,80 @@
 <li>然后使用一个方法封装该实现</li>
 </ul>
 <p>以下代码就是一个简单的示例，判断一个是否是浮点数据类型：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;iostream&gt;</span><span style="color:#ff79c6">
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">typename</span> T<span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">is_floating_point</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">static</span> <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">bool</span> value <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">false</span>;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;iostream&gt;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> is_floating_point {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">static</span> <span style="color:#fe8019">const</span> <span style="color:#fabd2f">bool</span> value <span style="color:#fe8019">=</span> <span style="color:#fabd2f">false</span>;
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">is_floating_point</span><span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">float</span><span style="color:#ff79c6">&gt;</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">static</span> <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">bool</span> value <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">true</span>;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> is_floating_point<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">float</span><span style="color:#fe8019">&gt;</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">static</span> <span style="color:#fe8019">const</span> <span style="color:#fabd2f">bool</span> value <span style="color:#fe8019">=</span> <span style="color:#fabd2f">true</span>;
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">is_floating_point</span><span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">double</span><span style="color:#ff79c6">&gt;</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">static</span> <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">bool</span> value <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">true</span>;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> is_floating_point<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">double</span><span style="color:#fe8019">&gt;</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">static</span> <span style="color:#fe8019">const</span> <span style="color:#fabd2f">bool</span> value <span style="color:#fe8019">=</span> <span style="color:#fabd2f">true</span>;
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">is_floating_point</span><span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">long</span> <span style="color:#8be9fd">double</span><span style="color:#ff79c6">&gt;</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">static</span> <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">bool</span> value <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">true</span>;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> is_floating_point<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">long</span> <span style="color:#fabd2f">double</span><span style="color:#fe8019">&gt;</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">static</span> <span style="color:#fe8019">const</span> <span style="color:#fabd2f">bool</span> value <span style="color:#fe8019">=</span> <span style="color:#fabd2f">true</span>;
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">typename</span> T<span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">void</span> process_real_number(T <span style="color:#ff79c6">const</span><span style="color:#ff79c6">&amp;</span> value) {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">static_assert</span>(is_floating_point<span style="color:#ff79c6">&lt;</span>T<span style="color:#ff79c6">&gt;::</span>value);
-</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;processing a real number: &#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> value <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> process_real_number(T <span style="color:#fe8019">const</span><span style="color:#fe8019">&amp;</span> value) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">static_assert</span>(is_floating_point<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;::</span>value);
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;processing a real number: &#34;</span> <span style="color:#fe8019">&lt;&lt;</span> value <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">int</span> <span style="color:#50fa7b">main</span>() {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">static_assert</span>(is_floating_point<span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">float</span><span style="color:#ff79c6">&gt;::</span>value);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">static_assert</span>(is_floating_point<span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">double</span><span style="color:#ff79c6">&gt;::</span>value);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">static_assert</span>(is_floating_point<span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">long</span> <span style="color:#8be9fd">double</span><span style="color:#ff79c6">&gt;::</span>value);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">static_assert</span>(<span style="color:#ff79c6">!</span>is_floating_point<span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">int</span><span style="color:#ff79c6">&gt;::</span>value);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">static_assert</span>(<span style="color:#ff79c6">!</span>is_floating_point<span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">bool</span><span style="color:#ff79c6">&gt;::</span>value);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">static_assert</span>(<span style="color:#ff79c6">!</span>is_floating_point<span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">long</span><span style="color:#ff79c6">&gt;::</span>value);
-</span></span><span style="display:flex;"><span>  process_real_number(<span style="color:#bd93f9">42.0</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// process_real_number(42);  ===&gt; error: static assertion failed
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>}
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">int</span> <span style="color:#fabd2f">main</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">static_assert</span>(is_floating_point<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">float</span><span style="color:#fe8019">&gt;::</span>value);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">static_assert</span>(is_floating_point<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">double</span><span style="color:#fe8019">&gt;::</span>value);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">static_assert</span>(is_floating_point<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">long</span> <span style="color:#fabd2f">double</span><span style="color:#fe8019">&gt;::</span>value);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">static_assert</span>(<span style="color:#fe8019">!</span>is_floating_point<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span><span style="color:#fe8019">&gt;::</span>value);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">static_assert</span>(<span style="color:#fe8019">!</span>is_floating_point<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">bool</span><span style="color:#fe8019">&gt;::</span>value);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">static_assert</span>(<span style="color:#fe8019">!</span>is_floating_point<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">long</span><span style="color:#fe8019">&gt;::</span>value);
+</span></span><span style="display:flex;"><span>  process_real_number(<span style="color:#d3869b">42.0</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// process_real_number(42);  ===&gt; error: static assertion failed
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>}
 </span></span></code></pre></div><h2 id="sfinae">SFINAE</h2>
 <p><strong>SFINAE</strong> 全称是 <strong>Substitution Failure is not an Error</strong>， 即<strong>替换失败不是错误</strong>。简单来说就是<strong>让一段代码逻辑对特定的数据类型失效</strong>，即不会在编译的时候因为数据类型的不匹配而编译错误。这个特性在模板编程中常见。 <strong>SFINAE</strong> 通常发生在<strong>模板参数推导阶段 和 重载裁决阶段</strong>。</p>
 <p>先来看一个简单的代码示例:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;iostream&gt;</span><span style="color:#ff79c6">
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">MyType</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">using</span> type <span style="color:#ff79c6">=</span> <span style="color:#8be9fd">int</span>;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;iostream&gt;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> MyType {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">using</span> type <span style="color:#fe8019">=</span> <span style="color:#fabd2f">int</span>;
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">MyClass</span> {
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">public</span><span style="color:#ff79c6">:</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">typename</span> T<span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">static</span> <span style="color:#8be9fd">void</span> f(T x, <span style="color:#ff79c6">typename</span> T<span style="color:#ff79c6">::</span>type y) {  <span style="color:#6272a4">// #1
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;fire&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">class</span> MyClass {
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">public</span><span style="color:#fe8019">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">static</span> <span style="color:#fabd2f">void</span> f(T x, <span style="color:#fe8019">typename</span> T<span style="color:#fe8019">::</span>type y) {  <span style="color:#928374;font-style:italic">// #1
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;fire&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">typename</span> T<span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">static</span> <span style="color:#8be9fd">void</span> f(T x, <span style="color:#ff79c6">typename</span> T<span style="color:#ff79c6">::</span>other_type y) { <span style="color:#6272a4">// #2
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#6272a4">// ...
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;won&#39;t be fired&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">static</span> <span style="color:#fabd2f">void</span> f(T x, <span style="color:#fe8019">typename</span> T<span style="color:#fe8019">::</span>other_type y) { <span style="color:#928374;font-style:italic">// #2
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#928374;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;won&#39;t be fired&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">int</span> <span style="color:#50fa7b">main</span>() {
-</span></span><span style="display:flex;"><span> MyClass<span style="color:#ff79c6">::</span>f(MyType(), <span style="color:#bd93f9">10</span>);
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">int</span> <span style="color:#fabd2f">main</span>() {
+</span></span><span style="display:flex;"><span> MyClass<span style="color:#fe8019">::</span>f(MyType(), <span style="color:#d3869b">10</span>);
 </span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">//output:
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">// fire
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//output:
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// fire
 </span></span></span></code></pre></div><p>当调用<code>MyClass::f(MyType(), 10)</code> 时，编译器需要知道调用的是上述两个重载中的哪一个。实际编译流程肯定很复杂，这里简化一下流程， 首先把 MyType实例 带入到函数模板<code>#1</code>，很合适。然后在带入到<code>#2</code> 的时候发现 MyType 结构体并没有 <code>other_type</code> 这个类型，请注意这里说的 带入/替换 其实就是模板参数推导的过程。由于 MyType 带入到 <code>#2</code> 失败，从上面的代码示例可以看出在编译的过程中并没有出现编译终止报错，且运行成功。这就是 <strong>SFINAE</strong> 特性的意义所在了：即编译器在一堆集合中找最合适的结果，不合适的就跳过（<strong>SFINAE</strong> 发挥作用），当然如果最终合适的结果有多个，或者没有一个合适的，编译肯定是会报错的。</p>
 <h3 id="使用-enable_if-实现-sfinae">使用 enable_if 实现 SFINAE</h3>
 <p><strong>SFINAE</strong> 通常是搭配 c++ type traits 特性一块使用的，最常用的是通过 <code>std::enable_if</code> 来从重载集合中剔除不合适的，其可能的实现如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">bool</span> B, <span style="color:#ff79c6">typename</span> T <span style="color:#ff79c6">=</span> <span style="color:#8be9fd">void</span><span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">enable_if</span> {};
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">bool</span> B, <span style="color:#fe8019">typename</span> T <span style="color:#fe8019">=</span> <span style="color:#fabd2f">void</span><span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> enable_if {};
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">template</span><span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">typename</span> T<span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">enable_if</span><span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd;font-style:italic">true</span>, T<span style="color:#ff79c6">&gt;</span> {<span style="color:#ff79c6">using</span> type <span style="color:#ff79c6">=</span> T;};
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> enable_if<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">true</span>, T<span style="color:#fe8019">&gt;</span> {<span style="color:#fe8019">using</span> type <span style="color:#fe8019">=</span> T;};
 </span></span></code></pre></div><p>可以看到 primary template 有一个 非类型模板参数 B 和一个 具有默认类型void的模板参数 T， 这是一个空类。有实现了一个模板参数B为true的偏特化版本，定义了一个成员类型type。所以 <code>std::enable_if</code>  是结合布尔表达式一块使用的， 当布尔表达式为true的时候，它就有一个成员类型type， 当布尔表达式为 false的时候，就是一个空类。</p>
 <p><code>std::enable_if</code> 可以用在：</p>
 <ul>
@@ -329,82 +329,82 @@
 <li>具有默认值的函数参数</li>
 </ul>
 <p>以上面的判断浮点数的代码为例：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;iostream&gt;</span><span style="color:#ff79c6">
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;type_traits&gt;</span><span style="color:#ff79c6">
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">typename</span> T,
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">typename</span> std<span style="color:#ff79c6">::</span>enable_if<span style="color:#ff79c6">&lt;</span>std<span style="color:#ff79c6">::</span>is_floating_point_v<span style="color:#ff79c6">&lt;</span>T<span style="color:#ff79c6">&gt;&gt;::</span>type<span style="color:#ff79c6">*</span> <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">nullptr</span><span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">void</span> f(T <span style="color:#ff79c6">const</span><span style="color:#ff79c6">&amp;</span> x) {  <span style="color:#6272a4">// #1
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;float type&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;iostream&gt;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;type_traits&gt;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T,
+</span></span><span style="display:flex;"><span>          <span style="color:#fe8019">typename</span> std<span style="color:#fe8019">::</span>enable_if<span style="color:#fe8019">&lt;</span>std<span style="color:#fe8019">::</span>is_floating_point_v<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;&gt;::</span>type<span style="color:#fe8019">*</span> <span style="color:#fe8019">=</span> <span style="color:#fe8019">nullptr</span><span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> f(T <span style="color:#fe8019">const</span><span style="color:#fe8019">&amp;</span> x) {  <span style="color:#928374;font-style:italic">// #1
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;float type&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">typename</span> T, <span style="color:#ff79c6">typename</span> std<span style="color:#ff79c6">::</span>enable_if<span style="color:#ff79c6">&lt;</span>
-</span></span><span style="display:flex;"><span>                          <span style="color:#ff79c6">!</span>std<span style="color:#ff79c6">::</span>is_floating_point_v<span style="color:#ff79c6">&lt;</span>T<span style="color:#ff79c6">&gt;&gt;::</span>type<span style="color:#ff79c6">*</span> <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">nullptr</span><span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">void</span> f(T <span style="color:#ff79c6">const</span><span style="color:#ff79c6">&amp;</span> x) {
-</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;not float type&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T, <span style="color:#fe8019">typename</span> std<span style="color:#fe8019">::</span>enable_if<span style="color:#fe8019">&lt;</span>
+</span></span><span style="display:flex;"><span>                          <span style="color:#fe8019">!</span>std<span style="color:#fe8019">::</span>is_floating_point_v<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;&gt;::</span>type<span style="color:#fe8019">*</span> <span style="color:#fe8019">=</span> <span style="color:#fe8019">nullptr</span><span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> f(T <span style="color:#fe8019">const</span><span style="color:#fe8019">&amp;</span> x) {
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;not float type&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">typename</span> T<span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">void</span> h(T <span style="color:#ff79c6">const</span><span style="color:#ff79c6">&amp;</span> x,
-</span></span><span style="display:flex;"><span>       <span style="color:#ff79c6">typename</span> std<span style="color:#ff79c6">::</span>enable_if<span style="color:#ff79c6">&lt;</span>std<span style="color:#ff79c6">::</span>is_floating_point_v<span style="color:#ff79c6">&lt;</span>T<span style="color:#ff79c6">&gt;&gt;::</span>type<span style="color:#ff79c6">*</span> <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">nullptr</span>) {
-</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;float type&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> h(T <span style="color:#fe8019">const</span><span style="color:#fe8019">&amp;</span> x,
+</span></span><span style="display:flex;"><span>       <span style="color:#fe8019">typename</span> std<span style="color:#fe8019">::</span>enable_if<span style="color:#fe8019">&lt;</span>std<span style="color:#fe8019">::</span>is_floating_point_v<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;&gt;::</span>type<span style="color:#fe8019">*</span> <span style="color:#fe8019">=</span> <span style="color:#fe8019">nullptr</span>) {
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;float type&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">typename</span> T<span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">void</span> h(T <span style="color:#ff79c6">const</span><span style="color:#ff79c6">&amp;</span> x,
-</span></span><span style="display:flex;"><span>       <span style="color:#ff79c6">typename</span> std<span style="color:#ff79c6">::</span>enable_if<span style="color:#ff79c6">&lt;!</span>std<span style="color:#ff79c6">::</span>is_floating_point_v<span style="color:#ff79c6">&lt;</span>T<span style="color:#ff79c6">&gt;&gt;::</span>type<span style="color:#ff79c6">*</span> <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">nullptr</span>) {
-</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;not float type&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> h(T <span style="color:#fe8019">const</span><span style="color:#fe8019">&amp;</span> x,
+</span></span><span style="display:flex;"><span>       <span style="color:#fe8019">typename</span> std<span style="color:#fe8019">::</span>enable_if<span style="color:#fe8019">&lt;!</span>std<span style="color:#fe8019">::</span>is_floating_point_v<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;&gt;::</span>type<span style="color:#fe8019">*</span> <span style="color:#fe8019">=</span> <span style="color:#fe8019">nullptr</span>) {
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;not float type&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">typename</span> T<span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">typename</span> std<span style="color:#ff79c6">::</span>enable_if<span style="color:#ff79c6">&lt;</span>std<span style="color:#ff79c6">::</span>is_floating_point_v<span style="color:#ff79c6">&lt;</span>T<span style="color:#ff79c6">&gt;&gt;::</span>type k(T <span style="color:#ff79c6">const</span><span style="color:#ff79c6">&amp;</span> x) {
-</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;float type&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">typename</span> std<span style="color:#fe8019">::</span>enable_if<span style="color:#fe8019">&lt;</span>std<span style="color:#fe8019">::</span>is_floating_point_v<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;&gt;::</span>type k(T <span style="color:#fe8019">const</span><span style="color:#fe8019">&amp;</span> x) {
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;float type&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">typename</span> T<span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">typename</span> std<span style="color:#ff79c6">::</span>enable_if<span style="color:#ff79c6">&lt;!</span>std<span style="color:#ff79c6">::</span>is_floating_point_v<span style="color:#ff79c6">&lt;</span>T<span style="color:#ff79c6">&gt;&gt;::</span>type k(T <span style="color:#ff79c6">const</span><span style="color:#ff79c6">&amp;</span> x) {
-</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;not float type&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">typename</span> std<span style="color:#fe8019">::</span>enable_if<span style="color:#fe8019">&lt;!</span>std<span style="color:#fe8019">::</span>is_floating_point_v<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;&gt;::</span>type k(T <span style="color:#fe8019">const</span><span style="color:#fe8019">&amp;</span> x) {
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;not float type&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">int</span> <span style="color:#50fa7b">main</span>() {
-</span></span><span style="display:flex;"><span>  f(<span style="color:#bd93f9">10</span>);
-</span></span><span style="display:flex;"><span>  f(<span style="color:#bd93f9">10.0</span>);
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">int</span> <span style="color:#fabd2f">main</span>() {
+</span></span><span style="display:flex;"><span>  f(<span style="color:#d3869b">10</span>);
+</span></span><span style="display:flex;"><span>  f(<span style="color:#d3869b">10.0</span>);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  h(<span style="color:#bd93f9">10</span>);
-</span></span><span style="display:flex;"><span>  h(<span style="color:#bd93f9">10.0</span>);
+</span></span><span style="display:flex;"><span>  h(<span style="color:#d3869b">10</span>);
+</span></span><span style="display:flex;"><span>  h(<span style="color:#d3869b">10.0</span>);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  k(<span style="color:#bd93f9">10</span>);
-</span></span><span style="display:flex;"><span>  k(<span style="color:#bd93f9">10.0</span>);
+</span></span><span style="display:flex;"><span>  k(<span style="color:#d3869b">10</span>);
+</span></span><span style="display:flex;"><span>  k(<span style="color:#d3869b">10.0</span>);
 </span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">//output:
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">//not float type
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">//float type
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">//not float type
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">//float type
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">//not float type
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">//float type
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//output:
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//not float type
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//float type
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//not float type
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//float type
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//not float type
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//float type
 </span></span></span></code></pre></div><h3 id="使用-constexpr-if-实现-sfinae">使用 constexpr if 实现 SFINAE</h3>
 <p>当然，可以利用 c++17 的 <code>if constexpr</code>特性， 让代码更加简洁和直观：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;iostream&gt;</span><span style="color:#ff79c6">
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;type_traits&gt;</span><span style="color:#ff79c6">
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">MyClass</span> {
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">public</span><span style="color:#ff79c6">:</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">template</span> <span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">typename</span> T<span style="color:#ff79c6">&gt;</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">static</span> <span style="color:#8be9fd">void</span> f(T t) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> <span style="color:#50fa7b">constexpr</span> (std<span style="color:#ff79c6">::</span>is_floating_point<span style="color:#ff79c6">&lt;</span>T<span style="color:#ff79c6">&gt;::</span>value) {
-</span></span><span style="display:flex;"><span>      std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;call f(float)&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
-</span></span><span style="display:flex;"><span>    } <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>      std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;call f(integral)&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;iostream&gt;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;type_traits&gt;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">class</span> MyClass {
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">public</span><span style="color:#fe8019">:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">template</span> <span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">static</span> <span style="color:#fabd2f">void</span> f(T t) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> <span style="color:#fabd2f">constexpr</span> (std<span style="color:#fe8019">::</span>is_floating_point<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;::</span>value) {
+</span></span><span style="display:flex;"><span>      std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;call f(float)&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
+</span></span><span style="display:flex;"><span>    } <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>      std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;call f(integral)&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">int</span> <span style="color:#50fa7b">main</span>() {
-</span></span><span style="display:flex;"><span>  MyClass<span style="color:#ff79c6">::</span>f(<span style="color:#bd93f9">10</span>);
-</span></span><span style="display:flex;"><span>  MyClass<span style="color:#ff79c6">::</span>f(<span style="color:#bd93f9">10u</span>);
-</span></span><span style="display:flex;"><span>  MyClass<span style="color:#ff79c6">::</span>f(<span style="color:#bd93f9">0.2</span>);
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">int</span> <span style="color:#fabd2f">main</span>() {
+</span></span><span style="display:flex;"><span>  MyClass<span style="color:#fe8019">::</span>f(<span style="color:#d3869b">10</span>);
+</span></span><span style="display:flex;"><span>  MyClass<span style="color:#fe8019">::</span>f(<span style="color:#d3869b">10u</span>);
+</span></span><span style="display:flex;"><span>  MyClass<span style="color:#fe8019">::</span>f(<span style="color:#d3869b">0.2</span>);
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
   </div>

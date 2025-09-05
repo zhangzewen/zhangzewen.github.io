@@ -93,7 +93,7 @@ type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool Last
       },
       "datePublished": "2024-08-29T23:48:15+08:00",
       "dateModified": "2024-08-29T23:48:15+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 client-go release-1.25 分支\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003e\u003ccode\u003eController\u003c/code\u003e是一个接口，该接口的实例的主要作用是构建和启动 \u003ca href=\"https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/\"\u003ereflector\u003c/a\u003e。\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-go\" data-lang=\"go\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#8be9fd;font-style:italic\"\u003etype\u003c/span\u003e Controller \u003cspan style=\"color:#8be9fd;font-style:italic\"\u003einterface\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  \u003cspan style=\"color:#50fa7b\"\u003eRun\u003c/span\u003e(stopCh \u003cspan style=\"color:#ff79c6\"\u003e\u0026lt;-\u003c/span\u003e\u003cspan style=\"color:#8be9fd;font-style:italic\"\u003echan\u003c/span\u003e \u003cspan style=\"color:#8be9fd;font-style:italic\"\u003estruct\u003c/span\u003e{})\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  \u003cspan style=\"color:#50fa7b\"\u003eHasSynced\u003c/span\u003e() \u003cspan style=\"color:#8be9fd\"\u003ebool\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  \u003cspan style=\"color:#50fa7b\"\u003eLastSyncResourceVersion\u003c/span\u003e() \u003cspan style=\"color:#8be9fd\"\u003estring\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#8be9fd;font-style:italic\"\u003etype\u003c/span\u003e controller \u003cspan style=\"color:#8be9fd;font-style:italic\"\u003estruct\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  config         Config\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  reflector      \u003cspan style=\"color:#ff79c6\"\u003e*\u003c/span\u003eReflector\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  reflectorMutex sync.RWMutex\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  clock          clock.Clock\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003econtroller 实现了上述的 Controller，Config 存储的是配置信息， 通过调用 New 构造 controller 实例：\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 client-go release-1.25 分支\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003e\u003ccode\u003eController\u003c/code\u003e是一个接口，该接口的实例的主要作用是构建和启动 \u003ca href=\"https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/\"\u003ereflector\u003c/a\u003e。\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-go\" data-lang=\"go\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#fe8019\"\u003etype\u003c/span\u003e Controller \u003cspan style=\"color:#fe8019\"\u003einterface\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  \u003cspan style=\"color:#fabd2f\"\u003eRun\u003c/span\u003e(stopCh \u003cspan style=\"color:#fe8019\"\u003e\u0026lt;-\u003c/span\u003e\u003cspan style=\"color:#fe8019\"\u003echan\u003c/span\u003e \u003cspan style=\"color:#fe8019\"\u003estruct\u003c/span\u003e{})\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  \u003cspan style=\"color:#fabd2f\"\u003eHasSynced\u003c/span\u003e() \u003cspan style=\"color:#fabd2f\"\u003ebool\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  \u003cspan style=\"color:#fabd2f\"\u003eLastSyncResourceVersion\u003c/span\u003e() \u003cspan style=\"color:#fabd2f\"\u003estring\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#fe8019\"\u003etype\u003c/span\u003e controller \u003cspan style=\"color:#fe8019\"\u003estruct\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  config         Config\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  reflector      \u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003eReflector\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  reflectorMutex sync.RWMutex\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  clock          clock.Clock\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003econtroller 实现了上述的 Controller，Config 存储的是配置信息， 通过调用 New 构造 controller 实例：\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -234,38 +234,38 @@ type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool Last
     <blockquote>
 <p>本篇文章基于 client-go release-1.25 分支</p></blockquote>
 <p><code>Controller</code>是一个接口，该接口的实例的主要作用是构建和启动 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/">reflector</a>。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Controller <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">Run</span>(stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{})
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">HasSynced</span>() <span style="color:#8be9fd">bool</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">LastSyncResourceVersion</span>() <span style="color:#8be9fd">string</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> Controller <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Run</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{})
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">HasSynced</span>() <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">LastSyncResourceVersion</span>() <span style="color:#fabd2f">string</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> controller <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> controller <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>  config         Config
-</span></span><span style="display:flex;"><span>  reflector      <span style="color:#ff79c6">*</span>Reflector
+</span></span><span style="display:flex;"><span>  reflector      <span style="color:#fe8019">*</span>Reflector
 </span></span><span style="display:flex;"><span>  reflectorMutex sync.RWMutex
 </span></span><span style="display:flex;"><span>  clock          clock.Clock
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>controller 实现了上述的 Controller，Config 存储的是配置信息， 通过调用 New 构造 controller 实例：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// New makes a new Controller from the given Config.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">New</span>(c <span style="color:#ff79c6">*</span>Config) Controller {
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 只是简单地传递了配置，后面用于构建reflector实例</span>
-</span></span><span style="display:flex;"><span>  ctlr <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>controller{
-</span></span><span style="display:flex;"><span>    config: <span style="color:#ff79c6">*</span>c,
-</span></span><span style="display:flex;"><span>    clock:  <span style="color:#ff79c6">&amp;</span>clock.RealClock{},
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// New makes a new Controller from the given Config.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">New</span>(c <span style="color:#fe8019">*</span>Config) Controller {
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 只是简单地传递了配置，后面用于构建reflector实例</span>
+</span></span><span style="display:flex;"><span>  ctlr <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>controller{
+</span></span><span style="display:flex;"><span>    config: <span style="color:#fe8019">*</span>c,
+</span></span><span style="display:flex;"><span>    clock:  <span style="color:#fe8019">&amp;</span>clock.RealClock{},
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> ctlr
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> ctlr
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>在实例化接口 Controller 后，通过 <code>Run</code> 来启动实例， 这里可以看到传入的 Config 配置信息会构造 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/">reflector</a>。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>controller) <span style="color:#50fa7b">Run</span>(stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}) {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">defer</span> utilruntime.<span style="color:#50fa7b">HandleCrash</span>()
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&lt;-</span>stopCh
-</span></span><span style="display:flex;"><span>    c.config.Queue.<span style="color:#50fa7b">Close</span>()
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (c <span style="color:#fe8019">*</span>controller) <span style="color:#fabd2f">Run</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">defer</span> utilruntime.<span style="color:#fabd2f">HandleCrash</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">go</span> <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">&lt;-</span>stopCh
+</span></span><span style="display:flex;"><span>    c.config.Queue.<span style="color:#fabd2f">Close</span>()
 </span></span><span style="display:flex;"><span>  }()
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 构建 Reflector</span>
-</span></span><span style="display:flex;"><span>  r <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">NewReflector</span>(
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 构建 Reflector</span>
+</span></span><span style="display:flex;"><span>  r <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">NewReflector</span>(
 </span></span><span style="display:flex;"><span>    c.config.ListerWatcher,
 </span></span><span style="display:flex;"><span>    c.config.ObjectType,
 </span></span><span style="display:flex;"><span>    c.config.Queue,
@@ -274,39 +274,39 @@ type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool Last
 </span></span><span style="display:flex;"><span>  r.ShouldResync = c.config.ShouldResync
 </span></span><span style="display:flex;"><span>  r.WatchListPageSize = c.config.WatchListPageSize
 </span></span><span style="display:flex;"><span>  r.clock = c.clock
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> c.config.WatchErrorHandler <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> c.config.WatchErrorHandler <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>    r.watchErrorHandler = c.config.WatchErrorHandler
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  c.reflectorMutex.<span style="color:#50fa7b">Lock</span>()
+</span></span><span style="display:flex;"><span>  c.reflectorMutex.<span style="color:#fabd2f">Lock</span>()
 </span></span><span style="display:flex;"><span>  c.reflector = r
-</span></span><span style="display:flex;"><span>  c.reflectorMutex.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span>  c.reflectorMutex.<span style="color:#fabd2f">Unlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd;font-style:italic">var</span> wg wait.Group
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 调用Reflector.Run方法，启动Reflector组件</span>
-</span></span><span style="display:flex;"><span>  wg.<span style="color:#50fa7b">StartWithChannel</span>(stopCh, r.Run)
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 调用controller.processLoop从controller.config.Queue中pop出item进行处理</span>
-</span></span><span style="display:flex;"><span>  wait.<span style="color:#50fa7b">Until</span>(c.processLoop, time.Second, stopCh)
-</span></span><span style="display:flex;"><span>  wg.<span style="color:#50fa7b">Wait</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">var</span> wg wait.Group
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 调用Reflector.Run方法，启动Reflector组件</span>
+</span></span><span style="display:flex;"><span>  wg.<span style="color:#fabd2f">StartWithChannel</span>(stopCh, r.Run)
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 调用controller.processLoop从controller.config.Queue中pop出item进行处理</span>
+</span></span><span style="display:flex;"><span>  wait.<span style="color:#fabd2f">Until</span>(c.processLoop, time.Second, stopCh)
+</span></span><span style="display:flex;"><span>  wg.<span style="color:#fabd2f">Wait</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>从上面的代码中核心逻辑是 <code>processLoop</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (c <span style="color:#ff79c6">*</span>controller) <span style="color:#50fa7b">processLoop</span>() {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">for</span> {
-</span></span><span style="display:flex;"><span>    obj, err <span style="color:#ff79c6">:=</span> c.config.Queue.<span style="color:#50fa7b">Pop</span>(<span style="color:#50fa7b">PopProcessFunc</span>(c.config.Process))
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">==</span> ErrFIFOClosed {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (c <span style="color:#fe8019">*</span>controller) <span style="color:#fabd2f">processLoop</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">for</span> {
+</span></span><span style="display:flex;"><span>    obj, err <span style="color:#fe8019">:=</span> c.config.Queue.<span style="color:#fabd2f">Pop</span>(<span style="color:#fabd2f">PopProcessFunc</span>(c.config.Process))
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">if</span> err <span style="color:#fe8019">==</span> ErrFIFOClosed {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>      }
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">if</span> c.config.RetryOnError {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// This is the safe way to re-enqueue.</span>
-</span></span><span style="display:flex;"><span>        c.config.Queue.<span style="color:#50fa7b">AddIfNotPresent</span>(obj)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">if</span> c.config.RetryOnError {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// This is the safe way to re-enqueue.</span>
+</span></span><span style="display:flex;"><span>        c.config.Queue.<span style="color:#fabd2f">AddIfNotPresent</span>(obj)
 </span></span><span style="display:flex;"><span>      }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>上述代码逻辑很明了： 从队列中 Pop 出数据进行处理，处理的逻辑是调用 <code>controller.config.Process</code>，这个最终还是会调用 processDeltas，其流程是遍历一个资源对象的修改事件列表，判断该对象在 Store 实例中是否存在, 不存在则创建, 反之则更新。 然后根据事件的类型, 调用对应的用户注册的回调函数。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/client-go/tools/cache/controller.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">newInformer</span>(
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/client-go/tools/cache/controller.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">newInformer</span>(
 </span></span><span style="display:flex;"><span>	lw ListerWatcher,
 </span></span><span style="display:flex;"><span>	objType runtime.Object,
 </span></span><span style="display:flex;"><span>	resyncPeriod time.Duration,
@@ -314,67 +314,67 @@ type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool Last
 </span></span><span style="display:flex;"><span>	clientState Store,
 </span></span><span style="display:flex;"><span>	transformer TransformFunc,
 </span></span><span style="display:flex;"><span>) Controller {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//...</span>
-</span></span><span style="display:flex;"><span>	cfg <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>Config{
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">//...</span>
-</span></span><span style="display:flex;"><span>		Process: <span style="color:#8be9fd;font-style:italic">func</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> deltas, ok <span style="color:#ff79c6">:=</span> obj.(Deltas); ok {
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span> <span style="color:#50fa7b">processDeltas</span>(h, clientState, deltas)
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//...</span>
+</span></span><span style="display:flex;"><span>	cfg <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>Config{
+</span></span><span style="display:flex;"><span>        <span style="color:#8ec07c">//...</span>
+</span></span><span style="display:flex;"><span>		Process: <span style="color:#fe8019">func</span>(obj <span style="color:#fe8019">interface</span>{}) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> deltas, ok <span style="color:#fe8019">:=</span> obj.(Deltas); ok {
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span> <span style="color:#fabd2f">processDeltas</span>(h, clientState, deltas)
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;object given as Process argument is not Deltas&#34;</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> errors.<span style="color:#fabd2f">New</span>(<span style="color:#b8bb26">&#34;object given as Process argument is not Deltas&#34;</span>)
 </span></span><span style="display:flex;"><span>		},
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#50fa7b">New</span>(cfg)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fabd2f">New</span>(cfg)
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">//k8s.io/client-go/tools/cache/shared_informer.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (s <span style="color:#ff79c6">*</span>sharedIndexInformer) <span style="color:#50fa7b">HandleDeltas</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>	s.blockDeltas.<span style="color:#50fa7b">Lock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> s.blockDeltas.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span><span style="color:#8ec07c">//k8s.io/client-go/tools/cache/shared_informer.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (s <span style="color:#fe8019">*</span>sharedIndexInformer) <span style="color:#fabd2f">HandleDeltas</span>(obj <span style="color:#fe8019">interface</span>{}) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>	s.blockDeltas.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> s.blockDeltas.<span style="color:#fabd2f">Unlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> deltas, ok <span style="color:#ff79c6">:=</span> obj.(Deltas); ok {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#50fa7b">processDeltas</span>(s, s.indexer, deltas)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> deltas, ok <span style="color:#fe8019">:=</span> obj.(Deltas); ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fabd2f">processDeltas</span>(s, s.indexer, deltas)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;object given as Process argument is not Deltas&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> errors.<span style="color:#fabd2f">New</span>(<span style="color:#b8bb26">&#34;object given as Process argument is not Deltas&#34;</span>)
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/client-go/tools/cache/controller.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">processDeltas</span>(
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/client-go/tools/cache/controller.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">processDeltas</span>(
 </span></span><span style="display:flex;"><span>	handler ResourceEventHandler,
 </span></span><span style="display:flex;"><span>	clientState Store,
 </span></span><span style="display:flex;"><span>	deltas Deltas,
-</span></span><span style="display:flex;"><span>) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, d <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> deltas {
-</span></span><span style="display:flex;"><span>		obj <span style="color:#ff79c6">:=</span> d.Object
+</span></span><span style="display:flex;"><span>) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> _, d <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> deltas {
+</span></span><span style="display:flex;"><span>		obj <span style="color:#fe8019">:=</span> d.Object
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">switch</span> d.Type {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> Sync, Replaced, Added, Updated:
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 存在，则更新</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> old, exists, err <span style="color:#ff79c6">:=</span> clientState.<span style="color:#50fa7b">Get</span>(obj); err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> exists {
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> clientState.<span style="color:#50fa7b">Update</span>(obj); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">switch</span> d.Type {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> Sync, Replaced, Added, Updated:
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 存在，则更新</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> old, exists, err <span style="color:#fe8019">:=</span> clientState.<span style="color:#fabd2f">Get</span>(obj); err <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span> exists {
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> clientState.<span style="color:#fabd2f">Update</span>(obj); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>					<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>				}
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// 调用用户注册回调</span>
-</span></span><span style="display:flex;"><span>				handler.<span style="color:#50fa7b">OnUpdate</span>(old, obj)
-</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// 不存在，创建</span>
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> clientState.<span style="color:#50fa7b">Add</span>(obj); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// 调用用户注册回调</span>
+</span></span><span style="display:flex;"><span>				handler.<span style="color:#fabd2f">OnUpdate</span>(old, obj)
+</span></span><span style="display:flex;"><span>			} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// 不存在，创建</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> clientState.<span style="color:#fabd2f">Add</span>(obj); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>					<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>				}
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// 调用用户注册回调</span>
-</span></span><span style="display:flex;"><span>				handler.<span style="color:#50fa7b">OnAdd</span>(obj)
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// 调用用户注册回调</span>
+</span></span><span style="display:flex;"><span>				handler.<span style="color:#fabd2f">OnAdd</span>(obj)
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">case</span> Deleted:
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 删除</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> clientState.<span style="color:#50fa7b">Delete</span>(obj); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> Deleted:
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 删除</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> clientState.<span style="color:#fabd2f">Delete</span>(obj); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 调用用户注册回调</span>
-</span></span><span style="display:flex;"><span>			handler.<span style="color:#50fa7b">OnDelete</span>(obj)
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 调用用户注册回调</span>
+</span></span><span style="display:flex;"><span>			handler.<span style="color:#fabd2f">OnDelete</span>(obj)
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p><img src="/images/kubernetes/client-go/controller/controller_01.png" alt="controller_01"></p>
 

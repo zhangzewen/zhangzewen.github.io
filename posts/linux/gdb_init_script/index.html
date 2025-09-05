@@ -90,7 +90,7 @@ b main r b main.c:56 c 这样就可以避免重复性的劳动。">
       },
       "datePublished": "2025-02-25T09:43:31+08:00",
       "dateModified": "2025-02-25T09:43:31+08:00",
-      "description": "\u003cp\u003e.gdbinit 能够将gdb基本命令添加到文件中以避免每次启动gdb 进行 debug 时候输入他们，例如\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-shell\" data-lang=\"shell\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003eb main\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003er\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003eb main.c:56\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003ec\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003e这样就可以避免重复性的劳动。\u003c/p\u003e",
+      "description": "\u003cp\u003e.gdbinit 能够将gdb基本命令添加到文件中以避免每次启动gdb 进行 debug 时候输入他们，例如\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-shell\" data-lang=\"shell\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003eb main\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003er\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003eb main.c:56\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003ec\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003e这样就可以避免重复性的劳动。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -226,30 +226,30 @@ b main r b main.c:56 c 这样就可以避免重复性的劳动。">
 
   <div>
     <p>.gdbinit 能够将gdb基本命令添加到文件中以避免每次启动gdb 进行 debug 时候输入他们，例如</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>b main
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>b main
 </span></span><span style="display:flex;"><span>r
 </span></span><span style="display:flex;"><span>b main.c:56
 </span></span><span style="display:flex;"><span>c
 </span></span></code></pre></div><p>这样就可以避免重复性的劳动。</p>
 <p>通过也可以在 .gdbinit 中 自定义命令：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>define &lt;<span style="color:#8be9fd;font-style:italic">command</span> name&gt;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>define &lt;<span style="color:#fabd2f">command</span> name&gt;
 </span></span><span style="display:flex;"><span>    &lt;code&gt;
 </span></span><span style="display:flex;"><span>end
 </span></span></code></pre></div><p>在 gdb 中可以直接调用通过 <code>&lt;command name&gt;</code> 来调用该自定义命令。同时也支持参数列表，在脚本中 使用形如 <code>$arg1</code>，<code>$arg2</code>，&hellip;.，来访问参数列表，在gdb中就可以这样调用：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>&gt; &lt;<span style="color:#8be9fd;font-style:italic">command</span> name&gt; arg1 arg2 arg3 ...
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>&gt; &lt;<span style="color:#fabd2f">command</span> name&gt; arg1 arg2 arg3 ...
 </span></span></code></pre></div><p>在 .gdbinit 脚本中，可以使用 <code>$&lt;variable_name&gt;</code> 变量的名字。</p>
 <p>.gdbinit 也支持 if 条件判断：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#ff79c6">if</span> &lt;condition&gt;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#fe8019">if</span> &lt;condition&gt;
 </span></span><span style="display:flex;"><span>    &lt;code&gt;
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">else</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">else</span>
 </span></span><span style="display:flex;"><span>    &lt;code&gt;
 </span></span><span style="display:flex;"><span>end
 </span></span></code></pre></div><p>以及 while 循环：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#ff79c6">while</span> &lt;condition&gt;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#fe8019">while</span> &lt;condition&gt;
 </span></span><span style="display:flex;"><span>    &lt;code&gt;
 </span></span><span style="display:flex;"><span>end
 </span></span></code></pre></div><p>打印在 .gdbinit 中也很简单：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">printf</span> <span style="color:#f1fa8c">&#34;&lt;format&gt;&#34;</span>, arg0, arg1, ...
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#fabd2f">printf</span> <span style="color:#b8bb26">&#34;&lt;format&gt;&#34;</span>, arg0, arg1, ...
 </span></span></code></pre></div>
   </div>
 

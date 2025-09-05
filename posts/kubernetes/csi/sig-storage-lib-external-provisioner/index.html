@@ -253,43 +253,43 @@
     <p><a href="https://github.com/kubernetes-sigs/sig-storage-lib-external-provisioner.git">sig-storage-lib-external-provisioner</a> 是用来开发的 external provisioners 的工具库，提供了一个通用的控制器，即根据提供的 Provisioner，然后监听 PVC/PV 资源的变化来实现创建/删除 PV。</p>
 <h2 id="接口">接口</h2>
 <p>sig-storage-lib-external-provisioner 中的接口 Provisioner 提供了 external provisioners 实现创建/删除 PV 的方法 Provision/Delete, 接口 BlockProvisioner 扩展了 Provisioner：能够判断 provisioner是否支持块设备。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> Provisioner <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Provision</span>(context.Context, ProvisionOptions) (<span style="color:#ff79c6">*</span>v1.PersistentVolume, ProvisioningState, <span style="color:#8be9fd">error</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Delete</span>(context.Context, <span style="color:#ff79c6">*</span>v1.PersistentVolume) <span style="color:#8be9fd">error</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Provisioner <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Provision</span>(context.Context, ProvisionOptions) (<span style="color:#fe8019">*</span>v1.PersistentVolume, ProvisioningState, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Delete</span>(context.Context, <span style="color:#fe8019">*</span>v1.PersistentVolume) <span style="color:#fabd2f">error</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> BlockProvisioner <span style="color:#8be9fd;font-style:italic">interface</span> {
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> BlockProvisioner <span style="color:#fe8019">interface</span> {
 </span></span><span style="display:flex;"><span>	Provisioner
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">SupportsBlock</span>(context.Context) <span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">SupportsBlock</span>(context.Context) <span style="color:#fabd2f">bool</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="实现">实现</h2>
 <p>ProvisionController 是上述提到了通用控制器，主要的字段都做了注释：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> ProvisionController <span style="color:#8be9fd;font-style:italic">struct</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 和apiserver交互的client</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> ProvisionController <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 和apiserver交互的client</span>
 </span></span><span style="display:flex;"><span>    client kubernetes.Interface 
-</span></span><span style="display:flex;"><span>    provisionerName <span style="color:#8be9fd">string</span>
-</span></span><span style="display:flex;"><span>    additionalProvisionerNames []<span style="color:#8be9fd">string</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 提供创建/删除 PV能力</span>
+</span></span><span style="display:flex;"><span>    provisionerName <span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>    additionalProvisionerNames []<span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 提供创建/删除 PV能力</span>
 </span></span><span style="display:flex;"><span>    provisioner Provisioner
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// claim监听</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// claim监听</span>
 </span></span><span style="display:flex;"><span>    claimInformer  cache.SharedIndexInformer
 </span></span><span style="display:flex;"><span>    claimsIndexer  cache.Indexer
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// volume 监听</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// volume 监听</span>
 </span></span><span style="display:flex;"><span>    volumeInformer cache.SharedInformer
 </span></span><span style="display:flex;"><span>    volumes        cache.Store
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// storageclass</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// storageclass</span>
 </span></span><span style="display:flex;"><span>    classInformer  cache.SharedInformer
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// node资源accesser</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// node资源accesser</span>
 </span></span><span style="display:flex;"><span>    nodeLister     corelistersv1.NodeLister
 </span></span><span style="display:flex;"><span>    classes        cache.Store
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// To determine if the informer is internal or external</span>
-</span></span><span style="display:flex;"><span>    customClaimInformer, customVolumeInformer, customClassInformer <span style="color:#8be9fd">bool</span> 
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// claimQ</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// To determine if the informer is internal or external</span>
+</span></span><span style="display:flex;"><span>    customClaimInformer, customVolumeInformer, customClassInformer <span style="color:#fabd2f">bool</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// claimQ</span>
 </span></span><span style="display:flex;"><span>    claimQueue  workqueue.RateLimitingInterface
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// volumeQ</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// volumeQ</span>
 </span></span><span style="display:flex;"><span>    volumeQueue workqueue.RateLimitingInterface
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ....</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ....</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="创建">创建</h3>
 <p>NewProvisionController 创建 ProvisionController 实例，只需关注：</p>
@@ -300,104 +300,104 @@
 </ul>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewProvisionController</span>(
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewProvisionController</span>(
 </span></span><span style="display:flex;"><span>	ctx context.Context,
 </span></span><span style="display:flex;"><span>	client kubernetes.Interface,
-</span></span><span style="display:flex;"><span>	provisionerName <span style="color:#8be9fd">string</span>,
+</span></span><span style="display:flex;"><span>	provisionerName <span style="color:#fabd2f">string</span>,
 </span></span><span style="display:flex;"><span>	provisioner Provisioner,
-</span></span><span style="display:flex;"><span>	options <span style="color:#ff79c6">...</span><span style="color:#8be9fd;font-style:italic">func</span>(<span style="color:#ff79c6">*</span>ProvisionController) <span style="color:#8be9fd">error</span>,
-</span></span><span style="display:flex;"><span>) <span style="color:#ff79c6">*</span>ProvisionController {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建 pvc 和 pv 的workqueue</span>
-</span></span><span style="display:flex;"><span>    controller.claimQueue = workqueue.<span style="color:#50fa7b">NewNamedRateLimitingQueue</span>(rateLimiter, <span style="color:#f1fa8c">&#34;claims&#34;</span>)
-</span></span><span style="display:flex;"><span>    controller.volumeQueue = workqueue.<span style="color:#50fa7b">NewNamedRateLimitingQueue</span>(rateLimiter, <span style="color:#f1fa8c">&#34;volumes&#34;</span>)
+</span></span><span style="display:flex;"><span>	options <span style="color:#fe8019">...</span><span style="color:#fe8019">func</span>(<span style="color:#fe8019">*</span>ProvisionController) <span style="color:#fabd2f">error</span>,
+</span></span><span style="display:flex;"><span>) <span style="color:#fe8019">*</span>ProvisionController {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 创建 pvc 和 pv 的workqueue</span>
+</span></span><span style="display:flex;"><span>    controller.claimQueue = workqueue.<span style="color:#fabd2f">NewNamedRateLimitingQueue</span>(rateLimiter, <span style="color:#b8bb26">&#34;claims&#34;</span>)
+</span></span><span style="display:flex;"><span>    controller.volumeQueue = workqueue.<span style="color:#fabd2f">NewNamedRateLimitingQueue</span>(rateLimiter, <span style="color:#b8bb26">&#34;volumes&#34;</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    informer <span style="color:#ff79c6">:=</span> informers.<span style="color:#50fa7b">NewSharedInformerFactory</span>(client, controller.resyncPeriod)
+</span></span><span style="display:flex;"><span>    informer <span style="color:#fe8019">:=</span> informers.<span style="color:#fabd2f">NewSharedInformerFactory</span>(client, controller.resyncPeriod)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// ----------------------</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// PersistentVolumeClaims</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// pvc informer</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// ----------------------</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// PersistentVolumeClaims</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// pvc informer</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	claimHandler <span style="color:#ff79c6">:=</span> cache.ResourceEventHandlerFuncs{
-</span></span><span style="display:flex;"><span>		AddFunc:    <span style="color:#8be9fd;font-style:italic">func</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) { controller.<span style="color:#50fa7b">enqueueClaim</span>(obj) },
-</span></span><span style="display:flex;"><span>		UpdateFunc: <span style="color:#8be9fd;font-style:italic">func</span>(oldObj, newObj <span style="color:#8be9fd;font-style:italic">interface</span>{}) { controller.<span style="color:#50fa7b">enqueueClaim</span>(newObj) },
-</span></span><span style="display:flex;"><span>		DeleteFunc: <span style="color:#8be9fd;font-style:italic">func</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// NOOP. The claim is either in claimsInProgress and in the queue, so it will be processed as usual</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// or it&#39;s not in claimsInProgress and then we don&#39;t care</span>
+</span></span><span style="display:flex;"><span>	claimHandler <span style="color:#fe8019">:=</span> cache.ResourceEventHandlerFuncs{
+</span></span><span style="display:flex;"><span>		AddFunc:    <span style="color:#fe8019">func</span>(obj <span style="color:#fe8019">interface</span>{}) { controller.<span style="color:#fabd2f">enqueueClaim</span>(obj) },
+</span></span><span style="display:flex;"><span>		UpdateFunc: <span style="color:#fe8019">func</span>(oldObj, newObj <span style="color:#fe8019">interface</span>{}) { controller.<span style="color:#fabd2f">enqueueClaim</span>(newObj) },
+</span></span><span style="display:flex;"><span>		DeleteFunc: <span style="color:#fe8019">func</span>(obj <span style="color:#fe8019">interface</span>{}) {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// NOOP. The claim is either in claimsInProgress and in the queue, so it will be processed as usual</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// or it&#39;s not in claimsInProgress and then we don&#39;t care</span>
 </span></span><span style="display:flex;"><span>		},
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> controller.claimInformer <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		controller.claimInformer.<span style="color:#50fa7b">AddEventHandlerWithResyncPeriod</span>(claimHandler, controller.resyncPeriod)
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>		controller.claimInformer = informer.<span style="color:#50fa7b">Core</span>().<span style="color:#50fa7b">V1</span>().<span style="color:#50fa7b">PersistentVolumeClaims</span>().<span style="color:#50fa7b">Informer</span>()
-</span></span><span style="display:flex;"><span>		controller.claimInformer.<span style="color:#50fa7b">AddEventHandler</span>(claimHandler)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> controller.claimInformer <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		controller.claimInformer.<span style="color:#fabd2f">AddEventHandlerWithResyncPeriod</span>(claimHandler, controller.resyncPeriod)
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>		controller.claimInformer = informer.<span style="color:#fabd2f">Core</span>().<span style="color:#fabd2f">V1</span>().<span style="color:#fabd2f">PersistentVolumeClaims</span>().<span style="color:#fabd2f">Informer</span>()
+</span></span><span style="display:flex;"><span>		controller.claimInformer.<span style="color:#fabd2f">AddEventHandler</span>(claimHandler)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	err = controller.claimInformer.<span style="color:#50fa7b">AddIndexers</span>(cache.Indexers{uidIndex: <span style="color:#8be9fd;font-style:italic">func</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) ([]<span style="color:#8be9fd">string</span>, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>		uid, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getObjectUID</span>(obj)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, err
+</span></span><span style="display:flex;"><span>	err = controller.claimInformer.<span style="color:#fabd2f">AddIndexers</span>(cache.Indexers{uidIndex: <span style="color:#fe8019">func</span>(obj <span style="color:#fe8019">interface</span>{}) ([]<span style="color:#fabd2f">string</span>, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>		uid, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">getObjectUID</span>(obj)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, err
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> []<span style="color:#8be9fd">string</span>{uid}, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> []<span style="color:#fabd2f">string</span>{uid}, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}})
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		logger.<span style="color:#50fa7b">Error</span>(err, <span style="color:#f1fa8c">&#34;Error setting indexer for pvc informer&#34;</span>, <span style="color:#f1fa8c">&#34;indexer&#34;</span>, uidIndex)
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">FlushAndExit</span>(klog.ExitFlushTimeout, <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		logger.<span style="color:#fabd2f">Error</span>(err, <span style="color:#b8bb26">&#34;Error setting indexer for pvc informer&#34;</span>, <span style="color:#b8bb26">&#34;indexer&#34;</span>, uidIndex)
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">FlushAndExit</span>(klog.ExitFlushTimeout, <span style="color:#d3869b">1</span>)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	controller.claimsIndexer = controller.claimInformer.<span style="color:#50fa7b">GetIndexer</span>()
+</span></span><span style="display:flex;"><span>	controller.claimsIndexer = controller.claimInformer.<span style="color:#fabd2f">GetIndexer</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// -----------------</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// PersistentVolumes</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// pv informer</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// -----------------</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// PersistentVolumes</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// pv informer</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	volumeHandler <span style="color:#ff79c6">:=</span> cache.ResourceEventHandlerFuncs{
-</span></span><span style="display:flex;"><span>		AddFunc:    <span style="color:#8be9fd;font-style:italic">func</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) { controller.<span style="color:#50fa7b">enqueueVolume</span>(obj) },
-</span></span><span style="display:flex;"><span>		UpdateFunc: <span style="color:#8be9fd;font-style:italic">func</span>(oldObj, newObj <span style="color:#8be9fd;font-style:italic">interface</span>{}) { controller.<span style="color:#50fa7b">enqueueVolume</span>(newObj) },
-</span></span><span style="display:flex;"><span>		DeleteFunc: <span style="color:#8be9fd;font-style:italic">func</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) { controller.<span style="color:#50fa7b">forgetVolume</span>(obj) },
+</span></span><span style="display:flex;"><span>	volumeHandler <span style="color:#fe8019">:=</span> cache.ResourceEventHandlerFuncs{
+</span></span><span style="display:flex;"><span>		AddFunc:    <span style="color:#fe8019">func</span>(obj <span style="color:#fe8019">interface</span>{}) { controller.<span style="color:#fabd2f">enqueueVolume</span>(obj) },
+</span></span><span style="display:flex;"><span>		UpdateFunc: <span style="color:#fe8019">func</span>(oldObj, newObj <span style="color:#fe8019">interface</span>{}) { controller.<span style="color:#fabd2f">enqueueVolume</span>(newObj) },
+</span></span><span style="display:flex;"><span>		DeleteFunc: <span style="color:#fe8019">func</span>(obj <span style="color:#fe8019">interface</span>{}) { controller.<span style="color:#fabd2f">forgetVolume</span>(obj) },
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> controller.volumeInformer <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		controller.volumeInformer.<span style="color:#50fa7b">AddEventHandlerWithResyncPeriod</span>(volumeHandler, controller.resyncPeriod)
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>		controller.volumeInformer = informer.<span style="color:#50fa7b">Core</span>().<span style="color:#50fa7b">V1</span>().<span style="color:#50fa7b">PersistentVolumes</span>().<span style="color:#50fa7b">Informer</span>()
-</span></span><span style="display:flex;"><span>		controller.volumeInformer.<span style="color:#50fa7b">AddEventHandler</span>(volumeHandler)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> controller.volumeInformer <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		controller.volumeInformer.<span style="color:#fabd2f">AddEventHandlerWithResyncPeriod</span>(volumeHandler, controller.resyncPeriod)
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>		controller.volumeInformer = informer.<span style="color:#fabd2f">Core</span>().<span style="color:#fabd2f">V1</span>().<span style="color:#fabd2f">PersistentVolumes</span>().<span style="color:#fabd2f">Informer</span>()
+</span></span><span style="display:flex;"><span>		controller.volumeInformer.<span style="color:#fabd2f">AddEventHandler</span>(volumeHandler)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	controller.volumes = controller.volumeInformer.<span style="color:#50fa7b">GetStore</span>()
+</span></span><span style="display:flex;"><span>	controller.volumes = controller.volumeInformer.<span style="color:#fabd2f">GetStore</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// --------------</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// StorageClasses</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// storage informer</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// --------------</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// StorageClasses</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// storage informer</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// no resource event handler needed for StorageClasses</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> controller.classInformer <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		controller.classInformer = informer.<span style="color:#50fa7b">Storage</span>().<span style="color:#50fa7b">V1</span>().<span style="color:#50fa7b">StorageClasses</span>().<span style="color:#50fa7b">Informer</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// no resource event handler needed for StorageClasses</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> controller.classInformer <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		controller.classInformer = informer.<span style="color:#fabd2f">Storage</span>().<span style="color:#fabd2f">V1</span>().<span style="color:#fabd2f">StorageClasses</span>().<span style="color:#fabd2f">Informer</span>()
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	controller.classes = controller.classInformer.<span style="color:#50fa7b">GetStore</span>()
+</span></span><span style="display:flex;"><span>	controller.classes = controller.classInformer.<span style="color:#fabd2f">GetStore</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> controller.createProvisionerPVLimiter <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		logger.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Using saving PVs to API server in background&#34;</span>)
-</span></span><span style="display:flex;"><span>		controller.volumeStore = <span style="color:#50fa7b">NewVolumeStoreQueue</span>(client, controller.createProvisionerPVLimiter, controller.claimsIndexer, controller.eventRecorder)
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> controller.createProvisionedPVBackoff <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// Use linear backoff with createProvisionedPVInterval and createProvisionedPVRetryCount by default.</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> controller.createProvisionedPVInterval <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> controller.createProvisionerPVLimiter <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		logger.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Using saving PVs to API server in background&#34;</span>)
+</span></span><span style="display:flex;"><span>		controller.volumeStore = <span style="color:#fabd2f">NewVolumeStoreQueue</span>(client, controller.createProvisionerPVLimiter, controller.claimsIndexer, controller.eventRecorder)
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> controller.createProvisionedPVBackoff <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// Use linear backoff with createProvisionedPVInterval and createProvisionedPVRetryCount by default.</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> controller.createProvisionedPVInterval <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {
 </span></span><span style="display:flex;"><span>				controller.createProvisionedPVInterval = DefaultCreateProvisionedPVInterval
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> controller.createProvisionedPVRetryCount <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> controller.createProvisionedPVRetryCount <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {
 </span></span><span style="display:flex;"><span>				controller.createProvisionedPVRetryCount = DefaultCreateProvisionedPVRetryCount
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			controller.createProvisionedPVBackoff = <span style="color:#ff79c6">&amp;</span>wait.Backoff{
+</span></span><span style="display:flex;"><span>			controller.createProvisionedPVBackoff = <span style="color:#fe8019">&amp;</span>wait.Backoff{
 </span></span><span style="display:flex;"><span>				Duration: controller.createProvisionedPVInterval,
-</span></span><span style="display:flex;"><span>				Factor:   <span style="color:#bd93f9">1</span>, <span style="color:#6272a4">// linear backoff</span>
+</span></span><span style="display:flex;"><span>				Factor:   <span style="color:#d3869b">1</span>, <span style="color:#928374;font-style:italic">// linear backoff</span>
 </span></span><span style="display:flex;"><span>				Steps:    controller.createProvisionedPVRetryCount,
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// Cap:      controller.createProvisionedPVInterval,</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// Cap:      controller.createProvisionedPVInterval,</span>
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		logger.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Using blocking saving PVs to API server&#34;</span>)
-</span></span><span style="display:flex;"><span>		controller.volumeStore = <span style="color:#50fa7b">NewBackoffStore</span>(client, controller.eventRecorder, controller.createProvisionedPVBackoff, controller)
+</span></span><span style="display:flex;"><span>		logger.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Using blocking saving PVs to API server&#34;</span>)
+</span></span><span style="display:flex;"><span>		controller.volumeStore = <span style="color:#fabd2f">NewBackoffStore</span>(client, controller.eventRecorder, controller.createProvisionedPVBackoff, controller)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> controller
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> controller
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
@@ -412,106 +412,106 @@
 </ul>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// Run starts all of this controller&#39;s control loops</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (ctrl <span style="color:#ff79c6">*</span>ProvisionController) <span style="color:#50fa7b">Run</span>(ctx context.Context) {
-</span></span><span style="display:flex;"><span>	run <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">func</span>(ctx context.Context) {
-</span></span><span style="display:flex;"><span>		logger <span style="color:#ff79c6">:=</span> klog.<span style="color:#50fa7b">FromContext</span>(ctx)
-</span></span><span style="display:flex;"><span>		logger.<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Starting provisioner controller&#34;</span>, <span style="color:#f1fa8c">&#34;component&#34;</span>, ctrl.component)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">defer</span> utilruntime.<span style="color:#50fa7b">HandleCrash</span>()
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">defer</span> ctrl.claimQueue.<span style="color:#50fa7b">ShutDown</span>()
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">defer</span> ctrl.volumeQueue.<span style="color:#50fa7b">ShutDown</span>()
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Run starts all of this controller&#39;s control loops</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (ctrl <span style="color:#fe8019">*</span>ProvisionController) <span style="color:#fabd2f">Run</span>(ctx context.Context) {
+</span></span><span style="display:flex;"><span>	run <span style="color:#fe8019">:=</span> <span style="color:#fe8019">func</span>(ctx context.Context) {
+</span></span><span style="display:flex;"><span>		logger <span style="color:#fe8019">:=</span> klog.<span style="color:#fabd2f">FromContext</span>(ctx)
+</span></span><span style="display:flex;"><span>		logger.<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Starting provisioner controller&#34;</span>, <span style="color:#b8bb26">&#34;component&#34;</span>, ctrl.component)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">defer</span> utilruntime.<span style="color:#fabd2f">HandleCrash</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">defer</span> ctrl.claimQueue.<span style="color:#fabd2f">ShutDown</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">defer</span> ctrl.volumeQueue.<span style="color:#fabd2f">ShutDown</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">go</span> ctrl.slowSet.<span style="color:#50fa7b">Run</span>(ctx.<span style="color:#50fa7b">Done</span>())
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">go</span> ctrl.slowSet.<span style="color:#fabd2f">Run</span>(ctx.<span style="color:#fabd2f">Done</span>())
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		ctrl.hasRunLock.<span style="color:#50fa7b">Lock</span>()
-</span></span><span style="display:flex;"><span>		ctrl.hasRun = <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>		ctrl.hasRunLock.<span style="color:#50fa7b">Unlock</span>()
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 提供监控指标获取的http server      </span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> ctrl.metricsPort &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>			prometheus.<span style="color:#50fa7b">MustRegister</span>([]prometheus.Collector{
+</span></span><span style="display:flex;"><span>		ctrl.hasRunLock.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>		ctrl.hasRun = <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>		ctrl.hasRunLock.<span style="color:#fabd2f">Unlock</span>()
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 提供监控指标获取的http server      </span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> ctrl.metricsPort &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>			prometheus.<span style="color:#fabd2f">MustRegister</span>([]prometheus.Collector{
 </span></span><span style="display:flex;"><span>				ctrl.metrics.PersistentVolumeClaimProvisionTotal,
 </span></span><span style="display:flex;"><span>				ctrl.metrics.PersistentVolumeClaimProvisionFailedTotal,
 </span></span><span style="display:flex;"><span>				ctrl.metrics.PersistentVolumeClaimProvisionDurationSeconds,
 </span></span><span style="display:flex;"><span>				ctrl.metrics.PersistentVolumeDeleteTotal,
 </span></span><span style="display:flex;"><span>				ctrl.metrics.PersistentVolumeDeleteFailedTotal,
 </span></span><span style="display:flex;"><span>				ctrl.metrics.PersistentVolumeDeleteDurationSeconds,
-</span></span><span style="display:flex;"><span>			}<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>			http.<span style="color:#50fa7b">Handle</span>(ctrl.metricsPath, promhttp.<span style="color:#50fa7b">Handler</span>())
-</span></span><span style="display:flex;"><span>			address <span style="color:#ff79c6">:=</span> net.<span style="color:#50fa7b">JoinHostPort</span>(ctrl.metricsAddress, strconv.<span style="color:#50fa7b">FormatInt</span>(<span style="color:#8be9fd;font-style:italic">int64</span>(ctrl.metricsPort), <span style="color:#bd93f9">10</span>))
-</span></span><span style="display:flex;"><span>			logger.<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Starting metrics server&#34;</span>, <span style="color:#f1fa8c">&#34;address&#34;</span>, address)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">go</span> wait.<span style="color:#50fa7b">Forever</span>(<span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>				err <span style="color:#ff79c6">:=</span> http.<span style="color:#50fa7b">ListenAndServe</span>(address, <span style="color:#ff79c6">nil</span>)
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>					logger.<span style="color:#50fa7b">Error</span>(err, <span style="color:#f1fa8c">&#34;Failed to listen metrics server&#34;</span>, <span style="color:#f1fa8c">&#34;address&#34;</span>, address)
+</span></span><span style="display:flex;"><span>			}<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>			http.<span style="color:#fabd2f">Handle</span>(ctrl.metricsPath, promhttp.<span style="color:#fabd2f">Handler</span>())
+</span></span><span style="display:flex;"><span>			address <span style="color:#fe8019">:=</span> net.<span style="color:#fabd2f">JoinHostPort</span>(ctrl.metricsAddress, strconv.<span style="color:#fabd2f">FormatInt</span>(<span style="color:#fabd2f">int64</span>(ctrl.metricsPort), <span style="color:#d3869b">10</span>))
+</span></span><span style="display:flex;"><span>			logger.<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Starting metrics server&#34;</span>, <span style="color:#b8bb26">&#34;address&#34;</span>, address)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">go</span> wait.<span style="color:#fabd2f">Forever</span>(<span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>				err <span style="color:#fe8019">:=</span> http.<span style="color:#fabd2f">ListenAndServe</span>(address, <span style="color:#fe8019">nil</span>)
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>					logger.<span style="color:#fabd2f">Error</span>(err, <span style="color:#b8bb26">&#34;Failed to listen metrics server&#34;</span>, <span style="color:#b8bb26">&#34;address&#34;</span>, address)
 </span></span><span style="display:flex;"><span>				}
-</span></span><span style="display:flex;"><span>			}, <span style="color:#bd93f9">5</span><span style="color:#ff79c6">*</span>time.Second)
+</span></span><span style="display:flex;"><span>			}, <span style="color:#d3869b">5</span><span style="color:#fe8019">*</span>time.Second)
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// If a external SharedInformer has been passed in, this controller</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// should not call Run again</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !ctrl.customClaimInformer {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">go</span> ctrl.claimInformer.<span style="color:#50fa7b">Run</span>(ctx.<span style="color:#50fa7b">Done</span>())
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// If a external SharedInformer has been passed in, this controller</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// should not call Run again</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !ctrl.customClaimInformer {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">go</span> ctrl.claimInformer.<span style="color:#fabd2f">Run</span>(ctx.<span style="color:#fabd2f">Done</span>())
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !ctrl.customVolumeInformer {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">go</span> ctrl.volumeInformer.<span style="color:#50fa7b">Run</span>(ctx.<span style="color:#50fa7b">Done</span>())
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !ctrl.customVolumeInformer {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">go</span> ctrl.volumeInformer.<span style="color:#fabd2f">Run</span>(ctx.<span style="color:#fabd2f">Done</span>())
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !ctrl.customClassInformer {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">go</span> ctrl.classInformer.<span style="color:#50fa7b">Run</span>(ctx.<span style="color:#50fa7b">Done</span>())
-</span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 等待cache都同步完成      </span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !cache.<span style="color:#50fa7b">WaitForCacheSync</span>(ctx.<span style="color:#50fa7b">Done</span>(), ctrl.claimInformer.HasSynced, ctrl.volumeInformer.HasSynced, ctrl.classInformer.HasSynced) {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !ctrl.customClassInformer {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">go</span> ctrl.classInformer.<span style="color:#fabd2f">Run</span>(ctx.<span style="color:#fabd2f">Done</span>())
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 拉起来2个goroutine分别处理pvc和pv      </span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>; i &lt; ctrl.threadiness; i<span style="color:#ff79c6">++</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">go</span> wait.<span style="color:#50fa7b">Until</span>(<span style="color:#8be9fd;font-style:italic">func</span>() { ctrl.<span style="color:#50fa7b">runClaimWorker</span>(ctx) }, time.Second, ctx.<span style="color:#50fa7b">Done</span>())
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">go</span> wait.<span style="color:#50fa7b">Until</span>(<span style="color:#8be9fd;font-style:italic">func</span>() { ctrl.<span style="color:#50fa7b">runVolumeWorker</span>(ctx) }, time.Second, ctx.<span style="color:#50fa7b">Done</span>())
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 等待cache都同步完成      </span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !cache.<span style="color:#fabd2f">WaitForCacheSync</span>(ctx.<span style="color:#fabd2f">Done</span>(), ctrl.claimInformer.HasSynced, ctrl.volumeInformer.HasSynced, ctrl.classInformer.HasSynced) {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		logger.<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Started provisioner controller&#34;</span>, <span style="color:#f1fa8c">&#34;component&#34;</span>, ctrl.component)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 拉起来2个goroutine分别处理pvc和pv      </span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> i <span style="color:#fe8019">:=</span> <span style="color:#d3869b">0</span>; i &lt; ctrl.threadiness; i<span style="color:#fe8019">++</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">go</span> wait.<span style="color:#fabd2f">Until</span>(<span style="color:#fe8019">func</span>() { ctrl.<span style="color:#fabd2f">runClaimWorker</span>(ctx) }, time.Second, ctx.<span style="color:#fabd2f">Done</span>())
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">go</span> wait.<span style="color:#fabd2f">Until</span>(<span style="color:#fe8019">func</span>() { ctrl.<span style="color:#fabd2f">runVolumeWorker</span>(ctx) }, time.Second, ctx.<span style="color:#fabd2f">Done</span>())
+</span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">&lt;-</span>ctx.<span style="color:#50fa7b">Done</span>()
+</span></span><span style="display:flex;"><span>		logger.<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Started provisioner controller&#34;</span>, <span style="color:#b8bb26">&#34;component&#34;</span>, ctrl.component)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">&lt;-</span>ctx.<span style="color:#fabd2f">Done</span>()
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">go</span> ctrl.volumeStore.<span style="color:#50fa7b">Run</span>(ctx, DefaultThreadiness)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">go</span> ctrl.volumeStore.<span style="color:#fabd2f">Run</span>(ctx, DefaultThreadiness)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	logger <span style="color:#ff79c6">:=</span> klog.<span style="color:#50fa7b">FromContext</span>(ctx)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 支持多实例，leader election      </span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> ctrl.leaderElection {
-</span></span><span style="display:flex;"><span>		rl, err <span style="color:#ff79c6">:=</span> resourcelock.<span style="color:#50fa7b">New</span>(resourcelock.LeasesResourceLock,
+</span></span><span style="display:flex;"><span>	logger <span style="color:#fe8019">:=</span> klog.<span style="color:#fabd2f">FromContext</span>(ctx)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 支持多实例，leader election      </span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> ctrl.leaderElection {
+</span></span><span style="display:flex;"><span>		rl, err <span style="color:#fe8019">:=</span> resourcelock.<span style="color:#fabd2f">New</span>(resourcelock.LeasesResourceLock,
 </span></span><span style="display:flex;"><span>			ctrl.leaderElectionNamespace,
-</span></span><span style="display:flex;"><span>			strings.<span style="color:#50fa7b">Replace</span>(ctrl.provisionerName, <span style="color:#f1fa8c">&#34;/&#34;</span>, <span style="color:#f1fa8c">&#34;-&#34;</span>, <span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>),
-</span></span><span style="display:flex;"><span>			ctrl.client.<span style="color:#50fa7b">CoreV1</span>(),
-</span></span><span style="display:flex;"><span>			ctrl.client.<span style="color:#50fa7b">CoordinationV1</span>(),
+</span></span><span style="display:flex;"><span>			strings.<span style="color:#fabd2f">Replace</span>(ctrl.provisionerName, <span style="color:#b8bb26">&#34;/&#34;</span>, <span style="color:#b8bb26">&#34;-&#34;</span>, <span style="color:#fe8019">-</span><span style="color:#d3869b">1</span>),
+</span></span><span style="display:flex;"><span>			ctrl.client.<span style="color:#fabd2f">CoreV1</span>(),
+</span></span><span style="display:flex;"><span>			ctrl.client.<span style="color:#fabd2f">CoordinationV1</span>(),
 </span></span><span style="display:flex;"><span>			resourcelock.ResourceLockConfig{
 </span></span><span style="display:flex;"><span>				Identity:      ctrl.id,
 </span></span><span style="display:flex;"><span>				EventRecorder: ctrl.eventRecorder,
 </span></span><span style="display:flex;"><span>			})
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			logger.<span style="color:#50fa7b">Error</span>(err, <span style="color:#f1fa8c">&#34;Error creating lock&#34;</span>)
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">FlushAndExit</span>(klog.ExitFlushTimeout, <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			logger.<span style="color:#fabd2f">Error</span>(err, <span style="color:#b8bb26">&#34;Error creating lock&#34;</span>)
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">FlushAndExit</span>(klog.ExitFlushTimeout, <span style="color:#d3869b">1</span>)
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		leaderelection.<span style="color:#50fa7b">RunOrDie</span>(ctx, leaderelection.LeaderElectionConfig{
+</span></span><span style="display:flex;"><span>		leaderelection.<span style="color:#fabd2f">RunOrDie</span>(ctx, leaderelection.LeaderElectionConfig{
 </span></span><span style="display:flex;"><span>			Lock:          rl,
 </span></span><span style="display:flex;"><span>			LeaseDuration: ctrl.leaseDuration,
 </span></span><span style="display:flex;"><span>			RenewDeadline: ctrl.renewDeadline,
 </span></span><span style="display:flex;"><span>			RetryPeriod:   ctrl.retryPeriod,
 </span></span><span style="display:flex;"><span>			Callbacks: leaderelection.LeaderCallbacks{
-</span></span><span style="display:flex;"><span>				OnStartedLeading: run, <span style="color:#6272a4">// 实例成为 leader 后 执行run</span>
-</span></span><span style="display:flex;"><span>				OnStoppedLeading: <span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>					logger.<span style="color:#50fa7b">Error</span>(<span style="color:#ff79c6">nil</span>, <span style="color:#f1fa8c">&#34;Leaderelection lost&#34;</span>)
-</span></span><span style="display:flex;"><span>					klog.<span style="color:#50fa7b">FlushAndExit</span>(klog.ExitFlushTimeout, <span style="color:#bd93f9">1</span>)
+</span></span><span style="display:flex;"><span>				OnStartedLeading: run, <span style="color:#928374;font-style:italic">// 实例成为 leader 后 执行run</span>
+</span></span><span style="display:flex;"><span>				OnStoppedLeading: <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>					logger.<span style="color:#fabd2f">Error</span>(<span style="color:#fe8019">nil</span>, <span style="color:#b8bb26">&#34;Leaderelection lost&#34;</span>)
+</span></span><span style="display:flex;"><span>					klog.<span style="color:#fabd2f">FlushAndExit</span>(klog.ExitFlushTimeout, <span style="color:#d3869b">1</span>)
 </span></span><span style="display:flex;"><span>				},
 </span></span><span style="display:flex;"><span>			},
 </span></span><span style="display:flex;"><span>		})
-</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">panic</span>(<span style="color:#f1fa8c">&#34;unreachable&#34;</span>)
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 单实例运行</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#50fa7b">run</span>(ctx)
+</span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;unreachable&#34;</span>)
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 单实例运行</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">run</span>(ctx)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
@@ -535,12 +535,12 @@
 <ul>
 <li>给 pv 增加了 Finalizer： <code>external-provisioner.volume.kubernetes.io/finalizer</code>。</li>
 <li>给 pv 增加
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>.metadata.annotations<span style="color:#ff79c6">[</span><span style="color:#f1fa8c">&#34;pv.kubernetes.io/provisioned-by&#34;</span><span style="color:#ff79c6">]</span> <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;&lt;external provisioner&gt;&#34;</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>.metadata.annotations<span style="color:#fe8019">[</span><span style="color:#b8bb26">&#34;pv.kubernetes.io/provisioned-by&#34;</span><span style="color:#fe8019">]</span> <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;&lt;external provisioner&gt;&#34;</span>
 </span></span></code></pre></div>这条记录。</li>
 <li>交给 VolumeStore, 其会随后把 PV 写入到 ETCD 中，如下是接口 VolumeStore 接口的定义：
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> VolumeStore <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">StoreVolume</span>(claim <span style="color:#ff79c6">*</span>v1.PersistentVolumeClaim, volume <span style="color:#ff79c6">*</span>v1.PersistentVolume) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Run</span>(ctx context.Context, threadiness <span style="color:#8be9fd">int</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> VolumeStore <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">StoreVolume</span>(claim <span style="color:#fe8019">*</span>v1.PersistentVolumeClaim, volume <span style="color:#fe8019">*</span>v1.PersistentVolume) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Run</span>(ctx context.Context, threadiness <span style="color:#fabd2f">int</span>)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div></li>
 </ul>
@@ -548,248 +548,248 @@
 </ul>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (ctrl <span style="color:#ff79c6">*</span>ProvisionController) <span style="color:#50fa7b">syncClaim</span>(ctx context.Context, obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>	claim, ok <span style="color:#ff79c6">:=</span> obj.(<span style="color:#ff79c6">*</span>v1.PersistentVolumeClaim)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;expected claim but got %+v&#34;</span>, obj)
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (ctrl <span style="color:#fe8019">*</span>ProvisionController) <span style="color:#fabd2f">syncClaim</span>(ctx context.Context, obj <span style="color:#fe8019">interface</span>{}) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>	claim, ok <span style="color:#fe8019">:=</span> obj.(<span style="color:#fe8019">*</span>v1.PersistentVolumeClaim)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;expected claim but got %+v&#34;</span>, obj)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> ctrl.<span style="color:#50fa7b">delayProvisioningIfRecentlyInfeasible</span>(claim); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> ctrl.<span style="color:#fabd2f">delayProvisioningIfRecentlyInfeasible</span>(claim); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	should, err <span style="color:#ff79c6">:=</span> ctrl.<span style="color:#50fa7b">shouldProvision</span>(ctx, claim)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		ctrl.<span style="color:#50fa7b">updateProvisionStats</span>(claim, err, time.Time{})
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> err
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> should {
-</span></span><span style="display:flex;"><span>		startTime <span style="color:#ff79c6">:=</span> time.<span style="color:#50fa7b">Now</span>()
-</span></span><span style="display:flex;"><span>		logger <span style="color:#ff79c6">:=</span> klog.<span style="color:#50fa7b">FromContext</span>(ctx)
+</span></span><span style="display:flex;"><span>	should, err <span style="color:#fe8019">:=</span> ctrl.<span style="color:#fabd2f">shouldProvision</span>(ctx, claim)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		ctrl.<span style="color:#fabd2f">updateProvisionStats</span>(claim, err, time.Time{})
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> err
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span> should {
+</span></span><span style="display:flex;"><span>		startTime <span style="color:#fe8019">:=</span> time.<span style="color:#fabd2f">Now</span>()
+</span></span><span style="display:flex;"><span>		logger <span style="color:#fe8019">:=</span> klog.<span style="color:#fabd2f">FromContext</span>(ctx)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		status, err <span style="color:#ff79c6">:=</span> ctrl.<span style="color:#50fa7b">provisionClaimOperation</span>(ctx, claim)
-</span></span><span style="display:flex;"><span>		ctrl.<span style="color:#50fa7b">updateProvisionStats</span>(claim, err, startTime)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">||</span> status <span style="color:#ff79c6">==</span> ProvisioningFinished {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">switch</span> err {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> <span style="color:#ff79c6">nil</span>:
-</span></span><span style="display:flex;"><span>				logger.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Claim processing succeeded, removing PVC from claims in progress&#34;</span>, <span style="color:#f1fa8c">&#34;claimUID&#34;</span>, claim.UID)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> errStopProvision:
-</span></span><span style="display:flex;"><span>				logger.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Stop provisioning, removing PVC from claims in progress&#34;</span>, <span style="color:#f1fa8c">&#34;claimUID&#34;</span>, claim.UID)
-</span></span><span style="display:flex;"><span>				err = <span style="color:#ff79c6">nil</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">default</span>:
-</span></span><span style="display:flex;"><span>				logger.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Final error received, removing PVC from claims in progress&#34;</span>, <span style="color:#f1fa8c">&#34;claimUID&#34;</span>, claim.UID)
+</span></span><span style="display:flex;"><span>		status, err <span style="color:#fe8019">:=</span> ctrl.<span style="color:#fabd2f">provisionClaimOperation</span>(ctx, claim)
+</span></span><span style="display:flex;"><span>		ctrl.<span style="color:#fabd2f">updateProvisionStats</span>(claim, err, startTime)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span> status <span style="color:#fe8019">==</span> ProvisioningFinished {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">switch</span> err {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">case</span> <span style="color:#fe8019">nil</span>:
+</span></span><span style="display:flex;"><span>				logger.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">5</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Claim processing succeeded, removing PVC from claims in progress&#34;</span>, <span style="color:#b8bb26">&#34;claimUID&#34;</span>, claim.UID)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">case</span> errStopProvision:
+</span></span><span style="display:flex;"><span>				logger.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">5</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Stop provisioning, removing PVC from claims in progress&#34;</span>, <span style="color:#b8bb26">&#34;claimUID&#34;</span>, claim.UID)
+</span></span><span style="display:flex;"><span>				err = <span style="color:#fe8019">nil</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">default</span>:
+</span></span><span style="display:flex;"><span>				logger.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Final error received, removing PVC from claims in progress&#34;</span>, <span style="color:#b8bb26">&#34;claimUID&#34;</span>, claim.UID)
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			ctrl.claimsInProgress.<span style="color:#50fa7b">Delete</span>(<span style="color:#8be9fd;font-style:italic">string</span>(claim.UID))
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>			ctrl.claimsInProgress.<span style="color:#fabd2f">Delete</span>(<span style="color:#fabd2f">string</span>(claim.UID))
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> status <span style="color:#ff79c6">==</span> ProvisioningInBackground {
-</span></span><span style="display:flex;"><span>			logger.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">Info</span>(<span style="color:#f1fa8c">&#34;Temporary error received, adding PVC to claims in progress&#34;</span>, <span style="color:#f1fa8c">&#34;claimUID&#34;</span>, claim.UID)
-</span></span><span style="display:flex;"><span>			ctrl.claimsInProgress.<span style="color:#50fa7b">Store</span>(<span style="color:#8be9fd;font-style:italic">string</span>(claim.UID), claim)
-</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> status <span style="color:#fe8019">==</span> ProvisioningInBackground {
+</span></span><span style="display:flex;"><span>			logger.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">Info</span>(<span style="color:#b8bb26">&#34;Temporary error received, adding PVC to claims in progress&#34;</span>, <span style="color:#b8bb26">&#34;claimUID&#34;</span>, claim.UID)
+</span></span><span style="display:flex;"><span>			ctrl.claimsInProgress.<span style="color:#fabd2f">Store</span>(<span style="color:#fabd2f">string</span>(claim.UID), claim)
+</span></span><span style="display:flex;"><span>		} <span style="color:#fe8019">else</span> {
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// provisionClaimOperation attempts to provision a volume for the given claim.</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// Returns nil error only when the volume was provisioned (in which case it also returns ProvisioningFinished),</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// a normal error when the volume was not provisioned and provisioning should be retried (requeue the claim),</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// or the special errStopProvision when provisioning was impossible and no further attempts to provision should be tried.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (ctrl <span style="color:#ff79c6">*</span>ProvisionController) <span style="color:#50fa7b">provisionClaimOperation</span>(ctx context.Context, claim <span style="color:#ff79c6">*</span>v1.PersistentVolumeClaim) (ProvisioningState, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Most code here is identical to that found in controller.go of kube&#39;s PV controller...</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取该pvc中的storageclassName</span>
-</span></span><span style="display:flex;"><span>    claimClass <span style="color:#ff79c6">:=</span> util.<span style="color:#50fa7b">GetPersistentVolumeClaimClass</span>(claim)
-</span></span><span style="display:flex;"><span>    operation <span style="color:#ff79c6">:=</span> fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;provision %q class %q&#34;</span>, <span style="color:#50fa7b">claimToClaimKey</span>(claim), claimClass)
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;started&#34;</span>))
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// provisionClaimOperation attempts to provision a volume for the given claim.</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Returns nil error only when the volume was provisioned (in which case it also returns ProvisioningFinished),</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// a normal error when the volume was not provisioned and provisioning should be retried (requeue the claim),</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// or the special errStopProvision when provisioning was impossible and no further attempts to provision should be tried.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (ctrl <span style="color:#fe8019">*</span>ProvisionController) <span style="color:#fabd2f">provisionClaimOperation</span>(ctx context.Context, claim <span style="color:#fe8019">*</span>v1.PersistentVolumeClaim) (ProvisioningState, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Most code here is identical to that found in controller.go of kube&#39;s PV controller...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取该pvc中的storageclassName</span>
+</span></span><span style="display:flex;"><span>    claimClass <span style="color:#fe8019">:=</span> util.<span style="color:#fabd2f">GetPersistentVolumeClaimClass</span>(claim)
+</span></span><span style="display:flex;"><span>    operation <span style="color:#fe8019">:=</span> fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;provision %q class %q&#34;</span>, <span style="color:#fabd2f">claimToClaimKey</span>(claim), claimClass)
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;started&#34;</span>))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">//  A previous doProvisionClaim may just have finished while we were waiting for</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">//  the locks. Check that PV (with deterministic name) hasn&#39;t been provisioned</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">//  yet.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 因为是dynamic provision，所以pvName是动态生成的</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 其实就是pvc-&lt;pvc.UID&gt;</span>
-</span></span><span style="display:flex;"><span>    pvName <span style="color:#ff79c6">:=</span> ctrl.<span style="color:#50fa7b">getProvisionedVolumeNameForClaim</span>(claim)
-</span></span><span style="display:flex;"><span>    _, exists, err <span style="color:#ff79c6">:=</span> ctrl.volumes.<span style="color:#50fa7b">GetByKey</span>(pvName)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//已经存在该pvName这条记录了，表示已经创建了，直接返回，不需要进行后续的创建逻辑</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> exists {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// Volume has been already provisioned, nothing to do.</span>
-</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;persistentvolume %q already exists, skipping&#34;</span>, pvName))
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> ProvisioningFinished, errStopProvision
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">//  A previous doProvisionClaim may just have finished while we were waiting for</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">//  the locks. Check that PV (with deterministic name) hasn&#39;t been provisioned</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">//  yet.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 因为是dynamic provision，所以pvName是动态生成的</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 其实就是pvc-&lt;pvc.UID&gt;</span>
+</span></span><span style="display:flex;"><span>    pvName <span style="color:#fe8019">:=</span> ctrl.<span style="color:#fabd2f">getProvisionedVolumeNameForClaim</span>(claim)
+</span></span><span style="display:flex;"><span>    _, exists, err <span style="color:#fe8019">:=</span> ctrl.volumes.<span style="color:#fabd2f">GetByKey</span>(pvName)
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//已经存在该pvName这条记录了，表示已经创建了，直接返回，不需要进行后续的创建逻辑</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span> exists {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// Volume has been already provisioned, nothing to do.</span>
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;persistentvolume %q already exists, skipping&#34;</span>, pvName))
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> ProvisioningFinished, errStopProvision
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Prepare a claimRef to the claim early (to fail before a volume is</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// provisioned)</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建claimRef用于给PV使用</span>
-</span></span><span style="display:flex;"><span>    claimRef, err <span style="color:#ff79c6">:=</span> ref.<span style="color:#50fa7b">GetReference</span>(scheme.Scheme, claim)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;unexpected error getting claim reference: %v&#34;</span>, err))
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> ProvisioningNoChange, err
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Prepare a claimRef to the claim early (to fail before a volume is</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// provisioned)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 创建claimRef用于给PV使用</span>
+</span></span><span style="display:flex;"><span>    claimRef, err <span style="color:#fe8019">:=</span> ref.<span style="color:#fabd2f">GetReference</span>(scheme.Scheme, claim)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;unexpected error getting claim reference: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> ProvisioningNoChange, err
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Check if this provisioner can provision this claim.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">//  是否支持block volume</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err = ctrl.<span style="color:#50fa7b">canProvision</span>(ctx, claim); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        ctrl.eventRecorder.<span style="color:#50fa7b">Event</span>(claim, v1.EventTypeWarning, <span style="color:#f1fa8c">&#34;ProvisioningFailed&#34;</span>, err.<span style="color:#50fa7b">Error</span>())
-</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;failed to provision volume: %v&#34;</span>, err))
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> ProvisioningFinished, errStopProvision
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Check if this provisioner can provision this claim.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">//  是否支持block volume</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err = ctrl.<span style="color:#fabd2f">canProvision</span>(ctx, claim); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        ctrl.eventRecorder.<span style="color:#fabd2f">Event</span>(claim, v1.EventTypeWarning, <span style="color:#b8bb26">&#34;ProvisioningFailed&#34;</span>, err.<span style="color:#fabd2f">Error</span>())
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;failed to provision volume: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> ProvisioningFinished, errStopProvision
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// For any issues getting fields from StorageClass (including reclaimPolicy &amp; mountOptions),</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// retry the claim because the storageClass can be fixed/(re)created independently of the claim</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获得scObj</span>
-</span></span><span style="display:flex;"><span>    class, err <span style="color:#ff79c6">:=</span> ctrl.<span style="color:#50fa7b">getStorageClass</span>(claimClass)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;error getting claim&#39;s StorageClass&#39;s fields: %v&#34;</span>, err))
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> ProvisioningFinished, err
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// For any issues getting fields from StorageClass (including reclaimPolicy &amp; mountOptions),</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// retry the claim because the storageClass can be fixed/(re)created independently of the claim</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获得scObj</span>
+</span></span><span style="display:flex;"><span>    class, err <span style="color:#fe8019">:=</span> ctrl.<span style="color:#fabd2f">getStorageClass</span>(claimClass)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;error getting claim&#39;s StorageClass&#39;s fields: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> ProvisioningFinished, err
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 再次校验scObj是不是本次的external provisioner</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> !ctrl.<span style="color:#50fa7b">knownProvisioner</span>(class.Provisioner) {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// class.Provisioner has either changed since shouldProvision() or</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// annDynamicallyProvisioned contains different provisioner than</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// class.Provisioner.</span>
-</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;unknown provisioner %q requested in claim&#39;s StorageClass&#34;</span>, class.Provisioner))
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> ProvisioningFinished, errStopProvision
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 再次校验scObj是不是本次的external provisioner</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> !ctrl.<span style="color:#fabd2f">knownProvisioner</span>(class.Provisioner) {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// class.Provisioner has either changed since shouldProvision() or</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// annDynamicallyProvisioned contains different provisioner than</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// class.Provisioner.</span>
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;unknown provisioner %q requested in claim&#39;s StorageClass&#34;</span>, class.Provisioner))
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> ProvisioningFinished, errStopProvision
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> selectedNode <span style="color:#ff79c6">*</span>v1.Node
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Get SelectedNode</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取nodeName</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> nodeName, ok <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">getString</span>(claim.Annotations, annSelectedNode, annAlphaSelectedNode); ok {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> ctrl.nodeLister <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> { <span style="color:#6272a4">// 从informer cache中获取</span>
-</span></span><span style="display:flex;"><span>            selectedNode, err = ctrl.nodeLister.<span style="color:#50fa7b">Get</span>(nodeName)
-</span></span><span style="display:flex;"><span>        } <span style="color:#ff79c6">else</span> { <span style="color:#6272a4">// 直接从etcd中获取</span>
-</span></span><span style="display:flex;"><span>            selectedNode, err = ctrl.client.<span style="color:#50fa7b">CoreV1</span>().<span style="color:#50fa7b">Nodes</span>().<span style="color:#50fa7b">Get</span>(ctx, nodeName, metav1.GetOptions{}) <span style="color:#6272a4">// TODO (verult) cache Nodes</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">var</span> selectedNode <span style="color:#fe8019">*</span>v1.Node
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Get SelectedNode</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取nodeName</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> nodeName, ok <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">getString</span>(claim.Annotations, annSelectedNode, annAlphaSelectedNode); ok {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> ctrl.nodeLister <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> { <span style="color:#928374;font-style:italic">// 从informer cache中获取</span>
+</span></span><span style="display:flex;"><span>            selectedNode, err = ctrl.nodeLister.<span style="color:#fabd2f">Get</span>(nodeName)
+</span></span><span style="display:flex;"><span>        } <span style="color:#fe8019">else</span> { <span style="color:#928374;font-style:italic">// 直接从etcd中获取</span>
+</span></span><span style="display:flex;"><span>            selectedNode, err = ctrl.client.<span style="color:#fabd2f">CoreV1</span>().<span style="color:#fabd2f">Nodes</span>().<span style="color:#fabd2f">Get</span>(ctx, nodeName, metav1.GetOptions{}) <span style="color:#928374;font-style:italic">// TODO (verult) cache Nodes</span>
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>            err = fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to get target node: %v&#34;</span>, err)
-</span></span><span style="display:flex;"><span>            ctrl.eventRecorder.<span style="color:#50fa7b">Event</span>(claim, v1.EventTypeWarning, <span style="color:#f1fa8c">&#34;ProvisioningFailed&#34;</span>, err.<span style="color:#50fa7b">Error</span>())
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> ProvisioningNoChange, err
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>            err = fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;failed to get target node: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>            ctrl.eventRecorder.<span style="color:#fabd2f">Event</span>(claim, v1.EventTypeWarning, <span style="color:#b8bb26">&#34;ProvisioningFailed&#34;</span>, err.<span style="color:#fabd2f">Error</span>())
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> ProvisioningNoChange, err
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    options <span style="color:#ff79c6">:=</span> ProvisionOptions{
+</span></span><span style="display:flex;"><span>    options <span style="color:#fe8019">:=</span> ProvisionOptions{
 </span></span><span style="display:flex;"><span>        StorageClass: class,
 </span></span><span style="display:flex;"><span>        PVName:       pvName,
 </span></span><span style="display:flex;"><span>        PVC:          claim,
 </span></span><span style="display:flex;"><span>        SelectedNode: selectedNode,
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ctrl.eventRecorder.<span style="color:#50fa7b">Event</span>(claim, v1.EventTypeNormal, <span style="color:#f1fa8c">&#34;Provisioning&#34;</span>, fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;External provisioner is provisioning volume for claim %q&#34;</span>, <span style="color:#50fa7b">claimToClaimKey</span>(claim)))
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建PV</span>
-</span></span><span style="display:flex;"><span>    volume, result, err <span style="color:#ff79c6">:=</span> ctrl.provisioner.<span style="color:#50fa7b">Provision</span>(ctx, options)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> ierr, ok <span style="color:#ff79c6">:=</span> err.(<span style="color:#ff79c6">*</span>IgnoredError); ok {
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// Provision ignored, do nothing and hope another provisioner will provision it.</span>
-</span></span><span style="display:flex;"><span>            klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;volume provision ignored: %v&#34;</span>, ierr))
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> ProvisioningFinished, errStopProvision
+</span></span><span style="display:flex;"><span>    ctrl.eventRecorder.<span style="color:#fabd2f">Event</span>(claim, v1.EventTypeNormal, <span style="color:#b8bb26">&#34;Provisioning&#34;</span>, fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;External provisioner is provisioning volume for claim %q&#34;</span>, <span style="color:#fabd2f">claimToClaimKey</span>(claim)))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 创建PV</span>
+</span></span><span style="display:flex;"><span>    volume, result, err <span style="color:#fe8019">:=</span> ctrl.provisioner.<span style="color:#fabd2f">Provision</span>(ctx, options)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> ierr, ok <span style="color:#fe8019">:=</span> err.(<span style="color:#fe8019">*</span>IgnoredError); ok {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// Provision ignored, do nothing and hope another provisioner will provision it.</span>
+</span></span><span style="display:flex;"><span>            klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;volume provision ignored: %v&#34;</span>, ierr))
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> ProvisioningFinished, errStopProvision
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        err = fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to provision volume with StorageClass %q: %v&#34;</span>, claimClass, err)
-</span></span><span style="display:flex;"><span>        ctrl.eventRecorder.<span style="color:#50fa7b">Event</span>(claim, v1.EventTypeWarning, <span style="color:#f1fa8c">&#34;ProvisioningFailed&#34;</span>, err.<span style="color:#50fa7b">Error</span>())
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> _, ok <span style="color:#ff79c6">:=</span> claim.Annotations[annSelectedNode]; ok <span style="color:#ff79c6">&amp;&amp;</span> result <span style="color:#ff79c6">==</span> ProvisioningReschedule { <span style="color:#6272a4">// 需要进行重新schedule</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// For dynamic PV provisioning with delayed binding, the provisioner may fail</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// because the node is wrong (permanent error) or currently unusable (not enough</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// capacity). If the provisioner wants to give up scheduling with the currently</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// selected node, then it can ask for that by returning ProvisioningReschedule</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// as state.</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">//
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">            // `selectedNode` must be removed to notify scheduler to schedule again.</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">//  删除pvc的 .metadata.annotations[&#34;volume.kubernetes.io/selected-node&#34;],然后更新ETCD，好让kube-scheduler重新进行schedule</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> errLabel <span style="color:#ff79c6">:=</span> ctrl.<span style="color:#50fa7b">rescheduleProvisioning</span>(ctx, claim); errLabel <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>                klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;volume rescheduling failed: %v&#34;</span>, errLabel))
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// If unsetting that label fails in ctrl.rescheduleProvisioning, we</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// keep the volume in the work queue as if the provisioner had</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// returned ProvisioningFinished and simply try again later.</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> ProvisioningFinished, err
+</span></span><span style="display:flex;"><span>        err = fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;failed to provision volume with StorageClass %q: %v&#34;</span>, claimClass, err)
+</span></span><span style="display:flex;"><span>        ctrl.eventRecorder.<span style="color:#fabd2f">Event</span>(claim, v1.EventTypeWarning, <span style="color:#b8bb26">&#34;ProvisioningFailed&#34;</span>, err.<span style="color:#fabd2f">Error</span>())
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> _, ok <span style="color:#fe8019">:=</span> claim.Annotations[annSelectedNode]; ok <span style="color:#fe8019">&amp;&amp;</span> result <span style="color:#fe8019">==</span> ProvisioningReschedule { <span style="color:#928374;font-style:italic">// 需要进行重新schedule</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// For dynamic PV provisioning with delayed binding, the provisioner may fail</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// because the node is wrong (permanent error) or currently unusable (not enough</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// capacity). If the provisioner wants to give up scheduling with the currently</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// selected node, then it can ask for that by returning ProvisioningReschedule</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// as state.</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">//
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">            // `selectedNode` must be removed to notify scheduler to schedule again.</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">//  删除pvc的 .metadata.annotations[&#34;volume.kubernetes.io/selected-node&#34;],然后更新ETCD，好让kube-scheduler重新进行schedule</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> errLabel <span style="color:#fe8019">:=</span> ctrl.<span style="color:#fabd2f">rescheduleProvisioning</span>(ctx, claim); errLabel <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>                klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;volume rescheduling failed: %v&#34;</span>, errLabel))
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// If unsetting that label fails in ctrl.rescheduleProvisioning, we</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// keep the volume in the work queue as if the provisioner had</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// returned ProvisioningFinished and simply try again later.</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">return</span> ProvisioningFinished, err
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// Label was removed, stop working on the volume.</span>
-</span></span><span style="display:flex;"><span>            klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;volume rescheduled because: %v&#34;</span>, err))
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> ProvisioningFinished, errStopProvision
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// Label was removed, stop working on the volume.</span>
+</span></span><span style="display:flex;"><span>            klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;volume rescheduled because: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> ProvisioningFinished, errStopProvision
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// ProvisioningReschedule shouldn&#39;t have been returned for volumes without selected node,</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// but if we get it anyway, then treat it like ProvisioningFinished because we cannot</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// reschedule.</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> result <span style="color:#ff79c6">==</span> ProvisioningReschedule { <span style="color:#6272a4">// 把ProvisioningReschedule 修改为ProvisioningFinished</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// ProvisioningReschedule shouldn&#39;t have been returned for volumes without selected node,</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// but if we get it anyway, then treat it like ProvisioningFinished because we cannot</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// reschedule.</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> result <span style="color:#fe8019">==</span> ProvisioningReschedule { <span style="color:#928374;font-style:italic">// 把ProvisioningReschedule 修改为ProvisioningFinished</span>
 </span></span><span style="display:flex;"><span>            result = ProvisioningFinished
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> result, err
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> result, err
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;volume %q provisioned&#34;</span>, volume.Name))
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;volume %q provisioned&#34;</span>, volume.Name))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Set ClaimRef and the PV controller will bind and set annBoundByController for us</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 把生成的volume.spec.ClaimRef 赋值为pvc，即把pv和pvc绑定起来</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Set ClaimRef and the PV controller will bind and set annBoundByController for us</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 把生成的volume.spec.ClaimRef 赋值为pvc，即把pv和pvc绑定起来</span>
 </span></span><span style="display:flex;"><span>    volume.Spec.ClaimRef = claimRef
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Add external provisioner finalizer if it doesn&#39;t already have it</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 更新pv的finallizer, 添加external-provisioner.volume.kubernetes.io/finalizer</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> ctrl.addFinalizer <span style="color:#ff79c6">&amp;&amp;</span> !ctrl.<span style="color:#50fa7b">checkFinalizer</span>(volume, finalizerPV) {
-</span></span><span style="display:flex;"><span>        volume.ObjectMeta.Finalizers = <span style="color:#8be9fd;font-style:italic">append</span>(volume.ObjectMeta.Finalizers, finalizerPV)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Add external provisioner finalizer if it doesn&#39;t already have it</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 更新pv的finallizer, 添加external-provisioner.volume.kubernetes.io/finalizer</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> ctrl.addFinalizer <span style="color:#fe8019">&amp;&amp;</span> !ctrl.<span style="color:#fabd2f">checkFinalizer</span>(volume, finalizerPV) {
+</span></span><span style="display:flex;"><span>        volume.ObjectMeta.Finalizers = <span style="color:#fabd2f">append</span>(volume.ObjectMeta.Finalizers, finalizerPV)
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 设置pv的资源信息</span>
-</span></span><span style="display:flex;"><span>    metav1.<span style="color:#50fa7b">SetMetaDataAnnotation</span>(<span style="color:#ff79c6">&amp;</span>volume.ObjectMeta, annDynamicallyProvisioned, class.Provisioner)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 设置pv的资源信息</span>
+</span></span><span style="display:flex;"><span>    metav1.<span style="color:#fabd2f">SetMetaDataAnnotation</span>(<span style="color:#fe8019">&amp;</span>volume.ObjectMeta, annDynamicallyProvisioned, class.Provisioner)
 </span></span><span style="display:flex;"><span>    volume.Spec.StorageClassName = claimClass
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;succeeded&#34;</span>))
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 交给volumeStore,其会随后把PV写入到ETCD中</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> ctrl.volumeStore.<span style="color:#50fa7b">StoreVolume</span>(claim, volume); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> ProvisioningFinished, err
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;succeeded&#34;</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 交给volumeStore,其会随后把PV写入到ETCD中</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> ctrl.volumeStore.<span style="color:#fabd2f">StoreVolume</span>(claim, volume); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> ProvisioningFinished, err
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 更新本地cache</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err = ctrl.volumes.<span style="color:#50fa7b">Add</span>(volume); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        utilruntime.<span style="color:#50fa7b">HandleError</span>(err)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 更新本地cache</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err = ctrl.volumes.<span style="color:#fabd2f">Add</span>(volume); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        utilruntime.<span style="color:#fabd2f">HandleError</span>(err)
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> ProvisioningFinished, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> ProvisioningFinished, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// shouldProvision returns whether a claim should have a volume provisioned for</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// it, i.e. whether a Provision is &#34;desired&#34;</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (ctrl <span style="color:#ff79c6">*</span>ProvisionController) <span style="color:#50fa7b">shouldProvision</span>(ctx context.Context, claim <span style="color:#ff79c6">*</span>v1.PersistentVolumeClaim) (<span style="color:#8be9fd">bool</span>, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// PVC没有绑定PV,所以不需要创建PV                                                                    </span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> claim.Spec.VolumeName <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;&#34;</span> {                                                                     
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// shouldProvision returns whether a claim should have a volume provisioned for</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// it, i.e. whether a Provision is &#34;desired&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (ctrl <span style="color:#fe8019">*</span>ProvisionController) <span style="color:#fabd2f">shouldProvision</span>(ctx context.Context, claim <span style="color:#fe8019">*</span>v1.PersistentVolumeClaim) (<span style="color:#fabd2f">bool</span>, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// PVC没有绑定PV,所以不需要创建PV                                                                    </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> claim.Spec.VolumeName <span style="color:#fe8019">!=</span> <span style="color:#b8bb26">&#34;&#34;</span> {                                                                     
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 让第三方来检测是不是需要进行PV的创建</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> qualifier, ok <span style="color:#ff79c6">:=</span> ctrl.provisioner.(Qualifier); ok {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> !qualifier.<span style="color:#50fa7b">ShouldProvision</span>(ctx, claim) {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 让第三方来检测是不是需要进行PV的创建</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> qualifier, ok <span style="color:#fe8019">:=</span> ctrl.provisioner.(Qualifier); ok {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> !qualifier.<span style="color:#fabd2f">ShouldProvision</span>(ctx, claim) {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获得第三方的provisioner</span>
-</span></span><span style="display:flex;"><span>    provisioner, found <span style="color:#ff79c6">:=</span> claim.Annotations[annStorageProvisioner]
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> !found {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获得第三方的provisioner</span>
+</span></span><span style="display:flex;"><span>    provisioner, found <span style="color:#fe8019">:=</span> claim.Annotations[annStorageProvisioner]
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> !found {
 </span></span><span style="display:flex;"><span>        provisioner, found = claim.Annotations[annBetaStorageProvisioner]
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> found {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> ctrl.<span style="color:#50fa7b">knownProvisioner</span>(provisioner) { <span style="color:#6272a4">// 现判断这个pvc是不是该自己来处理</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 获取scObj</span>
-</span></span><span style="display:flex;"><span>            claimClass <span style="color:#ff79c6">:=</span> util.<span style="color:#50fa7b">GetPersistentVolumeClaimClass</span>(claim)
-</span></span><span style="display:flex;"><span>            class, err <span style="color:#ff79c6">:=</span> ctrl.<span style="color:#50fa7b">getStorageClass</span>(claimClass)
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, err
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> found {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> ctrl.<span style="color:#fabd2f">knownProvisioner</span>(provisioner) { <span style="color:#928374;font-style:italic">// 现判断这个pvc是不是该自己来处理</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 获取scObj</span>
+</span></span><span style="display:flex;"><span>            claimClass <span style="color:#fe8019">:=</span> util.<span style="color:#fabd2f">GetPersistentVolumeClaimClass</span>(claim)
+</span></span><span style="display:flex;"><span>            class, err <span style="color:#fe8019">:=</span> ctrl.<span style="color:#fabd2f">getStorageClass</span>(claimClass)
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, err
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 如果sc的volumebindingmode是WaitForFirstConsumer， 那就需要等到pvc被pod消费的时候才可以创建</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> class.VolumeBindingMode <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> <span style="color:#ff79c6">*</span>class.VolumeBindingMode <span style="color:#ff79c6">==</span> storage.VolumeBindingWaitForFirstConsumer {
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// When claim is in delay binding mode, annSelectedNode is</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// required to provision volume.</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// Though PV controller set annStorageProvisioner only when</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// annSelectedNode is set, but provisioner may remove</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// annSelectedNode to notify scheduler to reschedule again.</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">//  再次做 volume.kubernetes.io/selected-node 判断，如果这个值设置了， 是需要进行创建PV的操作的</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">if</span> selectedNode, ok <span style="color:#ff79c6">:=</span> claim.Annotations[annSelectedNode]; ok <span style="color:#ff79c6">&amp;&amp;</span> selectedNode <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
-</span></span><span style="display:flex;"><span>                    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 如果sc的volumebindingmode是WaitForFirstConsumer， 那就需要等到pvc被pod消费的时候才可以创建</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> class.VolumeBindingMode <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span> <span style="color:#fe8019">*</span>class.VolumeBindingMode <span style="color:#fe8019">==</span> storage.VolumeBindingWaitForFirstConsumer {
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// When claim is in delay binding mode, annSelectedNode is</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// required to provision volume.</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// Though PV controller set annStorageProvisioner only when</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// annSelectedNode is set, but provisioner may remove</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// annSelectedNode to notify scheduler to reschedule again.</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">//  再次做 volume.kubernetes.io/selected-node 判断，如果这个值设置了， 是需要进行创建PV的操作的</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">if</span> selectedNode, ok <span style="color:#fe8019">:=</span> claim.Annotations[annSelectedNode]; ok <span style="color:#fe8019">&amp;&amp;</span> selectedNode <span style="color:#fe8019">!=</span> <span style="color:#b8bb26">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>                    <span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>                }
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// 否则，就不需要</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// 否则，就不需要</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 只要不是WaitForFirstConsumer 都需要进行创建</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 只要不是WaitForFirstConsumer 都需要进行创建</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
@@ -804,172 +804,172 @@
 </ul>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// syncVolume checks if the volume should be deleted and deletes if so</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (ctrl <span style="color:#ff79c6">*</span>ProvisionController) <span style="color:#50fa7b">syncVolume</span>(ctx context.Context, obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>    volume, ok <span style="color:#ff79c6">:=</span> obj.(<span style="color:#ff79c6">*</span>v1.PersistentVolume)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> !ok {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;expected volume but got %+v&#34;</span>, obj)
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// syncVolume checks if the volume should be deleted and deletes if so</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (ctrl <span style="color:#fe8019">*</span>ProvisionController) <span style="color:#fabd2f">syncVolume</span>(ctx context.Context, obj <span style="color:#fe8019">interface</span>{}) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>    volume, ok <span style="color:#fe8019">:=</span> obj.(<span style="color:#fe8019">*</span>v1.PersistentVolume)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> !ok {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;expected volume but got %+v&#34;</span>, obj)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    volume, err <span style="color:#ff79c6">:=</span> ctrl.<span style="color:#50fa7b">handleProtectionFinalizer</span>(ctx, volume)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>    volume, err <span style="color:#fe8019">:=</span> ctrl.<span style="color:#fabd2f">handleProtectionFinalizer</span>(ctx, volume)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>                                                                                                                                            
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> ctrl.<span style="color:#50fa7b">shouldDelete</span>(ctx, volume) {                                                                                                     
-</span></span><span style="display:flex;"><span>        startTime <span style="color:#ff79c6">:=</span> time.<span style="color:#50fa7b">Now</span>()                                                                                                             
-</span></span><span style="display:flex;"><span>        err = ctrl.<span style="color:#50fa7b">deleteVolumeOperation</span>(ctx, volume)
-</span></span><span style="display:flex;"><span>        ctrl.<span style="color:#50fa7b">updateDeleteStats</span>(volume, err, startTime)
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> ctrl.<span style="color:#fabd2f">shouldDelete</span>(ctx, volume) {                                                                                                     
+</span></span><span style="display:flex;"><span>        startTime <span style="color:#fe8019">:=</span> time.<span style="color:#fabd2f">Now</span>()                                                                                                             
+</span></span><span style="display:flex;"><span>        err = ctrl.<span style="color:#fabd2f">deleteVolumeOperation</span>(ctx, volume)
+</span></span><span style="display:flex;"><span>        ctrl.<span style="color:#fabd2f">updateDeleteStats</span>(volume, err, startTime)
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (ctrl <span style="color:#ff79c6">*</span>ProvisionController) <span style="color:#50fa7b">handleProtectionFinalizer</span>(ctx context.Context, volume <span style="color:#ff79c6">*</span>v1.PersistentVolume) (<span style="color:#ff79c6">*</span>v1.PersistentVolume, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> modifiedFinalizers []<span style="color:#8be9fd">string</span>  
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> modified <span style="color:#8be9fd">bool</span>                
-</span></span><span style="display:flex;"><span>    reclaimPolicy <span style="color:#ff79c6">:=</span> volume.Spec.PersistentVolumeReclaimPolicy
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Check if the `addFinalizer` config option is disabled, i.e, rollback scenario, or the reclaim policy is changed</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// to `Retain` or `Recycle`</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> !ctrl.addFinalizer <span style="color:#ff79c6">||</span> reclaimPolicy <span style="color:#ff79c6">==</span> v1.PersistentVolumeReclaimRetain <span style="color:#ff79c6">||</span> reclaimPolicy <span style="color:#ff79c6">==</span> v1.PersistentVolumeReclaimRecycle {
-</span></span><span style="display:flex;"><span>        modifiedFinalizers, modified = <span style="color:#50fa7b">removeFinalizer</span>(volume.ObjectMeta.Finalizers, finalizerPV)
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (ctrl <span style="color:#fe8019">*</span>ProvisionController) <span style="color:#fabd2f">handleProtectionFinalizer</span>(ctx context.Context, volume <span style="color:#fe8019">*</span>v1.PersistentVolume) (<span style="color:#fe8019">*</span>v1.PersistentVolume, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">var</span> modifiedFinalizers []<span style="color:#fabd2f">string</span>  
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">var</span> modified <span style="color:#fabd2f">bool</span>                
+</span></span><span style="display:flex;"><span>    reclaimPolicy <span style="color:#fe8019">:=</span> volume.Spec.PersistentVolumeReclaimPolicy
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Check if the `addFinalizer` config option is disabled, i.e, rollback scenario, or the reclaim policy is changed</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// to `Retain` or `Recycle`</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> !ctrl.addFinalizer <span style="color:#fe8019">||</span> reclaimPolicy <span style="color:#fe8019">==</span> v1.PersistentVolumeReclaimRetain <span style="color:#fe8019">||</span> reclaimPolicy <span style="color:#fe8019">==</span> v1.PersistentVolumeReclaimRecycle {
+</span></span><span style="display:flex;"><span>        modifiedFinalizers, modified = <span style="color:#fabd2f">removeFinalizer</span>(volume.ObjectMeta.Finalizers, finalizerPV)
 </span></span><span style="display:flex;"><span>    }            
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Add the finalizer only if `addFinalizer` config option is enabled, finalizer doesn&#39;t exist and PV is not already</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// under deletion.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> ctrl.addFinalizer <span style="color:#ff79c6">&amp;&amp;</span> reclaimPolicy <span style="color:#ff79c6">==</span> v1.PersistentVolumeReclaimDelete <span style="color:#ff79c6">&amp;&amp;</span> volume.DeletionTimestamp <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        modifiedFinalizers, modified = <span style="color:#50fa7b">addFinalizer</span>(volume.ObjectMeta.Finalizers, finalizerPV)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Add the finalizer only if `addFinalizer` config option is enabled, finalizer doesn&#39;t exist and PV is not already</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// under deletion.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> ctrl.addFinalizer <span style="color:#fe8019">&amp;&amp;</span> reclaimPolicy <span style="color:#fe8019">==</span> v1.PersistentVolumeReclaimDelete <span style="color:#fe8019">&amp;&amp;</span> volume.DeletionTimestamp <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        modifiedFinalizers, modified = <span style="color:#fabd2f">addFinalizer</span>(volume.ObjectMeta.Finalizers, finalizerPV)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> modified {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> modified {
 </span></span><span style="display:flex;"><span>        volume.ObjectMeta.Finalizers = modifiedFinalizers
-</span></span><span style="display:flex;"><span>        newVolume, err <span style="color:#ff79c6">:=</span> ctrl.<span style="color:#50fa7b">updatePersistentVolume</span>(ctx, volume)
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> volume, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to modify finalizers to %+v on volume %s err: %+v&#34;</span>, modifiedFinalizers, volume.Name, err)
+</span></span><span style="display:flex;"><span>        newVolume, err <span style="color:#fe8019">:=</span> ctrl.<span style="color:#fabd2f">updatePersistentVolume</span>(ctx, volume)
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> volume, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;failed to modify finalizers to %+v on volume %s err: %+v&#34;</span>, modifiedFinalizers, volume.Name, err)
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>        volume = newVolume
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> volume, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> volume, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}   
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// deleteVolumeOperation attempts to delete the volume backing the given</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// volume. Returns error, which indicates whether deletion should be retried</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// (requeue the volume) or not</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (ctrl <span style="color:#ff79c6">*</span>ProvisionController) <span style="color:#50fa7b">deleteVolumeOperation</span>(ctx context.Context, volume <span style="color:#ff79c6">*</span>v1.PersistentVolume) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>    operation <span style="color:#ff79c6">:=</span> fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;delete %q&#34;</span>, volume.Name)
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;started&#34;</span>))
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 调用 external provisioner 删除PV</span>
-</span></span><span style="display:flex;"><span>    err <span style="color:#ff79c6">:=</span> ctrl.provisioner.<span style="color:#50fa7b">Delete</span>(ctx, volume)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> ierr, ok <span style="color:#ff79c6">:=</span> err.(<span style="color:#ff79c6">*</span>IgnoredError); ok {
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// Delete ignored, do nothing and hope another provisioner will delete it.</span>
-</span></span><span style="display:flex;"><span>            klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;volume deletion ignored: %v&#34;</span>, ierr))
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// deleteVolumeOperation attempts to delete the volume backing the given</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// volume. Returns error, which indicates whether deletion should be retried</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// (requeue the volume) or not</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (ctrl <span style="color:#fe8019">*</span>ProvisionController) <span style="color:#fabd2f">deleteVolumeOperation</span>(ctx context.Context, volume <span style="color:#fe8019">*</span>v1.PersistentVolume) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>    operation <span style="color:#fe8019">:=</span> fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;delete %q&#34;</span>, volume.Name)
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;started&#34;</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 调用 external provisioner 删除PV</span>
+</span></span><span style="display:flex;"><span>    err <span style="color:#fe8019">:=</span> ctrl.provisioner.<span style="color:#fabd2f">Delete</span>(ctx, volume)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> ierr, ok <span style="color:#fe8019">:=</span> err.(<span style="color:#fe8019">*</span>IgnoredError); ok {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// Delete ignored, do nothing and hope another provisioner will delete it.</span>
+</span></span><span style="display:flex;"><span>            klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;volume deletion ignored: %v&#34;</span>, ierr))
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// Delete failed, emit an event.</span>
-</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">Error</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;volume deletion failed: %v&#34;</span>, err))
-</span></span><span style="display:flex;"><span>        ctrl.eventRecorder.<span style="color:#50fa7b">Event</span>(volume, v1.EventTypeWarning, <span style="color:#f1fa8c">&#34;VolumeFailedDelete&#34;</span>, err.<span style="color:#50fa7b">Error</span>())
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// Delete failed, emit an event.</span>
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#fabd2f">Error</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;volume deletion failed: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>        ctrl.eventRecorder.<span style="color:#fabd2f">Event</span>(volume, v1.EventTypeWarning, <span style="color:#b8bb26">&#34;VolumeFailedDelete&#34;</span>, err.<span style="color:#fabd2f">Error</span>())
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;volume deleted&#34;</span>))
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;volume deleted&#34;</span>))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Delete the volume</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">//  把ETCD中的PV记录删除</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err = ctrl.client.<span style="color:#50fa7b">CoreV1</span>().<span style="color:#50fa7b">PersistentVolumes</span>().<span style="color:#50fa7b">Delete</span>(ctx, volume.Name, metav1.DeleteOptions{}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// Oops, could not delete the volume and therefore the controller will</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// try to delete the volume again on next update.</span>
-</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;failed to delete persistentvolume: %v&#34;</span>, err))
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Delete the volume</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">//  把ETCD中的PV记录删除</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err = ctrl.client.<span style="color:#fabd2f">CoreV1</span>().<span style="color:#fabd2f">PersistentVolumes</span>().<span style="color:#fabd2f">Delete</span>(ctx, volume.Name, metav1.DeleteOptions{}); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// Oops, could not delete the volume and therefore the controller will</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// try to delete the volume again on next update.</span>
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;failed to delete persistentvolume: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 移除external-provisioner.volume.kubernetes.io/finalizer 这个finalizer</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> ctrl.addFinalizer {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(volume.ObjectMeta.Finalizers) &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// Remove external-provisioner finalizer</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 移除external-provisioner.volume.kubernetes.io/finalizer 这个finalizer</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> ctrl.addFinalizer {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(volume.ObjectMeta.Finalizers) &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// Remove external-provisioner finalizer</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// need to get the pv again because the delete has updated the object with a deletion timestamp</span>
-</span></span><span style="display:flex;"><span>            volumeObj, exists, err <span style="color:#ff79c6">:=</span> ctrl.volumes.<span style="color:#50fa7b">GetByKey</span>(volume.Name)
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>                klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;failed to get persistentvolume to update finalizer: %v&#34;</span>, err))
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// need to get the pv again because the delete has updated the object with a deletion timestamp</span>
+</span></span><span style="display:flex;"><span>            volumeObj, exists, err <span style="color:#fe8019">:=</span> ctrl.volumes.<span style="color:#fabd2f">GetByKey</span>(volume.Name)
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>                klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;failed to get persistentvolume to update finalizer: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> !exists {
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// If the volume is not found return</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> !exists {
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// If the volume is not found return</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            newVolume, ok <span style="color:#ff79c6">:=</span> volumeObj.(<span style="color:#ff79c6">*</span>v1.PersistentVolume)
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> !ok {
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span> fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;expected volume but got %+v&#34;</span>, volumeObj)
+</span></span><span style="display:flex;"><span>            newVolume, ok <span style="color:#fe8019">:=</span> volumeObj.(<span style="color:#fe8019">*</span>v1.PersistentVolume)
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> !ok {
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;expected volume but got %+v&#34;</span>, volumeObj)
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            finalizers, modified <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">removeFinalizer</span>(newVolume.ObjectMeta.Finalizers, finalizerPV)
+</span></span><span style="display:flex;"><span>            finalizers, modified <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">removeFinalizer</span>(newVolume.ObjectMeta.Finalizers, finalizerPV)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// Only update the finalizers if we actually removed something</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> modified {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// Only update the finalizers if we actually removed something</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> modified {
 </span></span><span style="display:flex;"><span>                newVolume.ObjectMeta.Finalizers = finalizers
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">if</span> _, err = ctrl.client.<span style="color:#50fa7b">CoreV1</span>().<span style="color:#50fa7b">PersistentVolumes</span>().<span style="color:#50fa7b">Update</span>(ctx, newVolume, metav1.UpdateOptions{}); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>                    <span style="color:#ff79c6">if</span> !apierrs.<span style="color:#50fa7b">IsNotFound</span>(err) {
-</span></span><span style="display:flex;"><span>                        <span style="color:#6272a4">// Couldn&#39;t remove finalizer and the object still exists, the controller may</span>
-</span></span><span style="display:flex;"><span>                        <span style="color:#6272a4">// try to remove the finalizer again on the next update</span>
-</span></span><span style="display:flex;"><span>                        klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;failed to remove finalizer for persistentvolume: %v&#34;</span>, err))
-</span></span><span style="display:flex;"><span>                        <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">if</span> _, err = ctrl.client.<span style="color:#fabd2f">CoreV1</span>().<span style="color:#fabd2f">PersistentVolumes</span>().<span style="color:#fabd2f">Update</span>(ctx, newVolume, metav1.UpdateOptions{}); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>                    <span style="color:#fe8019">if</span> !apierrs.<span style="color:#fabd2f">IsNotFound</span>(err) {
+</span></span><span style="display:flex;"><span>                        <span style="color:#928374;font-style:italic">// Couldn&#39;t remove finalizer and the object still exists, the controller may</span>
+</span></span><span style="display:flex;"><span>                        <span style="color:#928374;font-style:italic">// try to remove the finalizer again on the next update</span>
+</span></span><span style="display:flex;"><span>                        klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;failed to remove finalizer for persistentvolume: %v&#34;</span>, err))
+</span></span><span style="display:flex;"><span>                        <span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>                    }
 </span></span><span style="display:flex;"><span>                }
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;persistentvolume deleted&#34;</span>))
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 本地缓存中删除PV的记录</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err = ctrl.volumes.<span style="color:#50fa7b">Delete</span>(volume); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        utilruntime.<span style="color:#50fa7b">HandleError</span>(err)
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;persistentvolume deleted&#34;</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 本地缓存中删除PV的记录</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err = ctrl.volumes.<span style="color:#fabd2f">Delete</span>(volume); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        utilruntime.<span style="color:#fabd2f">HandleError</span>(err)
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Info</span>(<span style="color:#50fa7b">logOperation</span>(operation, <span style="color:#f1fa8c">&#34;succeeded&#34;</span>))
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">Info</span>(<span style="color:#fabd2f">logOperation</span>(operation, <span style="color:#b8bb26">&#34;succeeded&#34;</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// shouldDelete returns whether a volume should have its backing volume</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// deleted, i.e. whether a Delete is &#34;desired&#34;</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (ctrl <span style="color:#ff79c6">*</span>ProvisionController) <span style="color:#50fa7b">shouldDelete</span>(ctx context.Context, volume <span style="color:#ff79c6">*</span>v1.PersistentVolume) <span style="color:#8be9fd">bool</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 从第三方的角度来看是不是要删除PV</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> deletionGuard, ok <span style="color:#ff79c6">:=</span> ctrl.provisioner.(DeletionGuard); ok {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> !deletionGuard.<span style="color:#50fa7b">ShouldDelete</span>(ctx, volume) {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// shouldDelete returns whether a volume should have its backing volume</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// deleted, i.e. whether a Delete is &#34;desired&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (ctrl <span style="color:#fe8019">*</span>ProvisionController) <span style="color:#fabd2f">shouldDelete</span>(ctx context.Context, volume <span style="color:#fe8019">*</span>v1.PersistentVolume) <span style="color:#fabd2f">bool</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 从第三方的角度来看是不是要删除PV</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> deletionGuard, ok <span style="color:#fe8019">:=</span> ctrl.provisioner.(DeletionGuard); ok {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> !deletionGuard.<span style="color:#fabd2f">ShouldDelete</span>(ctx, volume) {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 如果有finalizer保护</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> ctrl.addFinalizer {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// finalizer已经移除，DeletionTimestamp不为nil，说明删除是完成了的</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> !ctrl.<span style="color:#50fa7b">checkFinalizer</span>(volume, finalizerPV) <span style="color:#ff79c6">&amp;&amp;</span> volume.ObjectMeta.DeletionTimestamp <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// The finalizer was removed, i.e. the volume has been already deleted.</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 如果有finalizer保护</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> ctrl.addFinalizer {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// finalizer已经移除，DeletionTimestamp不为nil，说明删除是完成了的</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> !ctrl.<span style="color:#fabd2f">checkFinalizer</span>(volume, finalizerPV) <span style="color:#fe8019">&amp;&amp;</span> volume.ObjectMeta.DeletionTimestamp <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// The finalizer was removed, i.e. the volume has been already deleted.</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>    } <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> volume.ObjectMeta.DeletionTimestamp <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>    } <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> volume.ObjectMeta.DeletionTimestamp <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 状态不是released</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> volume.Status.Phase <span style="color:#ff79c6">!=</span> v1.VolumeReleased {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 状态不是released</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> volume.Status.Phase <span style="color:#fe8019">!=</span> v1.VolumeReleased {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 删除策略不是Delete</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> volume.Spec.PersistentVolumeReclaimPolicy <span style="color:#ff79c6">!=</span> v1.PersistentVolumeReclaimDelete {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 删除策略不是Delete</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> volume.Spec.PersistentVolumeReclaimPolicy <span style="color:#fe8019">!=</span> v1.PersistentVolumeReclaimDelete {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 没有 .metadata.annotations[&#34;pv.kubernetes.io/provisioned-by&#34;]</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> !metav1.<span style="color:#50fa7b">HasAnnotation</span>(volume.ObjectMeta, annDynamicallyProvisioned) {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 没有 .metadata.annotations[&#34;pv.kubernetes.io/provisioned-by&#34;]</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> !metav1.<span style="color:#fabd2f">HasAnnotation</span>(volume.ObjectMeta, annDynamicallyProvisioned) {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    ann <span style="color:#ff79c6">:=</span> volume.Annotations[annDynamicallyProvisioned]
-</span></span><span style="display:flex;"><span>    migratedTo <span style="color:#ff79c6">:=</span> volume.Annotations[annMigratedTo]
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> ann <span style="color:#ff79c6">!=</span> ctrl.provisionerName <span style="color:#ff79c6">&amp;&amp;</span> migratedTo <span style="color:#ff79c6">!=</span> ctrl.provisionerName {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>
+</span></span><span style="display:flex;"><span>    ann <span style="color:#fe8019">:=</span> volume.Annotations[annDynamicallyProvisioned]
+</span></span><span style="display:flex;"><span>    migratedTo <span style="color:#fe8019">:=</span> volume.Annotations[annMigratedTo]
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> ann <span style="color:#fe8019">!=</span> ctrl.provisionerName <span style="color:#fe8019">&amp;&amp;</span> migratedTo <span style="color:#fe8019">!=</span> ctrl.provisionerName {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>

@@ -297,7 +297,7 @@ BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一
 <h3 id="btf">BTF</h3>
 <p>BTF（BPF类型格式）是整个BPF CO-RE方法的关键推动因素之一。BTF（<a href="https://www.kernel.org/doc/html/latest/bpf/btf.html">BPF Type Format</a>）作为一种更通用且冗长的DWARF调试信息的替代方案而创建。BTF是一种空间高效、紧凑且足够表达C程序所有类型信息的格式。由于其简单性和<a href="https://nakryiko.com/posts/btf-dedup/">BTF 去重算法</a>，与DWARF相比，BTF可以实现高达100倍的尺寸缩减。现在，在运行时始终嵌入BTF类型信息的Linux内核已经变得实用：只需使用<code>CONFIG_DEBUG_INFO_BTF=y</code>选项构建内核即可。内核的BTF对内核本身可用，并且现在用于增强BPF验证器的功能，超出了社区一年前认为可能的范围（例如，现在可以直接进行内核内存读取，无需使用<code>bpf_probe_read()</code>）。</p>
 <p>对于BPF CO-RE来说更为重要的是，内核还通过sysfs在<code>/sys/kernel/btf/vmlinux</code>处公开这些自我描述的权威BTF信息（在其他方面定义了精确的结构布局）。您可以使用以下命令：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  $ bpftool btf dump file <span style="color:#ff79c6">/</span>sys<span style="color:#ff79c6">/</span>kernel<span style="color:#ff79c6">/</span>btf<span style="color:#ff79c6">/</span>vmlinux format c
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  $ bpftool btf dump file <span style="color:#fe8019">/</span>sys<span style="color:#fe8019">/</span>kernel<span style="color:#fe8019">/</span>btf<span style="color:#fe8019">/</span>vmlinux format c
 </span></span></code></pre></div><p>您将获得一个可编译的C头文件（通常称为“vmlinux.h”），其中包含所有内核类型。而且“所有”确实意味着所有，包括那些从未通过<code>kernel-devel</code>软件包提供的头文件暴露的类型！</p>
 <h3 id="编译器支持">编译器支持</h3>
 <p>为了启用BPF CO-RE并让BPF加载器（即libbpf）调整BPF程序以适应目标主机上运行的特定内核，Clang扩展了一些内置函数。它们发布的<strong>BTF重定位</strong>功能，用以捕获BPF程序代码打算读取的信息的高级描述。如果你要访问<code>task_struct-&gt;pid</code>字段，Clang将记录它是位于<code>struct task_struct</code>内部的名为“pid”的类型为“pid_t”的字段。这样做是为了确保即使目标内核的<code>task_struct</code>布局中的“pid”字段在<code>task_struct</code>结构内的不同偏移量处（例如，由于在“pid”字段之前添加了额外字段），甚至如果它被移动到了某个嵌套的匿名结构或联合中（这在C代码中是完全透明的，所以没有人关注这样的细节），您仍然可以通过其名称和类型信息找到它。这被称为字段偏移量重定位。</p>
@@ -312,89 +312,89 @@ BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一
 <p>让我们通过典型的现实世界中BPF应用程序必须处理的场景，看看它们是如何通过BPF CO-RE来解决的。如下所示，一些可移植性问题（例如，兼容的结构布局差异）被非常透明自然地处理，而其他问题则通过更明确的方式处理，例如通过<code>if</code>/<code>else</code>条件（与BCC程序中的编译时 <code>#ifdef</code>/<code>#else</code> 构造相对）以及BPF CO-RE提供的额外机制。</p>
 <h3 id="摆脱内核头文件依赖">摆脱内核头文件依赖</h3>
 <p>除了使用内核的BTF信息进行字段重定位外，还可以使用它生成一个包含所有内核内部类型的大型头文件（&quot;<strong>vmlinux.h</strong>&quot;），从而完全避免依赖系统范围内的内核头文件。您可以使用bpftool获取它：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>  $ bpftool btf dump file /sys/kernel/btf/vmlinux format c &gt; vmlinux.h
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>  $ bpftool btf dump file /sys/kernel/btf/vmlinux format c &gt; vmlinux.h
 </span></span></code></pre></div><p>有了<code>vmlinux.h</code>，您就不再需要在BPF程序中通常使用的那些<code>#include &lt;linux/sched.h&gt;</code>，<code>#include &lt;linux/fs.h&gt;</code>等。您现在可以只<code>#include &quot;vmlinux.h&quot;</code>，忘掉<code>kernel-devel</code>吧。此头文件包含所有内核类型：作为UAPI一部分公开的类型，通过<code>kernel-devel</code>提供的内部类型，以及<em>其他地方无法获取的一些更内部的内核类型</em>。</p>
 <p>不幸的是，BTF（以及DWARF）不记录<code>#define</code>宏，因此<code>vmlinux.h</code>中可能会缺少一些常见宏。最常缺失的宏可能是由libbpf的(<a href="https://github.com/libbpf/libbpf/blob/master/src/bpf_helpers.h">https://github.com/libbpf/libbpf/blob/master/src/bpf_helpers.h</a>)提供的（由libbpf提供的内核侧的“库”）。</p>
 <h3 id="读取内核数据结构字段">读取内核数据结构字段</h3>
 <p>最常见和典型的情况就是从许多内核结构之一中读取字段。假设您想要读取task_struct的pid。使用BCC很容易：</p>
 <p>BBC 方法如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#8be9fd">pid_t</span> pid <span style="color:#ff79c6">=</span> task<span style="color:#ff79c6">-&gt;</span>pid;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fabd2f">pid_t</span> pid <span style="color:#fe8019">=</span> task<span style="color:#fe8019">-&gt;</span>pid;
 </span></span></code></pre></div><p>BCC会方便地将<code>task-&gt;pid</code>重写为对<code>bpf_probe_read()</code>的调用，这很棒（尽管有时可能无法正常工作，具体取决于所使用的表达式的复杂程度）。使用libbpf，因为它没有BCC的代码重写魔法可供使用，您可以通过几种方式实现相同的结果。</p>
 <p>如果您使用了最近添加的<code>BTF_PROG_TYPE_TRACING</code> BPF程序，那么智能BPF验证器会给你诸多方便，它现在可以原生地理解和跟踪BTF类型，并允许您直接（且安全地）跟踪指针和读取内核内存，避免调用<code>bpf_probe_read()</code>，因此您不需要编译器重写魔法就可以获得相同的简洁且熟悉的语法。</p>
 <p>以 Libbpf + BPF_PROG_TYPE_TRACING 组合的方式：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#8be9fd">pid_t</span> pid <span style="color:#ff79c6">=</span> task<span style="color:#ff79c6">-&gt;</span>pid;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fabd2f">pid_t</span> pid <span style="color:#fe8019">=</span> task<span style="color:#fe8019">-&gt;</span>pid;
 </span></span></code></pre></div><p>将这个功能与BPF CO-RE配对，以支持可移植（即，可重定位）字段读取，您必须将此代码封装在<code>__builtin_preserve_access_index</code>编译器内置函数中：</p>
 <p>以 BPF_PROG_TYPE_TRACING + BPF CO-RE 组合的方式：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#8be9fd">pid_t</span> pid <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">__builtin_preserve_access_index</span>(({ task<span style="color:#ff79c6">-&gt;</span>pid; }));
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fabd2f">pid_t</span> pid <span style="color:#fe8019">=</span> <span style="color:#fabd2f">__builtin_preserve_access_index</span>(({ task<span style="color:#fe8019">-&gt;</span>pid; }));
 </span></span></code></pre></div><p>就是这样。它将按照您的期望工作，但可以在不同的内核版本之间进行移植。但考虑到<code>BPF_PROG_TYPE_TRACING</code>的最新性，您可能还无法使用它，因此必须明确使用<code>bpf_probe_read()</code>。</p>
 <p>非 CO-RE libbpf 的方式：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#8be9fd">pid_t</span> pid;
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">bpf_probe_read</span>(<span style="color:#ff79c6">&amp;</span>pid, <span style="color:#ff79c6">sizeof</span>(pid), <span style="color:#ff79c6">&amp;</span>task<span style="color:#ff79c6">-&gt;</span>pid);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fabd2f">pid_t</span> pid;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">bpf_probe_read</span>(<span style="color:#fe8019">&amp;</span>pid, <span style="color:#fe8019">sizeof</span>(pid), <span style="color:#fe8019">&amp;</span>task<span style="color:#fe8019">-&gt;</span>pid);
 </span></span></code></pre></div><p>现在，使用CO-RE+libbpf有两种方法可以实现这一点。一种是直接用<code>bpf_core_read()</code>替换<code>bpf_probe_read()</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#8be9fd">pid_t</span> pid; <span style="color:#50fa7b">bpf_core_read</span>(<span style="color:#ff79c6">&amp;</span>pid, <span style="color:#ff79c6">sizeof</span>(pid), <span style="color:#ff79c6">&amp;</span>task<span style="color:#ff79c6">-&gt;</span>pid);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fabd2f">pid_t</span> pid; <span style="color:#fabd2f">bpf_core_read</span>(<span style="color:#fe8019">&amp;</span>pid, <span style="color:#fe8019">sizeof</span>(pid), <span style="color:#fe8019">&amp;</span>task<span style="color:#fe8019">-&gt;</span>pid);
 </span></span></code></pre></div><p><code>bpf_core_read()</code>是一个简单的宏，它将所有参数直接传递给<code>bpf_probe_read()</code>，但它还通过<code>__builtin_preserve_access_index()</code>使Clang为第三个参数（<code>&amp;task-&gt;pid</code>）记录字段偏移重定位。因此，最后一个示例实际上就是这样的，底层如此：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#50fa7b">bpf_probe_read</span>(<span style="color:#ff79c6">&amp;</span>pid, <span style="color:#ff79c6">sizeof</span>(pid), <span style="color:#50fa7b">__builtin_preserve_access_index</span>(<span style="color:#ff79c6">&amp;</span>task<span style="color:#ff79c6">-&gt;</span>pid));
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fabd2f">bpf_probe_read</span>(<span style="color:#fe8019">&amp;</span>pid, <span style="color:#fe8019">sizeof</span>(pid), <span style="color:#fabd2f">__builtin_preserve_access_index</span>(<span style="color:#fe8019">&amp;</span>task<span style="color:#fe8019">-&gt;</span>pid));
 </span></span></code></pre></div><p>唉，这些<code>bpf_probe_read()</code>/<code>bpf_core_read()</code>调用可能很快变得过时，特别是当您处理通过指针链接在一起的一堆结构时。例如，要获取当前进程可执行二进制文件的inode编号，您需要使用BCC执行类似这样的操作：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  u64 inode <span style="color:#ff79c6">=</span> task<span style="color:#ff79c6">-&gt;</span>mm<span style="color:#ff79c6">-&gt;</span>exe_file<span style="color:#ff79c6">-&gt;</span>f_inode<span style="color:#ff79c6">-&gt;</span>i_ino;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  u64 inode <span style="color:#fe8019">=</span> task<span style="color:#fe8019">-&gt;</span>mm<span style="color:#fe8019">-&gt;</span>exe_file<span style="color:#fe8019">-&gt;</span>f_inode<span style="color:#fe8019">-&gt;</span>i_ino;
 </span></span></code></pre></div><p>使用普通的<code>bpf_probe_read()</code>/<code>bpf_core_read()</code>，这将转换为4个调用，额外的临时变量用于存储所有这些中间指针的值，以最终获取到i_ino字段。幸运的是，使用BPF CO-RE，有一个辅助宏，它将允许您获得几乎与BCC类似的可用性，但根本不需要代码重写魔法：</p>
 <p>BPF CO_RE 方式：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  u64 inode <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">BPF_CORE_READ</span>(task, mm, exe_file, f_inode, i_ino);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  u64 inode <span style="color:#fe8019">=</span> <span style="color:#fabd2f">BPF_CORE_READ</span>(task, mm, exe_file, f_inode, i_ino);
 </span></span></code></pre></div><p>或者，如果您已经有一个要读入的变量，您可以执行以下操作，避免额外的中间变量（<code>BPF_CORE_READ</code>隐藏在内部实现中）：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  u64 inode;
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">BPF_CORE_READ_INTO</span>(<span style="color:#ff79c6">&amp;</span>inode, task, mm, exe_file, f_inode, i_ino);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  u64 inode;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">BPF_CORE_READ_INTO</span>(<span style="color:#fe8019">&amp;</span>inode, task, mm, exe_file, f_inode, i_ino);
 </span></span></code></pre></div><p>有一个与之对应的<code>bpf_core_read_str()</code>，它是<code>bpf_probe_read_str()</code>的替代品。还有一个<code>BPF_CORE_READ_STR_INTO()</code>宏，它的工作方式类似于<code>BPF_CORE_READ_INTO()</code>，但对于最后一个字段将执行<code>bpf_probe_read_str()</code>调用。</p>
 <p>还可以使用贴切命名的<code>bpf_core_field_exists()</code>宏检查目标内核中是否存在字段，并根据是否存在来执行不同的操作：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#8be9fd">pid_t</span> pid <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bpf_core_field_exists</span>(task<span style="color:#ff79c6">-&gt;</span>pid) <span style="color:#ff79c6">?</span> <span style="color:#50fa7b">BPF_CORE_READ</span>(task, pid) <span style="color:#ff79c6">:</span> <span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fabd2f">pid_t</span> pid <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bpf_core_field_exists</span>(task<span style="color:#fe8019">-&gt;</span>pid) <span style="color:#fe8019">?</span> <span style="color:#fabd2f">BPF_CORE_READ</span>(task, pid) <span style="color:#fe8019">:</span> <span style="color:#fe8019">-</span><span style="color:#d3869b">1</span>;
 </span></span></code></pre></div><p>此外，可以使用<code>bpf_core_field_size()</code>宏捕获任何字段的大小，以便在您无法保证在内核版本之间处理的数据大小不变的情况下使用：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  u32 comm_sz <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bpf_core_field_size</span>(task<span style="color:#ff79c6">-&gt;</span>comm); */<span style="color:#ff79c6">*</span> will set comm_sz to <span style="color:#bd93f9">16</span> */<span style="color:#ff79c6">*</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  u32 comm_sz <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bpf_core_field_size</span>(task<span style="color:#fe8019">-&gt;</span>comm); */<span style="color:#fe8019">*</span> will set comm_sz to <span style="color:#d3869b">16</span> */<span style="color:#fe8019">*</span>
 </span></span></code></pre></div><p>除此之外，对于在内核之间支持非常罕见（但极其痛苦）的情况，当您需要从内核结构中读取位域时，有特殊的<code>BPF_CORE_READ_BITFIELD()</code>（使用直接内存读取）和<code>BPF_CORE_READ_BITFIELD_PROBED()</code>（依赖于<code>bpf_probe_read()</code>调用）宏。它们抽象出了提取位域的痛苦细节，同时保持了跨内核版本的可移植性：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> tcp_sock <span style="color:#ff79c6">*</span>s <span style="color:#ff79c6">=</span> ...;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">struct</span> tcp_sock <span style="color:#fe8019">*</span>s <span style="color:#fe8019">=</span> ...;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">/* with direct reads */</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">bool</span> is_cwnd_limited <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">BPF_CORE_READ_BITFIELD</span>(s, is_cwnd_limited);
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/* with direct reads */</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">bool</span> is_cwnd_limited <span style="color:#fe8019">=</span> <span style="color:#fabd2f">BPF_CORE_READ_BITFIELD</span>(s, is_cwnd_limited);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">/* with bpf_probe_read()-based reads */</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/* with bpf_probe_read()-based reads */</span>
 </span></span><span style="display:flex;"><span>u64 is_cwnd_limited;
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">BPF_CORE_READ_BITFIELD_PROBED</span>(s, is_cwnd_limited, <span style="color:#ff79c6">&amp;</span>is_cwnd_limited);
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">BPF_CORE_READ_BITFIELD_PROBED</span>(s, is_cwnd_limited, <span style="color:#fe8019">&amp;</span>is_cwnd_limited);
 </span></span></code></pre></div><p>字段重定位和相关宏是BPF CO-RE的核心。它们涵盖了许多实际用例，并将使您的BPF程序走得更远。</p>
 <h3 id="处理内核版本和配置差异">处理内核版本和配置差异</h3>
 <p>在某些情况下，BPF程序必须处理超出常见内核结构的轻微结构变化的内核差异。有时字段会被重命名，因此出于所有目的，它变成了一个完全不同的字段（但具有相同的含义）。反过来说，字段保持不变，但其含义可能会发生变化。例如，在4.6内核之后的某个时间点开始，<code>task_struct</code>的<code>utime</code>和<code>stime</code>字段从以jiffies计算切换到以纳秒计算，因此您必须在之前和之后执行不同的转换。其他时候，您希望提取的数据在某些内核配置中存在，但在其他配置中编译时被剔除。在许多其他场景中，只是不可能拥有适合所有内核的单一通用类型定义。</p>
 <p>针对这种情况，BPF CO-RE提供了两种互补解决方案：libbpf提供的<strong>extern Kconfig variables</strong>和 <strong>struct flavors</strong>。</p>
 <p>Libbpf提供的extern变量是一种很简洁的想法。BPF程序可以定义一个带有众所周知名称的extern变量（例如，“<em>LINUX_KERNEL_VERSION</em>”用于提取正在运行的内核版本）或者名称与Kconfig的键匹配（例如，“<em>CONFIG_HZ</em>”以获取内核构建时使用的HZ值），libbpf将以某种方式设置一切，以便您的BPF程序可以像使用任何其他全局变量一样使用这些extern变量。这些变量将具有正确的值，与执行您的BPF程序的活动内核相匹配。此外，BPF验证器将跟踪这些变量作为已知常量，并能够用于高级控制流分析和死代码消除。查看以下示例，了解如何使用BPF CO-RE完成线程的CPU用户时间提取：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">extern</span> u32 LINUX_KERNEL_VERSION __kconfig;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">extern</span> u32 CONFIG_HZ __kconfig;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fe8019">extern</span> u32 LINUX_KERNEL_VERSION __kconfig;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">extern</span> u32 CONFIG_HZ __kconfig;
 </span></span><span style="display:flex;"><span>  
 </span></span><span style="display:flex;"><span>  u64 utime_ns;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (LINUX_KERNEL_VERSION <span style="color:#ff79c6">&gt;=</span> <span style="color:#50fa7b">KERNEL_VERSION</span>(<span style="color:#bd93f9">4</span>, <span style="color:#bd93f9">11</span>, <span style="color:#bd93f9">0</span>))
-</span></span><span style="display:flex;"><span>      utime_ns <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">BPF_CORE_READ</span>(task, utime);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">else</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#6272a4">/* convert jiffies to nanoseconds */</span>
-</span></span><span style="display:flex;"><span>      utime_ns <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">BPF_CORE_READ</span>(task, utime) <span style="color:#ff79c6">*</span> (<span style="color:#bd93f9">1000000000UL</span> <span style="color:#ff79c6">/</span> CONFIG_HZ);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (LINUX_KERNEL_VERSION <span style="color:#fe8019">&gt;=</span> <span style="color:#fabd2f">KERNEL_VERSION</span>(<span style="color:#d3869b">4</span>, <span style="color:#d3869b">11</span>, <span style="color:#d3869b">0</span>))
+</span></span><span style="display:flex;"><span>      utime_ns <span style="color:#fe8019">=</span> <span style="color:#fabd2f">BPF_CORE_READ</span>(task, utime);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">else</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#928374;font-style:italic">/* convert jiffies to nanoseconds */</span>
+</span></span><span style="display:flex;"><span>      utime_ns <span style="color:#fe8019">=</span> <span style="color:#fabd2f">BPF_CORE_READ</span>(task, utime) <span style="color:#fe8019">*</span> (<span style="color:#d3869b">1000000000UL</span> <span style="color:#fe8019">/</span> CONFIG_HZ);
 </span></span></code></pre></div><p>另一个机制，<em>struct flavors</em>，有助于处理不同内核具有不兼容类型的情况，因此使用单个通用结构体定义编译两个内核的单个BPF程序是不可能的。举一个刻意的例子，让我们看看如何使用结构体风格提取<code>fs</code>/<code>fsbase</code>（如上所述，它被重命名了）以进行一些线程本地数据处理：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#6272a4">/* up-to-date thread_struct definition matching newer kernels */</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> thread_struct {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">/* up-to-date thread_struct definition matching newer kernels */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> thread_struct {
 </span></span><span style="display:flex;"><span>      ...
 </span></span><span style="display:flex;"><span>      u64 fsbase;
 </span></span><span style="display:flex;"><span>      ...
 </span></span><span style="display:flex;"><span>  };
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">/* legacy thread_struct definition for &lt;= 4.6 kernels */</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> thread_struct___v46 { <span style="color:#6272a4">/* ___v46 is a &#34;flavor&#34; part */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">/* legacy thread_struct definition for &lt;= 4.6 kernels */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> thread_struct___v46 { <span style="color:#928374;font-style:italic">/* ___v46 is a &#34;flavor&#34; part */</span>
 </span></span><span style="display:flex;"><span>      ...
 </span></span><span style="display:flex;"><span>      u64 fs;
 </span></span><span style="display:flex;"><span>      ...
 </span></span><span style="display:flex;"><span>  };
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">extern</span> <span style="color:#8be9fd">int</span> LINUX_KERNEL_VERSION __kconfig;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">extern</span> <span style="color:#fabd2f">int</span> LINUX_KERNEL_VERSION __kconfig;
 </span></span><span style="display:flex;"><span>  ...
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> thread_struct <span style="color:#ff79c6">*</span>thr <span style="color:#ff79c6">=</span> ...;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> thread_struct <span style="color:#fe8019">*</span>thr <span style="color:#fe8019">=</span> ...;
 </span></span><span style="display:flex;"><span>  u64 fsbase;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (LINUX_KERNEL_VERSION <span style="color:#ff79c6">&gt;</span> <span style="color:#50fa7b">KERNEL_VERSION</span>(<span style="color:#bd93f9">4</span>, <span style="color:#bd93f9">6</span>, <span style="color:#bd93f9">0</span>))
-</span></span><span style="display:flex;"><span>      fsbase <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">BPF_CORE_READ</span>((<span style="color:#ff79c6">struct</span> thread_struct___v46 <span style="color:#ff79c6">*</span>)thr, fs);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">else</span>
-</span></span><span style="display:flex;"><span>      fsbase <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">BPF_CORE_READ</span>(thr, fsbase);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (LINUX_KERNEL_VERSION <span style="color:#fe8019">&gt;</span> <span style="color:#fabd2f">KERNEL_VERSION</span>(<span style="color:#d3869b">4</span>, <span style="color:#d3869b">6</span>, <span style="color:#d3869b">0</span>))
+</span></span><span style="display:flex;"><span>      fsbase <span style="color:#fe8019">=</span> <span style="color:#fabd2f">BPF_CORE_READ</span>((<span style="color:#fe8019">struct</span> thread_struct___v46 <span style="color:#fe8019">*</span>)thr, fs);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">else</span>
+</span></span><span style="display:flex;"><span>      fsbase <span style="color:#fe8019">=</span> <span style="color:#fabd2f">BPF_CORE_READ</span>(thr, fsbase);
 </span></span></code></pre></div><p>在此示例中，BPF应用为&lt;= 4.6内核定义了&quot;旧版&quot;的 <code>struct thread_struct</code> 定义，称为 <code>struct thread_struct___v46</code>。类型名称中的三个下划线及其后的所有内容被视为该结构的“风格”。libbpf将忽略这个风格部分，这意味着在执行必要的重定位时，这个类型定义仍然将与实际运行内核的<code>struct thread_struct</code>进行匹配。这种约定允许在单个C程序中具有多个替代（和不兼容）的相同内核类型定义，并能够在运行时选择最合适的定义（例如，通过上面示例中的内核版本特定逻辑），并使用类型转换为结构风格以提取必要的字段。</p>
 <p>如果没有结构风格，在像上面这样的情况下，编写一个可以在多个内核上运行的&quot;一次编译&quot;程序是不可能的。您需要使用带有 <code>#ifdef</code> 的源代码，将其编译为两个单独的BPF程序变体，并通过运行时控制应用程序手动选择合适的变体。所有这些都只会增加不必要的复杂性和麻烦。虽然不是透明地，但BPF CO-RE允许通过熟悉的C代码结构解决这个问题，即使是对于这样的高级场景。</p>
 <h3 id="根据用户提供的配置更改行为">根据用户提供的配置更改行为</h3>
@@ -406,17 +406,17 @@ BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一
 </ul>
 <p>对于这样一个（确实复杂的）用例的解决方案是通过使用只读全局数据。在将BPF程序加载到内核之前，由控制应用程序设置一次。从BPF程序的角度来看，这看起来像是正常的全局变量访问。不会有任何BPF映射查找开销 - 全局变量是作为直接内存访问实现的。控制应用程序端在BPF程序加载之前设置初始配置值，因此在BPF验证器进行程序验证时，配置值将是已知的且只读的。这将允许BPF验证器将它们视为已知常量，并使用其高级控制流分析来执行死代码消除。</p>
 <p>因此，对于上述示例，在较旧的内核上，BPF验证器证实未知的BPF帮助函数永远不会被使用，并将彻底消除该代码。然而，在更新的内核上，应用程序提供的配置将有所不同，将允许使用新的时髦BPF帮助函数，BPF验证器将成功验证这个逻辑。以下BPF代码示例应该使这一点更加清楚：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  */<span style="color:#ff79c6">*</span> global read<span style="color:#ff79c6">-</span>only variables, set up by control app */
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">*</span><span style="color:#ff79c6">const</span> <span style="color:#8be9fd">bool</span> use_fancy_helper;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">const</span> u32 fallback_value;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  */<span style="color:#fe8019">*</span> global read<span style="color:#fe8019">-</span>only variables, set up by control app */
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">*</span><span style="color:#fe8019">const</span> <span style="color:#fabd2f">bool</span> use_fancy_helper;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">const</span> u32 fallback_value;
 </span></span><span style="display:flex;"><span>  
 </span></span><span style="display:flex;"><span>  ...
 </span></span><span style="display:flex;"><span>  
 </span></span><span style="display:flex;"><span>  u32 value;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (use_fancy_helper)
-</span></span><span style="display:flex;"><span>    value <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bpf_fancy_helper</span>(ctx);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">else</span>
-</span></span><span style="display:flex;"><span>    value <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bpf_default_helper</span>(ctx) <span style="color:#ff79c6">*</span> fallback_value;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (use_fancy_helper)
+</span></span><span style="display:flex;"><span>    value <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bpf_fancy_helper</span>(ctx);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">else</span>
+</span></span><span style="display:flex;"><span>    value <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bpf_default_helper</span>(ctx) <span style="color:#fe8019">*</span> fallback_value;
 </span></span></code></pre></div><p>从用户态来看，应用程序将能够通过BPF skeleton 轻松地提供此配置。BPF skeleton 的讨论超出了本文的范围，但请参阅内核项目中的<a href="https://github.com/torvalds/linux/tree/master/tools/bpf/runqslower">runqslower tool</a> ，以查看如何使用它简化BPF应用程序的示例。</p>
 <h3 id="回顾">回顾</h3>
 <p>BPF CO-RE的目标是帮助BPF开发人员以简单的方式解决简单的可移植性问题（如读取结构字段），并使其仍然有可能解决复杂的可移植性问题（如不兼容的数据结构更改，复杂的用户空间控制条件等）。这使得BPF开发人员可以遵循 &ldquo;编译一次 - 到处运行&quot;的范式。这是通过组合几个上面描述的BPF CO-RE构建模块来实现的：</p>

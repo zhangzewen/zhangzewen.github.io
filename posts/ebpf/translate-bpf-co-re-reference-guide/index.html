@@ -286,90 +286,90 @@
 <p>到目前为止，最常见的BPF CO-RE操作是从某个内核结构中读取字段的值。libbpf提供了一整套辅助函数，使读取字段变得简单且CO-RE可重定位。<strong>CO-RE可重定位</strong>意味着，无论结构体的实际内存布局如何（这可能会根据实际使用的内核版本和内核配置而改变），BPF程序都将进行调整，以便在相对于结构起始位置的正确实际偏移处读取字段的值。</p>
 <h3 id="bpf_core_read">bpf_core_read()</h3>
 <p>最基础的以CO-RE可重定位方式读取字段的辅助函数是<code>bpf_core_read(dst, sz, src)</code>，它将从由<code>src</code>指向的字段中读取<code>sz</code>字节，并将其存储到<code>dst</code>指向的内存中：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> task_struct <span style="color:#ff79c6">*</span>task <span style="color:#ff79c6">=</span> (<span style="color:#8be9fd">void</span> <span style="color:#ff79c6">*</span>)<span style="color:#50fa7b">bpf_get_current_task</span>();
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> task_struct <span style="color:#ff79c6">*</span>parent_task;
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">int</span> err;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">struct</span> task_struct <span style="color:#fe8019">*</span>task <span style="color:#fe8019">=</span> (<span style="color:#fabd2f">void</span> <span style="color:#fe8019">*</span>)<span style="color:#fabd2f">bpf_get_current_task</span>();
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> task_struct <span style="color:#fe8019">*</span>parent_task;
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">int</span> err;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>err <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bpf_core_read</span>(<span style="color:#ff79c6">&amp;</span>parent_task, <span style="color:#ff79c6">sizeof</span>(<span style="color:#8be9fd">void</span> <span style="color:#ff79c6">*</span>), <span style="color:#ff79c6">&amp;</span>task<span style="color:#ff79c6">-&gt;</span>parent);
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">if</span> (err) {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* handle error */</span>
+</span></span><span style="display:flex;"><span>err <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bpf_core_read</span>(<span style="color:#fe8019">&amp;</span>parent_task, <span style="color:#fe8019">sizeof</span>(<span style="color:#fabd2f">void</span> <span style="color:#fe8019">*</span>), <span style="color:#fe8019">&amp;</span>task<span style="color:#fe8019">-&gt;</span>parent);
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">if</span> (err) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* handle error */</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">/* parent_task contains the value of task-&gt;parent pointer */</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/* parent_task contains the value of task-&gt;parent pointer */</span>
 </span></span></code></pre></div><p><code>bpf_core_read()</code>就像BPF辅助函数<code>bpf_probe_read_kernel()</code> 一样，只是它记录了需要在目标内核上重定位的字段的信息。即，如果<code>parent</code>字段在<code>struct task_struct</code>内的偏移量发生改变，比如在它前面添加了一个新字段，libbpf将自动将实际偏移量调整为正确的值。</p>
 <p>需要牢记的一件重要事情是，字段的大小不会自动重设置，只有其偏移量会重定位。因此，如果您读取的字段是一个结构体，并且其大小发生变化，您可能会遇到麻烦。请参阅“<a href="#Sizing kernel types and fields">Sizing kernel types and fields</a>”小节以了解如何处理这个问题。一般建议是，尽可能不要将整个结构体字段一次性读取。最好只读取您最终感兴趣的字段。</p>
 <h3 id="bpf_core_read_str">bpf_core_read_str()</h3>
 <p>就像有<code>bpf_probe_read_kernel()</code>和<code>bpf_probe_read_kernel_str()</code>这对BPF辅助函数，前者指定读取的字节数，后者读取一个可变长度的以零结尾的C字符串，<code>bpf_core_read()</code>也有一个与<code>bpf_core_read_str()</code>相对应的函数。它的工作方式就像<code>bpf_probe_read_kernel_str()</code>一样，只是它记录了源字符数组字段的CO-RE重定位信息，该字段包含一个以零结尾的C字符串。所以<code>bpf_core_read_str()</code>是<code>bpf_probe_read_kernel_str()</code>的CO-RE可重定位版本。</p>
 <p>请注意<strong>字符数组</strong>和<strong>字符指针</strong>之间重要但微妙的区别。在C中，当读取字符串值时，它们可以互换使用，因为数组在编译器中自动被视为指针。然而，在CO-RE的上下文中，这种区别非常重要。</p>
 <p>假设如下结构体是我们要读取的内核类型</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> my_kernel_type {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span> <span style="color:#ff79c6">*</span>name;
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">char</span> type[<span style="color:#bd93f9">32</span>];
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> my_kernel_type {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span> <span style="color:#fe8019">*</span>name;
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">char</span> type[<span style="color:#d3869b">32</span>];
 </span></span><span style="display:flex;"><span>  };
 </span></span></code></pre></div><p><code>name</code>字段指向内存上存储的是字符串存储的位置，<code>type</code>字段指向的内存上存储的就是字符串。如果您需要使用CO-RE读取<code>name</code>指向的字符串，正确的处理方法是先以CO-RE可重定位的方式<strong>读取指针值</strong>，然后执行普通的（非CO-RE）<code>bpf_probe_read_kernel_str()</code>读取（下面的示例忽略了错误处理以便简洁）：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> my_kernel_type <span style="color:#ff79c6">*</span>t <span style="color:#ff79c6">=</span> ...;
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span> <span style="color:#ff79c6">*</span>p;
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">char</span> str[<span style="color:#bd93f9">32</span>];
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">struct</span> my_kernel_type <span style="color:#fe8019">*</span>t <span style="color:#fe8019">=</span> ...;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span> <span style="color:#fe8019">*</span>p;
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">char</span> str[<span style="color:#d3869b">32</span>];
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">/* get string pointer, CO-RE-relocatable */</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">bpf_core_read</span>(<span style="color:#ff79c6">&amp;</span>p, <span style="color:#ff79c6">sizeof</span>(p), <span style="color:#ff79c6">&amp;</span>t<span style="color:#ff79c6">-&gt;</span>name);
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">/* read the string, non-CO-RE-relocatable, pointer is valid regardless */</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">bpf_probe_read_kernel_str</span>(str, <span style="color:#ff79c6">sizeof</span>(str), p);
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/* get string pointer, CO-RE-relocatable */</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">bpf_core_read</span>(<span style="color:#fe8019">&amp;</span>p, <span style="color:#fe8019">sizeof</span>(p), <span style="color:#fe8019">&amp;</span>t<span style="color:#fe8019">-&gt;</span>name);
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/* read the string, non-CO-RE-relocatable, pointer is valid regardless */</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">bpf_probe_read_kernel_str</span>(str, <span style="color:#fe8019">sizeof</span>(str), p);
 </span></span></code></pre></div><p>类似的，读取<code>type</code>字段的逻辑如下所示：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> my_kernel_type <span style="color:#ff79c6">*</span>t <span style="color:#ff79c6">=</span> ...;
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">char</span> str[<span style="color:#bd93f9">32</span>];
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">struct</span> my_kernel_type <span style="color:#fe8019">*</span>t <span style="color:#fe8019">=</span> ...;
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">char</span> str[<span style="color:#d3869b">32</span>];
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">/* read string as CO-RE-relocatable */</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">bpf_core_read_str</span>(str, <span style="color:#ff79c6">sizeof</span>(str), <span style="color:#ff79c6">&amp;</span>t<span style="color:#ff79c6">-&gt;</span>type);
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/* read string as CO-RE-relocatable */</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">bpf_core_read_str</span>(str, <span style="color:#fe8019">sizeof</span>(str), <span style="color:#fe8019">&amp;</span>t<span style="color:#fe8019">-&gt;</span>type);
 </span></span></code></pre></div><p>花一点时间思考为什么第一个示例不能使用<code>bpf_core_read_str()</code>（提示：你会将指针值解释为C字符串本身），为什么第二个不能先指针读取然后再字符串读取（提示：字符串本身是结构体的一部分，所以没有专用指针，它位于相对于<code>t</code>指针指向的位置的偏移量）。这很微妙，幸运的是并不经常出现，但在实际操作中如果不能识别这种差异，会非常困惑。</p>
 <h3 id="bpf_core_read-1">BPF_CORE_READ()</h3>
 <p>尽管<code>bpf_core_read()</code>虽然允许大量控制和仔细的错误处理，但直接使用它是相当繁琐的，特别是在读取需要通过较长的指针解引用链进行访问的字段。</p>
 <p>让我们看一个读取正在运行的进程的可执行文件名的例子。如果您要编写一个普通的C语言内核代码并执行此操作，您将需要执行以下操作：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> task_struct <span style="color:#ff79c6">*</span>t <span style="color:#ff79c6">=</span> ...;
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span> <span style="color:#ff79c6">*</span>name;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">struct</span> task_struct <span style="color:#fe8019">*</span>t <span style="color:#fe8019">=</span> ...;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span> <span style="color:#fe8019">*</span>name;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>name <span style="color:#ff79c6">=</span> t<span style="color:#ff79c6">-&gt;</span>mm<span style="color:#ff79c6">-&gt;</span>exe_file<span style="color:#ff79c6">-&gt;</span>fpath.dentry<span style="color:#ff79c6">-&gt;</span>d_name.name;
+</span></span><span style="display:flex;"><span>name <span style="color:#fe8019">=</span> t<span style="color:#fe8019">-&gt;</span>mm<span style="color:#fe8019">-&gt;</span>exe_file<span style="color:#fe8019">-&gt;</span>fpath.dentry<span style="color:#fe8019">-&gt;</span>d_name.name;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">/* now read string contents with bpf_probe_read_kernel_str() */</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/* now read string contents with bpf_probe_read_kernel_str() */</span>
 </span></span></code></pre></div><p>请注意指针解引用的顺序，混合了一些子结构访问（即，<code>fpath.dentry</code> 和 <code>d_name.name</code>）。使用<code>bpf_core_read()</code>这样做很快就会变得混乱：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> task_struct <span style="color:#ff79c6">*</span>t <span style="color:#ff79c6">=</span> ...;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> mm_struct <span style="color:#ff79c6">*</span>mm;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> file <span style="color:#ff79c6">*</span>exe_file;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> dentry <span style="color:#ff79c6">*</span>dentry;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span> <span style="color:#ff79c6">*</span>name;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> task_struct <span style="color:#fe8019">*</span>t <span style="color:#fe8019">=</span> ...;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> mm_struct <span style="color:#fe8019">*</span>mm;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> file <span style="color:#fe8019">*</span>exe_file;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> dentry <span style="color:#fe8019">*</span>dentry;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span> <span style="color:#fe8019">*</span>name;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">bpf_core_read</span>(<span style="color:#ff79c6">&amp;</span>mm, <span style="color:#bd93f9">8</span>, <span style="color:#ff79c6">&amp;</span>t<span style="color:#ff79c6">-&gt;</span>mm);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">bpf_core_read</span>(<span style="color:#ff79c6">&amp;</span>exe_file, <span style="color:#bd93f9">8</span>, <span style="color:#ff79c6">&amp;</span>mm<span style="color:#ff79c6">-&gt;</span>exe_file);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">bpf_core_read</span>(<span style="color:#ff79c6">&amp;</span>dentry, <span style="color:#bd93f9">8</span>, <span style="color:#ff79c6">&amp;</span>exe_file<span style="color:#ff79c6">-&gt;</span>path.dentry);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">bpf_core_read</span>(<span style="color:#ff79c6">&amp;</span>name, <span style="color:#bd93f9">8</span>, <span style="color:#ff79c6">&amp;</span>dentry<span style="color:#ff79c6">-&gt;</span>d_name.name);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">bpf_core_read</span>(<span style="color:#fe8019">&amp;</span>mm, <span style="color:#d3869b">8</span>, <span style="color:#fe8019">&amp;</span>t<span style="color:#fe8019">-&gt;</span>mm);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">bpf_core_read</span>(<span style="color:#fe8019">&amp;</span>exe_file, <span style="color:#d3869b">8</span>, <span style="color:#fe8019">&amp;</span>mm<span style="color:#fe8019">-&gt;</span>exe_file);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">bpf_core_read</span>(<span style="color:#fe8019">&amp;</span>dentry, <span style="color:#d3869b">8</span>, <span style="color:#fe8019">&amp;</span>exe_file<span style="color:#fe8019">-&gt;</span>path.dentry);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">bpf_core_read</span>(<span style="color:#fe8019">&amp;</span>name, <span style="color:#d3869b">8</span>, <span style="color:#fe8019">&amp;</span>dentry<span style="color:#fe8019">-&gt;</span>d_name.name);
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">/* now read string contents with bpf_probe_read_kernel_str() */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">/* now read string contents with bpf_probe_read_kernel_str() */</span>
 </span></span></code></pre></div><p>诚然，这是一个相当极端的例子，通常指针解引用链不会那么长，但关键在于：使用这种方法很痛苦。尽管在上面的示例中完全忽略了错误处理。</p>
 <p>为了使这样的多步读取更容易编写，libbpf提供了<code>BPF_CORE_READ()</code>宏。让我们看看使用<code>BPF_CORE_READ()</code>如何简化上面的代码：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> task_struct <span style="color:#ff79c6">*</span>t <span style="color:#ff79c6">=</span> ...;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span> <span style="color:#ff79c6">*</span>name;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> task_struct <span style="color:#fe8019">*</span>t <span style="color:#fe8019">=</span> ...;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span> <span style="color:#fe8019">*</span>name;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  name <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">BPF_CORE_READ</span>(t, mm, exe_file, fpath.dentry, d_name.name);
+</span></span><span style="display:flex;"><span>  name <span style="color:#fe8019">=</span> <span style="color:#fabd2f">BPF_CORE_READ</span>(t, mm, exe_file, fpath.dentry, d_name.name);
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">/* now read string contents with bpf_probe_read_kernel_str() */</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">/* now read string contents with bpf_probe_read_kernel_str() */</span>
 </span></span><span style="display:flex;"><span>  
 </span></span></code></pre></div><p>来对比一下使用 libbpf提供的<code>BPF_CORE_READ()</code>宏和上面的C代码：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#6272a4">/* direct pointer dereference */</span>
-</span></span><span style="display:flex;"><span>  name <span style="color:#ff79c6">=</span> t<span style="color:#ff79c6">-&gt;</span>mm<span style="color:#ff79c6">-&gt;</span>exe_file<span style="color:#ff79c6">-&gt;</span>fpath.dentry<span style="color:#ff79c6">-&gt;</span>d_name.name;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">/* direct pointer dereference */</span>
+</span></span><span style="display:flex;"><span>  name <span style="color:#fe8019">=</span> t<span style="color:#fe8019">-&gt;</span>mm<span style="color:#fe8019">-&gt;</span>exe_file<span style="color:#fe8019">-&gt;</span>fpath.dentry<span style="color:#fe8019">-&gt;</span>d_name.name;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">/* using BPF_CORE_READ() helper */</span>
-</span></span><span style="display:flex;"><span>  name <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">BPF_CORE_READ</span>(t, mm, exe_file, fpath.dentry, d_name.name);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">/* using BPF_CORE_READ() helper */</span>
+</span></span><span style="display:flex;"><span>  name <span style="color:#fe8019">=</span> <span style="color:#fabd2f">BPF_CORE_READ</span>(t, mm, exe_file, fpath.dentry, d_name.name);
 </span></span></code></pre></div><p>基本上，每个指针解引用在宏调用中变成一个逗号。每个子结构访问保持不变。相当简单明了。</p>
 <p>您可能已经注意到<code>BPF_CORE_READ()</code>直接返回读取的值，而不返回错误。如果传入的任何指针为NULL或指向无效内存，您将获得<code>0</code>（或<code>NULL</code>）。但是，如果您确实需要错误传播和处理，那么您将不得不使用低级别的<code>bpf_core_read()</code>原语并显式处理错误。实际上，这通常不是问题或必要的。</p>
 <h3 id="bpf_core_read_into">BPF_CORE_READ_INTO()</h3>
 <p>在某些情况下，有必要或更方便地将结果读入目标内存，而不是像<code>BPF_CORE_READ()</code>那样直接返回它。例如，直接地返回值不起作用的常见情况是读取C数组（例如，从套接字结构中的IPv4地址），因为C语言不允许从表达式直接返回数组。对于这种情况，libbpf提供了<code>BPF_CORE_READ_INTO()</code>宏，它的行为类似于<code>BPF_CORE_READ()</code>，但将最终字段的值读入目标内存。将上面的示例转换为<code>BPF_CORE_READ_INTO()</code>，如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> task_struct <span style="color:#ff79c6">*</span>t <span style="color:#ff79c6">=</span> ...;
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span> <span style="color:#ff79c6">*</span>name;
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">int</span> err;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">struct</span> task_struct <span style="color:#fe8019">*</span>t <span style="color:#fe8019">=</span> ...;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span> <span style="color:#fe8019">*</span>name;
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">int</span> err;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>err <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">BPF_CORE_READ_INTO</span>(<span style="color:#ff79c6">&amp;</span>name, t, mm, binfmt, executable, fpath.dentry, d_name.name);
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">if</span> (err) { <span style="color:#6272a4">/* handle errors */</span> }
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">/* now `name` contains the pointer to the string */</span>
+</span></span><span style="display:flex;"><span>err <span style="color:#fe8019">=</span> <span style="color:#fabd2f">BPF_CORE_READ_INTO</span>(<span style="color:#fe8019">&amp;</span>name, t, mm, binfmt, executable, fpath.dentry, d_name.name);
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">if</span> (err) { <span style="color:#928374;font-style:italic">/* handle errors */</span> }
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/* now `name` contains the pointer to the string */</span>
 </span></span></code></pre></div><p>注意<code>BPF_CORE_READ_INTO()</code>中额外的<code>&amp;name</code>参数，以及最后一次操作（即，读取<code>d_name.name</code>）返回错误码。总的来说，<code>BPF_CORE_READ()</code>在实践中更方便，易于阅读。</p>
 <h3 id="bpf_core_read_str_into">BPF_CORE_READ_STR_INTO()</h3>
 <p>对于最后一个字段是字符数组字段的情况（就像上面示例中的<code>name</code>与<code>type</code>一样），有一个<code>BPF_CORE_READ_STR_INTO()</code>宏，现在你应该对它的工作方式有一个很好的猜测。如果不是，请重新查看<a href="#bpf_core_read_str()">bpf_core_read_str()</a>部分。</p>
@@ -383,28 +383,28 @@
 <li>probably some more but I&rsquo;m too lazy to go and check.</li>
 </ul>
 <p>在这样的程序中，如果它们获得了指向某个内核类型的指针（例如，<code>struct task_struct *</code>），BPF程序代码可以直接解引用内存，甚至跟踪指针。因此，对于我们在上面一直以演示<code>BPF_CORE_READ()</code>的使用详细示例而言，当使用例如<code>fentry</code> BPF程序时，您所要做的就是：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> task_struct <span style="color:#ff79c6">*</span>t <span style="color:#ff79c6">=</span> ...;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span> <span style="color:#ff79c6">*</span>name;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> task_struct <span style="color:#fe8019">*</span>t <span style="color:#fe8019">=</span> ...;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span> <span style="color:#fe8019">*</span>name;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  name <span style="color:#ff79c6">=</span> t<span style="color:#ff79c6">-&gt;</span>mm<span style="color:#ff79c6">-&gt;</span>binfmt<span style="color:#ff79c6">-&gt;</span>executable<span style="color:#ff79c6">-&gt;</span>fpath.dentry<span style="color:#ff79c6">-&gt;</span>d_name.name;
+</span></span><span style="display:flex;"><span>  name <span style="color:#fe8019">=</span> t<span style="color:#fe8019">-&gt;</span>mm<span style="color:#fe8019">-&gt;</span>binfmt<span style="color:#fe8019">-&gt;</span>executable<span style="color:#fe8019">-&gt;</span>fpath.dentry<span style="color:#fe8019">-&gt;</span>d_name.name;
 </span></span></code></pre></div><p>是的，它与最开始的示例完全相同。但请记住，要获取字符串本身的内容，您仍然需要使用<code>bpf_probe_read_kernel_str()</code>。</p>
 <p>这种直接内存访问快速、方便、简单，您应该尽可能地使用它。不幸的是，现实世界中仍然有很多情况需要明确依赖“探测读取”，所以<code>BPF_CORE_READ()</code>将在可预见的将来成为您的朋友，因此一定要熟悉它。</p>
 <h3 id="读取位域和不同字节长度的整数">读取位域和不同字节长度的整数</h3>
 <p>从BPF读取位域一直是一个挑战。BPF应用程序开发人员必须付出巨大努力，编写相当难以维护且痛苦的代码，才能从内核类型中提取位域值。以<code>struct tcp_sock</code>为例。它有许多以位域编码的有用信息。即使在使用BCC及其源代码编译方法时，提取这些位域也是一个主要的麻烦和维护负担。</p>
 <p>幸运的是，libbpf提供了两个易于使用的宏，用于以CO-RE可重定位方式读取位域：<code>BPF_CORE_READ_BITFIELD()</code>和<code>BPF_CORE_READ_BITFIELD_PROBED()</code>。_PROBED变体必须在需要“探测读取”的数据上使用，就像在<code>BPF_CORE_READ()</code>中一样。<code>BPF_CORE_READ_BITFIELD()</code>仅在直接内存访问可用时使用（例如，从<code>fentry/</code>BPF程序，参见上面的“<a href="#BTF-enabled BPF program types with direct memory reads">&ldquo;BTF-enabled BPF program types with direct memory reads&rdquo;</a>”部分）。这两个宏都以u64整数返回位域的值。下面是从struct tcp_sock读取其中一个位域的示例：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">static</span> u64 <span style="color:#50fa7b">sk_get_syn_data</span>(<span style="color:#ff79c6">const</span> <span style="color:#ff79c6">struct</span> tcp_sock<span style="color:#ff79c6">*</span> tp)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">static</span> u64 <span style="color:#fabd2f">sk_get_syn_data</span>(<span style="color:#fe8019">const</span> <span style="color:#fe8019">struct</span> tcp_sock<span style="color:#fe8019">*</span> tp)
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* extract tp-&gt;syn_data bitfield value */</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#50fa7b">BPF_CORE_READ_BITFIELD_PROBED</span>(tp, syn_data);
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* extract tp-&gt;syn_data bitfield value */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fabd2f">BPF_CORE_READ_BITFIELD_PROBED</span>(tp, syn_data);
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>就是这么简单。使用BCC实现相同的效果（为什么这样做有效以及何时会出错，留给读者作为练习）如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">static</span> u64 <span style="color:#50fa7b">sk_get_syn_data</span>(<span style="color:#ff79c6">const</span> <span style="color:#ff79c6">struct</span> tcp_sock<span style="color:#ff79c6">*</span> tp)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">static</span> u64 <span style="color:#fabd2f">sk_get_syn_data</span>(<span style="color:#fe8019">const</span> <span style="color:#fe8019">struct</span> tcp_sock<span style="color:#fe8019">*</span> tp)
 </span></span><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>    u8 s;
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* get byte before tlp_high_seq */</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">bpf_probe_read</span>(<span style="color:#ff79c6">&amp;</span>s, <span style="color:#bd93f9">1</span>, <span style="color:#ff79c6">&amp;</span>(tp<span style="color:#ff79c6">-&gt;</span>tlp_high_seq) <span style="color:#ff79c6">-</span> <span style="color:#bd93f9">1</span>);
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* syn_data is the third bit of that byte in little-endian */</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> (s <span style="color:#ff79c6">&gt;&gt;</span> <span style="color:#bd93f9">2</span>) <span style="color:#ff79c6">&amp;</span> <span style="color:#bd93f9">0x1</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* get byte before tlp_high_seq */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">bpf_probe_read</span>(<span style="color:#fe8019">&amp;</span>s, <span style="color:#d3869b">1</span>, <span style="color:#fe8019">&amp;</span>(tp<span style="color:#fe8019">-&gt;</span>tlp_high_seq) <span style="color:#fe8019">-</span> <span style="color:#d3869b">1</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* syn_data is the third bit of that byte in little-endian */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> (s <span style="color:#fe8019">&gt;&gt;</span> <span style="color:#d3869b">2</span>) <span style="color:#fe8019">&amp;</span> <span style="color:#d3869b">0x1</span>;
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>编写、阅读和维护随着内核版本变化的<code>struct tcp_sock</code>是一种恐怖的经历。使用<code>BPF_CORE_READ_BITFIELD_PROBED()</code>让这变得非常简单。</p>
 <p>值得注意的是，<code>BPF_CORE_READ_BITFIELD()</code>和<code>BPF_CORE_READ_BITFIELD_PROBED()</code>还有另一个重要功能。它们不仅可以读取位域，还可以读取<strong>任何整数</strong>字段。无论字段的实际类型（位域或最多8字节的大小的整数），宏都会返回正确的带符号扩展的8字节整数。即使字段从整数更改为位域，反之亦然，它仍然可以继续工作。如果字段从<code>int</code>更改为<code>u8</code>，它也会继续工作。因此，<code>BPF_CORE_READ_BITFIELD()</code>宏是<strong>读取任何整数字段的通用方法</strong>，无论其类型或大小如何。</p>
@@ -419,59 +419,59 @@
 <h3 id="bpf_core_field_exists">bpf_core_field_exists()</h3>
 <p><code>bpf_core_field_exists()</code>允许检查给定内核类型是否包含指定的字段。在内核特性检测的上下文中，如果某个期望的内核特性是与向内核类型之一添加特定字段一起添加的，那么可以使用简单的<code>bpf_core_field_exists()</code>检查来检测这样的特性。</p>
 <p>作为一个具体的例子，检测内核是否支持基于perf的BPF程序类型（tracepoints、kprobes、uprobes）的BPF cookie（在此<a href="https://github.com/torvalds/linux/commit/82e6b1eee6a8875ef4eacfd60711cce6965c6b04">提交</a>中添加）的一种方法是：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">union</span> bpf_attr <span style="color:#ff79c6">*</span>attr <span style="color:#ff79c6">=</span> ... <span style="color:#6272a4">/* could be NULL */</span>;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">union</span> bpf_attr <span style="color:#fe8019">*</span>attr <span style="color:#fe8019">=</span> ... <span style="color:#928374;font-style:italic">/* could be NULL */</span>;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">if</span> (<span style="color:#50fa7b">bpf_core_field_exists</span>(attr<span style="color:#ff79c6">-&gt;</span>link_create.perf_event.bpf_cookie)) {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* bpf_cookie is supported */</span>
-</span></span><span style="display:flex;"><span>} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* bpf_cookie is NOT supported */</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">if</span> (<span style="color:#fabd2f">bpf_core_field_exists</span>(attr<span style="color:#fe8019">-&gt;</span>link_create.perf_event.bpf_cookie)) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* bpf_cookie is supported */</span>
+</span></span><span style="display:flex;"><span>} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* bpf_cookie is NOT supported */</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>上面的例子假设BPF程序有一个<code>union bpf_attr *</code>类型的变量。它可以是<code>NULL</code>，这并不重要，因为指针本身从未被读取，只是为了向编译器传递类型信息。对于没有现成可用的所需类型变量的情况，你可以编写等效的检查（使用C类型系统特性）：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">if</span> (<span style="color:#50fa7b">bpf_core_field_exists</span>(
-</span></span><span style="display:flex;"><span>        ((<span style="color:#ff79c6">union</span> bpf_attr <span style="color:#ff79c6">*</span>)<span style="color:#bd93f9">0</span>)<span style="color:#ff79c6">-&gt;</span>link_create.perf_event.bpf_cookie) {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* bpf_cookie is supported */</span>
-</span></span><span style="display:flex;"><span>} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* bpf_cookie is NOT supported */</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">if</span> (<span style="color:#fabd2f">bpf_core_field_exists</span>(
+</span></span><span style="display:flex;"><span>        ((<span style="color:#fe8019">union</span> bpf_attr <span style="color:#fe8019">*</span>)<span style="color:#d3869b">0</span>)<span style="color:#fe8019">-&gt;</span>link_create.perf_event.bpf_cookie) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* bpf_cookie is supported */</span>
+</span></span><span style="display:flex;"><span>} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* bpf_cookie is NOT supported */</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>在这里，如果主机内核中的<code>union bpf_attr</code>没有<code>link_create.perf_event.bpf_cookie</code>，那么<code>if</code>/<code>else</code>的第一个分支中的代码将永远不会被执行（也不会被验证）。</p>
 <p>值得重申的是，这样的代码被BPF验证器正确地检测为死代码，因此从未被验证。这意味着这样的代码可以在不担心BPF验证失败的情况下使用内核和BPF功能（例如，新的BPF辅助函数集）。例如，如果上面的第一个分支使用<code>bpf_get_attach_cookie()</code>辅助函数来获取BPF cookie特性，那么在尚未具有该帮助器的旧内核上，该程序将被正确验证。</p>
 <h3 id="bpf_core_type_exists">bpf_core_type_exists()</h3>
 <p>对于类型存在本身很重要的情况，BPF CO-RE 提供了一种检查类型存在的方法 <code>bpf_core_type_exists()</code>辅助函数。下面是检测内核是否支持 BPF ring buffer 的示例：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">if</span> (<span style="color:#50fa7b">bpf_core_type_exists</span>(<span style="color:#ff79c6">struct</span> bpf_ringbuf)) {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* BPF ringbuf helpers (e.g., bpf_ringbuf_reserve()) exist */</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">if</span> (<span style="color:#fabd2f">bpf_core_type_exists</span>(<span style="color:#fe8019">struct</span> bpf_ringbuf)) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* BPF ringbuf helpers (e.g., bpf_ringbuf_reserve()) exist */</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>请注意确保在某处定义了<code>struct bpf_ringbuf</code>（即使为空），否则您将检查<code>bpf_ringuf</code>向前声明是否存在，这几乎可以肯定不是您想要的。对于最近的 <code>vmlinux.h</code> 来说，这应该不是问题，但还是需要注意。</p>
 <h3 id="bpf_core_enum_value_exists">bpf_core_enum_value_exists()</h3>
 <p>能够检测给定枚举值的存在非常有用。这种检查的一个重要实际应用是<strong>检测是否支持某个 BPF 辅助程序</strong>。</p>
 <p>每个 BPF 辅助函数在<code>enum bpf_func_id</code>中都有一个对应的枚举值</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">enum</span> bpf_func_id {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fe8019">enum</span> bpf_func_id {
 </span></span><span style="display:flex;"><span>    ...
-</span></span><span style="display:flex;"><span>    BPF_FUNC_ringbuf_output <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">130</span>,
-</span></span><span style="display:flex;"><span>    BPF_FUNC_ringbuf_reserve <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">131</span>,
+</span></span><span style="display:flex;"><span>    BPF_FUNC_ringbuf_output <span style="color:#fe8019">=</span> <span style="color:#d3869b">130</span>,
+</span></span><span style="display:flex;"><span>    BPF_FUNC_ringbuf_reserve <span style="color:#fe8019">=</span> <span style="color:#d3869b">131</span>,
 </span></span><span style="display:flex;"><span>    ...
 </span></span><span style="display:flex;"><span>  };
 </span></span></code></pre></div><p>因此，检查 BPF 辅助函数 <code>bpf_xxx()</code>是否存在的最直接方法是检查<code>enum bpf_func_id</code> 中是否存在<code>BPF_FUNC_xxx</code>。因此，与其在前面的示例中使用 <code>bpf_core_type_exists(struct bpf_ringbuf)</code> 进行类型检查，不如更明确地说明我们的意图：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">if</span> (<span style="color:#50fa7b">bpf_core_enum_value_exists</span>(<span style="color:#ff79c6">enum</span> bpf_func_id, BPF_FUNC_ringbuf_reserve)) {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* use bpf_ringbuf_reserve() safely */</span>
-</span></span><span style="display:flex;"><span>} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* fall back to using bpf_perf_event_output() */</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">if</span> (<span style="color:#fabd2f">bpf_core_enum_value_exists</span>(<span style="color:#fe8019">enum</span> bpf_func_id, BPF_FUNC_ringbuf_reserve)) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* use bpf_ringbuf_reserve() safely */</span>
+</span></span><span style="display:flex;"><span>} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* fall back to using bpf_perf_event_output() */</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>许多其他 BPF 功能也可以以类似的方式检测到。BPF 程序类型和 BPF 映射类型支持只是另一个示例。</p>
 <p>当然，此功能不仅限于与 BPF 相关的功能。通过字段、类型或枚举器值的存在可以检测的任何内核特征都可以使用 BPF CO-RE 轻松执行。</p>
 <p>特征检测也不会停留在基于类型系统的检查上。在接下来的几节中，我们将介绍一些可用于执行内核特征检测的其他 BPF CO-RE 机制。不仅仅是功能检测，它们还允许在运行时提取特定内核的信息（如 Kconfig 值），这些信息通常无法提前知道。</p>
 <h3 id="linux_kernel_version">LINUX_KERNEL_VERSION</h3>
 <p>有时，检查 Linux 内核版本是检测必要功能存在的唯一方法。Libbpf 允许在 BPF 程序代码使用特殊的 <code>extern</code> 变量来执行此操作：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">extern</span> <span style="color:#8be9fd">int</span> LINUX_KERNEL_VERSION __kconfig;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fe8019">extern</span> <span style="color:#fabd2f">int</span> LINUX_KERNEL_VERSION __kconfig;
 </span></span></code></pre></div><p>声明后，<code>LINUX_KERNEL_VERSION</code> 以与内核本身完全相同的方式对正在运行的内核版本进行编码。这样的变量可以像任何其他变量一样使用：您可以与它进行比较、打印、记录并发送到用户态等。在所有这些情况下，BPF 验证器都知道其确切值，因此它可以检测死代码，就像上面描述的基于类型系统的检查一样。</p>
 <p>Libbpf 还提供了一个方便的 <code>KERNEL_VERSION(major, minor, patch)</code>宏，用于与<code>LINUX_KERNEL_VERSION</code>进行比较：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#ff79c6">#include</span> <span style="color:#ff79c6">&lt;bpf/bpf_helpers.h&gt;</span><span style="color:#ff79c6">
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6"></span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">extern</span> <span style="color:#8be9fd">int</span> LINUX_KERNEL_VERSION __kconfig;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;bpf/bpf_helpers.h&gt;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">extern</span> <span style="color:#fabd2f">int</span> LINUX_KERNEL_VERSION __kconfig;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>...
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">if</span> (LINUX_KERNEL_VERSION <span style="color:#ff79c6">&gt;</span> <span style="color:#50fa7b">KERNEL_VERSION</span>(<span style="color:#bd93f9">5</span>, <span style="color:#bd93f9">15</span>, <span style="color:#bd93f9">0</span>)) {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* we are on v5.15+ */</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">if</span> (LINUX_KERNEL_VERSION <span style="color:#fe8019">&gt;</span> <span style="color:#fabd2f">KERNEL_VERSION</span>(<span style="color:#d3869b">5</span>, <span style="color:#d3869b">15</span>, <span style="color:#d3869b">0</span>)) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* we are on v5.15+ */</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="kconfig-extern-variables">Kconfig extern variables</h3>
 <p>事实上，libbpf 允许为任何内核配置 （Kconfig） 值声明成特殊的 <code>extern</code> 变量。请记住，只有当内核通过<code>/proc/config.gz</code>  <em>公开其内核配置</em>时，才支持此功能，幸运的是，这在现代 Linux 发行版中非常常见。目前支持几种不同类型的变量。它们的使用取决于实际的 Kconfig 值类型：</p>
@@ -483,51 +483,51 @@
 </ul>
 <p>请记住，如果<code>/proc/config.gz</code>  中缺少请求的 Kconfig 值，libbpf 将中止程序加载并显示错误。为了优雅地处理这个问题，将这样的 Kconfig extern 变量声明为具有 <code>__weak</code> 属性的弱变量。在这种情况下，如果缺少该值，则根据使用的类型，将假定该值为 <code>false</code>、<code>TRI_NO</code>、<code>'0'</code>（零字符）、<code>0</code> 或<code>“”</code> （空字符串）。</p>
 <p>下面是声明和使用不同类型的 Kconfig extern 变量的示例：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">extern</span> <span style="color:#8be9fd">int</span> LINUX_KERNEL_VERSION __kconfig;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fe8019">extern</span> <span style="color:#fabd2f">int</span> LINUX_KERNEL_VERSION __kconfig;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">extern</span> <span style="color:#ff79c6">enum</span> libbpf_tristate CONFIG_BPF_PRELOAD __kconfig __weak;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">extern</span> <span style="color:#8be9fd">bool</span> CONFIG_BPF_JIT_ALWAYS_ON __kconfig __weak;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">extern</span> <span style="color:#8be9fd">char</span> CONFIG_BPF_JIT_DEFAULT_ON __kconfig __weak;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">extern</span> <span style="color:#8be9fd">int</span> CONFIG_HZ __kconfig;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">extern</span> <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span> CONFIG_MODPROBE_PATH[<span style="color:#bd93f9">256</span>] __kconfig __weak;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">extern</span> <span style="color:#fe8019">enum</span> libbpf_tristate CONFIG_BPF_PRELOAD __kconfig __weak;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">extern</span> <span style="color:#fabd2f">bool</span> CONFIG_BPF_JIT_ALWAYS_ON __kconfig __weak;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">extern</span> <span style="color:#fabd2f">char</span> CONFIG_BPF_JIT_DEFAULT_ON __kconfig __weak;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">extern</span> <span style="color:#fabd2f">int</span> CONFIG_HZ __kconfig;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">extern</span> <span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span> CONFIG_MODPROBE_PATH[<span style="color:#d3869b">256</span>] __kconfig __weak;
 </span></span><span style="display:flex;"><span>  
 </span></span><span style="display:flex;"><span>  ...
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (LINUX_KERNEL_VERSION <span style="color:#ff79c6">&gt;</span> <span style="color:#50fa7b">KERNEL_VERSION</span>(<span style="color:#bd93f9">5</span>, <span style="color:#bd93f9">15</span>, <span style="color:#bd93f9">0</span>)) { ... }
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (LINUX_KERNEL_VERSION <span style="color:#fe8019">&gt;</span> <span style="color:#fabd2f">KERNEL_VERSION</span>(<span style="color:#d3869b">5</span>, <span style="color:#d3869b">15</span>, <span style="color:#d3869b">0</span>)) { ... }
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">switch</span> (CONFIG_BPF_PRELOAD) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">case</span> <span style="color:#8be9fd;font-style:italic">TRI_NO</span>: ...; <span style="color:#ff79c6">break</span>;
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">case</span> <span style="color:#8be9fd;font-style:italic">TRI_YES</span>: ...; <span style="color:#ff79c6">break</span>;
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">case</span> <span style="color:#8be9fd;font-style:italic">TRI_MODULE</span>: ...; <span style="color:#ff79c6">break</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">switch</span> (CONFIG_BPF_PRELOAD) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">case</span> <span style="color:#fb4934">TRI_NO</span>: ...; <span style="color:#fe8019">break</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">case</span> <span style="color:#fb4934">TRI_YES</span>: ...; <span style="color:#fe8019">break</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">case</span> <span style="color:#fb4934">TRI_MODULE</span>: ...; <span style="color:#fe8019">break</span>;
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (<span style="color:#ff79c6">!</span>CONFIG_BPF_JIT_ALWAYS_ON)
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">bpf_printk</span>(<span style="color:#f1fa8c">&#34;BPF_JIT_DEFAULT_ON: %c</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>, CONFIG_BPF_JIT_DEFAULT_ON <span style="color:#ff79c6">?:</span> <span style="color:#f1fa8c">&#39;n&#39;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (<span style="color:#fe8019">!</span>CONFIG_BPF_JIT_ALWAYS_ON)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">bpf_printk</span>(<span style="color:#b8bb26">&#34;BPF_JIT_DEFAULT_ON: %c</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>, CONFIG_BPF_JIT_DEFAULT_ON <span style="color:#fe8019">?:</span> <span style="color:#b8bb26">&#39;n&#39;</span>);
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">bpf_printk</span>(<span style="color:#f1fa8c">&#34;HZ is %d, MODPROBE_PATH: %s</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>, CONFIG_HZ, CONFIG_MODPROBE_PATH);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">bpf_printk</span>(<span style="color:#b8bb26">&#34;HZ is %d, MODPROBE_PATH: %s</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>, CONFIG_HZ, CONFIG_MODPROBE_PATH);
 </span></span></code></pre></div><h3 id="可重定位枚举">可重定位枚举</h3>
 <p>一些 BPF 应用程序遇到的一个有趣的挑战是需要使用“不稳定”的内部内核枚举。也就是说，枚举没有分配给它们的一组固定常量和/或整数值。一个很好的例子是<code>enum cgroup_subsys_id</code>，它在  <a href="https://github.com/torvalds/linux/blob/87066fdd2e30fe9dd531125d95257c118a74617e/include/linux/cgroup-defs.h#L43-L47">include/linux/cgroup-defs.h</a> 中定义，其定义可能因内核编译期间启用的 cgroup 功能而异（有关详细信息，请参见 <a href="https://github.com/torvalds/linux/blob/87066fdd2e30fe9dd531125d95257c118a74617e/include/linux/cgroup_subsys.h">include/linux/cgroup_subsys.h</a> ）。因此，如果你需要知道 <code>cgroup_subsys_id::cpu_cgrp_id</code> 的实际整数值，这可能是一个大问题，因为这个枚举是内核内部的，并且是动态生成的。</p>
 <p>再一次，BPF CO-RE来救援。它允许在 <code>bpf_core_enum_value()</code>宏的帮助下捕获实际值：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">int</span> id <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bpf_core_enum_value</span>(<span style="color:#ff79c6">enum</span> cgroup_subsys_id, cpu_cgrp_id);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">int</span> id <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bpf_core_enum_value</span>(<span style="color:#fe8019">enum</span> cgroup_subsys_id, cpu_cgrp_id);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">/* id will contain the actual integer value in the host kernel */</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/* id will contain the actual integer value in the host kernel */</span>
 </span></span></code></pre></div><h3 id="guarding-potentially-failing-relocations">Guarding potentially failing relocations</h3>
 <p>某些内核上缺少某些字段的情况并不少见。如果 BPF 程序使用 <code>BPF_CORE_READ()</code>尝试读取带有的缺失字段，则在 BPF 验证期间将导致错误。同样，当获取主机内核中不存在的枚举（或类型）的枚举值（或类型大小）时，CO-RE 重定位将失败。</p>
 <p>不幸的是，目前这个错误非常隐晦（<a href="https://github.com/libbpf/libbpf/issues/371">但很快就会被 libbpf 改进</a>），所以最好注意它，以防万一你不小心遇到它。如果遇到类似于以下错误的错误，请知道这是因为 CO-RE 重定位无法找到相应的字段/类型/枚举：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#bd93f9">1</span><span style="color:#ff79c6">:</span> (<span style="color:#bd93f9">85</span>) call unknown#<span style="color:#bd93f9">195896080</span>
-</span></span><span style="display:flex;"><span>  invalid func unknown#<span style="color:#bd93f9">195896080</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#d3869b">1</span><span style="color:#fe8019">:</span> (<span style="color:#d3869b">85</span>) call unknown#<span style="color:#d3869b">195896080</span>
+</span></span><span style="display:flex;"><span>  invalid func unknown#<span style="color:#d3869b">195896080</span>
 </span></span></code></pre></div><p>该<code>195896080</code>用十六进制表示为<code>0xbad2310</code>（表示“bad relo”），并且是 libbpf 用来标记 CO-RE 重定位失败的指令的常量。libbpf 不立即报告此类错误的原因是，如果需要，BPF 应用程序可以正常处理缺少字段/类型/枚举和相应的失败 CO-RE 重定位。这样一来，只需一个 BPF 应用程序就可以适应内核类型中非常剧烈的变化（这是“一次编译 - 随处运行”理念的关键目标）。</p>
 <p>当某些字段/类型/枚举可能丢失时，您可以使用处理内核更改一节中描述的检查之一来保护此类代码路径。如果保护得当，BPF 验证器将知道这样的代码路径不可能在该特定内核上命中，因此会将其作为死代码消除。</p>
 <p>这种方法允许选择性地捕获内核信息片段，如果实际运行的内核确实有这些片段。否则，BPF 应用程序可以干净地回退到替代逻辑，并优雅地处理缺少的功能或数据。只要对可能失败的 CO-RE 搬迁得到妥善保护，所有这些都会很好用。此处的 CO-RE 重定位是指对 <code>BPF_CORE_READ()</code>系列宏、类型/字段大小重定位或枚举器值捕获的任何使用。如果目标字段/类型/枚举不存在或具有某些不兼容的定义，则任何没有意义的内容。</p>
 <p>继续前面<code>cpu_cgrp_id</code>枚举值的例子，为了处理可能没有定义此类枚举器的内核（例如，由于Kconfig 开关<code>CONFIG_CGROUP_PIDS</code>未设置），可以使用 <code>bpf_core_enum_value_exists()</code> 检查（<strong>存在检查永远不会失败！</strong>），它返回 <code>true</code>/<code>false</code>（严格来说，它在 C 中是 <code>0</code> 或 <code>1</code>）：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">int</span> id;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">int</span> id;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">if</span> (<span style="color:#50fa7b">bpf_core_enum_value_exists</span>(<span style="color:#ff79c6">enum</span> cgroup_subsys_id, cpu_cgrp_id))
-</span></span><span style="display:flex;"><span>    id <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">bpf_core_enum_value</span>(<span style="color:#ff79c6">enum</span> cgroup_subsys_id, cpu_cgrp_id);
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">else</span>
-</span></span><span style="display:flex;"><span>    id <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>; <span style="color:#6272a4">/* fallback value */</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">if</span> (<span style="color:#fabd2f">bpf_core_enum_value_exists</span>(<span style="color:#fe8019">enum</span> cgroup_subsys_id, cpu_cgrp_id))
+</span></span><span style="display:flex;"><span>    id <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bpf_core_enum_value</span>(<span style="color:#fe8019">enum</span> cgroup_subsys_id, cpu_cgrp_id);
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">else</span>
+</span></span><span style="display:flex;"><span>    id <span style="color:#fe8019">=</span> <span style="color:#fe8019">-</span><span style="color:#d3869b">1</span>; <span style="color:#928374;font-style:italic">/* fallback value */</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">/* use id even if cpu_cgrp_id isn&#39;t defined */</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/* use id even if cpu_cgrp_id isn&#39;t defined */</span>
 </span></span></code></pre></div><p>上面的例子在任何内核上都可以正常工作，无论<code>cpu_cgrp_id</code>枚举是否存在，即使 <code>bpf_core_enum_value()</code>在没有枚举<code>cpu_cgrp_id</code>的内核上失败。这一切都是因为有适当保护的代码路径。</p>
 <h2 id="advanced-topics">Advanced topics</h2>
 <p>前面的部分介绍了最常见的 CO-RE 功能。本节将介绍您可能需要处理的一些更高级的主题，具体取决于 BPF 应用程序必须处理的内部内核状态的复杂程度及其在不同内核版本中的变体。</p>
@@ -536,11 +536,11 @@
 <p>此外，有时在更复杂的情况下，<code>vmlinux.h</code> 可能还不够。要么是因为所需的类型还没有在内核 BTF 中，要么是因为内核中的某些内容以不兼容的方式发生了变化（例如，字段被重命名），现在您需要处理同一内核类型的两个不兼容的定义（我们将在下面处理这种不幸的情况）。</p>
 <p>不管是什么原因，定义你自己对内核类型的期望并使其可重新定位是很容易的。让我们以 <code>struct task_struct</code> 为例。这是一个庞大而复杂的结构，但通常你只需要它的整个定义中的几个简单字段。使用 BPF CO-RE，只需声明您将需要的字段就足够了，跳过所有其他字段，保持类型定义简单明了。</p>
 <p>假设您只关心 <code>pid</code>、<code>group_leader</code> 和 <code>comm</code> 字段。声明<code>struct task_struct</code> 如下足以使一切正常：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> task_struct {
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">int</span> pid;
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">char</span> comm[<span style="color:#bd93f9">16</span>];
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">struct</span> task_struct <span style="color:#ff79c6">*</span>group_leader;
-</span></span><span style="display:flex;"><span>  } <span style="color:#50fa7b">__attribute__</span>((preserve_access_index));
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> task_struct {
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">int</span> pid;
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">char</span> comm[<span style="color:#d3869b">16</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">struct</span> task_struct <span style="color:#fe8019">*</span>group_leader;
+</span></span><span style="display:flex;"><span>  } <span style="color:#fabd2f">__attribute__</span>((preserve_access_index));
 </span></span></code></pre></div><p>首先，字段的顺序完全无关紧要。</p>
 <p>其次，<code>__attribute__((preserve_access_index))</code> 对于允许直接内存读取的 BPF 程序是必需的。例如，BTF支持的raw tracepoints (<code>SEC(tp_btf)</code>)和 <code>fentry</code>/<code>fexit</code> BPF 程序。有了这个属性，使用此结构定义的任何直接内存读取都将自动可进行 CO-RE 重定位。</p>
 <p>使用显式 <code>BPF_CORE_READ()</code> 族宏时，不需要  <code>__attribute__((preserve_access_index))</code>，因为这些宏会自动强制执行它。但是，如果您直接使用普通的旧 <code>bpf_probe_read_kernel()</code>辅助函数时，如果结构体具有 <code>preserve_access_index</code> 属性，则此类探测读取也会被重新定位为 CO-RE。因此，简而言之，指定此属性始终是一个好主意。</p>
@@ -551,28 +551,28 @@
 <p>这意味着，如果您要定义一个<code>struct task_struct___my_own_copy</code>并在 BPF 应用程序中使用它，就 BPF CO-RE 而言，该结构等同于内核<code>struct task_struct</code>，并且将相应地进行匹配和重新定位。这同样适用于字段名称（因此 <code>state</code> 或 <code>state___custom</code> 实际上相同）和枚举（枚举类型名称本身以及该枚举中的枚举器名称）。它实际上是双向的，因此，如果内核具有<code>struct task_struct</code>和 <code>struct task_struct___2</code>，例如（有时由于 C 类型系统和头文件在内核源代码中包含交互），则这两个结构都将是匹配 BPF 程序源代码中定义的<code>struct task_struct___my</code>的候选者。</p>
 <p>这在实践中意味着，您现在可以对同一内核类型/字段/枚举拥有多个独立且相互冲突的定义，但既可以将代码编译为有效的 C，也可以根据您使用的任何功能检测方法在运行时选择正确的定义。</p>
 <p>让我们看一个示例，说明如何处理提到的 <code>task_struct-&gt;state</code> 重命名为 <code>task_struct-&gt;__state</code>的情况：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#6272a4">/* latest kernel task_struct definition, which can also come from vmlinux.h */</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> task_struct {
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">int</span> __state;
-</span></span><span style="display:flex;"><span>} <span style="color:#50fa7b">__attribute__</span>((preserve_access_index));
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/* latest kernel task_struct definition, which can also come from vmlinux.h */</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> task_struct {
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">int</span> __state;
+</span></span><span style="display:flex;"><span>} <span style="color:#fabd2f">__attribute__</span>((preserve_access_index));
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> task_struct___old {
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">long</span> state;
-</span></span><span style="display:flex;"><span>} <span style="color:#50fa7b">__attribute__</span>((preserve_access_index));
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> task_struct___old {
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">long</span> state;
+</span></span><span style="display:flex;"><span>} <span style="color:#fabd2f">__attribute__</span>((preserve_access_index));
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>...
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> task_struct <span style="color:#ff79c6">*</span>t <span style="color:#ff79c6">=</span> (<span style="color:#8be9fd">void</span> <span style="color:#ff79c6">*</span>)<span style="color:#50fa7b">bpf_get_current_task</span>();
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">int</span> state;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> task_struct <span style="color:#fe8019">*</span>t <span style="color:#fe8019">=</span> (<span style="color:#fabd2f">void</span> <span style="color:#fe8019">*</span>)<span style="color:#fabd2f">bpf_get_current_task</span>();
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">int</span> state;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">if</span> (<span style="color:#50fa7b">bpf_core_field_exists</span>(t<span style="color:#ff79c6">-&gt;</span>__state)) {
-</span></span><span style="display:flex;"><span>    state <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">BPF_CORE_READ</span>(t, __state);
-</span></span><span style="display:flex;"><span>} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* recast pointer to capture task_struct___old type for compiler */</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">struct</span> task_struct___old <span style="color:#ff79c6">*</span>t_old <span style="color:#ff79c6">=</span> (<span style="color:#8be9fd">void</span> <span style="color:#ff79c6">*</span>)t;
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">if</span> (<span style="color:#fabd2f">bpf_core_field_exists</span>(t<span style="color:#fe8019">-&gt;</span>__state)) {
+</span></span><span style="display:flex;"><span>    state <span style="color:#fe8019">=</span> <span style="color:#fabd2f">BPF_CORE_READ</span>(t, __state);
+</span></span><span style="display:flex;"><span>} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* recast pointer to capture task_struct___old type for compiler */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">struct</span> task_struct___old <span style="color:#fe8019">*</span>t_old <span style="color:#fe8019">=</span> (<span style="color:#fabd2f">void</span> <span style="color:#fe8019">*</span>)t;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">/* now use old &#34;state&#34; name of the field */</span>
-</span></span><span style="display:flex;"><span>    state <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">BPF_CORE_READ</span>(t_old, state);
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">/* now use old &#34;state&#34; name of the field */</span>
+</span></span><span style="display:flex;"><span>    state <span style="color:#fe8019">=</span> <span style="color:#fabd2f">BPF_CORE_READ</span>(t_old, state);
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>...

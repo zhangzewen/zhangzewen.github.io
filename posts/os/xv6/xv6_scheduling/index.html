@@ -309,163 +309,163 @@ xv6 进程间切换发生在如下两种情况：
 </table>
 <h2 id="上下文切换">上下文切换</h2>
 <p>xv6 中上下文切换是通过 swtch 完成的， swtch 是一段汇编代码， 其实就是保存要保存出让cpu进程的寄存器，加载获取cpu进程的寄存器：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#6272a4"># Context switch
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">#
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">#   void swtch(struct context *old, struct context *new);
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"># 
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"># Save current registers in old. Load from new.	
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">.globl</span> swtch
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">swtch:</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> ra, <span style="color:#bd93f9">0</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> sp, <span style="color:#bd93f9">8</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s0, <span style="color:#bd93f9">16</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s1, <span style="color:#bd93f9">24</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s2, <span style="color:#bd93f9">32</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s3, <span style="color:#bd93f9">40</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s4, <span style="color:#bd93f9">48</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s5, <span style="color:#bd93f9">56</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s6, <span style="color:#bd93f9">64</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s7, <span style="color:#bd93f9">72</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s8, <span style="color:#bd93f9">80</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s9, <span style="color:#bd93f9">88</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s10, <span style="color:#bd93f9">96</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s11, <span style="color:#bd93f9">104</span>(a0)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># Context switch
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">#
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">#   void swtch(struct context *old, struct context *new);
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># 
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># Save current registers in old. Load from new.	
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#b8bb26;font-weight:bold">.globl</span> <span style="color:#d3869b">swtch</span>
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">swtch:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">ra</span>, <span style="color:#d3869b">0</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">sp</span>, <span style="color:#d3869b">8</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s0</span>, <span style="color:#d3869b">16</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s1</span>, <span style="color:#d3869b">24</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s2</span>, <span style="color:#d3869b">32</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s3</span>, <span style="color:#d3869b">40</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s4</span>, <span style="color:#d3869b">48</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s5</span>, <span style="color:#d3869b">56</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s6</span>, <span style="color:#d3869b">64</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s7</span>, <span style="color:#d3869b">72</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s8</span>, <span style="color:#d3869b">80</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s9</span>, <span style="color:#d3869b">88</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s10</span>, <span style="color:#d3869b">96</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s11</span>, <span style="color:#d3869b">104</span>(<span style="color:#d3869b">a0</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> ra, <span style="color:#bd93f9">0</span>(a1)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> sp, <span style="color:#bd93f9">8</span>(a1)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s0, <span style="color:#bd93f9">16</span>(a1)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s1, <span style="color:#bd93f9">24</span>(a1)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s2, <span style="color:#bd93f9">32</span>(a1)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s3, <span style="color:#bd93f9">40</span>(a1)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s4, <span style="color:#bd93f9">48</span>(a1)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s5, <span style="color:#bd93f9">56</span>(a1)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s6, <span style="color:#bd93f9">64</span>(a1)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s7, <span style="color:#bd93f9">72</span>(a1)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s8, <span style="color:#bd93f9">80</span>(a1)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s9, <span style="color:#bd93f9">88</span>(a1)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s10, <span style="color:#bd93f9">96</span>(a1)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s11, <span style="color:#bd93f9">104</span>(a1)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">ra</span>, <span style="color:#d3869b">0</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">sp</span>, <span style="color:#d3869b">8</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s0</span>, <span style="color:#d3869b">16</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s1</span>, <span style="color:#d3869b">24</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s2</span>, <span style="color:#d3869b">32</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s3</span>, <span style="color:#d3869b">40</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s4</span>, <span style="color:#d3869b">48</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s5</span>, <span style="color:#d3869b">56</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s6</span>, <span style="color:#d3869b">64</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s7</span>, <span style="color:#d3869b">72</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s8</span>, <span style="color:#d3869b">80</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s9</span>, <span style="color:#d3869b">88</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s10</span>, <span style="color:#d3869b">96</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s11</span>, <span style="color:#d3869b">104</span>(<span style="color:#d3869b">a1</span>)
 </span></span><span style="display:flex;"><span>        
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ret</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ret</span>
 </span></span></code></pre></div><h2 id="yield-和-sched">yield 和 sched</h2>
 <p>sched 切换到 scheduler 的上下文，yield 修改进程状态： RUNNING -&gt; RUNNABLE ,并调用 sched 切换到 scheduler。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">sched</span>(<span style="color:#8be9fd">void</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">sched</span>(<span style="color:#fabd2f">void</span>)
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">int</span> intena;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proc <span style="color:#ff79c6">*</span>p <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">myproc</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> intena;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">myproc</span>();
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">!</span><span style="color:#50fa7b">holding</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock))
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">panic</span>(<span style="color:#f1fa8c">&#34;sched p-&gt;lock&#34;</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(<span style="color:#50fa7b">mycpu</span>()<span style="color:#ff79c6">-&gt;</span>noff <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">1</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">panic</span>(<span style="color:#f1fa8c">&#34;sched locks&#34;</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">==</span> RUNNING)
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">panic</span>(<span style="color:#f1fa8c">&#34;sched RUNNING&#34;</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(<span style="color:#50fa7b">intr_get</span>())
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">panic</span>(<span style="color:#f1fa8c">&#34;sched interruptible&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fe8019">!</span><span style="color:#fabd2f">holding</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock))
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;sched p-&gt;lock&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">mycpu</span>()<span style="color:#fe8019">-&gt;</span>noff <span style="color:#fe8019">!=</span> <span style="color:#d3869b">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;sched locks&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">==</span> RUNNING)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;sched RUNNING&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">intr_get</span>())
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;sched interruptible&#34;</span>);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  intena <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">mycpu</span>()<span style="color:#ff79c6">-&gt;</span>intena;
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">swtch</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>context, <span style="color:#ff79c6">&amp;</span><span style="color:#50fa7b">mycpu</span>()<span style="color:#ff79c6">-&gt;</span>context);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">mycpu</span>()<span style="color:#ff79c6">-&gt;</span>intena <span style="color:#ff79c6">=</span> intena;
+</span></span><span style="display:flex;"><span>  intena <span style="color:#fe8019">=</span> <span style="color:#fabd2f">mycpu</span>()<span style="color:#fe8019">-&gt;</span>intena;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">swtch</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>context, <span style="color:#fe8019">&amp;</span><span style="color:#fabd2f">mycpu</span>()<span style="color:#fe8019">-&gt;</span>context);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">mycpu</span>()<span style="color:#fe8019">-&gt;</span>intena <span style="color:#fe8019">=</span> intena;
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// Give up the CPU for one scheduling round.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#8be9fd">void</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">yield</span>(<span style="color:#8be9fd">void</span>)
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Give up the CPU for one scheduling round.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">yield</span>(<span style="color:#fabd2f">void</span>)
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proc <span style="color:#ff79c6">*</span>p <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">myproc</span>();
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">acquire</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
-</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">=</span> RUNNABLE;
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">sched</span>();
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">release</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">myproc</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">acquire</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> RUNNABLE;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">sched</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">release</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="scheduler-切换到-用户进程">scheduler 切换到 用户进程</h2>
 <p>在<code>kernel/main.c</code> 的 main 函数最后，会在每个 hart 执行进程的调度 scheduler：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">main</span>()
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">main</span>()
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">//...
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#50fa7b">scheduler</span>();        
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">scheduler</span>();        
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>scheduler 其内部是一个死循环，其遍历 proc，寻找状态为 RNNABLE 的进程，通过调用 swtch 来进行进程切换， 如果没有合适的进程，则执行 wfi 指令进入到低功耗待机状态，等待中断的到来。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">scheduler</span>(<span style="color:#8be9fd">void</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">scheduler</span>(<span style="color:#fabd2f">void</span>)
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proc <span style="color:#ff79c6">*</span>p;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> cpu <span style="color:#ff79c6">*</span>c <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">mycpu</span>();
-</span></span><span style="display:flex;"><span>  c<span style="color:#ff79c6">-&gt;</span>proc <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">for</span>(;;){
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">intr_on</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> cpu <span style="color:#fe8019">*</span>c <span style="color:#fe8019">=</span> <span style="color:#fabd2f">mycpu</span>();
+</span></span><span style="display:flex;"><span>  c<span style="color:#fe8019">-&gt;</span>proc <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">for</span>(;;){
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">intr_on</span>();
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd">int</span> found <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span>(p <span style="color:#ff79c6">=</span> proc; p <span style="color:#ff79c6">&lt;</span> <span style="color:#ff79c6">&amp;</span>proc[NPROC]; p<span style="color:#ff79c6">++</span>) {
-</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">acquire</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">if</span>(p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">==</span> RUNNABLE) {
-</span></span><span style="display:flex;"><span>        p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">=</span> RUNNING;
-</span></span><span style="display:flex;"><span>        c<span style="color:#ff79c6">-&gt;</span>proc <span style="color:#ff79c6">=</span> p;
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">swtch</span>(<span style="color:#ff79c6">&amp;</span>c<span style="color:#ff79c6">-&gt;</span>context, <span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>context);
-</span></span><span style="display:flex;"><span>        c<span style="color:#ff79c6">-&gt;</span>proc <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
-</span></span><span style="display:flex;"><span>        found <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">1</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">int</span> found <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">for</span>(p <span style="color:#fe8019">=</span> proc; p <span style="color:#fe8019">&lt;</span> <span style="color:#fe8019">&amp;</span>proc[NPROC]; p<span style="color:#fe8019">++</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">acquire</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">if</span>(p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">==</span> RUNNABLE) {
+</span></span><span style="display:flex;"><span>        p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> RUNNING;
+</span></span><span style="display:flex;"><span>        c<span style="color:#fe8019">-&gt;</span>proc <span style="color:#fe8019">=</span> p;
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">swtch</span>(<span style="color:#fe8019">&amp;</span>c<span style="color:#fe8019">-&gt;</span>context, <span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>context);
+</span></span><span style="display:flex;"><span>        c<span style="color:#fe8019">-&gt;</span>proc <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span>        found <span style="color:#fe8019">=</span> <span style="color:#d3869b">1</span>;
 </span></span><span style="display:flex;"><span>      }
-</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">release</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">release</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(found <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span>) {
-</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">intr_on</span>();
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">asm</span> <span style="color:#ff79c6">volatile</span>(<span style="color:#f1fa8c">&#34;wfi&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(found <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">intr_on</span>();
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">asm</span> <span style="color:#fe8019">volatile</span>(<span style="color:#b8bb26">&#34;wfi&#34;</span>);
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>在 scheduler 中最重要的两行代码：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>        <span style="color:#50fa7b">swtch</span>(<span style="color:#ff79c6">&amp;</span>c<span style="color:#ff79c6">-&gt;</span>context, <span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>context);
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// Process is done running for now.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4">// It should have changed its p-&gt;state before coming back.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        c<span style="color:#ff79c6">-&gt;</span>proc <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>        <span style="color:#fabd2f">swtch</span>(<span style="color:#fe8019">&amp;</span>c<span style="color:#fe8019">-&gt;</span>context, <span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>context);
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// Process is done running for now.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic">// It should have changed its p-&gt;state before coming back.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        c<span style="color:#fe8019">-&gt;</span>proc <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
 </span></span></code></pre></div><p>如果单看注释，会云里雾里。从 swtch 的汇编代码中可以看出，并没有寄存器 pc 的变更，但是需要注意的是，在 allocproc 这个函数里面有如下代码：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>context.ra <span style="color:#ff79c6">=</span> (uint64)forkret;
-</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>context.sp <span style="color:#ff79c6">=</span> p<span style="color:#ff79c6">-&gt;</span>kstack <span style="color:#ff79c6">+</span> PGSIZE;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>context.ra <span style="color:#fe8019">=</span> (uint64)forkret;
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>context.sp <span style="color:#fe8019">=</span> p<span style="color:#fe8019">-&gt;</span>kstack <span style="color:#fe8019">+</span> PGSIZE;
 </span></span></code></pre></div><p>在 调用 swtch 的时候， forkret 的地址会写入寄存器 ra， 当 swtch 返回的时候，ra 的值会写入到寄存器 pc，所以会从 forkret 开始执行。最终会调用 prepare_return ：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">prepare_return</span>(<span style="color:#8be9fd">void</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">prepare_return</span>(<span style="color:#fabd2f">void</span>)
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// ...
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// set S Exception Program Counter to the saved user pc.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#50fa7b">w_sepc</span>(p<span style="color:#ff79c6">-&gt;</span>trapframe<span style="color:#ff79c6">-&gt;</span>epc);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// set S Exception Program Counter to the saved user pc.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">w_sepc</span>(p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>epc);
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>最终会切换到用户进程执行。</p>
 <h2 id="sleep-和-wake">sleep 和 wake</h2>
 <p>sleep  调用 sched 出让 cpu， wake 修改下进程的状态：SLEEPING -&gt; RUNNABLE：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">sleep</span>(<span style="color:#8be9fd">void</span> <span style="color:#ff79c6">*</span>chan, <span style="color:#ff79c6">struct</span> spinlock <span style="color:#ff79c6">*</span>lk)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">sleep</span>(<span style="color:#fabd2f">void</span> <span style="color:#fe8019">*</span>chan, <span style="color:#fe8019">struct</span> spinlock <span style="color:#fe8019">*</span>lk)
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proc <span style="color:#ff79c6">*</span>p <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">myproc</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">myproc</span>();
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">acquire</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">release</span>(lk);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">acquire</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">release</span>(lk);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>chan <span style="color:#ff79c6">=</span> chan;
-</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">=</span> SLEEPING;
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>chan <span style="color:#fe8019">=</span> chan;
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> SLEEPING;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">sched</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">sched</span>();
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>chan <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>chan <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">release</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">acquire</span>(lk);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">release</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">acquire</span>(lk);
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">wakeup</span>(<span style="color:#8be9fd">void</span> <span style="color:#ff79c6">*</span>chan)
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">wakeup</span>(<span style="color:#fabd2f">void</span> <span style="color:#fe8019">*</span>chan)
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proc <span style="color:#ff79c6">*</span>p;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">for</span>(p <span style="color:#ff79c6">=</span> proc; p <span style="color:#ff79c6">&lt;</span> <span style="color:#ff79c6">&amp;</span>proc[NPROC]; p<span style="color:#ff79c6">++</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(p <span style="color:#ff79c6">!=</span> <span style="color:#50fa7b">myproc</span>()){
-</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">acquire</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">if</span>(p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">==</span> SLEEPING <span style="color:#ff79c6">&amp;&amp;</span> p<span style="color:#ff79c6">-&gt;</span>chan <span style="color:#ff79c6">==</span> chan) {
-</span></span><span style="display:flex;"><span>        p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">=</span> RUNNABLE;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">for</span>(p <span style="color:#fe8019">=</span> proc; p <span style="color:#fe8019">&lt;</span> <span style="color:#fe8019">&amp;</span>proc[NPROC]; p<span style="color:#fe8019">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(p <span style="color:#fe8019">!=</span> <span style="color:#fabd2f">myproc</span>()){
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">acquire</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">if</span>(p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">==</span> SLEEPING <span style="color:#fe8019">&amp;&amp;</span> p<span style="color:#fe8019">-&gt;</span>chan <span style="color:#fe8019">==</span> chan) {
+</span></span><span style="display:flex;"><span>        p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> RUNNABLE;
 </span></span><span style="display:flex;"><span>      }
-</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">release</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">release</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>}

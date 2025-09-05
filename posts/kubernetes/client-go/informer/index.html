@@ -253,9 +253,9 @@ processorListener processorListener 是用户对特定资源对象变更事件�
 <p>在讲解 Informer 机制之前，先来简单了解两个数据结构，这两个数据结构设计到变更事件的监听，事件分发，事件消费。</p>
 <h3 id="processorlistener">processorListener</h3>
 <p>processorListener 是用户对特定资源对象变更事件的回调处理逻辑接口 ResourceEventHandler 的封装，其监听变更事件以及调用用户注册的回调逻辑来消费这些变更事件。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> processorListener <span style="color:#8be9fd;font-style:italic">struct</span> {
-</span></span><span style="display:flex;"><span>	nextCh <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">interface</span>{}
-</span></span><span style="display:flex;"><span>	addCh  <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">interface</span>{}
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> processorListener <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>	nextCh <span style="color:#fe8019">chan</span> <span style="color:#fe8019">interface</span>{}
+</span></span><span style="display:flex;"><span>	addCh  <span style="color:#fe8019">chan</span> <span style="color:#fe8019">interface</span>{}
 </span></span><span style="display:flex;"><span>	handler ResourceEventHandler
 </span></span><span style="display:flex;"><span>	pendingNotifications buffer.RingGrowing
 </span></span><span style="display:flex;"><span>	requestedResyncPeriod time.Duration
@@ -265,232 +265,232 @@ processorListener processorListener 是用户对特定资源对象变更事件�
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>字段 nextCh 这个是一个unbuffered channel， 通知事件是从这里面读出来的，然后会调用注册的 handler 根据通知事件的类型（add/update/delete）来调用不同的方法处理（OnAdd/OnUpdate/OnDelete）。</p>
 <p>字段 addCh 从 DeltaFIFO 中 Pop 出来的经过处理的数据通过 <code>sharedProcessor.distribute</code> 放入到此通道，是一个unbuffered channel：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>processorListener) <span style="color:#50fa7b">add</span>(notification <span style="color:#8be9fd;font-style:italic">interface</span>{}) {
-</span></span><span style="display:flex;"><span>	p.addCh <span style="color:#ff79c6">&lt;-</span> notification
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>processorListener) <span style="color:#fabd2f">add</span>(notification <span style="color:#fe8019">interface</span>{}) {
+</span></span><span style="display:flex;"><span>	p.addCh <span style="color:#fe8019">&lt;-</span> notification
 </span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>sharedProcessor) <span style="color:#50fa7b">distribute</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}, sync <span style="color:#8be9fd">bool</span>) {
-</span></span><span style="display:flex;"><span>	p.listenersLock.<span style="color:#50fa7b">RLock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> p.listenersLock.<span style="color:#50fa7b">RUnlock</span>()
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>sharedProcessor) <span style="color:#fabd2f">distribute</span>(obj <span style="color:#fe8019">interface</span>{}, sync <span style="color:#fabd2f">bool</span>) {
+</span></span><span style="display:flex;"><span>	p.listenersLock.<span style="color:#fabd2f">RLock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> p.listenersLock.<span style="color:#fabd2f">RUnlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> sync {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, listener <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> p.syncingListeners {
-</span></span><span style="display:flex;"><span>			listener.<span style="color:#50fa7b">add</span>(obj)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> sync {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> _, listener <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> p.syncingListeners {
+</span></span><span style="display:flex;"><span>			listener.<span style="color:#fabd2f">add</span>(obj)
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, listener <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> p.listeners {
-</span></span><span style="display:flex;"><span>			listener.<span style="color:#50fa7b">add</span>(obj)
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> _, listener <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> p.listeners {
+</span></span><span style="display:flex;"><span>			listener.<span style="color:#fabd2f">add</span>(obj)
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>pendingNotifications 从 addCh 中读出数据放入 nextCh 中，如果阻塞，则放入此缓冲区域。</p>
 <p>pop 监听 addCh，把 notification 对象扔到 nextCh 管道里：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>processorListener) <span style="color:#50fa7b">pop</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> utilruntime.<span style="color:#50fa7b">HandleCrash</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> <span style="color:#8be9fd;font-style:italic">close</span>(p.nextCh) <span style="color:#6272a4">// Tell .run() to stop</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>processorListener) <span style="color:#fabd2f">pop</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">defer</span> utilruntime.<span style="color:#fabd2f">HandleCrash</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">defer</span> <span style="color:#fabd2f">close</span>(p.nextCh) <span style="color:#928374;font-style:italic">// Tell .run() to stop</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> nextCh <span style="color:#8be9fd;font-style:italic">chan</span><span style="color:#ff79c6">&lt;-</span> <span style="color:#8be9fd;font-style:italic">interface</span>{} <span style="color:#6272a4">// 初始值为nil</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> notification <span style="color:#8be9fd;font-style:italic">interface</span>{} <span style="color:#6272a4">// 初始值为nil</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">select</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 在最开始的时候nextCh为nil， 向一个空的channel中写入数据，会阻塞，</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 另外一种情况是nextCh被赋值为p.nextCh, 因为是select的第一个分支，会优先判断</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 如果p.nextCh被消费的够快，导致next &lt;- notification这个操作不阻塞，就会一直优先这个分支，直到再次阻塞</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 再次阻塞又分为2种情况:    a. nextCh(即p.nextCh)的消费端消费能力有限，且其是一个unbuffered channel，导致阻塞</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// b. pendingNotifications中没有数据了，导致notification, ok = p.pendingNotifications.ReadOne()这个中</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// ok为false， nextCh又被赋值为nil，向空的channel里面写数据，肯定是阻塞的</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">case</span> nextCh <span style="color:#ff79c6">&lt;-</span> notification:  
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// Notification dispatched</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#8be9fd;font-style:italic">var</span> ok <span style="color:#8be9fd">bool</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 读取pendingNotifications中的信息， 直到pendingNotification中没有数据</span>
-</span></span><span style="display:flex;"><span>            notification, ok = p.pendingNotifications.<span style="color:#50fa7b">ReadOne</span>()
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> !ok { <span style="color:#6272a4">// Nothing to pop pendingNotification中已经没有数据了</span>
-</span></span><span style="display:flex;"><span>                nextCh = <span style="color:#ff79c6">nil</span> <span style="color:#6272a4">// Disable this select case</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">var</span> nextCh <span style="color:#fe8019">chan</span><span style="color:#fe8019">&lt;-</span> <span style="color:#fe8019">interface</span>{} <span style="color:#928374;font-style:italic">// 初始值为nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">var</span> notification <span style="color:#fe8019">interface</span>{} <span style="color:#928374;font-style:italic">// 初始值为nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">for</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 在最开始的时候nextCh为nil， 向一个空的channel中写入数据，会阻塞，</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 另外一种情况是nextCh被赋值为p.nextCh, 因为是select的第一个分支，会优先判断</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 如果p.nextCh被消费的够快，导致next &lt;- notification这个操作不阻塞，就会一直优先这个分支，直到再次阻塞</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 再次阻塞又分为2种情况:    a. nextCh(即p.nextCh)的消费端消费能力有限，且其是一个unbuffered channel，导致阻塞</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// b. pendingNotifications中没有数据了，导致notification, ok = p.pendingNotifications.ReadOne()这个中</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// ok为false， nextCh又被赋值为nil，向空的channel里面写数据，肯定是阻塞的</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">case</span> nextCh <span style="color:#fe8019">&lt;-</span> notification:  
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// Notification dispatched</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">var</span> ok <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 读取pendingNotifications中的信息， 直到pendingNotification中没有数据</span>
+</span></span><span style="display:flex;"><span>            notification, ok = p.pendingNotifications.<span style="color:#fabd2f">ReadOne</span>()
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> !ok { <span style="color:#928374;font-style:italic">// Nothing to pop pendingNotification中已经没有数据了</span>
+</span></span><span style="display:flex;"><span>                nextCh = <span style="color:#fe8019">nil</span> <span style="color:#928374;font-style:italic">// Disable this select case</span>
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">//到这里说明pendingNotification中还有数据，重新进入到循环</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">case</span> notificationToAdd, ok <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>p.addCh: <span style="color:#6272a4">// 从addCh中读取到数据</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> !ok { <span style="color:#ff79c6">//addCh关闭了</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#8ec07c">//到这里说明pendingNotification中还有数据，重新进入到循环</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">case</span> notificationToAdd, ok <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&lt;-</span>p.addCh: <span style="color:#928374;font-style:italic">// 从addCh中读取到数据</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> !ok { <span style="color:#8ec07c">//addCh关闭了</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> notification <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> { <span style="color:#6272a4">// No notification to pop (and pendingNotifications is empty)</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// Optimize the case - skip adding to pendingNotifications</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// notification为nil的时候，说明pendingNotifications是空的</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> notification <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> { <span style="color:#928374;font-style:italic">// No notification to pop (and pendingNotifications is empty)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// Optimize the case - skip adding to pendingNotifications</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// notification为nil的时候，说明pendingNotifications是空的</span>
 </span></span><span style="display:flex;"><span>                notification = notificationToAdd
 </span></span><span style="display:flex;"><span>                nextCh = p.nextCh
-</span></span><span style="display:flex;"><span>            } <span style="color:#ff79c6">else</span> { <span style="color:#6272a4">// There is already a notification waiting to be dispatched</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// 放入到pendingNotification中</span>
-</span></span><span style="display:flex;"><span>                p.pendingNotifications.<span style="color:#50fa7b">WriteOne</span>(notificationToAdd)
+</span></span><span style="display:flex;"><span>            } <span style="color:#fe8019">else</span> { <span style="color:#928374;font-style:italic">// There is already a notification waiting to be dispatched</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// 放入到pendingNotification中</span>
+</span></span><span style="display:flex;"><span>                p.pendingNotifications.<span style="color:#fabd2f">WriteOne</span>(notificationToAdd)
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>pop 的同一时间只有一个通知事件被处理，即通过 nextCh 这个管道传递给 run 方法，对后续到来的事件，会放到 pendingNotifications 队列中，并优先处理掉 pendingNotifications 队列中积累的通知事件。</p>
 <p>通知事件写入到 nextCh 管道，然后由 run 方法来消费，其会根据通知事件的类型，调用客户注册的 handler 来处理这些通知事件。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>processorListener) <span style="color:#50fa7b">run</span>() {
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// this call blocks until the channel is closed.  When a panic happens during the notification</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// we will catch it, **the offending item will be skipped!**, and after a short delay (one second)</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// the next notification will be attempted.  This is usually better than the alternative of never</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// delivering again.</span>
-</span></span><span style="display:flex;"><span>	stopCh <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{})
-</span></span><span style="display:flex;"><span>	wait.<span style="color:#50fa7b">Until</span>(<span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> next <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> p.nextCh {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">switch</span> notification <span style="color:#ff79c6">:=</span> next.(<span style="color:#8be9fd;font-style:italic">type</span>) {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> updateNotification:
-</span></span><span style="display:flex;"><span>				p.handler.<span style="color:#50fa7b">OnUpdate</span>(notification.oldObj, notification.newObj)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> addNotification:
-</span></span><span style="display:flex;"><span>				p.handler.<span style="color:#50fa7b">OnAdd</span>(notification.newObj)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> deleteNotification:
-</span></span><span style="display:flex;"><span>				p.handler.<span style="color:#50fa7b">OnDelete</span>(notification.oldObj)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">default</span>:
-</span></span><span style="display:flex;"><span>				utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;unrecognized notification: %T&#34;</span>, next))
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>processorListener) <span style="color:#fabd2f">run</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// this call blocks until the channel is closed.  When a panic happens during the notification</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// we will catch it, **the offending item will be skipped!**, and after a short delay (one second)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// the next notification will be attempted.  This is usually better than the alternative of never</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// delivering again.</span>
+</span></span><span style="display:flex;"><span>	stopCh <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{})
+</span></span><span style="display:flex;"><span>	wait.<span style="color:#fabd2f">Until</span>(<span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> next <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> p.nextCh {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">switch</span> notification <span style="color:#fe8019">:=</span> next.(<span style="color:#fe8019">type</span>) {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">case</span> updateNotification:
+</span></span><span style="display:flex;"><span>				p.handler.<span style="color:#fabd2f">OnUpdate</span>(notification.oldObj, notification.newObj)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">case</span> addNotification:
+</span></span><span style="display:flex;"><span>				p.handler.<span style="color:#fabd2f">OnAdd</span>(notification.newObj)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">case</span> deleteNotification:
+</span></span><span style="display:flex;"><span>				p.handler.<span style="color:#fabd2f">OnDelete</span>(notification.oldObj)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">default</span>:
+</span></span><span style="display:flex;"><span>				utilruntime.<span style="color:#fabd2f">HandleError</span>(fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;unrecognized notification: %T&#34;</span>, next))
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// the only way to get here is if the p.nextCh is empty and closed</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">close</span>(stopCh)
-</span></span><span style="display:flex;"><span>	}, <span style="color:#bd93f9">1</span><span style="color:#ff79c6">*</span>time.Second, stopCh)
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// the only way to get here is if the p.nextCh is empty and closed</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">close</span>(stopCh)
+</span></span><span style="display:flex;"><span>	}, <span style="color:#d3869b">1</span><span style="color:#fe8019">*</span>time.Second, stopCh)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>processorListener 的 pop 和 run 是用两个独立的协程。 通过如下函数来构建 processorListener 实例，传入的参数就有用户注册的回调函数：ResourceEventHandler。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/client-go/tools/cache/shared_informer.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (s <span style="color:#ff79c6">*</span>sharedIndexInformer) <span style="color:#50fa7b">AddEventHandlerWithResyncPeriod</span>(handler ResourceEventHandler, resyncPeriod time.Duration) {
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>  listener <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">newProcessListener</span>(handler, resyncPeriod, <span style="color:#50fa7b">determineResyncPeriod</span>(resyncPeriod, s.resyncCheckPeriod), s.clock.<span style="color:#50fa7b">Now</span>(), initialBufferSize)
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// ...</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/client-go/tools/cache/shared_informer.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (s <span style="color:#fe8019">*</span>sharedIndexInformer) <span style="color:#fabd2f">AddEventHandlerWithResyncPeriod</span>(handler ResourceEventHandler, resyncPeriod time.Duration) {
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>  listener <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">newProcessListener</span>(handler, resyncPeriod, <span style="color:#fabd2f">determineResyncPeriod</span>(resyncPeriod, s.resyncCheckPeriod), s.clock.<span style="color:#fabd2f">Now</span>(), initialBufferSize)
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// ...</span>
 </span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 在这里initialBufferSize=1024</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">newProcessListener</span>(handler ResourceEventHandler, requestedResyncPeriod, resyncPeriod time.Duration, now time.Time, bufferSize <span style="color:#8be9fd">int</span>) <span style="color:#ff79c6">*</span>processorListener {
-</span></span><span style="display:flex;"><span>	ret <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>processorListener{
-</span></span><span style="display:flex;"><span>		nextCh:                <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">interface</span>{}),
-</span></span><span style="display:flex;"><span>		addCh:                 <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">interface</span>{}),
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 在这里initialBufferSize=1024</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">newProcessListener</span>(handler ResourceEventHandler, requestedResyncPeriod, resyncPeriod time.Duration, now time.Time, bufferSize <span style="color:#fabd2f">int</span>) <span style="color:#fe8019">*</span>processorListener {
+</span></span><span style="display:flex;"><span>	ret <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>processorListener{
+</span></span><span style="display:flex;"><span>		nextCh:                <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">chan</span> <span style="color:#fe8019">interface</span>{}),
+</span></span><span style="display:flex;"><span>		addCh:                 <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">chan</span> <span style="color:#fe8019">interface</span>{}),
 </span></span><span style="display:flex;"><span>		handler:               handler,
-</span></span><span style="display:flex;"><span>		pendingNotifications:  <span style="color:#ff79c6">*</span>buffer.<span style="color:#50fa7b">NewRingGrowing</span>(bufferSize),
+</span></span><span style="display:flex;"><span>		pendingNotifications:  <span style="color:#fe8019">*</span>buffer.<span style="color:#fabd2f">NewRingGrowing</span>(bufferSize),
 </span></span><span style="display:flex;"><span>		requestedResyncPeriod: requestedResyncPeriod,
 </span></span><span style="display:flex;"><span>		resyncPeriod:          resyncPeriod,
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	ret.<span style="color:#50fa7b">determineNextResync</span>(now)
+</span></span><span style="display:flex;"><span>	ret.<span style="color:#fabd2f">determineNextResync</span>(now)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> ret
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> ret
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="sharedprocessor">sharedProcessor</h3>
 <p><code>sharedProcessor</code>是管理<code>processorListener</code>的结构体：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> sharedProcessor <span style="color:#8be9fd;font-style:italic">struct</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 标志位， sharedProcessor是否已经启动</span>
-</span></span><span style="display:flex;"><span>	listenersStarted <span style="color:#8be9fd">bool</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 互斥锁， 保护listeners,syncingListeners的变更</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> sharedProcessor <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 标志位， sharedProcessor是否已经启动</span>
+</span></span><span style="display:flex;"><span>	listenersStarted <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 互斥锁， 保护listeners,syncingListeners的变更</span>
 </span></span><span style="display:flex;"><span>	listenersLock    sync.RWMutex
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// processorListener集合</span>
-</span></span><span style="display:flex;"><span>	listeners        []<span style="color:#ff79c6">*</span>processorListener
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// processorListener集合，这个是周期性变更</span>
-</span></span><span style="display:flex;"><span>	syncingListeners []<span style="color:#ff79c6">*</span>processorListener
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// processorListener集合</span>
+</span></span><span style="display:flex;"><span>	listeners        []<span style="color:#fe8019">*</span>processorListener
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// processorListener集合，这个是周期性变更</span>
+</span></span><span style="display:flex;"><span>	syncingListeners []<span style="color:#fe8019">*</span>processorListener
 </span></span><span style="display:flex;"><span>	clock            clock.Clock
 </span></span><span style="display:flex;"><span>	wg               wait.Group
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>注意 字段 listeners 和 syncingListeners 字段，其类型都是 <code>[]*processorListener</code>，即同一个资源，会存在多个回调处理逻辑。</p>
 <p>sharedProcesser 通过调用 run 启动，遍历所有的 processorListener, 并启动两个协程执行processorListener 的 run 和 pop 方法，并且每次新增 processorListener 时，会立即启动 processorListener 的 run 和 pop 方法：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>sharedProcessor) <span style="color:#50fa7b">run</span>(stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}) {
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>        p.listenersLock.<span style="color:#50fa7b">RLock</span>()
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">defer</span> p.listenersLock.<span style="color:#50fa7b">RUnlock</span>()
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 为每个listener的run和pop各自单独启动一个goroutine来运行</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">for</span> _, listener <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> p.listeners {
-</span></span><span style="display:flex;"><span>            p.wg.<span style="color:#50fa7b">Start</span>(listener.run)
-</span></span><span style="display:flex;"><span>            p.wg.<span style="color:#50fa7b">Start</span>(listener.pop)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>sharedProcessor) <span style="color:#fabd2f">run</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>        p.listenersLock.<span style="color:#fabd2f">RLock</span>()
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">defer</span> p.listenersLock.<span style="color:#fabd2f">RUnlock</span>()
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 为每个listener的run和pop各自单独启动一个goroutine来运行</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">for</span> _, listener <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> p.listeners {
+</span></span><span style="display:flex;"><span>            p.wg.<span style="color:#fabd2f">Start</span>(listener.run)
+</span></span><span style="display:flex;"><span>            p.wg.<span style="color:#fabd2f">Start</span>(listener.pop)
 </span></span><span style="display:flex;"><span>        }   
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 设置标志位</span>
-</span></span><span style="display:flex;"><span>        p.listenersStarted = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 设置标志位</span>
+</span></span><span style="display:flex;"><span>        p.listenersStarted = <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>    }()
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&lt;-</span>stopCh <span style="color:#6272a4">// 停止信号</span>
-</span></span><span style="display:flex;"><span>    p.listenersLock.<span style="color:#50fa7b">RLock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> p.listenersLock.<span style="color:#50fa7b">RUnlock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> _, listener <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> p.listeners {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 关闭listener.addCh, 告知listener的pop goroutine需要停止，然后pop告知run goroutine需要停止</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#8be9fd;font-style:italic">close</span>(listener.addCh) <span style="color:#6272a4">// Tell .pop() to stop. .pop() will tell .run() to stop</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">&lt;-</span>stopCh <span style="color:#928374;font-style:italic">// 停止信号</span>
+</span></span><span style="display:flex;"><span>    p.listenersLock.<span style="color:#fabd2f">RLock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">defer</span> p.listenersLock.<span style="color:#fabd2f">RUnlock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">for</span> _, listener <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> p.listeners {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 关闭listener.addCh, 告知listener的pop goroutine需要停止，然后pop告知run goroutine需要停止</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">close</span>(listener.addCh) <span style="color:#928374;font-style:italic">// Tell .pop() to stop. .pop() will tell .run() to stop</span>
 </span></span><span style="display:flex;"><span>    }  
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 阻塞等待所有的goroutine都停止</span>
-</span></span><span style="display:flex;"><span>    p.wg.<span style="color:#50fa7b">Wait</span>() <span style="color:#6272a4">// Wait for all .pop() and .run() to stop</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 阻塞等待所有的goroutine都停止</span>
+</span></span><span style="display:flex;"><span>    p.wg.<span style="color:#fabd2f">Wait</span>() <span style="color:#928374;font-style:italic">// Wait for all .pop() and .run() to stop</span>
 </span></span><span style="display:flex;"><span>}   
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>sharedProcessor) <span style="color:#50fa7b">addListener</span>(listener <span style="color:#ff79c6">*</span>processorListener) {
-</span></span><span style="display:flex;"><span>	p.listenersLock.<span style="color:#50fa7b">Lock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> p.listenersLock.<span style="color:#50fa7b">Unlock</span>()
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>sharedProcessor) <span style="color:#fabd2f">addListener</span>(listener <span style="color:#fe8019">*</span>processorListener) {
+</span></span><span style="display:flex;"><span>	p.listenersLock.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> p.listenersLock.<span style="color:#fabd2f">Unlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	p.<span style="color:#50fa7b">addListenerLocked</span>(listener)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> p.listenersStarted {
-</span></span><span style="display:flex;"><span>		p.wg.<span style="color:#50fa7b">Start</span>(listener.run)
-</span></span><span style="display:flex;"><span>		p.wg.<span style="color:#50fa7b">Start</span>(listener.pop)
+</span></span><span style="display:flex;"><span>	p.<span style="color:#fabd2f">addListenerLocked</span>(listener)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> p.listenersStarted {
+</span></span><span style="display:flex;"><span>		p.wg.<span style="color:#fabd2f">Start</span>(listener.run)
+</span></span><span style="display:flex;"><span>		p.wg.<span style="color:#fabd2f">Start</span>(listener.pop)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>sharedProcessor) <span style="color:#50fa7b">addListenerLocked</span>(listener <span style="color:#ff79c6">*</span>processorListener) {
-</span></span><span style="display:flex;"><span>	p.listeners = <span style="color:#8be9fd;font-style:italic">append</span>(p.listeners, listener)
-</span></span><span style="display:flex;"><span>	p.syncingListeners = <span style="color:#8be9fd;font-style:italic">append</span>(p.syncingListeners, listener)
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>sharedProcessor) <span style="color:#fabd2f">addListenerLocked</span>(listener <span style="color:#fe8019">*</span>processorListener) {
+</span></span><span style="display:flex;"><span>	p.listeners = <span style="color:#fabd2f">append</span>(p.listeners, listener)
+</span></span><span style="display:flex;"><span>	p.syncingListeners = <span style="color:#fabd2f">append</span>(p.syncingListeners, listener)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>sharedProcesser 通过 distribute 方法把收到的变更的事件遍历通知给所有的 processorListener 供其消费，具体可以看 <code>processorListener.add</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>sharedProcessor) <span style="color:#50fa7b">distribute</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}, sync <span style="color:#8be9fd">bool</span>) {
-</span></span><span style="display:flex;"><span>	p.listenersLock.<span style="color:#50fa7b">RLock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> p.listenersLock.<span style="color:#50fa7b">RUnlock</span>()
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>sharedProcessor) <span style="color:#fabd2f">distribute</span>(obj <span style="color:#fe8019">interface</span>{}, sync <span style="color:#fabd2f">bool</span>) {
+</span></span><span style="display:flex;"><span>	p.listenersLock.<span style="color:#fabd2f">RLock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> p.listenersLock.<span style="color:#fabd2f">RUnlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 从DeltaFIFO中Pop出来的数据(sharedIndexInformer.HandleDeltas)分发到各个listener中去</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> sync {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, listener <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> p.syncingListeners {
-</span></span><span style="display:flex;"><span>			listener.<span style="color:#50fa7b">add</span>(obj)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 从DeltaFIFO中Pop出来的数据(sharedIndexInformer.HandleDeltas)分发到各个listener中去</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> sync {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> _, listener <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> p.syncingListeners {
+</span></span><span style="display:flex;"><span>			listener.<span style="color:#fabd2f">add</span>(obj)
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, listener <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> p.listeners {
-</span></span><span style="display:flex;"><span>			listener.<span style="color:#50fa7b">add</span>(obj)
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> _, listener <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> p.listeners {
+</span></span><span style="display:flex;"><span>			listener.<span style="color:#fabd2f">add</span>(obj)
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p><code>sharedProcessor</code>管理下的<code>listener</code>是否需要resync,  逻辑也很是简单，直接看代码</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// shouldResync queries every listener to determine if any of them need a resync, based on each</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// listener&#39;s resyncPeriod.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>sharedProcessor) <span style="color:#50fa7b">shouldResync</span>() <span style="color:#8be9fd">bool</span> {
-</span></span><span style="display:flex;"><span>    p.listenersLock.<span style="color:#50fa7b">Lock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> p.listenersLock.<span style="color:#50fa7b">Unlock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 对p.syncingListeners重置</span>
-</span></span><span style="display:flex;"><span>    p.syncingListeners = []<span style="color:#ff79c6">*</span>processorListener{}
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// shouldResync queries every listener to determine if any of them need a resync, based on each</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// listener&#39;s resyncPeriod.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>sharedProcessor) <span style="color:#fabd2f">shouldResync</span>() <span style="color:#fabd2f">bool</span> {
+</span></span><span style="display:flex;"><span>    p.listenersLock.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">defer</span> p.listenersLock.<span style="color:#fabd2f">Unlock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 对p.syncingListeners重置</span>
+</span></span><span style="display:flex;"><span>    p.syncingListeners = []<span style="color:#fe8019">*</span>processorListener{}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    resyncNeeded <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">false</span>
-</span></span><span style="display:flex;"><span>    now <span style="color:#ff79c6">:=</span> p.clock.<span style="color:#50fa7b">Now</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> _, listener <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> p.listeners {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// need to loop through all the listeners to see if they need to resync so we can prepare any</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// listeners that are going to be resyncing.</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 判断是否需要resync,调用 processorListener.shouldResync方法</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> listener.<span style="color:#50fa7b">shouldResync</span>(now) {<span style="color:#ff79c6">//只要有一个listener需要resync，resyncNeeded就为true</span>
-</span></span><span style="display:flex;"><span>            resyncNeeded = <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>            p.syncingListeners = <span style="color:#8be9fd;font-style:italic">append</span>(p.syncingListeners, listener)
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 计算下一次需要resync的时间</span>
-</span></span><span style="display:flex;"><span>            listener.<span style="color:#50fa7b">determineNextResync</span>(now)
+</span></span><span style="display:flex;"><span>    resyncNeeded <span style="color:#fe8019">:=</span> <span style="color:#fe8019">false</span>
+</span></span><span style="display:flex;"><span>    now <span style="color:#fe8019">:=</span> p.clock.<span style="color:#fabd2f">Now</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">for</span> _, listener <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> p.listeners {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// need to loop through all the listeners to see if they need to resync so we can prepare any</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// listeners that are going to be resyncing.</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 判断是否需要resync,调用 processorListener.shouldResync方法</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> listener.<span style="color:#fabd2f">shouldResync</span>(now) {<span style="color:#8ec07c">//只要有一个listener需要resync，resyncNeeded就为true</span>
+</span></span><span style="display:flex;"><span>            resyncNeeded = <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>            p.syncingListeners = <span style="color:#fabd2f">append</span>(p.syncingListeners, listener)
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 计算下一次需要resync的时间</span>
+</span></span><span style="display:flex;"><span>            listener.<span style="color:#fabd2f">determineNextResync</span>(now)
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> resyncNeeded
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> resyncNeeded
 </span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 当resync的时间间隔修改后， 需要更新所有的listener的resync的时间间隔， 时间根新规则是取最近的时间间隔</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>sharedProcessor) <span style="color:#50fa7b">resyncCheckPeriodChanged</span>(resyncCheckPeriod time.Duration) {
-</span></span><span style="display:flex;"><span>    p.listenersLock.<span style="color:#50fa7b">RLock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> p.listenersLock.<span style="color:#50fa7b">RUnlock</span>()
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 当resync的时间间隔修改后， 需要更新所有的listener的resync的时间间隔， 时间根新规则是取最近的时间间隔</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>sharedProcessor) <span style="color:#fabd2f">resyncCheckPeriodChanged</span>(resyncCheckPeriod time.Duration) {
+</span></span><span style="display:flex;"><span>    p.listenersLock.<span style="color:#fabd2f">RLock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">defer</span> p.listenersLock.<span style="color:#fabd2f">RUnlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> _, listener <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> p.listeners {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 判断具体的resync时间间隔</span>
-</span></span><span style="display:flex;"><span>        resyncPeriod <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">determineResyncPeriod</span>(listener.requestedResyncPeriod, resyncCheckPeriod)
-</span></span><span style="display:flex;"><span>        listener.<span style="color:#50fa7b">setResyncPeriod</span>(resyncPeriod)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">for</span> _, listener <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> p.listeners {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 判断具体的resync时间间隔</span>
+</span></span><span style="display:flex;"><span>        resyncPeriod <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">determineResyncPeriod</span>(listener.requestedResyncPeriod, resyncCheckPeriod)
+</span></span><span style="display:flex;"><span>        listener.<span style="color:#fabd2f">setResyncPeriod</span>(resyncPeriod)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">determineResyncPeriod</span>(desired, check time.Duration) time.Duration {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> desired <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> desired
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">determineResyncPeriod</span>(desired, check time.Duration) time.Duration {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> desired <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> desired
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> check <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Warningf</span>(<span style="color:#f1fa8c">&#34;The specified resyncPeriod %v is invalid because this shared informer doesn&#39;t support resyncing&#34;</span>, desired)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> check <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">Warningf</span>(<span style="color:#b8bb26">&#34;The specified resyncPeriod %v is invalid because this shared informer doesn&#39;t support resyncing&#34;</span>, desired)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> desired &lt; check {
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Warningf</span>(<span style="color:#f1fa8c">&#34;The specified resyncPeriod %v is being increased to the minimum resyncCheckPeriod %v&#34;</span>, desired, check)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> check
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> desired &lt; check {
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">Warningf</span>(<span style="color:#b8bb26">&#34;The specified resyncPeriod %v is being increased to the minimum resyncCheckPeriod %v&#34;</span>, desired, check)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> check
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> desired
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> desired
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="informer-机制">Informer 机制</h2>
 <p>通过 newInformer 来构建一个简单的 informer， 注意其返回的 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/controller/">Controller</a>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">newInformer</span>(
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">newInformer</span>(
 </span></span><span style="display:flex;"><span>	lw ListerWatcher,
 </span></span><span style="display:flex;"><span>	objType runtime.Object,
 </span></span><span style="display:flex;"><span>	resyncPeriod time.Duration,
@@ -498,74 +498,74 @@ processorListener processorListener 是用户对特定资源对象变更事件�
 </span></span><span style="display:flex;"><span>	clientState Store,
 </span></span><span style="display:flex;"><span>	transformer TransformFunc,
 </span></span><span style="display:flex;"><span>) Controller {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建 DeltaFIFO</span>
-</span></span><span style="display:flex;"><span>	fifo <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">NewDeltaFIFOWithOptions</span>(DeltaFIFOOptions{
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 创建 DeltaFIFO</span>
+</span></span><span style="display:flex;"><span>	fifo <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">NewDeltaFIFOWithOptions</span>(DeltaFIFOOptions{
 </span></span><span style="display:flex;"><span>		KnownObjects:          clientState,
-</span></span><span style="display:flex;"><span>		EmitDeltaTypeReplaced: <span style="color:#ff79c6">true</span>,
+</span></span><span style="display:flex;"><span>		EmitDeltaTypeReplaced: <span style="color:#fe8019">true</span>,
 </span></span><span style="display:flex;"><span>		Transformer:           transformer,
 </span></span><span style="display:flex;"><span>	})
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建 config 集合对象</span>
-</span></span><span style="display:flex;"><span>	cfg <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>Config{
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 创建 config 集合对象</span>
+</span></span><span style="display:flex;"><span>	cfg <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>Config{
 </span></span><span style="display:flex;"><span>		Queue:            fifo,
 </span></span><span style="display:flex;"><span>		ListerWatcher:    lw,
 </span></span><span style="display:flex;"><span>		ObjectType:       objType,
 </span></span><span style="display:flex;"><span>		FullResyncPeriod: resyncPeriod,
-</span></span><span style="display:flex;"><span>		RetryOnError:     <span style="color:#ff79c6">false</span>,
+</span></span><span style="display:flex;"><span>		RetryOnError:     <span style="color:#fe8019">false</span>,
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		Process: <span style="color:#8be9fd;font-style:italic">func</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> deltas, ok <span style="color:#ff79c6">:=</span> obj.(Deltas); ok {
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span> <span style="color:#50fa7b">processDeltas</span>(h, clientState, deltas)
+</span></span><span style="display:flex;"><span>		Process: <span style="color:#fe8019">func</span>(obj <span style="color:#fe8019">interface</span>{}) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> deltas, ok <span style="color:#fe8019">:=</span> obj.(Deltas); ok {
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span> <span style="color:#fabd2f">processDeltas</span>(h, clientState, deltas)
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;object given as Process argument is not Deltas&#34;</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> errors.<span style="color:#fabd2f">New</span>(<span style="color:#b8bb26">&#34;object given as Process argument is not Deltas&#34;</span>)
 </span></span><span style="display:flex;"><span>		},
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 实例化 controller 对象</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#50fa7b">New</span>(cfg)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 实例化 controller 对象</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fabd2f">New</span>(cfg)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>通过上面代码可知：一个 informer 就是构建在一个特定的资源类型，一个额外的存储（local storage）, 一个 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/controller/">Controller</a> 和 一个 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/">Reflector</a> 之上的。
 而 SharedInformer， 其实是对一个特定的资源，共享一个informer， 毕竟每个资源一个informer 太浪费计算和内存资源。</p>
 <h2 id="sharedinformersharedindexinformer">sharedInformer/sharedIndexInformer</h2>
 <p>接口 SharedIndexInformer 扩展了接口 SharedInformer，新增加了两个和<a href="https://www.zhangzewen.net/posts/kubernetes/client-go/cache/#Indexer">索引</a>相关的方法 AddIndexers 和 GetIndexer。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> SharedInformer <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 注册用户 增/删/改 回调函数</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">AddEventHandler</span>(handler ResourceEventHandler)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 同上，但是添加了同步间隔时间</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">AddEventHandlerWithResyncPeriod</span>(handler ResourceEventHandler, resyncPeriod time.Duration)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 返回 SharedInformer 中的local storage</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">GetStore</span>() Store
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">GetController</span>() Controller
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 运行 sharedInformer</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">Run</span>(stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{})
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 是否需要同步</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">HasSynced</span>() <span style="color:#8be9fd">bool</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取上一次Sync时候的ResourceVersion</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">LastSyncResourceVersion</span>() <span style="color:#8be9fd">string</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 注册 watch 失败回调函数</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">SetWatchErrorHandler</span>(handler WatchErrorHandler) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">SetTransform</span>(handler TransformFunc) <span style="color:#8be9fd">error</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> SharedInformer <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 注册用户 增/删/改 回调函数</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">AddEventHandler</span>(handler ResourceEventHandler)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 同上，但是添加了同步间隔时间</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">AddEventHandlerWithResyncPeriod</span>(handler ResourceEventHandler, resyncPeriod time.Duration)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 返回 SharedInformer 中的local storage</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetStore</span>() Store
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetController</span>() Controller
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 运行 sharedInformer</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Run</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{})
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 是否需要同步</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">HasSynced</span>() <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取上一次Sync时候的ResourceVersion</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">LastSyncResourceVersion</span>() <span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 注册 watch 失败回调函数</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">SetWatchErrorHandler</span>(handler WatchErrorHandler) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">SetTransform</span>(handler TransformFunc) <span style="color:#fabd2f">error</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> SharedIndexInformer <span style="color:#8be9fd;font-style:italic">interface</span> {
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> SharedIndexInformer <span style="color:#fe8019">interface</span> {
 </span></span><span style="display:flex;"><span>	SharedInformer
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">AddIndexers</span>(indexers Indexers) <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">GetIndexer</span>() Indexer
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">AddIndexers</span>(indexers Indexers) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetIndexer</span>() Indexer
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="sharedindexinformer">sharedIndexInformer</h2>
 <p>终于到了<code>sharedIndexInformer</code>了，它是<code>client-go</code>的整个架构的关键所在，它窜联起来了上面将的每一个小内容的东西。在官方<code>client-go</code>的文档中，提供这样一幅架架构图：</p>
 <p><img src="/images/kubernetes/client-go/informer/client-go-controller-interaction.jpeg" alt="client-go-controller-interaction"></p>
 <p>或者是这幅图：</p>
 <p><img src="/images/kubernetes/client-go/informer/client-go-controller-interaction_1.png" alt="client-go-controller-interaction_1"></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> sharedIndexInformer <span style="color:#8be9fd;font-style:italic">struct</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> sharedIndexInformer <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>	indexer    Indexer
 </span></span><span style="display:flex;"><span>	controller Controller
-</span></span><span style="display:flex;"><span>	processor             <span style="color:#ff79c6">*</span>sharedProcessor
+</span></span><span style="display:flex;"><span>	processor             <span style="color:#fe8019">*</span>sharedProcessor
 </span></span><span style="display:flex;"><span>	cacheMutationDetector MutationDetector
 </span></span><span style="display:flex;"><span>	listerWatcher ListerWatcher
 </span></span><span style="display:flex;"><span>	objectType runtime.Object
 </span></span><span style="display:flex;"><span>	resyncCheckPeriod time.Duration
 </span></span><span style="display:flex;"><span>	defaultEventHandlerResyncPeriod time.Duration
 </span></span><span style="display:flex;"><span>	clock clock.Clock
-</span></span><span style="display:flex;"><span>	started, stopped <span style="color:#8be9fd">bool</span>
+</span></span><span style="display:flex;"><span>	started, stopped <span style="color:#fabd2f">bool</span>
 </span></span><span style="display:flex;"><span>	startedLock      sync.Mutex
 </span></span><span style="display:flex;"><span>	blockDeltas sync.Mutex
 </span></span><span style="display:flex;"><span>	watchErrorHandler WatchErrorHandler
@@ -588,141 +588,141 @@ processorListener processorListener 是用户对特定资源对象变更事件�
 </ul>
 <p><code>sharedIndexInformer</code>实现了<code>SharedIndexInformer</code>接口。</p>
 <p>来看看提供创建<code>sharedIndexInformer</code>实例的方法：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// NewSharedInformer creates a new instance for the listwatcher.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewSharedInformer</span>(lw ListerWatcher, exampleObject runtime.Object, defaultEventHandlerResyncPeriod time.Duration) SharedInformer {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#50fa7b">NewSharedIndexInformer</span>(lw, exampleObject, defaultEventHandlerResyncPeriod, Indexers{})
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// NewSharedInformer creates a new instance for the listwatcher.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewSharedInformer</span>(lw ListerWatcher, exampleObject runtime.Object, defaultEventHandlerResyncPeriod time.Duration) SharedInformer {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#fabd2f">NewSharedIndexInformer</span>(lw, exampleObject, defaultEventHandlerResyncPeriod, Indexers{})
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// NewSharedIndexInformer creates a new instance for the listwatcher.</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// The created informer will not do resyncs if the given</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// defaultEventHandlerResyncPeriod is zero.  Otherwise: for each</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// handler that with a non-zero requested resync period, whether added</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// before or after the informer starts, the nominal resync period is</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// the requested resync period rounded up to a multiple of the</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// informer&#39;s resync checking period.  Such an informer&#39;s resync</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// checking period is established when the informer starts running,</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// and is the maximum of (a) the minimum of the resync periods</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// requested before the informer starts and the</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// defaultEventHandlerResyncPeriod given here and (b) the constant</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// `minimumResyncPeriod` defined in this file.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewSharedIndexInformer</span>(lw ListerWatcher, exampleObject runtime.Object, defaultEventHandlerResyncPeriod time.Duration, indexers Indexers) SharedIndexInformer {
-</span></span><span style="display:flex;"><span>  realClock <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>clock.RealClock{}
-</span></span><span style="display:flex;"><span>  sharedIndexInformer <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>sharedIndexInformer{
-</span></span><span style="display:flex;"><span>    processor:                       <span style="color:#ff79c6">&amp;</span>sharedProcessor{clock: realClock},
-</span></span><span style="display:flex;"><span>    indexer:                         <span style="color:#50fa7b">NewIndexer</span>(DeletionHandlingMetaNamespaceKeyFunc, indexers),
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// NewSharedIndexInformer creates a new instance for the listwatcher.</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// The created informer will not do resyncs if the given</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// defaultEventHandlerResyncPeriod is zero.  Otherwise: for each</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// handler that with a non-zero requested resync period, whether added</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// before or after the informer starts, the nominal resync period is</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// the requested resync period rounded up to a multiple of the</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// informer&#39;s resync checking period.  Such an informer&#39;s resync</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// checking period is established when the informer starts running,</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// and is the maximum of (a) the minimum of the resync periods</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// requested before the informer starts and the</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// defaultEventHandlerResyncPeriod given here and (b) the constant</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// `minimumResyncPeriod` defined in this file.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewSharedIndexInformer</span>(lw ListerWatcher, exampleObject runtime.Object, defaultEventHandlerResyncPeriod time.Duration, indexers Indexers) SharedIndexInformer {
+</span></span><span style="display:flex;"><span>  realClock <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>clock.RealClock{}
+</span></span><span style="display:flex;"><span>  sharedIndexInformer <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>sharedIndexInformer{
+</span></span><span style="display:flex;"><span>    processor:                       <span style="color:#fe8019">&amp;</span>sharedProcessor{clock: realClock},
+</span></span><span style="display:flex;"><span>    indexer:                         <span style="color:#fabd2f">NewIndexer</span>(DeletionHandlingMetaNamespaceKeyFunc, indexers),
 </span></span><span style="display:flex;"><span>    listerWatcher:                   lw,
 </span></span><span style="display:flex;"><span>    objectType:                      exampleObject,
 </span></span><span style="display:flex;"><span>    resyncCheckPeriod:               defaultEventHandlerResyncPeriod,
 </span></span><span style="display:flex;"><span>    defaultEventHandlerResyncPeriod: defaultEventHandlerResyncPeriod,
-</span></span><span style="display:flex;"><span>    cacheMutationDetector:           <span style="color:#50fa7b">NewCacheMutationDetector</span>(fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;%T&#34;</span>, exampleObject)),
+</span></span><span style="display:flex;"><span>    cacheMutationDetector:           <span style="color:#fabd2f">NewCacheMutationDetector</span>(fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;%T&#34;</span>, exampleObject)),
 </span></span><span style="display:flex;"><span>    clock:                           realClock,
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> sharedIndexInformer
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> sharedIndexInformer
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>创建的过程很简单，&ldquo;localstorage&quot;是一个<strong>Indexer</strong>：<code>NewIndexer(DeletionHandlingMetaNamespaceKeyFunc, indexers)</code></p>
 <p><code>Run</code>的过程很简单，就是构建localstorage(Indexer)和DeltaFIFO, 然后构建controller，运行sharedProcessor，然后在运行controller组件，cotroller组件运行的时候，会把Reflector组件运行起来。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (s <span style="color:#ff79c6">*</span>sharedIndexInformer) <span style="color:#50fa7b">Run</span>(stopCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{}) {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">defer</span> utilruntime.<span style="color:#50fa7b">HandleCrash</span>()
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (s <span style="color:#fe8019">*</span>sharedIndexInformer) <span style="color:#fabd2f">Run</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">defer</span> utilruntime.<span style="color:#fabd2f">HandleCrash</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> s.<span style="color:#50fa7b">HasStarted</span>() {
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">Warningf</span>(<span style="color:#f1fa8c">&#34;The sharedIndexInformer has started, run more than once is not allowed&#34;</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> s.<span style="color:#fabd2f">HasStarted</span>() {
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">Warningf</span>(<span style="color:#b8bb26">&#34;The sharedIndexInformer has started, run more than once is not allowed&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 创建一个DeltaFIFO</span>
-</span></span><span style="display:flex;"><span>  fifo <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">NewDeltaFIFOWithOptions</span>(DeltaFIFOOptions{
-</span></span><span style="display:flex;"><span>    KnownObjects:          s.indexer,<span style="color:#6272a4">// localstorage,需要创建的fifo来驱动更新</span>
-</span></span><span style="display:flex;"><span>    EmitDeltaTypeReplaced: <span style="color:#ff79c6">true</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 创建一个DeltaFIFO</span>
+</span></span><span style="display:flex;"><span>  fifo <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">NewDeltaFIFOWithOptions</span>(DeltaFIFOOptions{
+</span></span><span style="display:flex;"><span>    KnownObjects:          s.indexer,<span style="color:#928374;font-style:italic">// localstorage,需要创建的fifo来驱动更新</span>
+</span></span><span style="display:flex;"><span>    EmitDeltaTypeReplaced: <span style="color:#fe8019">true</span>,
 </span></span><span style="display:flex;"><span>  })
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  cfg <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&amp;</span>Config{
+</span></span><span style="display:flex;"><span>  cfg <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&amp;</span>Config{
 </span></span><span style="display:flex;"><span>    Queue:            fifo,
 </span></span><span style="display:flex;"><span>    ListerWatcher:    s.listerWatcher,
 </span></span><span style="display:flex;"><span>    ObjectType:       s.objectType,
 </span></span><span style="display:flex;"><span>    FullResyncPeriod: s.resyncCheckPeriod,
-</span></span><span style="display:flex;"><span>    RetryOnError:     <span style="color:#ff79c6">false</span>,
+</span></span><span style="display:flex;"><span>    RetryOnError:     <span style="color:#fe8019">false</span>,
 </span></span><span style="display:flex;"><span>    ShouldResync:     s.processor.shouldResync,
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    Process:           s.HandleDeltas,<span style="color:#ff79c6">//DeltaFIFO的ProcessFunc</span>
+</span></span><span style="display:flex;"><span>    Process:           s.HandleDeltas,<span style="color:#8ec07c">//DeltaFIFO的ProcessFunc</span>
 </span></span><span style="display:flex;"><span>    WatchErrorHandler: s.watchErrorHandler,
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>    s.startedLock.<span style="color:#50fa7b">Lock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> s.startedLock.<span style="color:#50fa7b">Unlock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 创建controller</span>
-</span></span><span style="display:flex;"><span>    s.controller = <span style="color:#50fa7b">New</span>(cfg)
-</span></span><span style="display:flex;"><span>    s.controller.(<span style="color:#ff79c6">*</span>controller).clock = s.clock
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 设置标志位，表示informer已经启动</span>
-</span></span><span style="display:flex;"><span>    s.started = <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>    s.startedLock.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">defer</span> s.startedLock.<span style="color:#fabd2f">Unlock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 创建controller</span>
+</span></span><span style="display:flex;"><span>    s.controller = <span style="color:#fabd2f">New</span>(cfg)
+</span></span><span style="display:flex;"><span>    s.controller.(<span style="color:#fe8019">*</span>controller).clock = s.clock
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 设置标志位，表示informer已经启动</span>
+</span></span><span style="display:flex;"><span>    s.started = <span style="color:#fe8019">true</span>
 </span></span><span style="display:flex;"><span>  }()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Separate stop channel because Processor should be stopped strictly after controller</span>
-</span></span><span style="display:flex;"><span>  processorStopCh <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#8be9fd;font-style:italic">struct</span>{})
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd;font-style:italic">var</span> wg wait.Group
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">defer</span> wg.<span style="color:#50fa7b">Wait</span>()              <span style="color:#6272a4">// Wait for Processor to stop</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">defer</span> <span style="color:#8be9fd;font-style:italic">close</span>(processorStopCh) <span style="color:#6272a4">// Tell Processor to stop</span>
-</span></span><span style="display:flex;"><span>  wg.<span style="color:#50fa7b">StartWithChannel</span>(processorStopCh, s.cacheMutationDetector.Run)
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 把所有的listener启动起来， 可以看processorListener和sharedProcessor这2个章节</span>
-</span></span><span style="display:flex;"><span>  wg.<span style="color:#50fa7b">StartWithChannel</span>(processorStopCh, s.processor.run)
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Separate stop channel because Processor should be stopped strictly after controller</span>
+</span></span><span style="display:flex;"><span>  processorStopCh <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{})
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">var</span> wg wait.Group
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">defer</span> wg.<span style="color:#fabd2f">Wait</span>()              <span style="color:#928374;font-style:italic">// Wait for Processor to stop</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">defer</span> <span style="color:#fabd2f">close</span>(processorStopCh) <span style="color:#928374;font-style:italic">// Tell Processor to stop</span>
+</span></span><span style="display:flex;"><span>  wg.<span style="color:#fabd2f">StartWithChannel</span>(processorStopCh, s.cacheMutationDetector.Run)
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 把所有的listener启动起来， 可以看processorListener和sharedProcessor这2个章节</span>
+</span></span><span style="display:flex;"><span>  wg.<span style="color:#fabd2f">StartWithChannel</span>(processorStopCh, s.processor.run)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">defer</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>    s.startedLock.<span style="color:#50fa7b">Lock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> s.startedLock.<span style="color:#50fa7b">Unlock</span>()
-</span></span><span style="display:flex;"><span>    s.stopped = <span style="color:#ff79c6">true</span> <span style="color:#6272a4">// Don&#39;t want any new listeners</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">defer</span> <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>    s.startedLock.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">defer</span> s.startedLock.<span style="color:#fabd2f">Unlock</span>()
+</span></span><span style="display:flex;"><span>    s.stopped = <span style="color:#fe8019">true</span> <span style="color:#928374;font-style:italic">// Don&#39;t want any new listeners</span>
 </span></span><span style="display:flex;"><span>  }()
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">//启动controller</span>
-</span></span><span style="display:flex;"><span>  s.controller.<span style="color:#50fa7b">Run</span>(stopCh)
+</span></span><span style="display:flex;"><span>  <span style="color:#8ec07c">//启动controller</span>
+</span></span><span style="display:flex;"><span>  s.controller.<span style="color:#fabd2f">Run</span>(stopCh)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>在一个是<code>sharedIndexInformer.HandleDeltas</code></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (s <span style="color:#ff79c6">*</span>sharedIndexInformer) <span style="color:#50fa7b">HandleDeltas</span>(obj <span style="color:#8be9fd;font-style:italic">interface</span>{}) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>  s.blockDeltas.<span style="color:#50fa7b">Lock</span>()
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">defer</span> s.blockDeltas.<span style="color:#50fa7b">Unlock</span>()
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (s <span style="color:#fe8019">*</span>sharedIndexInformer) <span style="color:#fabd2f">HandleDeltas</span>(obj <span style="color:#fe8019">interface</span>{}) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>  s.blockDeltas.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">defer</span> s.blockDeltas.<span style="color:#fabd2f">Unlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// from oldest to newest</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">for</span> _, d <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> obj.(Deltas) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">switch</span> d.Type {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">case</span> Sync, Replaced, Added, Updated:
-</span></span><span style="display:flex;"><span>      s.cacheMutationDetector.<span style="color:#50fa7b">AddObject</span>(d.Object)
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">if</span> old, exists, err <span style="color:#ff79c6">:=</span> s.indexer.<span style="color:#50fa7b">Get</span>(d.Object); err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> exists {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 更新local storage</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> s.indexer.<span style="color:#50fa7b">Update</span>(d.Object); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// from oldest to newest</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">for</span> _, d <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> obj.(Deltas) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">switch</span> d.Type {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">case</span> Sync, Replaced, Added, Updated:
+</span></span><span style="display:flex;"><span>      s.cacheMutationDetector.<span style="color:#fabd2f">AddObject</span>(d.Object)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">if</span> old, exists, err <span style="color:#fe8019">:=</span> s.indexer.<span style="color:#fabd2f">Get</span>(d.Object); err <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span> exists {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 更新local storage</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> s.indexer.<span style="color:#fabd2f">Update</span>(d.Object); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>          <span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        isSync <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">false</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">switch</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">case</span> d.Type <span style="color:#ff79c6">==</span> Sync:
-</span></span><span style="display:flex;"><span>          <span style="color:#6272a4">// Sync events are only propagated to listeners that requested resync</span>
-</span></span><span style="display:flex;"><span>          isSync = <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">case</span> d.Type <span style="color:#ff79c6">==</span> Replaced:
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">if</span> accessor, err <span style="color:#ff79c6">:=</span> meta.<span style="color:#50fa7b">Accessor</span>(d.Object); err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> oldAccessor, err <span style="color:#ff79c6">:=</span> meta.<span style="color:#50fa7b">Accessor</span>(old); err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>              <span style="color:#6272a4">// Replaced events that didn&#39;t change resourceVersion are treated as resync events</span>
-</span></span><span style="display:flex;"><span>              <span style="color:#6272a4">// and only propagated to listeners that requested resync</span>
-</span></span><span style="display:flex;"><span>              isSync = accessor.<span style="color:#50fa7b">GetResourceVersion</span>() <span style="color:#ff79c6">==</span> oldAccessor.<span style="color:#50fa7b">GetResourceVersion</span>()
+</span></span><span style="display:flex;"><span>        isSync <span style="color:#fe8019">:=</span> <span style="color:#fe8019">false</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">switch</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">case</span> d.Type <span style="color:#fe8019">==</span> Sync:
+</span></span><span style="display:flex;"><span>          <span style="color:#928374;font-style:italic">// Sync events are only propagated to listeners that requested resync</span>
+</span></span><span style="display:flex;"><span>          isSync = <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">case</span> d.Type <span style="color:#fe8019">==</span> Replaced:
+</span></span><span style="display:flex;"><span>          <span style="color:#fe8019">if</span> accessor, err <span style="color:#fe8019">:=</span> meta.<span style="color:#fabd2f">Accessor</span>(d.Object); err <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> oldAccessor, err <span style="color:#fe8019">:=</span> meta.<span style="color:#fabd2f">Accessor</span>(old); err <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>              <span style="color:#928374;font-style:italic">// Replaced events that didn&#39;t change resourceVersion are treated as resync events</span>
+</span></span><span style="display:flex;"><span>              <span style="color:#928374;font-style:italic">// and only propagated to listeners that requested resync</span>
+</span></span><span style="display:flex;"><span>              isSync = accessor.<span style="color:#fabd2f">GetResourceVersion</span>() <span style="color:#fe8019">==</span> oldAccessor.<span style="color:#fabd2f">GetResourceVersion</span>()
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>          }
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 把通知事件下发到sharedProcesser管理下的所有processorListener</span>
-</span></span><span style="display:flex;"><span>        s.processor.<span style="color:#50fa7b">distribute</span>(updateNotification{oldObj: old, newObj: d.Object}, isSync)
-</span></span><span style="display:flex;"><span>      } <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 向local storage中添加数据</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> s.indexer.<span style="color:#50fa7b">Add</span>(d.Object); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 把通知事件下发到sharedProcesser管理下的所有processorListener</span>
+</span></span><span style="display:flex;"><span>        s.processor.<span style="color:#fabd2f">distribute</span>(updateNotification{oldObj: old, newObj: d.Object}, isSync)
+</span></span><span style="display:flex;"><span>      } <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 向local storage中添加数据</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> s.indexer.<span style="color:#fabd2f">Add</span>(d.Object); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>          <span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">//把通知事件下发到sharedProcesser管理下的所有processorListener</span>
-</span></span><span style="display:flex;"><span>        s.processor.<span style="color:#50fa7b">distribute</span>(addNotification{newObj: d.Object}, <span style="color:#ff79c6">false</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#8ec07c">//把通知事件下发到sharedProcesser管理下的所有processorListener</span>
+</span></span><span style="display:flex;"><span>        s.processor.<span style="color:#fabd2f">distribute</span>(addNotification{newObj: d.Object}, <span style="color:#fe8019">false</span>)
 </span></span><span style="display:flex;"><span>      }
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">case</span> Deleted:
-</span></span><span style="display:flex;"><span>      <span style="color:#6272a4">// 向local storage中删除数据</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> s.indexer.<span style="color:#50fa7b">Delete</span>(d.Object); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">case</span> Deleted:
+</span></span><span style="display:flex;"><span>      <span style="color:#928374;font-style:italic">// 向local storage中删除数据</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> s.indexer.<span style="color:#fabd2f">Delete</span>(d.Object); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>      }
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">//把通知事件下发到sharedProcesser管理下的所有processorListener</span>
-</span></span><span style="display:flex;"><span>      s.processor.<span style="color:#50fa7b">distribute</span>(deleteNotification{oldObj: d.Object}, <span style="color:#ff79c6">false</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#8ec07c">//把通知事件下发到sharedProcesser管理下的所有processorListener</span>
+</span></span><span style="display:flex;"><span>      s.processor.<span style="color:#fabd2f">distribute</span>(deleteNotification{oldObj: d.Object}, <span style="color:#fe8019">false</span>)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>下面用一张图把这些组件和存储窜联起来。</p>
 <p><img src="/images/kubernetes/client-go/informer/informer-01.png" alt="informer-01"></p>

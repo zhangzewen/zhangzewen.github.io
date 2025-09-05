@@ -296,20 +296,20 @@
 <h2 id="在共享库上设置-uprobe-锚点">在共享库上设置 uprobe 锚点</h2>
 <p>将 uprobes 附加到共享库上与在应用程序代码上设置 uprobes 没有区别。</p>
 <p><a href="https://github.com/iovisor/bcc">BCC</a> 使得把一个 uprobe 附加到一个函数上变得很容易。例如，如果你在一个叫demo的程序中有一个叫foo()的函数，你可以用BCC来附加一个uprobe，方法如下。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>attach_uprobe(
-</span></span><span style="display:flex;"><span>    <span style="color:#f1fa8c">&#34;/home/user/demo&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#f1fa8c">&#34;foo&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&lt;</span>your BPF code here<span style="color:#ff79c6">&gt;</span>);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>attach_uprobe(
+</span></span><span style="display:flex;"><span>    <span style="color:#b8bb26">&#34;/home/user/demo&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#b8bb26">&#34;foo&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">&lt;</span>your BPF code here<span style="color:#fe8019">&gt;</span>);
 </span></span></code></pre></div><p>请注意，要做到这一点，你必须用调试符号编译你的代码。你可以通过运行像nm这样的程序来验证一个二进制文件是否有符号；下面我们还运行grep来搜索一个感兴趣的特定符号。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ nm -C demo | grep foo
-</span></span><span style="display:flex;"><span><span style="color:#bd93f9">0000000000401110</span> T foo<span style="color:#ff79c6">()</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ nm -C demo | grep foo
+</span></span><span style="display:flex;"><span><span style="color:#d3869b">0000000000401110</span> T foo<span style="color:#fe8019">()</span>
 </span></span></code></pre></div><p>编译器的优化，如内联，往往意味着你要找的符号是不可用的，所以这是需要注意的。尽管如此，只要该符号在二进制文件中是可用的，你就可以追踪它。</p>
 <p>现在，如果你想把一个uprobe附加到一个共享库中，该怎么办？在这种情况下，我们将<code>.so</code>共享库作为我们的对象文件来处理，而不是我们所编译的程序，因为共享库是我们感兴趣的代码的所在。首先，让我们看看是否能找到我们想要探测的<code>SSL_write</code>或<code>SSL_read</code>符号。要做到这一点，我们直接在<code>libssl.so</code>文件上运行<code>nm</code>。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ nm /usr/lib/x86_64-linux-gnu/libssl.so.1.1
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$ nm /usr/lib/x86_64-linux-gnu/libssl.so.1.1
 </span></span><span style="display:flex;"><span>nm: /usr/lib/x86_64-linux-gnu/libssl.so.1.1: no symbols
 </span></span></code></pre></div><p>没有符号？它们被剔除了吗？那么我们如何调用attach_uprobe函数呢？</p>
 <p>在短暂的恐慌之后，你问自己，应用程序是如何调用OpenSSL函数，比如<code>SSL_write</code>？这些信息一定保存在某个地方，通过阅读<code>nm</code>的手册页面，我们可以找到答案。我们需要通过标志<code>--dynamic</code>来查看动态符号。这些符号不会被剥离，否则任何二进制文件都不可能链接到共享库。带着这个标志再次运行<code>nm</code>，会发现更有趣的东西</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ nm --dynamic /usr/lib/x86_64-linux-gnu/libssl.so.1.1 | grep -e SSL_write -e SSL_read
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ nm --dynamic /usr/lib/x86_64-linux-gnu/libssl.so.1.1 | grep -e SSL_write -e SSL_read
 </span></span><span style="display:flex;"><span>0000000000038b00 T SSL_read
 </span></span><span style="display:flex;"><span>000000000003c730 T SSL_read_early_data
 </span></span><span style="display:flex;"><span>0000000000038b70 T SSL_read_ex
@@ -318,10 +318,10 @@
 </span></span><span style="display:flex;"><span>0000000000038e40 T SSL_write_ex
 </span></span></code></pre></div><p>这些符号确实存在，这很有希望。</p>
 <p>最后的<code>attach_uprobe</code>调用非常简单。对于要设置uprobe的对象，你可以直接提供共享库。而对于符号，使用感兴趣的动态符号。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>attach_uprobe(
-</span></span><span style="display:flex;"><span>    <span style="color:#f1fa8c">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#f1fa8c">&#34;SSL_write&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">&lt;</span>your BPF code here<span style="color:#ff79c6">&gt;</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>attach_uprobe(
+</span></span><span style="display:flex;"><span>    <span style="color:#b8bb26">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#b8bb26">&#34;SSL_write&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">&lt;</span>your BPF code here<span style="color:#fe8019">&gt;</span>)
 </span></span></code></pre></div><h2 id="整合到一起">整合到一起</h2>
 <p>一个完全工作的OpenSSL追踪器的版本可以在<a href="https://github.com/pixie-io/pixie-demos/tree/main/openssl-tracer">这里</a>找到。要运行该演示，请遵循README文件中的指示。</p>
 <p>项目主要结构如下:</p>
@@ -334,43 +334,43 @@
 <p><code>openssl_tracer.cc</code>是包括<code>main</code>的顶层文件。它负责部署探针，然后从BPF读取跟踪数据并打印到屏幕上。</p>
 <p>在<code>openssl_tracer.cc</code>的文件的开始，我们列出了我们想要连接的探针。<code>UProbeSpec</code>是我们定义的一个自定义结构体，用于指定一个探针。它有我们想要附加探针的对象文件和符号。它还指定了探针是否应该在被追踪函数的进入或返回时触发。最后，<code>probe_fn</code>指定了探针被触发时要执行的BPF函数（后面会有更多介绍）。</p>
 <p>在我们的OpenSSL追踪器中，我们想追踪<code>SSL_write</code>和<code>SSL_read</code>。由于我们对这两个函数的输入和输出都感兴趣，我们实际上需要4个探针：一个关于<code>SSL_write</code>的入口和返回探针，以及一个关于<code>SSL_read</code>的入口和返回探针。我们将在下一节看一下BPF探针函数的内容。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#6272a4">// A probe on entry of SSL_write
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>UProbeSpec kSSLWriteEntryProbeSpec{
-</span></span><span style="display:flex;"><span>    .binary_path <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
-</span></span><span style="display:flex;"><span>    .symbol <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;SSL_write&#34;</span>,
-</span></span><span style="display:flex;"><span>    .attach_type <span style="color:#ff79c6">=</span> BPF_PROBE_ENTRY,
-</span></span><span style="display:flex;"><span>    .probe_fn <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;probe_entry_SSL_write&#34;</span>,
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// A probe on entry of SSL_write
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>UProbeSpec kSSLWriteEntryProbeSpec{
+</span></span><span style="display:flex;"><span>    .binary_path <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
+</span></span><span style="display:flex;"><span>    .symbol <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;SSL_write&#34;</span>,
+</span></span><span style="display:flex;"><span>    .attach_type <span style="color:#fe8019">=</span> BPF_PROBE_ENTRY,
+</span></span><span style="display:flex;"><span>    .probe_fn <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;probe_entry_SSL_write&#34;</span>,
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// A probe on return of SSL_write
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>UProbeSpec kSSLWriteRetProbeSpec{
-</span></span><span style="display:flex;"><span>    .binary_path <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
-</span></span><span style="display:flex;"><span>    .symbol <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;SSL_write&#34;</span>,
-</span></span><span style="display:flex;"><span>    .attach_type <span style="color:#ff79c6">=</span> BPF_PROBE_RETURN,
-</span></span><span style="display:flex;"><span>    .probe_fn <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;probe_ret_SSL_write&#34;</span>,
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// A probe on return of SSL_write
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>UProbeSpec kSSLWriteRetProbeSpec{
+</span></span><span style="display:flex;"><span>    .binary_path <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
+</span></span><span style="display:flex;"><span>    .symbol <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;SSL_write&#34;</span>,
+</span></span><span style="display:flex;"><span>    .attach_type <span style="color:#fe8019">=</span> BPF_PROBE_RETURN,
+</span></span><span style="display:flex;"><span>    .probe_fn <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;probe_ret_SSL_write&#34;</span>,
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// A probe on entry of SSL_read
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>UProbeSpec kSSLReadEntryProbeSpec{
-</span></span><span style="display:flex;"><span>    .binary_path <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
-</span></span><span style="display:flex;"><span>    .symbol <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;SSL_read&#34;</span>,
-</span></span><span style="display:flex;"><span>    .attach_type <span style="color:#ff79c6">=</span> BPF_PROBE_ENTRY,
-</span></span><span style="display:flex;"><span>    .probe_fn <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;probe_entry_SSL_read&#34;</span>,
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// A probe on entry of SSL_read
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>UProbeSpec kSSLReadEntryProbeSpec{
+</span></span><span style="display:flex;"><span>    .binary_path <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
+</span></span><span style="display:flex;"><span>    .symbol <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;SSL_read&#34;</span>,
+</span></span><span style="display:flex;"><span>    .attach_type <span style="color:#fe8019">=</span> BPF_PROBE_ENTRY,
+</span></span><span style="display:flex;"><span>    .probe_fn <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;probe_entry_SSL_read&#34;</span>,
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// A probe on return of SSL_read
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>UProbeSpec kSSLReadRetProbeSpec{
-</span></span><span style="display:flex;"><span>    .binary_path <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
-</span></span><span style="display:flex;"><span>    .symbol <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;SSL_read&#34;</span>,
-</span></span><span style="display:flex;"><span>    .attach_type <span style="color:#ff79c6">=</span> BPF_PROBE_RETURN,
-</span></span><span style="display:flex;"><span>    .probe_fn <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;probe_ret_SSL_read&#34;</span>,
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// A probe on return of SSL_read
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>UProbeSpec kSSLReadRetProbeSpec{
+</span></span><span style="display:flex;"><span>    .binary_path <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;/usr/lib/x86_64-linux-gnu/libssl.so.1.1&#34;</span>,
+</span></span><span style="display:flex;"><span>    .symbol <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;SSL_read&#34;</span>,
+</span></span><span style="display:flex;"><span>    .attach_type <span style="color:#fe8019">=</span> BPF_PROBE_RETURN,
+</span></span><span style="display:flex;"><span>    .probe_fn <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;probe_ret_SSL_read&#34;</span>,
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">const</span> std<span style="color:#ff79c6">::</span>vector<span style="color:#ff79c6">&lt;</span>UProbeSpec<span style="color:#ff79c6">&gt;</span> kUProbes <span style="color:#ff79c6">=</span> {
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> std<span style="color:#fe8019">::</span>vector<span style="color:#fe8019">&lt;</span>UProbeSpec<span style="color:#fe8019">&gt;</span> kUProbes <span style="color:#fe8019">=</span> {
 </span></span><span style="display:flex;"><span>    kSSLWriteEntryProbeSpec,
 </span></span><span style="display:flex;"><span>    kSSLWriteRetProbeSpec,
 </span></span><span style="display:flex;"><span>    kSSLReadEntryProbeSpec,
@@ -378,24 +378,24 @@
 </span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><p>接下来，我们设置perf缓冲区的输出。回想一下，perf缓冲区只是一个输出缓冲区（之所以叫 &ldquo;perf &ldquo;是因为它在历史上被用作perf套件的一部分）；它实际上只是一个简单的输出缓冲区。内核空间的BPF探针将数据推入perf缓冲区，这里我们从用户空间读出数据。</p>
 <p>我们再次定义了一个自定义的<code>PerfBufferSpec</code>来指定我们想要读取的perf缓冲区。在这种情况下，perf_buffer被称为<code>tls_events</code>。这个名称必须与BPF探针中指定的perf缓冲区匹配，否则我们将无法找到推送的数据。我们还设置了一个<code>probe_output_fn</code>，它指定在从缓冲区读取事件时要调用户空间函数。在这种情况下，我们调用<code>handle_output</code>函数，它只是将信息打印到<code>标准输出</code>上。由于该缓冲区本质上是一个循环缓冲区，并且可能会丢失事件，因此还有一个可选的<code>probe_loss_fn</code>来处理丢失事件；为简单起见，在本示例中忽略此类事件。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#8be9fd">void</span> <span style="color:#50fa7b">handle_output</span>(<span style="color:#8be9fd">void</span><span style="color:#ff79c6">*</span> <span style="color:#6272a4">/*cb_cookie*/</span>, <span style="color:#8be9fd">void</span><span style="color:#ff79c6">*</span> data, <span style="color:#8be9fd">int</span> <span style="color:#6272a4">/*data_size*/</span>) {
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Cast the raw memory into the ssl_data_event_t struct that we know it is.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">ssl_data_event_t</span> r <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">*</span><span style="color:#ff79c6">static_cast</span><span style="color:#ff79c6">&lt;</span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">ssl_data_event_t</span><span style="color:#ff79c6">*&gt;</span>(data);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fabd2f">void</span> <span style="color:#fabd2f">handle_output</span>(<span style="color:#fabd2f">void</span><span style="color:#fe8019">*</span> <span style="color:#928374;font-style:italic">/*cb_cookie*/</span>, <span style="color:#fabd2f">void</span><span style="color:#fe8019">*</span> data, <span style="color:#fabd2f">int</span> <span style="color:#928374;font-style:italic">/*data_size*/</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Cast the raw memory into the ssl_data_event_t struct that we know it is.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> ssl_data_event_t r <span style="color:#fe8019">=</span> <span style="color:#fe8019">*</span><span style="color:#fe8019">static_cast</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">struct</span> ssl_data_event_t<span style="color:#fe8019">*&gt;</span>(data);
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>string_view plaintext(r.data, r.data_len);
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>string_view plaintext(r.data, r.data_len);
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34; t=&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> r.timestamp_ns;
-</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34; type=&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> (r.type <span style="color:#ff79c6">==</span> kSSLRead <span style="color:#ff79c6">?</span> <span style="color:#f1fa8c">&#34;read&#34;</span> <span style="color:#ff79c6">:</span> <span style="color:#f1fa8c">&#34;write&#34;</span>);
-</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34; data=&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> plaintext;
-</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34; t=&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> r.timestamp_ns;
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34; type=&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> (r.type <span style="color:#fe8019">==</span> kSSLRead <span style="color:#fe8019">?</span> <span style="color:#b8bb26">&#34;read&#34;</span> <span style="color:#fe8019">:</span> <span style="color:#b8bb26">&#34;write&#34;</span>);
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34; data=&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> plaintext;
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">const</span> PerfBufferSpec kPerfBufferSpec <span style="color:#ff79c6">=</span> {
-</span></span><span style="display:flex;"><span>    .name <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;tls_events&#34;</span>,
-</span></span><span style="display:flex;"><span>    .probe_output_fn <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">&amp;</span>handle_output,
-</span></span><span style="display:flex;"><span>    .probe_loss_fn <span style="color:#ff79c6">=</span> <span style="color:#ff79c6">nullptr</span>,
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> PerfBufferSpec kPerfBufferSpec <span style="color:#fe8019">=</span> {
+</span></span><span style="display:flex;"><span>    .name <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;tls_events&#34;</span>,
+</span></span><span style="display:flex;"><span>    .probe_output_fn <span style="color:#fe8019">=</span> <span style="color:#fe8019">&amp;</span>handle_output,
+</span></span><span style="display:flex;"><span>    .probe_loss_fn <span style="color:#fe8019">=</span> <span style="color:#fe8019">nullptr</span>,
 </span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><p>接下来，我们有了追踪器的主要功能，它不是太复杂。代码的主要部分包括：</p>
 <ul>
@@ -404,45 +404,45 @@
 <li>打开perf缓冲区，以便我们可以读取被uprobes插入的数据。</li>
 <li>使用一个循环来定期读取perf buffer中的所有事件。每次从这里读出一个事件，都会触发上述的<code>handle_output</code>。</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#8be9fd">int</span> <span style="color:#50fa7b">main</span>(<span style="color:#8be9fd">int</span> argc, <span style="color:#8be9fd">char</span><span style="color:#ff79c6">**</span> argv) {
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Read arguments to get the target PID to trace.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">if</span> (argc <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">2</span>) {
-</span></span><span style="display:flex;"><span>    std<span style="color:#ff79c6">::</span>cerr <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;Usage: &#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> argv[<span style="color:#bd93f9">0</span>] <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34; &lt;PID to trace for SSL traffic&gt;&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
-</span></span><span style="display:flex;"><span>    exit(<span style="color:#bd93f9">1</span>);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fabd2f">int</span> <span style="color:#fabd2f">main</span>(<span style="color:#fabd2f">int</span> argc, <span style="color:#fabd2f">char</span><span style="color:#fe8019">**</span> argv) {
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Read arguments to get the target PID to trace.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">if</span> (argc <span style="color:#fe8019">!=</span> <span style="color:#d3869b">2</span>) {
+</span></span><span style="display:flex;"><span>    std<span style="color:#fe8019">::</span>cerr <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;Usage: &#34;</span> <span style="color:#fe8019">&lt;&lt;</span> argv[<span style="color:#d3869b">0</span>] <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34; &lt;PID to trace for SSL traffic&gt;&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
+</span></span><span style="display:flex;"><span>    exit(<span style="color:#d3869b">1</span>);
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>string target_pid(argv[<span style="color:#bd93f9">1</span>]);
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>string target_pid(argv[<span style="color:#d3869b">1</span>]);
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  BCCWrapper bcc;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Read and deploy the BPF code.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  std<span style="color:#ff79c6">::</span>ifstream ifs(<span style="color:#f1fa8c">&#34;openssl_tracer_bpf_funcs.c&#34;</span>);
-</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>string bpf_code(std<span style="color:#ff79c6">::</span>istreambuf_iterator<span style="color:#ff79c6">&lt;</span><span style="color:#8be9fd">char</span><span style="color:#ff79c6">&gt;</span>(ifs), {});
-</span></span><span style="display:flex;"><span>  RETURN_IF_ERROR(bcc.Init(bpf_code, {<span style="color:#f1fa8c">&#34;-DTRACE_PID=&#34;</span> <span style="color:#ff79c6">+</span> target_pid}));
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Read and deploy the BPF code.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  std<span style="color:#fe8019">::</span>ifstream ifs(<span style="color:#b8bb26">&#34;openssl_tracer_bpf_funcs.c&#34;</span>);
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>string bpf_code(std<span style="color:#fe8019">::</span>istreambuf_iterator<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">char</span><span style="color:#fe8019">&gt;</span>(ifs), {});
+</span></span><span style="display:flex;"><span>  RETURN_IF_ERROR(bcc.Init(bpf_code, {<span style="color:#b8bb26">&#34;-DTRACE_PID=&#34;</span> <span style="color:#fe8019">+</span> target_pid}));
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Deploy uprobes.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">for</span> (<span style="color:#ff79c6">auto</span><span style="color:#ff79c6">&amp;</span> <span style="color:#8be9fd;font-style:italic">probe_spec</span> : kUProbes) {
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Deploy uprobes.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">for</span> (<span style="color:#fe8019">auto</span><span style="color:#fe8019">&amp;</span> <span style="color:#fb4934">probe_spec</span> : kUProbes) {
 </span></span><span style="display:flex;"><span>    RETURN_IF_ERROR(bcc.AttachUProbe(probe_spec));
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Open the perf buffer used by our uprobes to output data.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  RETURN_IF_ERROR(bcc.OpenPerfBuffer(kPerfBufferSpec));
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Open the perf buffer used by our uprobes to output data.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  RETURN_IF_ERROR(bcc.OpenPerfBuffer(kPerfBufferSpec));
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  std<span style="color:#ff79c6">::</span>cout <span style="color:#ff79c6">&lt;&lt;</span> <span style="color:#f1fa8c">&#34;Successfully deployed BPF probes. Tracing for SSL data. Use Ctrl-C to exit.&#34;</span> <span style="color:#ff79c6">&lt;&lt;</span> std<span style="color:#ff79c6">::</span>endl;
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;Successfully deployed BPF probes. Tracing for SSL data. Use Ctrl-C to exit.&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Periodically read the output buffer and print entries to screen.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">while</span> (<span style="color:#8be9fd;font-style:italic">true</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Periodically read the output buffer and print entries to screen.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">while</span> (<span style="color:#fabd2f">true</span>) {
 </span></span><span style="display:flex;"><span>    bcc.PollPerfBuffer(kPerfBufferSpec.name);
-</span></span><span style="display:flex;"><span>    usleep(<span style="color:#bd93f9">100000</span>);
+</span></span><span style="display:flex;"><span>    usleep(<span style="color:#d3869b">100000</span>);
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="bpf-uprobes">BPF uprobes</h3>
 <p>BPF uprobes 的主要目的是追踪<code>SSL_write</code>和<code>SSL_read</code>函数并捕获数据。实际上，这意味着我们需要跟踪这些函数的入口和出口。返回值探针对于跟踪返回值是必要的。此外，在<code>SSL_read</code>的情况下，输入缓冲区的指针在入口处不会包含读取的数据，所以在返回时复制数据是必要的。</p>
@@ -468,76 +468,76 @@
   </tbody>
 </table>
 <p>在更详细地浏览BPF代码时，有几个要点需要强调。首先，我们在源码文件开始部分有一些全局变量：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>BPF_PERF_OUTPUT(tls_events);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>BPF_PERF_OUTPUT(tls_events);
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// Key is thread ID (from bpf_get_current_pid_tgid).
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">// Value is a pointer to the data buffer argument to SSL_write/SSL_read.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>BPF_HASH(active_ssl_read_args_map, <span style="color:#8be9fd">uint64_t</span>, <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">ssl_args_t</span>);
-</span></span><span style="display:flex;"><span>BPF_HASH(active_ssl_write_args_map, <span style="color:#8be9fd">uint64_t</span>, <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">ssl_args_t</span>);
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Key is thread ID (from bpf_get_current_pid_tgid).
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Value is a pointer to the data buffer argument to SSL_write/SSL_read.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>BPF_HASH(active_ssl_read_args_map, <span style="color:#fabd2f">uint64_t</span>, <span style="color:#fe8019">struct</span> ssl_args_t);
+</span></span><span style="display:flex;"><span>BPF_HASH(active_ssl_write_args_map, <span style="color:#fabd2f">uint64_t</span>, <span style="color:#fe8019">struct</span> ssl_args_t);
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// BPF programs are limited to a 512-byte stack. We store this value per CPU
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">// and use it as a heap allocated value.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>BPF_PERCPU_ARRAY(data_buffer_heap, <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">ssl_data_event_t</span>, <span style="color:#bd93f9">1</span>);
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// BPF programs are limited to a 512-byte stack. We store this value per CPU
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// and use it as a heap allocated value.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>BPF_PERCPU_ARRAY(data_buffer_heap, <span style="color:#fe8019">struct</span> ssl_data_event_t, <span style="color:#d3869b">1</span>);
 </span></span></code></pre></div><p>可以将上述三个语句视为对任何BPF探针可用的全局结构。在<code>BPF_HASH</code>的情况下，它表示一个全局哈希表：第一个参数是名称，第二个参数是键，第三个参数是值类型。我们使用前两个映射将数据从入口探针传输到返回探针。尤其是我们将数据缓冲区的位置（作为输入参数）存储在全局映射中。然后返回探针（无法直接访问输入参数）从全局映射中读取该值。为了使其工作，我们将使用线程ID作为这些映射的键。</p>
 <p>BPF_PERCPU_ARRAY是另一个针对每个CPU本地的BPF映射。我们将其用作临时的暂存空间，因为无法将过多的数据复制到BPF堆栈上。</p>
 <p>接下来，我将展示SSL_read探针的代码——<code>SSL_write</code>探针非常相似，可自行探索。</p>
 <p>入口探针<code>probe_entry_SSL_read</code>首先获取pid，以查看刚刚触发的探针是否是目标PID。如果不是，则探针返回而不采取任何操作。然而，如果当前PID是目标PID，则探针读取缓冲区指针并将该值存储在全局<code>active_ssl_read_args_map</code>中。这只是一种通过将其存储在持久的全局位置中来向返回探测器传递参数的方式。</p>
 <p>在触发输入探针后不久，我们预计将会触发返回探针<code>probe_ret_SSL_read</code>。当这种情况发生时，我们再次确保正在追踪一个感兴趣的PID。如果是这样，我们将“取出”buf参数，该参数告诉我们<code>SSL_read</code>数据被复制到了哪里。然后，我们也复制一份该数据，并通过<code>process_SSL_data</code>将其推送到输出perf_buffer中。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#ff79c6">static</span> <span style="color:#8be9fd">int</span> <span style="color:#50fa7b">process_SSL_data</span>(<span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">pt_regs</span><span style="color:#ff79c6">*</span> ctx, <span style="color:#8be9fd">uint64_t</span> id, <span style="color:#ff79c6">enum</span> <span style="color:#50fa7b">ssl_data_event_type</span> type,
-</span></span><span style="display:flex;"><span>                            <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span><span style="color:#ff79c6">*</span> buf) {
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">int</span> len <span style="color:#ff79c6">=</span> (<span style="color:#8be9fd">int</span>)PT_REGS_RC(ctx);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (len <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">static</span> <span style="color:#fabd2f">int</span> <span style="color:#fabd2f">process_SSL_data</span>(<span style="color:#fe8019">struct</span> pt_regs<span style="color:#fe8019">*</span> ctx, <span style="color:#fabd2f">uint64_t</span> id, <span style="color:#fe8019">enum</span> ssl_data_event_type type,
+</span></span><span style="display:flex;"><span>                            <span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span><span style="color:#fe8019">*</span> buf) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> len <span style="color:#fe8019">=</span> (<span style="color:#fabd2f">int</span>)PT_REGS_RC(ctx);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (len <span style="color:#fe8019">&lt;</span> <span style="color:#d3869b">0</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">ssl_data_event_t</span><span style="color:#ff79c6">*</span> event <span style="color:#ff79c6">=</span> create_ssl_data_event(id);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (event <span style="color:#ff79c6">==</span> <span style="color:#8be9fd;font-style:italic">NULL</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> ssl_data_event_t<span style="color:#fe8019">*</span> event <span style="color:#fe8019">=</span> create_ssl_data_event(id);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (event <span style="color:#fe8019">==</span> <span style="color:#fabd2f">NULL</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  event<span style="color:#ff79c6">-&gt;</span>type <span style="color:#ff79c6">=</span> type;
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// This is a max function, but it is written in such a way to keep older BPF verifiers happy.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  event<span style="color:#ff79c6">-&gt;</span>data_len <span style="color:#ff79c6">=</span> (len <span style="color:#ff79c6">&lt;</span> MAX_DATA_SIZE <span style="color:#ff79c6">?</span> (len <span style="color:#ff79c6">&amp;</span> (MAX_DATA_SIZE <span style="color:#ff79c6">-</span> <span style="color:#bd93f9">1</span>)) <span style="color:#ff79c6">:</span> MAX_DATA_SIZE);
-</span></span><span style="display:flex;"><span>  bpf_probe_read(event<span style="color:#ff79c6">-&gt;</span>data, event<span style="color:#ff79c6">-&gt;</span>data_len, buf);
-</span></span><span style="display:flex;"><span>  tls_events.perf_submit(ctx, event, <span style="color:#ff79c6">sizeof</span>(<span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">ssl_data_event_t</span>));
+</span></span><span style="display:flex;"><span>  event<span style="color:#fe8019">-&gt;</span>type <span style="color:#fe8019">=</span> type;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// This is a max function, but it is written in such a way to keep older BPF verifiers happy.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  event<span style="color:#fe8019">-&gt;</span>data_len <span style="color:#fe8019">=</span> (len <span style="color:#fe8019">&lt;</span> MAX_DATA_SIZE <span style="color:#fe8019">?</span> (len <span style="color:#fe8019">&amp;</span> (MAX_DATA_SIZE <span style="color:#fe8019">-</span> <span style="color:#d3869b">1</span>)) <span style="color:#fe8019">:</span> MAX_DATA_SIZE);
+</span></span><span style="display:flex;"><span>  bpf_probe_read(event<span style="color:#fe8019">-&gt;</span>data, event<span style="color:#fe8019">-&gt;</span>data_len, buf);
+</span></span><span style="display:flex;"><span>  tls_events.perf_submit(ctx, event, <span style="color:#fe8019">sizeof</span>(<span style="color:#fe8019">struct</span> ssl_data_event_t));
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// Function signature being probed:
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">// int SSL_read(SSL *s, void *buf, int num)
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#8be9fd">int</span> <span style="color:#50fa7b">probe_entry_SSL_read</span>(<span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">pt_regs</span><span style="color:#ff79c6">*</span> ctx) {
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">uint64_t</span> current_pid_tgid <span style="color:#ff79c6">=</span> bpf_get_current_pid_tgid();
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">uint32_t</span> pid <span style="color:#ff79c6">=</span> current_pid_tgid <span style="color:#ff79c6">&gt;&gt;</span> <span style="color:#bd93f9">32</span>;
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Function signature being probed:
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// int SSL_read(SSL *s, void *buf, int num)
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fabd2f">int</span> <span style="color:#fabd2f">probe_entry_SSL_read</span>(<span style="color:#fe8019">struct</span> pt_regs<span style="color:#fe8019">*</span> ctx) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">uint64_t</span> current_pid_tgid <span style="color:#fe8019">=</span> bpf_get_current_pid_tgid();
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">uint32_t</span> pid <span style="color:#fe8019">=</span> current_pid_tgid <span style="color:#fe8019">&gt;&gt;</span> <span style="color:#d3869b">32</span>;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (pid <span style="color:#ff79c6">!=</span> TRACE_PID) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (pid <span style="color:#fe8019">!=</span> TRACE_PID) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span><span style="color:#ff79c6">*</span> buf <span style="color:#ff79c6">=</span> (<span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span><span style="color:#ff79c6">*</span>)PT_REGS_PARM2(ctx);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span><span style="color:#fe8019">*</span> buf <span style="color:#fe8019">=</span> (<span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span><span style="color:#fe8019">*</span>)PT_REGS_PARM2(ctx);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  active_ssl_read_args_map.update(<span style="color:#ff79c6">&amp;</span>current_pid_tgid, <span style="color:#ff79c6">&amp;</span>buf);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  active_ssl_read_args_map.update(<span style="color:#fe8019">&amp;</span>current_pid_tgid, <span style="color:#fe8019">&amp;</span>buf);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd">int</span> <span style="color:#50fa7b">probe_ret_SSL_read</span>(<span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">pt_regs</span><span style="color:#ff79c6">*</span> ctx) {
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">uint64_t</span> current_pid_tgid <span style="color:#ff79c6">=</span> bpf_get_current_pid_tgid();
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">uint32_t</span> pid <span style="color:#ff79c6">=</span> current_pid_tgid <span style="color:#ff79c6">&gt;&gt;</span> <span style="color:#bd93f9">32</span>;
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">int</span> <span style="color:#fabd2f">probe_ret_SSL_read</span>(<span style="color:#fe8019">struct</span> pt_regs<span style="color:#fe8019">*</span> ctx) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">uint64_t</span> current_pid_tgid <span style="color:#fe8019">=</span> bpf_get_current_pid_tgid();
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">uint32_t</span> pid <span style="color:#fe8019">=</span> current_pid_tgid <span style="color:#fe8019">&gt;&gt;</span> <span style="color:#d3869b">32</span>;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (pid <span style="color:#ff79c6">!=</span> TRACE_PID) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (pid <span style="color:#fe8019">!=</span> TRACE_PID) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">const</span> <span style="color:#8be9fd">char</span><span style="color:#ff79c6">**</span> buf <span style="color:#ff79c6">=</span> active_ssl_read_args_map.lookup(<span style="color:#ff79c6">&amp;</span>current_pid_tgid);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span> (buf <span style="color:#ff79c6">!=</span> <span style="color:#8be9fd;font-style:italic">NULL</span>) {
-</span></span><span style="display:flex;"><span>    process_SSL_data(ctx, current_pid_tgid, kSSLRead, <span style="color:#ff79c6">*</span>buf);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span><span style="color:#fe8019">**</span> buf <span style="color:#fe8019">=</span> active_ssl_read_args_map.lookup(<span style="color:#fe8019">&amp;</span>current_pid_tgid);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (buf <span style="color:#fe8019">!=</span> <span style="color:#fabd2f">NULL</span>) {
+</span></span><span style="display:flex;"><span>    process_SSL_data(ctx, current_pid_tgid, kSSLRead, <span style="color:#fe8019">*</span>buf);
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  active_ssl_read_args_map.<span style="color:#ff79c6">delete</span>(<span style="color:#ff79c6">&amp;</span>current_pid_tgid);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  active_ssl_read_args_map.<span style="color:#fe8019">delete</span>(<span style="color:#fe8019">&amp;</span>current_pid_tgid);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>这就是全部了。一旦探针将数据推送到<code>tls_events</code>性能缓冲区，用户空间的<code>openssl_tracer.cc</code>跟踪器将在下次唤醒时看到数据。然后它会将其打印到屏幕上。</p>
 <p>看哪！您刚刚追踪了自己的TLS/SSL应用程序。</p>

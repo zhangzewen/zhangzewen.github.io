@@ -253,11 +253,11 @@ PLEG 是 “Pod Lifecycle Event Generator” 的缩写，监控运行在集群�
 <p>PLEG 是 &ldquo;Pod Lifecycle Event Generator&rdquo; 的缩写，监控运行在集群各个节点上的容器状态变化，并将这些变化事件推送给 kubelet，kubelet 处理后同步到 apiserver。</p>
 <p><img src="/images/kubernetes/kubelet/pleg/pleg.png" alt="pleg"></p>
 <h2 id="接口">接口</h2>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// PodLifecycleEventGenerator contains functions for generating pod life cycle events.                                     </span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> PodLifecycleEventGenerator <span style="color:#8be9fd;font-style:italic">interface</span> {                                     
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">Start</span>()                                     
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">Watch</span>() <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>PodLifecycleEvent                                    
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">Healthy</span>() (<span style="color:#8be9fd">bool</span>, <span style="color:#8be9fd">error</span>)                                     
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// PodLifecycleEventGenerator contains functions for generating pod life cycle events.                                     </span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> PodLifecycleEventGenerator <span style="color:#fe8019">interface</span> {                                     
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">Start</span>()                                     
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">Watch</span>() <span style="color:#fe8019">chan</span> <span style="color:#fe8019">*</span>PodLifecycleEvent                                    
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">Healthy</span>() (<span style="color:#fabd2f">bool</span>, <span style="color:#fabd2f">error</span>)                                     
 </span></span><span style="display:flex;"><span>}                       
 </span></span></code></pre></div><ul>
 <li>Start：就是让 PLEG 跑起来，这个肯定要至少拉起来一个 goroutine。</li>
@@ -265,20 +265,20 @@ PLEG 是 “Pod Lifecycle Event Generator” 的缩写，监控运行在集群�
 <li>Healty：判断 PLEG 是否是正常运行的。</li>
 </ul>
 <h3 id="event">Event</h3>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> PodLifeCycleEventType <span style="color:#8be9fd">string</span>                                     
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> PodLifeCycleEventType <span style="color:#fabd2f">string</span>                                     
 </span></span><span style="display:flex;"><span>                                    
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">const</span> (
-</span></span><span style="display:flex;"><span>    ContainerStarted PodLifeCycleEventType = <span style="color:#f1fa8c">&#34;ContainerStarted&#34;</span>
-</span></span><span style="display:flex;"><span>    ContainerDied PodLifeCycleEventType = <span style="color:#f1fa8c">&#34;ContainerDied&#34;</span>
-</span></span><span style="display:flex;"><span>    ContainerRemoved PodLifeCycleEventType = <span style="color:#f1fa8c">&#34;ContainerRemoved&#34;</span>
-</span></span><span style="display:flex;"><span>    PodSync PodLifeCycleEventType = <span style="color:#f1fa8c">&#34;PodSync&#34;</span>
-</span></span><span style="display:flex;"><span>    ContainerChanged PodLifeCycleEventType = <span style="color:#f1fa8c">&#34;ContainerChanged&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> (
+</span></span><span style="display:flex;"><span>    ContainerStarted PodLifeCycleEventType = <span style="color:#b8bb26">&#34;ContainerStarted&#34;</span>
+</span></span><span style="display:flex;"><span>    ContainerDied PodLifeCycleEventType = <span style="color:#b8bb26">&#34;ContainerDied&#34;</span>
+</span></span><span style="display:flex;"><span>    ContainerRemoved PodLifeCycleEventType = <span style="color:#b8bb26">&#34;ContainerRemoved&#34;</span>
+</span></span><span style="display:flex;"><span>    PodSync PodLifeCycleEventType = <span style="color:#b8bb26">&#34;PodSync&#34;</span>
+</span></span><span style="display:flex;"><span>    ContainerChanged PodLifeCycleEventType = <span style="color:#b8bb26">&#34;ContainerChanged&#34;</span>
 </span></span><span style="display:flex;"><span>)                
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> PodLifecycleEvent <span style="color:#8be9fd;font-style:italic">struct</span> {
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> PodLifecycleEvent <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>    ID types.UID 
 </span></span><span style="display:flex;"><span>    Type PodLifeCycleEventType                                    
-</span></span><span style="display:flex;"><span>    Data <span style="color:#8be9fd;font-style:italic">interface</span>{}                                     
+</span></span><span style="display:flex;"><span>    Data <span style="color:#fe8019">interface</span>{}                                     
 </span></span><span style="display:flex;"><span>} 
 </span></span></code></pre></div><ul>
 <li>ID：Pod的UID，毕竟这个是和Pod相关</li>
@@ -287,15 +287,15 @@ PLEG 是 “Pod Lifecycle Event Generator” 的缩写，监控运行在集群�
 </ul>
 <h2 id="genericpleg">GenericPLEG</h2>
 <p>结构体 GenericPLEG 定义了通用的 PLEG：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> GenericPLEG <span style="color:#8be9fd;font-style:italic">struct</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> GenericPLEG <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>    relistPeriod time.Duration
 </span></span><span style="display:flex;"><span>    runtime kubecontainer.Runtime
-</span></span><span style="display:flex;"><span>    eventChannel <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>PodLifecycleEvent
+</span></span><span style="display:flex;"><span>    eventChannel <span style="color:#fe8019">chan</span> <span style="color:#fe8019">*</span>PodLifecycleEvent
 </span></span><span style="display:flex;"><span>    podRecords podRecords
 </span></span><span style="display:flex;"><span>    relistTime atomic.Value
 </span></span><span style="display:flex;"><span>    cache kubecontainer.Cache
 </span></span><span style="display:flex;"><span>    clock clock.Clock
-</span></span><span style="display:flex;"><span>    podsToReinspect <span style="color:#8be9fd;font-style:italic">map</span>[types.UID]<span style="color:#ff79c6">*</span>kubecontainer.Pod
+</span></span><span style="display:flex;"><span>    podsToReinspect <span style="color:#fe8019">map</span>[types.UID]<span style="color:#fe8019">*</span>kubecontainer.Pod
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><ul>
 <li>
@@ -309,12 +309,12 @@ PLEG 是 “Pod Lifecycle Event Generator” 的缩写，监控运行在集群�
 </li>
 <li>
 <p>podRecords： 本地 cache，每次从 runtime 拉取的数据会更新本地 cache，因此有新/旧记录之分，也就会产生变更 event。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> podRecord <span style="color:#8be9fd;font-style:italic">struct</span> {
-</span></span><span style="display:flex;"><span>    old     <span style="color:#ff79c6">*</span>kubecontainer.Pod
-</span></span><span style="display:flex;"><span>    current <span style="color:#ff79c6">*</span>kubecontainer.Pod
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> podRecord <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>    old     <span style="color:#fe8019">*</span>kubecontainer.Pod
+</span></span><span style="display:flex;"><span>    current <span style="color:#fe8019">*</span>kubecontainer.Pod
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> podRecords <span style="color:#8be9fd;font-style:italic">map</span>[types.UID]<span style="color:#ff79c6">*</span>podRecord
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> podRecords <span style="color:#fe8019">map</span>[types.UID]<span style="color:#fe8019">*</span>podRecord
 </span></span></code></pre></div></li>
 <li>
 <p>relistTime： 每次从 runtime 拉取数据成功的时间点。</p>
@@ -324,239 +324,239 @@ PLEG 是 “Pod Lifecycle Event Generator” 的缩写，监控运行在集群�
 </li>
 </ul>
 <p>实例化比较简单，就是字段的赋值，没有啥好说的，需要注意点就是 podStatus 的本地 cache 是通过参数传递进来的，就是说 podStatus 这个 cache 是公用的，也必须是公用的。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// NewGenericPLEG instantiates a new GenericPLEG object and return it.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewGenericPLEG</span>(runtime kubecontainer.Runtime, channelCapacity <span style="color:#8be9fd">int</span>,
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// NewGenericPLEG instantiates a new GenericPLEG object and return it.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewGenericPLEG</span>(runtime kubecontainer.Runtime, channelCapacity <span style="color:#fabd2f">int</span>,
 </span></span><span style="display:flex;"><span>    relistPeriod time.Duration, cache kubecontainer.Cache, clock clock.Clock) PodLifecycleEventGenerator {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">&amp;</span>GenericPLEG{
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">&amp;</span>GenericPLEG{
 </span></span><span style="display:flex;"><span>        relistPeriod: relistPeriod,
 </span></span><span style="display:flex;"><span>        runtime:      runtime,
-</span></span><span style="display:flex;"><span>        eventChannel: <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>PodLifecycleEvent, channelCapacity),
-</span></span><span style="display:flex;"><span>        podRecords:   <span style="color:#8be9fd;font-style:italic">make</span>(podRecords),
+</span></span><span style="display:flex;"><span>        eventChannel: <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">chan</span> <span style="color:#fe8019">*</span>PodLifecycleEvent, channelCapacity),
+</span></span><span style="display:flex;"><span>        podRecords:   <span style="color:#fabd2f">make</span>(podRecords),
 </span></span><span style="display:flex;"><span>        cache:        cache,
 </span></span><span style="display:flex;"><span>        clock:        clock,
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="watch">Watch</h3>
 <p>返回一个可供消费事件的 channel：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// Watch returns a channel from which the subscriber can receive PodLifecycleEvent</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// events.</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// TODO: support multiple subscribers.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (g <span style="color:#ff79c6">*</span>GenericPLEG) <span style="color:#50fa7b">Watch</span>() <span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>PodLifecycleEvent {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> g.eventChannel
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Watch returns a channel from which the subscriber can receive PodLifecycleEvent</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// events.</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// TODO: support multiple subscribers.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (g <span style="color:#fe8019">*</span>GenericPLEG) <span style="color:#fabd2f">Watch</span>() <span style="color:#fe8019">chan</span> <span style="color:#fe8019">*</span>PodLifecycleEvent {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> g.eventChannel
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>kubelet 主循环调度 syncLoop 中的 syncLoopIteration 会监听该管道：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (kl <span style="color:#ff79c6">*</span>Kubelet) <span style="color:#50fa7b">syncLoopIteration</span>(configCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> kubetypes.PodUpdate, handler SyncHandler,
-</span></span><span style="display:flex;"><span>	syncCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> time.Time, housekeepingCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> time.Time, plegCh <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> <span style="color:#ff79c6">*</span>pleg.PodLifecycleEvent) <span style="color:#8be9fd">bool</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">select</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">case</span> e <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">&lt;-</span>plegCh:
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> e.Type <span style="color:#ff79c6">==</span> pleg.ContainerStarted {
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// record the most recent time we observed a container start for this pod.</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// this lets us selectively invalidate the runtimeCache when processing a delete for this pod</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// to make sure we don&#39;t miss handling graceful termination for containers we reported as having started.</span>
-</span></span><span style="display:flex;"><span>			kl.lastContainerStartedTime.<span style="color:#50fa7b">Add</span>(e.ID, time.<span style="color:#50fa7b">Now</span>())
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (kl <span style="color:#fe8019">*</span>Kubelet) <span style="color:#fabd2f">syncLoopIteration</span>(configCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> kubetypes.PodUpdate, handler SyncHandler,
+</span></span><span style="display:flex;"><span>	syncCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> time.Time, housekeepingCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> time.Time, plegCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">*</span>pleg.PodLifecycleEvent) <span style="color:#fabd2f">bool</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> e <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&lt;-</span>plegCh:
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> e.Type <span style="color:#fe8019">==</span> pleg.ContainerStarted {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// record the most recent time we observed a container start for this pod.</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// this lets us selectively invalidate the runtimeCache when processing a delete for this pod</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// to make sure we don&#39;t miss handling graceful termination for containers we reported as having started.</span>
+</span></span><span style="display:flex;"><span>			kl.lastContainerStartedTime.<span style="color:#fabd2f">Add</span>(e.ID, time.<span style="color:#fabd2f">Now</span>())
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> <span style="color:#50fa7b">isSyncPodWorthy</span>(e) {
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// PLEG event for a pod; sync it.</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> pod, ok <span style="color:#ff79c6">:=</span> kl.podManager.<span style="color:#50fa7b">GetPodByUID</span>(e.ID); ok {
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;SyncLoop (PLEG): event for pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod), <span style="color:#f1fa8c">&#34;event&#34;</span>, e)
-</span></span><span style="display:flex;"><span>				handler.<span style="color:#50fa7b">HandlePodSyncs</span>([]<span style="color:#ff79c6">*</span>v1.Pod{pod})
-</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// If the pod no longer exists, ignore the event.</span>
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;SyncLoop (PLEG): pod does not exist, ignore irrelevant event&#34;</span>, <span style="color:#f1fa8c">&#34;event&#34;</span>, e)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> <span style="color:#fabd2f">isSyncPodWorthy</span>(e) {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// PLEG event for a pod; sync it.</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> pod, ok <span style="color:#fe8019">:=</span> kl.podManager.<span style="color:#fabd2f">GetPodByUID</span>(e.ID); ok {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;SyncLoop (PLEG): event for pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;event&#34;</span>, e)
+</span></span><span style="display:flex;"><span>				handler.<span style="color:#fabd2f">HandlePodSyncs</span>([]<span style="color:#fe8019">*</span>v1.Pod{pod})
+</span></span><span style="display:flex;"><span>			} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// If the pod no longer exists, ignore the event.</span>
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;SyncLoop (PLEG): pod does not exist, ignore irrelevant event&#34;</span>, <span style="color:#b8bb26">&#34;event&#34;</span>, e)
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> e.Type <span style="color:#ff79c6">==</span> pleg.ContainerDied {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> containerID, ok <span style="color:#ff79c6">:=</span> e.Data.(<span style="color:#8be9fd">string</span>); ok {
-</span></span><span style="display:flex;"><span>				kl.<span style="color:#50fa7b">cleanUpContainersInPod</span>(e.ID, containerID)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> e.Type <span style="color:#fe8019">==</span> pleg.ContainerDied {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> containerID, ok <span style="color:#fe8019">:=</span> e.Data.(<span style="color:#fabd2f">string</span>); ok {
+</span></span><span style="display:flex;"><span>				kl.<span style="color:#fabd2f">cleanUpContainersInPod</span>(e.ID, containerID)
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="healthy">Healthy</h3>
 <p>判断 PLEG 的健康状态，PLEG有两个关键的时间参数，一个是检查的执行间隔，另外一个是检查的超时时间。以默认情况为准，PLEG检查会间隔一秒，换句话说，每一次检查过程执行之后，PLEG会等待一秒钟，然后进行下一次检查；而每一次检查的超时时间是三分钟，如果一次PLEG检查操作不能在三分钟内完成，那么这个状况，会被 NodeStatus 机制当做集群节点 NotReady 的凭据，同步给 apiserver。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// Healthy check if PLEG work properly.</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// relistThreshold is the maximum interval between two relist.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (g <span style="color:#ff79c6">*</span>GenericPLEG) <span style="color:#50fa7b">Healthy</span>() (<span style="color:#8be9fd">bool</span>, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//获取上次relist的时间</span>
-</span></span><span style="display:flex;"><span>    relistTime <span style="color:#ff79c6">:=</span> g.<span style="color:#50fa7b">getRelistTime</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> relistTime.<span style="color:#50fa7b">IsZero</span>() {<span style="color:#ff79c6">//没有成功</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;pleg has yet to be successful&#34;</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Healthy check if PLEG work properly.</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// relistThreshold is the maximum interval between two relist.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (g <span style="color:#fe8019">*</span>GenericPLEG) <span style="color:#fabd2f">Healthy</span>() (<span style="color:#fabd2f">bool</span>, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//获取上次relist的时间</span>
+</span></span><span style="display:flex;"><span>    relistTime <span style="color:#fe8019">:=</span> g.<span style="color:#fabd2f">getRelistTime</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> relistTime.<span style="color:#fabd2f">IsZero</span>() {<span style="color:#8ec07c">//没有成功</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;pleg has yet to be successful&#34;</span>)
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Expose as metric so you can alert on `time()-pleg_last_seen_seconds &gt; nn`</span>
-</span></span><span style="display:flex;"><span>    metrics.PLEGLastSeen.<span style="color:#50fa7b">Set</span>(<span style="color:#8be9fd;font-style:italic">float64</span>(relistTime.<span style="color:#50fa7b">Unix</span>()))
-</span></span><span style="display:flex;"><span>    elapsed <span style="color:#ff79c6">:=</span> g.clock.<span style="color:#50fa7b">Since</span>(relistTime)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// elapsed是当前时间距离上次relist成功的时间间隔，</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 如果超过了relistThreshold（3min)， 说明数据处理时间太常了，</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 或者中间relist有失败的情况，所以会返回false</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> elapsed &gt; relistThreshold {
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;pleg was last seen active %v ago; threshold is %v&#34;</span>, elapsed, relistThreshold)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Expose as metric so you can alert on `time()-pleg_last_seen_seconds &gt; nn`</span>
+</span></span><span style="display:flex;"><span>    metrics.PLEGLastSeen.<span style="color:#fabd2f">Set</span>(<span style="color:#fabd2f">float64</span>(relistTime.<span style="color:#fabd2f">Unix</span>()))
+</span></span><span style="display:flex;"><span>    elapsed <span style="color:#fe8019">:=</span> g.clock.<span style="color:#fabd2f">Since</span>(relistTime)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// elapsed是当前时间距离上次relist成功的时间间隔，</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 如果超过了relistThreshold（3min)， 说明数据处理时间太常了，</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 或者中间relist有失败的情况，所以会返回false</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> elapsed &gt; relistThreshold {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;pleg was last seen active %v ago; threshold is %v&#34;</span>, elapsed, relistThreshold)
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">true</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">true</span>, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="start">Start</h3>
 <p>拉起来一个 goroutine，重复执行 <code>GenericPLEG.relist</code>：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// Start spawns a goroutine to relist periodically.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (g <span style="color:#ff79c6">*</span>GenericPLEG) <span style="color:#50fa7b">Start</span>() {          
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">go</span> wait.<span style="color:#50fa7b">Until</span>(g.relist, g.relistPeriod, wait.NeverStop)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Start spawns a goroutine to relist periodically.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (g <span style="color:#fe8019">*</span>GenericPLEG) <span style="color:#fabd2f">Start</span>() {          
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">go</span> wait.<span style="color:#fabd2f">Until</span>(g.relist, g.relistPeriod, wait.NeverStop)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>下面主要分析 <code>GenericPLEG.relist</code> 的逻辑。</p>
 <h3 id="relist">relist</h3>
 <p>relist 是 PLEG 的核心，它从 container runtime 中拉取 pods 的信息，并与自身维护的 cache 信息进行对比，生成对应的 PodLifecycleEvent，然后输出到 eventChannel 中，通过 eventChannel 发送到 kubelet 进行消费。</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// relist queries the container runtime for list of pods/containers, compare</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// with the internal pods/containers, and generates events accordingly.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (g <span style="color:#ff79c6">*</span>GenericPLEG) <span style="color:#50fa7b">relist</span>() {
-</span></span><span style="display:flex;"><span>    klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;GenericPLEG: Relisting&#34;</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取上次relist成功的时间并写入到metric</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> lastRelistTime <span style="color:#ff79c6">:=</span> g.<span style="color:#50fa7b">getRelistTime</span>(); !lastRelistTime.<span style="color:#50fa7b">IsZero</span>() {
-</span></span><span style="display:flex;"><span>        metrics.PLEGRelistInterval.<span style="color:#50fa7b">Observe</span>(metrics.<span style="color:#50fa7b">SinceInSeconds</span>(lastRelistTime))
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// relist queries the container runtime for list of pods/containers, compare</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// with the internal pods/containers, and generates events accordingly.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (g <span style="color:#fe8019">*</span>GenericPLEG) <span style="color:#fabd2f">relist</span>() {
+</span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">5</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;GenericPLEG: Relisting&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取上次relist成功的时间并写入到metric</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> lastRelistTime <span style="color:#fe8019">:=</span> g.<span style="color:#fabd2f">getRelistTime</span>(); !lastRelistTime.<span style="color:#fabd2f">IsZero</span>() {
+</span></span><span style="display:flex;"><span>        metrics.PLEGRelistInterval.<span style="color:#fabd2f">Observe</span>(metrics.<span style="color:#fabd2f">SinceInSeconds</span>(lastRelistTime))
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 记录当前时间</span>
-</span></span><span style="display:flex;"><span>    timestamp <span style="color:#ff79c6">:=</span> g.clock.<span style="color:#50fa7b">Now</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">defer</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>        metrics.PLEGRelistDuration.<span style="color:#50fa7b">Observe</span>(metrics.<span style="color:#50fa7b">SinceInSeconds</span>(timestamp))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 记录当前时间</span>
+</span></span><span style="display:flex;"><span>    timestamp <span style="color:#fe8019">:=</span> g.clock.<span style="color:#fabd2f">Now</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">defer</span> <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>        metrics.PLEGRelistDuration.<span style="color:#fabd2f">Observe</span>(metrics.<span style="color:#fabd2f">SinceInSeconds</span>(timestamp))
 </span></span><span style="display:flex;"><span>    }()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Get all the pods.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 执行relist</span>
-</span></span><span style="display:flex;"><span>    podList, err <span style="color:#ff79c6">:=</span> g.runtime.<span style="color:#50fa7b">GetPods</span>(<span style="color:#ff79c6">true</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>        klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;GenericPLEG: Unable to retrieve pods&#34;</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Get all the pods.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 执行relist</span>
+</span></span><span style="display:flex;"><span>    podList, err <span style="color:#fe8019">:=</span> g.runtime.<span style="color:#fabd2f">GetPods</span>(<span style="color:#fe8019">true</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;GenericPLEG: Unable to retrieve pods&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 写入本次拉取成功的时间</span>
-</span></span><span style="display:flex;"><span>    g.<span style="color:#50fa7b">updateRelistTime</span>(timestamp)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 写入本次拉取成功的时间</span>
+</span></span><span style="display:flex;"><span>    g.<span style="color:#fabd2f">updateRelistTime</span>(timestamp)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    pods <span style="color:#ff79c6">:=</span> kubecontainer.<span style="color:#50fa7b">Pods</span>(podList)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// update running pod and container count</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 更新metric</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">updateRunningPodAndContainerMetrics</span>(pods)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 更新records 记录中的currnet字段</span>
-</span></span><span style="display:flex;"><span>    g.podRecords.<span style="color:#50fa7b">setCurrent</span>(pods)
+</span></span><span style="display:flex;"><span>    pods <span style="color:#fe8019">:=</span> kubecontainer.<span style="color:#fabd2f">Pods</span>(podList)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// update running pod and container count</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 更新metric</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">updateRunningPodAndContainerMetrics</span>(pods)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 更新records 记录中的currnet字段</span>
+</span></span><span style="display:flex;"><span>    g.podRecords.<span style="color:#fabd2f">setCurrent</span>(pods)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// Compare the old and the current pods, and generate events.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// eventsByPodID 每个pod的PLEG Events列表</span>
-</span></span><span style="display:flex;"><span>    eventsByPodID <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">map</span>[types.UID][]<span style="color:#ff79c6">*</span>PodLifecycleEvent{}
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> pid <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> g.podRecords {
-</span></span><span style="display:flex;"><span>        oldPod <span style="color:#ff79c6">:=</span> g.podRecords.<span style="color:#50fa7b">getOld</span>(pid)
-</span></span><span style="display:flex;"><span>        pod <span style="color:#ff79c6">:=</span> g.podRecords.<span style="color:#50fa7b">getCurrent</span>(pid)
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// Get all containers in the old and the new pod.</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 获取新/旧 pod中的共同containers, getContainersFromPods这个如果你要是跟进去看的话</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 你会发现其实就是执行的遍历，所以这个allContainers是增加新的container中旧的container中没有的</span>
-</span></span><span style="display:flex;"><span>        allContainers <span style="color:#ff79c6">:=</span>  <span style="color:#50fa7b">getContainersFromPods</span>(oldPod, pod)
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">for</span> _, container <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> allContainers {
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 通过对比新旧container的状态构造PLEG Events</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// newStatus = plegContainerRunning ==&gt; ContainerStarted</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// newStatus = plegContainerExited ==&gt; ContainerDied</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// newStatus = plegContainerUnknown ==&gt; ContainerChanged</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// newStatus =  plegContainerNonExistent &amp;&amp; oldStatus = plegContainerExited  ==&gt; ContainerRemoved</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// newStatus = plegContainerNonExistent &amp;&amp; oldStatus != plegContainerExited  ==&gt; [ContainerDied, ContainerRemoved]</span>
-</span></span><span style="display:flex;"><span>            events <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">computeEvents</span>(oldPod, pod, <span style="color:#ff79c6">&amp;</span>container.ID)
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">for</span> _, e <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> events {
-</span></span><span style="display:flex;"><span>                <span style="color:#50fa7b">updateEvents</span>(eventsByPodID, e)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// Compare the old and the current pods, and generate events.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// eventsByPodID 每个pod的PLEG Events列表</span>
+</span></span><span style="display:flex;"><span>    eventsByPodID <span style="color:#fe8019">:=</span> <span style="color:#fe8019">map</span>[types.UID][]<span style="color:#fe8019">*</span>PodLifecycleEvent{}
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">for</span> pid <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> g.podRecords {
+</span></span><span style="display:flex;"><span>        oldPod <span style="color:#fe8019">:=</span> g.podRecords.<span style="color:#fabd2f">getOld</span>(pid)
+</span></span><span style="display:flex;"><span>        pod <span style="color:#fe8019">:=</span> g.podRecords.<span style="color:#fabd2f">getCurrent</span>(pid)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// Get all containers in the old and the new pod.</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 获取新/旧 pod中的共同containers, getContainersFromPods这个如果你要是跟进去看的话</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 你会发现其实就是执行的遍历，所以这个allContainers是增加新的container中旧的container中没有的</span>
+</span></span><span style="display:flex;"><span>        allContainers <span style="color:#fe8019">:=</span>  <span style="color:#fabd2f">getContainersFromPods</span>(oldPod, pod)
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">for</span> _, container <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> allContainers {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 通过对比新旧container的状态构造PLEG Events</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// newStatus = plegContainerRunning ==&gt; ContainerStarted</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// newStatus = plegContainerExited ==&gt; ContainerDied</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// newStatus = plegContainerUnknown ==&gt; ContainerChanged</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// newStatus =  plegContainerNonExistent &amp;&amp; oldStatus = plegContainerExited  ==&gt; ContainerRemoved</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// newStatus = plegContainerNonExistent &amp;&amp; oldStatus != plegContainerExited  ==&gt; [ContainerDied, ContainerRemoved]</span>
+</span></span><span style="display:flex;"><span>            events <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">computeEvents</span>(oldPod, pod, <span style="color:#fe8019">&amp;</span>container.ID)
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">for</span> _, e <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> events {
+</span></span><span style="display:flex;"><span>                <span style="color:#fabd2f">updateEvents</span>(eventsByPodID, e)
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">var</span> needsReinspection <span style="color:#8be9fd;font-style:italic">map</span>[types.UID]<span style="color:#ff79c6">*</span>kubecontainer.Pod
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> g.<span style="color:#50fa7b">cacheEnabled</span>() {<span style="color:#6272a4">// podStatus cache存在</span>
-</span></span><span style="display:flex;"><span>        needsReinspection = <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">map</span>[types.UID]<span style="color:#ff79c6">*</span>kubecontainer.Pod)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">var</span> needsReinspection <span style="color:#fe8019">map</span>[types.UID]<span style="color:#fe8019">*</span>kubecontainer.Pod
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> g.<span style="color:#fabd2f">cacheEnabled</span>() {<span style="color:#928374;font-style:italic">// podStatus cache存在</span>
+</span></span><span style="display:flex;"><span>        needsReinspection = <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">map</span>[types.UID]<span style="color:#fe8019">*</span>kubecontainer.Pod)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// If there are events associated with a pod, we should update the</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// podCache.</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> pid, events <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> eventsByPodID {
-</span></span><span style="display:flex;"><span>        pod <span style="color:#ff79c6">:=</span> g.podRecords.<span style="color:#50fa7b">getCurrent</span>(pid)
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> g.<span style="color:#50fa7b">cacheEnabled</span>() {
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// updateCache() will inspect the pod and update the cache. If an</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// error occurs during the inspection, we want PLEG to retry again</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// in the next relist. To achieve this, we do not update the</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// associated podRecord of the pod, so that the change will be</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// detect again in the next relist.</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// TODO: If many pods changed during the same relist period,</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// inspecting the pod and getting the PodStatus to update the cache</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// serially may take a while. We should be aware of this and</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// parallelize if needed.</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 这个会调用container runtime来获取pod的状态然后更新到本地的podStatus 缓存</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> g.<span style="color:#50fa7b">updateCache</span>(pod, pid); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// Rely on updateCache calling GetPodStatus to log the actual error.</span>
-</span></span><span style="display:flex;"><span>                klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;PLEG: Ignoring events for pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KRef</span>(pod.Namespace, pod.Name))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// If there are events associated with a pod, we should update the</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// podCache.</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">for</span> pid, events <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> eventsByPodID {
+</span></span><span style="display:flex;"><span>        pod <span style="color:#fe8019">:=</span> g.podRecords.<span style="color:#fabd2f">getCurrent</span>(pid)
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> g.<span style="color:#fabd2f">cacheEnabled</span>() {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// updateCache() will inspect the pod and update the cache. If an</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// error occurs during the inspection, we want PLEG to retry again</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// in the next relist. To achieve this, we do not update the</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// associated podRecord of the pod, so that the change will be</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// detect again in the next relist.</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// TODO: If many pods changed during the same relist period,</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// inspecting the pod and getting the PodStatus to update the cache</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// serially may take a while. We should be aware of this and</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// parallelize if needed.</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 这个会调用container runtime来获取pod的状态然后更新到本地的podStatus 缓存</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> g.<span style="color:#fabd2f">updateCache</span>(pod, pid); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// Rely on updateCache calling GetPodStatus to log the actual error.</span>
+</span></span><span style="display:flex;"><span>                klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;PLEG: Ignoring events for pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KRef</span>(pod.Namespace, pod.Name))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// make sure we try to reinspect the pod during the next relisting</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// 不成功，需要记录下</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// make sure we try to reinspect the pod during the next relisting</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// 不成功，需要记录下</span>
 </span></span><span style="display:flex;"><span>                needsReinspection[pid] = pod
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">continue</span>
-</span></span><span style="display:flex;"><span>            } <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// this pod was in the list to reinspect and we did so because it had events, so remove it</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// from the list (we don&#39;t want the reinspection code below to inspect it a second time in</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// this relist execution)</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// 成功了需要把该记录删除</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#8be9fd;font-style:italic">delete</span>(g.podsToReinspect, pid)
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">continue</span>
+</span></span><span style="display:flex;"><span>            } <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// this pod was in the list to reinspect and we did so because it had events, so remove it</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// from the list (we don&#39;t want the reinspection code below to inspect it a second time in</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// this relist execution)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// 成功了需要把该记录删除</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#fabd2f">delete</span>(g.podsToReinspect, pid)
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// Update the internal storage and send out the events.</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 更新下podRecords中的记录 总结一句话，就是赋值操作old，current = current, nil</span>
-</span></span><span style="display:flex;"><span>        g.podRecords.<span style="color:#50fa7b">update</span>(pid)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// Update the internal storage and send out the events.</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 更新下podRecords中的记录 总结一句话，就是赋值操作old，current = current, nil</span>
+</span></span><span style="display:flex;"><span>        g.podRecords.<span style="color:#fabd2f">update</span>(pid)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Map from containerId to exit code; used as a temporary cache for lookup</span>
-</span></span><span style="display:flex;"><span>	containerExitCode <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]<span style="color:#8be9fd">int</span>)
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">for</span> i <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> events {
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// Filter out events that are not reliable and no other components use yet.</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 把ContainerChanged类型的消息过滤掉</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> events[i].Type <span style="color:#ff79c6">==</span> ContainerChanged {
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Map from containerId to exit code; used as a temporary cache for lookup</span>
+</span></span><span style="display:flex;"><span>	containerExitCode <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]<span style="color:#fabd2f">int</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">for</span> i <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> events {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// Filter out events that are not reliable and no other components use yet.</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 把ContainerChanged类型的消息过滤掉</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> events[i].Type <span style="color:#fe8019">==</span> ContainerChanged {
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">continue</span>
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// 这里需要注意的是，如果队列满了，消息是要丢弃的，毕竟不能阻塞goroutine</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">select</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">case</span> g.eventChannel <span style="color:#ff79c6">&lt;-</span> events[i]:
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">default</span>:
-</span></span><span style="display:flex;"><span>                metrics.PLEGDiscardEvents.<span style="color:#50fa7b">Inc</span>()
-</span></span><span style="display:flex;"><span>                klog.<span style="color:#50fa7b">ErrorS</span>(<span style="color:#ff79c6">nil</span>, <span style="color:#f1fa8c">&#34;Event channel is full, discard this relist() cycle event&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 这里需要注意的是，如果队列满了，消息是要丢弃的，毕竟不能阻塞goroutine</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">case</span> g.eventChannel <span style="color:#fe8019">&lt;-</span> events[i]:
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">default</span>:
+</span></span><span style="display:flex;"><span>                metrics.PLEGDiscardEvents.<span style="color:#fabd2f">Inc</span>()
+</span></span><span style="display:flex;"><span>                klog.<span style="color:#fabd2f">ErrorS</span>(<span style="color:#fe8019">nil</span>, <span style="color:#b8bb26">&#34;Event channel is full, discard this relist() cycle event&#34;</span>)
 </span></span><span style="display:flex;"><span>            }
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// Log exit code of containers when they finished in a particular event</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">if</span> events[i].Type <span style="color:#ff79c6">==</span> ContainerDied {
-</span></span><span style="display:flex;"><span>            	<span style="color:#6272a4">// Fill up containerExitCode map for ContainerDied event when first time appeared</span>
-</span></span><span style="display:flex;"><span>        	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(containerExitCode) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> <span style="color:#ff79c6">&amp;&amp;</span> pod <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> g.cache <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>            	    <span style="color:#6272a4">// Get updated podStatus</span>
-</span></span><span style="display:flex;"><span>            	    status, err <span style="color:#ff79c6">:=</span> g.cache.<span style="color:#50fa7b">Get</span>(pod.ID)
-</span></span><span style="display:flex;"><span>            	    <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>            		<span style="color:#ff79c6">for</span> _, containerStatus <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> status.ContainerStatuses {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// Log exit code of containers when they finished in a particular event</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">if</span> events[i].Type <span style="color:#fe8019">==</span> ContainerDied {
+</span></span><span style="display:flex;"><span>            	<span style="color:#928374;font-style:italic">// Fill up containerExitCode map for ContainerDied event when first time appeared</span>
+</span></span><span style="display:flex;"><span>        	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(containerExitCode) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> <span style="color:#fe8019">&amp;&amp;</span> pod <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span> g.cache <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>            	    <span style="color:#928374;font-style:italic">// Get updated podStatus</span>
+</span></span><span style="display:flex;"><span>            	    status, err <span style="color:#fe8019">:=</span> g.cache.<span style="color:#fabd2f">Get</span>(pod.ID)
+</span></span><span style="display:flex;"><span>            	    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>            		<span style="color:#fe8019">for</span> _, containerStatus <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> status.ContainerStatuses {
 </span></span><span style="display:flex;"><span>            	        	containerExitCode[containerStatus.ID.ID] = containerStatus.ExitCode
 </span></span><span style="display:flex;"><span>            		}
 </span></span><span style="display:flex;"><span>            	    }
 </span></span><span style="display:flex;"><span>            	}
-</span></span><span style="display:flex;"><span>        	<span style="color:#ff79c6">if</span> containerID, ok <span style="color:#ff79c6">:=</span> events[i].Data.(<span style="color:#8be9fd">string</span>); ok {
-</span></span><span style="display:flex;"><span>            	    <span style="color:#ff79c6">if</span> exitCode, ok <span style="color:#ff79c6">:=</span> containerExitCode[containerID]; ok <span style="color:#ff79c6">&amp;&amp;</span> pod <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>                	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Generic (PLEG): container finished&#34;</span>, <span style="color:#f1fa8c">&#34;podID&#34;</span>, pod.ID, <span style="color:#f1fa8c">&#34;containerID&#34;</span>, containerID, <span style="color:#f1fa8c">&#34;exitCode&#34;</span>, exitCode)
+</span></span><span style="display:flex;"><span>        	<span style="color:#fe8019">if</span> containerID, ok <span style="color:#fe8019">:=</span> events[i].Data.(<span style="color:#fabd2f">string</span>); ok {
+</span></span><span style="display:flex;"><span>            	    <span style="color:#fe8019">if</span> exitCode, ok <span style="color:#fe8019">:=</span> containerExitCode[containerID]; ok <span style="color:#fe8019">&amp;&amp;</span> pod <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>                	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Generic (PLEG): container finished&#34;</span>, <span style="color:#b8bb26">&#34;podID&#34;</span>, pod.ID, <span style="color:#b8bb26">&#34;containerID&#34;</span>, containerID, <span style="color:#b8bb26">&#34;exitCode&#34;</span>, exitCode)
 </span></span><span style="display:flex;"><span>            	    }
 </span></span><span style="display:flex;"><span>            	}
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span> g.<span style="color:#50fa7b">cacheEnabled</span>() {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// reinspect any pods that failed inspection during the previous relist</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(g.podsToReinspect) &gt; <span style="color:#bd93f9">0</span> {<span style="color:#6272a4">// 在上一轮的relist中有遗留的需要处理的pod的记录</span>
-</span></span><span style="display:flex;"><span>            klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;GenericPLEG: Reinspecting pods that previously failed inspection&#34;</span>)
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">for</span> pid, pod <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> g.podsToReinspect {
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> g.<span style="color:#50fa7b">updateCache</span>(pod, pid); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {<span style="color:#ff79c6">//再次更新，如果更新失败，还要放到needsReinspection中</span>
-</span></span><span style="display:flex;"><span>                    <span style="color:#6272a4">// Rely on updateCache calling GetPodStatus to log the actual error.</span>
-</span></span><span style="display:flex;"><span>                    klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">5</span>).<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;PLEG: pod failed reinspection&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KRef</span>(pod.Namespace, pod.Name))
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> g.<span style="color:#fabd2f">cacheEnabled</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// reinspect any pods that failed inspection during the previous relist</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(g.podsToReinspect) &gt; <span style="color:#d3869b">0</span> {<span style="color:#928374;font-style:italic">// 在上一轮的relist中有遗留的需要处理的pod的记录</span>
+</span></span><span style="display:flex;"><span>            klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">5</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;GenericPLEG: Reinspecting pods that previously failed inspection&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#fe8019">for</span> pid, pod <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> g.podsToReinspect {
+</span></span><span style="display:flex;"><span>                <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> g.<span style="color:#fabd2f">updateCache</span>(pod, pid); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {<span style="color:#8ec07c">//再次更新，如果更新失败，还要放到needsReinspection中</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#928374;font-style:italic">// Rely on updateCache calling GetPodStatus to log the actual error.</span>
+</span></span><span style="display:flex;"><span>                    klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">5</span>).<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;PLEG: pod failed reinspection&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KRef</span>(pod.Namespace, pod.Name))
 </span></span><span style="display:flex;"><span>                    needsReinspection[pid] = pod
 </span></span><span style="display:flex;"><span>                }
 </span></span><span style="display:flex;"><span>            }
 </span></span><span style="display:flex;"><span>        }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// Update the cache timestamp.  This needs to happen *after*</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// all pods have been properly updated in the cache.</span>
-</span></span><span style="display:flex;"><span>        g.cache.<span style="color:#50fa7b">UpdateTime</span>(timestamp)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// Update the cache timestamp.  This needs to happen *after*</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// all pods have been properly updated in the cache.</span>
+</span></span><span style="display:flex;"><span>        g.cache.<span style="color:#fabd2f">UpdateTime</span>(timestamp)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// make sure we retain the list of pods that need reinspecting the next time relist is called</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// make sure we retain the list of pods that need reinspecting the next time relist is called</span>
 </span></span><span style="display:flex;"><span>    g.podsToReinspect = needsReinspection
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>

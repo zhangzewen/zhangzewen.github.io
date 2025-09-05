@@ -90,7 +90,7 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
       },
       "datePublished": "2025-05-25T16:33:16+08:00",
       "dateModified": "2025-05-25T16:33:16+08:00",
-      "description": "\u003cp\u003e接口 SyncHandler 定义了一系列管理 Pod 的方法：\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-go\" data-lang=\"go\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#8be9fd;font-style:italic\"\u003etype\u003c/span\u003e SyncHandler \u003cspan style=\"color:#8be9fd;font-style:italic\"\u003einterface\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#6272a4\"\u003e// 新增\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#50fa7b\"\u003eHandlePodAdditions\u003c/span\u003e(pods []\u003cspan style=\"color:#ff79c6\"\u003e*\u003c/span\u003ev1.Pod)\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#6272a4\"\u003e// 更新\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#50fa7b\"\u003eHandlePodUpdates\u003c/span\u003e(pods []\u003cspan style=\"color:#ff79c6\"\u003e*\u003c/span\u003ev1.Pod)\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#6272a4\"\u003e// 删除\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#50fa7b\"\u003eHandlePodRemoves\u003c/span\u003e(pods []\u003cspan style=\"color:#ff79c6\"\u003e*\u003c/span\u003ev1.Pod)\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#6272a4\"\u003e// 协调\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#50fa7b\"\u003eHandlePodReconcile\u003c/span\u003e(pods []\u003cspan style=\"color:#ff79c6\"\u003e*\u003c/span\u003ev1.Pod)\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#6272a4\"\u003e// 同步\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#50fa7b\"\u003eHandlePodSyncs\u003c/span\u003e(pods []\u003cspan style=\"color:#ff79c6\"\u003e*\u003c/span\u003ev1.Pod)\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#6272a4\"\u003e// 清理\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#50fa7b\"\u003eHandlePodCleanups\u003c/span\u003e() \u003cspan style=\"color:#8be9fd\"\u003eerror\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003e结构体 Kubelet 实现了该方法。\u003ccode\u003eKubelet.HandlePodAdditions\u003c/code\u003e 的流程如下：\u003c/p\u003e",
+      "description": "\u003cp\u003e接口 SyncHandler 定义了一系列管理 Pod 的方法：\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-go\" data-lang=\"go\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#fe8019\"\u003etype\u003c/span\u003e SyncHandler \u003cspan style=\"color:#fe8019\"\u003einterface\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#928374;font-style:italic\"\u003e// 新增\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eHandlePodAdditions\u003c/span\u003e(pods []\u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003ev1.Pod)\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#928374;font-style:italic\"\u003e// 更新\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eHandlePodUpdates\u003c/span\u003e(pods []\u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003ev1.Pod)\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#928374;font-style:italic\"\u003e// 删除\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eHandlePodRemoves\u003c/span\u003e(pods []\u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003ev1.Pod)\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#928374;font-style:italic\"\u003e// 协调\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eHandlePodReconcile\u003c/span\u003e(pods []\u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003ev1.Pod)\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#928374;font-style:italic\"\u003e// 同步\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eHandlePodSyncs\u003c/span\u003e(pods []\u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003ev1.Pod)\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e    \u003cspan style=\"color:#928374;font-style:italic\"\u003e// 清理\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eHandlePodCleanups\u003c/span\u003e() \u003cspan style=\"color:#fabd2f\"\u003eerror\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003e结构体 Kubelet 实现了该方法。\u003ccode\u003eKubelet.HandlePodAdditions\u003c/code\u003e 的流程如下：\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -242,19 +242,19 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
 
   <div>
     <p>接口 SyncHandler 定义了一系列管理 Pod 的方法：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> SyncHandler <span style="color:#8be9fd;font-style:italic">interface</span> {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 新增</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">HandlePodAdditions</span>(pods []<span style="color:#ff79c6">*</span>v1.Pod)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 更新</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">HandlePodUpdates</span>(pods []<span style="color:#ff79c6">*</span>v1.Pod)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 删除</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">HandlePodRemoves</span>(pods []<span style="color:#ff79c6">*</span>v1.Pod)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 协调</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">HandlePodReconcile</span>(pods []<span style="color:#ff79c6">*</span>v1.Pod)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 同步</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">HandlePodSyncs</span>(pods []<span style="color:#ff79c6">*</span>v1.Pod)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 清理</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#50fa7b">HandlePodCleanups</span>() <span style="color:#8be9fd">error</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> SyncHandler <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 新增</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">HandlePodAdditions</span>(pods []<span style="color:#fe8019">*</span>v1.Pod)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 更新</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">HandlePodUpdates</span>(pods []<span style="color:#fe8019">*</span>v1.Pod)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 删除</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">HandlePodRemoves</span>(pods []<span style="color:#fe8019">*</span>v1.Pod)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 协调</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">HandlePodReconcile</span>(pods []<span style="color:#fe8019">*</span>v1.Pod)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 同步</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">HandlePodSyncs</span>(pods []<span style="color:#fe8019">*</span>v1.Pod)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 清理</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">HandlePodCleanups</span>() <span style="color:#fabd2f">error</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>结构体 Kubelet 实现了该方法。<code>Kubelet.HandlePodAdditions</code> 的流程如下：</p>
 <ul>
@@ -264,75 +264,75 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
 <li>对 pod 进行准入控制判断，不符合就忽略后续步骤。</li>
 <li>调用 dispatchWork 来创建 pod。</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (kl <span style="color:#ff79c6">*</span>Kubelet) <span style="color:#50fa7b">HandlePodAdditions</span>(pods []<span style="color:#ff79c6">*</span>v1.Pod) {
-</span></span><span style="display:flex;"><span>	start <span style="color:#ff79c6">:=</span> kl.clock.<span style="color:#50fa7b">Now</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// 按照 创建事件的先后对传入的 pods 进行排序，先来先创建</span>
-</span></span><span style="display:flex;"><span>	sort.<span style="color:#50fa7b">Sort</span>(sliceutils.<span style="color:#50fa7b">PodsByCreationTime</span>(pods))
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, pod <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> pods {
-</span></span><span style="display:flex;"><span>		existingPods <span style="color:#ff79c6">:=</span> kl.podManager.<span style="color:#50fa7b">GetPods</span>()
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 把 pod 添加到 podManager 里</span>
-</span></span><span style="display:flex;"><span>		kl.podManager.<span style="color:#50fa7b">AddPod</span>(pod)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (kl <span style="color:#fe8019">*</span>Kubelet) <span style="color:#fabd2f">HandlePodAdditions</span>(pods []<span style="color:#fe8019">*</span>v1.Pod) {
+</span></span><span style="display:flex;"><span>	start <span style="color:#fe8019">:=</span> kl.clock.<span style="color:#fabd2f">Now</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 按照 创建事件的先后对传入的 pods 进行排序，先来先创建</span>
+</span></span><span style="display:flex;"><span>	sort.<span style="color:#fabd2f">Sort</span>(sliceutils.<span style="color:#fabd2f">PodsByCreationTime</span>(pods))
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> _, pod <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> pods {
+</span></span><span style="display:flex;"><span>		existingPods <span style="color:#fe8019">:=</span> kl.podManager.<span style="color:#fabd2f">GetPods</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// 把 pod 添加到 podManager 里</span>
+</span></span><span style="display:flex;"><span>		kl.podManager.<span style="color:#fabd2f">AddPod</span>(pod)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 判断是否是 mirror pod， static pod 相关</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> kubetypes.<span style="color:#50fa7b">IsMirrorPod</span>(pod) {
-</span></span><span style="display:flex;"><span>			kl.<span style="color:#50fa7b">handleMirrorPod</span>(pod, start)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// 判断是否是 mirror pod， static pod 相关</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> kubetypes.<span style="color:#fabd2f">IsMirrorPod</span>(pod) {
+</span></span><span style="display:flex;"><span>			kl.<span style="color:#fabd2f">handleMirrorPod</span>(pod, start)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">continue</span>
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 准入控制判断是否需要创建pod</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !kl.podWorkers.<span style="color:#50fa7b">IsPodTerminationRequested</span>(pod.UID) {
-</span></span><span style="display:flex;"><span>			activePods <span style="color:#ff79c6">:=</span> kl.<span style="color:#50fa7b">filterOutInactivePods</span>(existingPods)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 准入控制判断是否需要创建pod</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !kl.podWorkers.<span style="color:#fabd2f">IsPodTerminationRequested</span>(pod.UID) {
+</span></span><span style="display:flex;"><span>			activePods <span style="color:#fe8019">:=</span> kl.<span style="color:#fabd2f">filterOutInactivePods</span>(existingPods)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> ok, reason, message <span style="color:#ff79c6">:=</span> kl.<span style="color:#50fa7b">canAdmitPod</span>(activePods, pod); !ok {
-</span></span><span style="display:flex;"><span>				kl.<span style="color:#50fa7b">rejectPod</span>(pod, reason, message)
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> ok, reason, message <span style="color:#fe8019">:=</span> kl.<span style="color:#fabd2f">canAdmitPod</span>(activePods, pod); !ok {
+</span></span><span style="display:flex;"><span>				kl.<span style="color:#fabd2f">rejectPod</span>(pod, reason, message)
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">continue</span>
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		mirrorPod, _ <span style="color:#ff79c6">:=</span> kl.podManager.<span style="color:#50fa7b">GetMirrorPodByPod</span>(pod)
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// 调用 dispatchWork 创建 pod</span>
-</span></span><span style="display:flex;"><span>		kl.<span style="color:#50fa7b">dispatchWork</span>(pod, kubetypes.SyncPodCreate, mirrorPod, start)
+</span></span><span style="display:flex;"><span>		mirrorPod, _ <span style="color:#fe8019">:=</span> kl.podManager.<span style="color:#fabd2f">GetMirrorPodByPod</span>(pod)
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// 调用 dispatchWork 创建 pod</span>
+</span></span><span style="display:flex;"><span>		kl.<span style="color:#fabd2f">dispatchWork</span>(pod, kubetypes.SyncPodCreate, mirrorPod, start)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>从上面的代码得知，最后都会调用 dispatchWork， 并且 HandlePodRemoves、HandlePodUpdates、HandlePodReconcile、HandlePodSyncs、HandlePodCleanups 这些方法最终也是会调用 dispatchWork，可自行查阅源码，这里不深入分析：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/kubelet/pod_workers.go</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/pod_workers.go</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (kl <span style="color:#ff79c6">*</span>Kubelet) <span style="color:#50fa7b">dispatchWork</span>(pod <span style="color:#ff79c6">*</span>v1.Pod, syncType kubetypes.SyncPodType, mirrorPod <span style="color:#ff79c6">*</span>v1.Pod, start time.Time) {
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Run the sync in an async worker.</span>
-</span></span><span style="display:flex;"><span>	kl.podWorkers.<span style="color:#50fa7b">UpdatePod</span>(UpdatePodOptions{
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (kl <span style="color:#fe8019">*</span>Kubelet) <span style="color:#fabd2f">dispatchWork</span>(pod <span style="color:#fe8019">*</span>v1.Pod, syncType kubetypes.SyncPodType, mirrorPod <span style="color:#fe8019">*</span>v1.Pod, start time.Time) {
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Run the sync in an async worker.</span>
+</span></span><span style="display:flex;"><span>	kl.podWorkers.<span style="color:#fabd2f">UpdatePod</span>(UpdatePodOptions{
 </span></span><span style="display:flex;"><span>		Pod:        pod,
 </span></span><span style="display:flex;"><span>		MirrorPod:  mirrorPod,
 </span></span><span style="display:flex;"><span>		UpdateType: syncType,
 </span></span><span style="display:flex;"><span>		StartTime:  start,
 </span></span><span style="display:flex;"><span>	})
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Note the number of containers for new pods.</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> syncType <span style="color:#ff79c6">==</span> kubetypes.SyncPodCreate {
-</span></span><span style="display:flex;"><span>		metrics.ContainersPerPodCount.<span style="color:#50fa7b">Observe</span>(<span style="color:#8be9fd;font-style:italic">float64</span>(<span style="color:#8be9fd;font-style:italic">len</span>(pod.Spec.Containers)))
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Note the number of containers for new pods.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> syncType <span style="color:#fe8019">==</span> kubetypes.SyncPodCreate {
+</span></span><span style="display:flex;"><span>		metrics.ContainersPerPodCount.<span style="color:#fabd2f">Observe</span>(<span style="color:#fabd2f">float64</span>(<span style="color:#fabd2f">len</span>(pod.Spec.Containers)))
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>podWrokers 实现了接口 PodWorkers，可以理解这是一个<strong>协程池</strong>，每个 pod 都有自己独立的协程执行方法 managePodLoop。PodWorkers 以及其实现不是本篇的重点，如下代码可以帮助理解 PodWorker 实例的基本框架：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>podWorkers) <span style="color:#50fa7b">UpdatePod</span>(options UpdatePodOptions) {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>	podUpdates, exists <span style="color:#ff79c6">:=</span> p.podUpdates[uid]
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !exists {
-</span></span><span style="display:flex;"><span>		podUpdates = <span style="color:#8be9fd;font-style:italic">make</span>(<span style="color:#8be9fd;font-style:italic">chan</span> podWork, <span style="color:#bd93f9">1</span>)
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>podWorkers) <span style="color:#fabd2f">UpdatePod</span>(options UpdatePodOptions) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>	podUpdates, exists <span style="color:#fe8019">:=</span> p.podUpdates[uid]
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !exists {
+</span></span><span style="display:flex;"><span>		podUpdates = <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">chan</span> podWork, <span style="color:#d3869b">1</span>)
 </span></span><span style="display:flex;"><span>		p.podUpdates[uid] = podUpdates
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// ... </span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">go</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">defer</span> runtime.<span style="color:#50fa7b">HandleCrash</span>()
-</span></span><span style="display:flex;"><span>			p.<span style="color:#50fa7b">managePodLoop</span>(outCh)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// ... </span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">go</span> <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">defer</span> runtime.<span style="color:#fabd2f">HandleCrash</span>()
+</span></span><span style="display:flex;"><span>			p.<span style="color:#fabd2f">managePodLoop</span>(outCh)
 </span></span><span style="display:flex;"><span>		}()
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !status.<span style="color:#50fa7b">IsWorking</span>() {
-</span></span><span style="display:flex;"><span>		status.working = <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>		podUpdates <span style="color:#ff79c6">&lt;-</span> work
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !status.<span style="color:#fabd2f">IsWorking</span>() {
+</span></span><span style="display:flex;"><span>		status.working = <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>		podUpdates <span style="color:#fe8019">&lt;-</span> work
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//...</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
@@ -341,31 +341,31 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
 <p>managePodLoop 的代码如下，这里只需要关注 workType 类型为 SyncPodWork，即 pod 已经启动并在运行，剩下的情况 终止Pod 运行的逻辑：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (p <span style="color:#ff79c6">*</span>podWorkers) <span style="color:#50fa7b">managePodLoop</span>(podUpdates <span style="color:#ff79c6">&lt;-</span><span style="color:#8be9fd;font-style:italic">chan</span> podWork) {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>		err <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">func</span>() <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">switch</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> update.WorkType <span style="color:#ff79c6">==</span> TerminatedPodWork:
-</span></span><span style="display:flex;"><span>				err = p.<span style="color:#50fa7b">syncTerminatedPodFn</span>(ctx, pod, status)
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (p <span style="color:#fe8019">*</span>podWorkers) <span style="color:#fabd2f">managePodLoop</span>(podUpdates <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> podWork) {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>		err <span style="color:#fe8019">:=</span> <span style="color:#fe8019">func</span>() <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">switch</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">case</span> update.WorkType <span style="color:#fe8019">==</span> TerminatedPodWork:
+</span></span><span style="display:flex;"><span>				err = p.<span style="color:#fabd2f">syncTerminatedPodFn</span>(ctx, pod, status)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> update.WorkTdpe <span style="color:#ff79c6">==</span> TerminatingPodWork:
-</span></span><span style="display:flex;"><span>				<span style="color:#8be9fd;font-style:italic">var</span> gracePeriod <span style="color:#ff79c6">*</span><span style="color:#8be9fd">int64</span>
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> opt <span style="color:#ff79c6">:=</span> update.Options.KillPodOptions; opt <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">case</span> update.WorkTdpe <span style="color:#fe8019">==</span> TerminatingPodWork:
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">var</span> gracePeriod <span style="color:#fe8019">*</span><span style="color:#fabd2f">int64</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> opt <span style="color:#fe8019">:=</span> update.Options.KillPodOptions; opt <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>					gracePeriod = opt.PodTerminationGracePeriodSecondsOverride
 </span></span><span style="display:flex;"><span>				}
-</span></span><span style="display:flex;"><span>				podStatusFn <span style="color:#ff79c6">:=</span> p.<span style="color:#50fa7b">acknowledgeTerminating</span>(pod)
+</span></span><span style="display:flex;"><span>				podStatusFn <span style="color:#fe8019">:=</span> p.<span style="color:#fabd2f">acknowledgeTerminating</span>(pod)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>				err = p.<span style="color:#50fa7b">syncTerminatingPodFn</span>(ctx, pod, status, update.Options.RunningPod, gracePeriod, podStatusFn)
+</span></span><span style="display:flex;"><span>				err = p.<span style="color:#fabd2f">syncTerminatingPodFn</span>(ctx, pod, status, update.Options.RunningPod, gracePeriod, podStatusFn)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">default</span>:
-</span></span><span style="display:flex;"><span>				isTerminal, err = p.<span style="color:#50fa7b">syncPodFn</span>(ctx, update.Options.UpdateType, pod, update.Options.MirrorPod, status)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">default</span>:
+</span></span><span style="display:flex;"><span>				isTerminal, err = p.<span style="color:#fabd2f">syncPodFn</span>(ctx, update.Options.UpdateType, pod, update.Options.MirrorPod, status)
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>			lastSyncTime = time.<span style="color:#50fa7b">Now</span>()
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>			lastSyncTime = time.<span style="color:#fabd2f">Now</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>		}()
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">//...</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#8ec07c">//...</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
@@ -394,237 +394,237 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
 </ul>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (kl <span style="color:#ff79c6">*</span>Kubelet) <span style="color:#50fa7b">syncPod</span>(ctx context.Context, updateType kubetypes.SyncPodType, pod, mirrorPod <span style="color:#ff79c6">*</span>v1.Pod, podStatus <span style="color:#ff79c6">*</span>kubecontainer.PodStatus) (isTerminal <span style="color:#8be9fd">bool</span>, err <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;syncPod enter&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod), <span style="color:#f1fa8c">&#34;podUID&#34;</span>, pod.UID)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> <span style="color:#8be9fd;font-style:italic">func</span>() {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;syncPod exit&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod), <span style="color:#f1fa8c">&#34;podUID&#34;</span>, pod.UID, <span style="color:#f1fa8c">&#34;isTerminal&#34;</span>, isTerminal)
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (kl <span style="color:#fe8019">*</span>Kubelet) <span style="color:#fabd2f">syncPod</span>(ctx context.Context, updateType kubetypes.SyncPodType, pod, mirrorPod <span style="color:#fe8019">*</span>v1.Pod, podStatus <span style="color:#fe8019">*</span>kubecontainer.PodStatus) (isTerminal <span style="color:#fabd2f">bool</span>, err <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;syncPod enter&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;podUID&#34;</span>, pod.UID)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;syncPod exit&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;podUID&#34;</span>, pod.UID, <span style="color:#b8bb26">&#34;isTerminal&#34;</span>, isTerminal)
 </span></span><span style="display:flex;"><span>	}()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> firstSeenTime time.Time
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> firstSeenTimeStr, ok <span style="color:#ff79c6">:=</span> pod.Annotations[kubetypes.ConfigFirstSeenAnnotationKey]; ok {
-</span></span><span style="display:flex;"><span>		firstSeenTime = kubetypes.<span style="color:#50fa7b">ConvertToTimestamp</span>(firstSeenTimeStr).<span style="color:#50fa7b">Get</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">var</span> firstSeenTime time.Time
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> firstSeenTimeStr, ok <span style="color:#fe8019">:=</span> pod.Annotations[kubetypes.ConfigFirstSeenAnnotationKey]; ok {
+</span></span><span style="display:flex;"><span>		firstSeenTime = kubetypes.<span style="color:#fabd2f">ConvertToTimestamp</span>(firstSeenTimeStr).<span style="color:#fabd2f">Get</span>()
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 如果是创建pod，则记录pod的启动延迟时间 </span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> updateType <span style="color:#ff79c6">==</span> kubetypes.SyncPodCreate {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !firstSeenTime.<span style="color:#50fa7b">IsZero</span>() {
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// This is the first time we are syncing the pod. Record the latency</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// since kubelet first saw the pod if firstSeenTime is set.</span>
-</span></span><span style="display:flex;"><span>			metrics.PodWorkerStartDuration.<span style="color:#50fa7b">Observe</span>(metrics.<span style="color:#50fa7b">SinceInSeconds</span>(firstSeenTime))
-</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;First seen time not recorded for pod&#34;</span>,
-</span></span><span style="display:flex;"><span>				<span style="color:#f1fa8c">&#34;podUID&#34;</span>, pod.UID,
-</span></span><span style="display:flex;"><span>				<span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 如果是创建pod，则记录pod的启动延迟时间 </span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> updateType <span style="color:#fe8019">==</span> kubetypes.SyncPodCreate {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !firstSeenTime.<span style="color:#fabd2f">IsZero</span>() {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// This is the first time we are syncing the pod. Record the latency</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// since kubelet first saw the pod if firstSeenTime is set.</span>
+</span></span><span style="display:flex;"><span>			metrics.PodWorkerStartDuration.<span style="color:#fabd2f">Observe</span>(metrics.<span style="color:#fabd2f">SinceInSeconds</span>(firstSeenTime))
+</span></span><span style="display:flex;"><span>		} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;First seen time not recorded for pod&#34;</span>,
+</span></span><span style="display:flex;"><span>				<span style="color:#b8bb26">&#34;podUID&#34;</span>, pod.UID,
+</span></span><span style="display:flex;"><span>				<span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>     <span style="color:#6272a4">// 通过pod和pod status生成api, pod status设置pod的IP。</span>
-</span></span><span style="display:flex;"><span>	apiPodStatus <span style="color:#ff79c6">:=</span> kl.<span style="color:#50fa7b">generateAPIPodStatus</span>(pod, podStatus)
-</span></span><span style="display:flex;"><span>	podStatus.IPs = <span style="color:#8be9fd;font-style:italic">make</span>([]<span style="color:#8be9fd">string</span>, <span style="color:#bd93f9">0</span>, <span style="color:#8be9fd;font-style:italic">len</span>(apiPodStatus.PodIPs))
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, ipInfo <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> apiPodStatus.PodIPs {
-</span></span><span style="display:flex;"><span>		podStatus.IPs = <span style="color:#8be9fd;font-style:italic">append</span>(podStatus.IPs, ipInfo.IP)
+</span></span><span style="display:flex;"><span>     <span style="color:#928374;font-style:italic">// 通过pod和pod status生成api, pod status设置pod的IP。</span>
+</span></span><span style="display:flex;"><span>	apiPodStatus <span style="color:#fe8019">:=</span> kl.<span style="color:#fabd2f">generateAPIPodStatus</span>(pod, podStatus)
+</span></span><span style="display:flex;"><span>	podStatus.IPs = <span style="color:#fabd2f">make</span>([]<span style="color:#fabd2f">string</span>, <span style="color:#d3869b">0</span>, <span style="color:#fabd2f">len</span>(apiPodStatus.PodIPs))
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> _, ipInfo <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> apiPodStatus.PodIPs {
+</span></span><span style="display:flex;"><span>		podStatus.IPs = <span style="color:#fabd2f">append</span>(podStatus.IPs, ipInfo.IP)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(podStatus.IPs) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span> <span style="color:#ff79c6">&amp;&amp;</span> <span style="color:#8be9fd;font-style:italic">len</span>(apiPodStatus.PodIP) &gt; <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>		podStatus.IPs = []<span style="color:#8be9fd">string</span>{apiPodStatus.PodIP}
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 如果 pod 的状态是 terminal，就忽略后续步骤</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> apiPodStatus.Phase <span style="color:#ff79c6">==</span> v1.PodSucceeded <span style="color:#ff79c6">||</span> apiPodStatus.Phase <span style="color:#ff79c6">==</span> v1.PodFailed {
-</span></span><span style="display:flex;"><span>		kl.statusManager.<span style="color:#50fa7b">SetPodStatus</span>(pod, apiPodStatus)
-</span></span><span style="display:flex;"><span>		isTerminal = <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> isTerminal, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(podStatus.IPs) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> <span style="color:#fe8019">&amp;&amp;</span> <span style="color:#fabd2f">len</span>(apiPodStatus.PodIP) &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		podStatus.IPs = []<span style="color:#fabd2f">string</span>{apiPodStatus.PodIP}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 校验pod是否可运行，如果不可运行，则更新pod和container的状态和相应的原因。</span>
-</span></span><span style="display:flex;"><span>	runnable <span style="color:#ff79c6">:=</span> kl.<span style="color:#50fa7b">canRunPod</span>(pod)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !runnable.Admit {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Pod is not runnable; and update the Pod and Container statuses to why.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> apiPodStatus.Phase <span style="color:#ff79c6">!=</span> v1.PodFailed <span style="color:#ff79c6">&amp;&amp;</span> apiPodStatus.Phase <span style="color:#ff79c6">!=</span> v1.PodSucceeded {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 如果 pod 的状态是 terminal，就忽略后续步骤</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> apiPodStatus.Phase <span style="color:#fe8019">==</span> v1.PodSucceeded <span style="color:#fe8019">||</span> apiPodStatus.Phase <span style="color:#fe8019">==</span> v1.PodFailed {
+</span></span><span style="display:flex;"><span>		kl.statusManager.<span style="color:#fabd2f">SetPodStatus</span>(pod, apiPodStatus)
+</span></span><span style="display:flex;"><span>		isTerminal = <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> isTerminal, <span style="color:#fe8019">nil</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 校验pod是否可运行，如果不可运行，则更新pod和container的状态和相应的原因。</span>
+</span></span><span style="display:flex;"><span>	runnable <span style="color:#fe8019">:=</span> kl.<span style="color:#fabd2f">canRunPod</span>(pod)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !runnable.Admit {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Pod is not runnable; and update the Pod and Container statuses to why.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> apiPodStatus.Phase <span style="color:#fe8019">!=</span> v1.PodFailed <span style="color:#fe8019">&amp;&amp;</span> apiPodStatus.Phase <span style="color:#fe8019">!=</span> v1.PodSucceeded {
 </span></span><span style="display:flex;"><span>			apiPodStatus.Phase = v1.PodPending
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>		apiPodStatus.Reason = runnable.Reason
 </span></span><span style="display:flex;"><span>		apiPodStatus.Message = runnable.Message
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Waiting containers are not creating.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">const</span> waitingReason = <span style="color:#f1fa8c">&#34;Blocked&#34;</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, cs <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> apiPodStatus.InitContainerStatuses {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> cs.State.Waiting <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Waiting containers are not creating.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">const</span> waitingReason = <span style="color:#b8bb26">&#34;Blocked&#34;</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> _, cs <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> apiPodStatus.InitContainerStatuses {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> cs.State.Waiting <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>				cs.State.Waiting.Reason = waitingReason
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, cs <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> apiPodStatus.ContainerStatuses {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> cs.State.Waiting <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> _, cs <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> apiPodStatus.ContainerStatuses {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> cs.State.Waiting <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>				cs.State.Waiting.Reason = waitingReason
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	existingStatus, ok <span style="color:#ff79c6">:=</span> kl.statusManager.<span style="color:#50fa7b">GetPodStatus</span>(pod.UID)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !ok <span style="color:#ff79c6">||</span> existingStatus.Phase <span style="color:#ff79c6">==</span> v1.PodPending <span style="color:#ff79c6">&amp;&amp;</span> apiPodStatus.Phase <span style="color:#ff79c6">==</span> v1.PodRunning <span style="color:#ff79c6">&amp;&amp;</span>
-</span></span><span style="display:flex;"><span>		!firstSeenTime.<span style="color:#50fa7b">IsZero</span>() {
-</span></span><span style="display:flex;"><span>		metrics.PodStartDuration.<span style="color:#50fa7b">Observe</span>(metrics.<span style="color:#50fa7b">SinceInSeconds</span>(firstSeenTime))
+</span></span><span style="display:flex;"><span>	existingStatus, ok <span style="color:#fe8019">:=</span> kl.statusManager.<span style="color:#fabd2f">GetPodStatus</span>(pod.UID)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !ok <span style="color:#fe8019">||</span> existingStatus.Phase <span style="color:#fe8019">==</span> v1.PodPending <span style="color:#fe8019">&amp;&amp;</span> apiPodStatus.Phase <span style="color:#fe8019">==</span> v1.PodRunning <span style="color:#fe8019">&amp;&amp;</span>
+</span></span><span style="display:flex;"><span>		!firstSeenTime.<span style="color:#fabd2f">IsZero</span>() {
+</span></span><span style="display:flex;"><span>		metrics.PodStartDuration.<span style="color:#fabd2f">Observe</span>(metrics.<span style="color:#fabd2f">SinceInSeconds</span>(firstSeenTime))
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// // 更新 pod 状态到 statusManager </span>
-</span></span><span style="display:flex;"><span>	kl.statusManager.<span style="color:#50fa7b">SetPodStatus</span>(pod, apiPodStatus)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// // 更新 pod 状态到 statusManager </span>
+</span></span><span style="display:flex;"><span>	kl.statusManager.<span style="color:#fabd2f">SetPodStatus</span>(pod, apiPodStatus)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 杀死不可运行的pod</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !runnable.Admit {
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Pod is not runnable and must have running containers stopped&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod), <span style="color:#f1fa8c">&#34;podUID&#34;</span>, pod.UID, <span style="color:#f1fa8c">&#34;message&#34;</span>, runnable.Message)
-</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">var</span> syncErr <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>		p <span style="color:#ff79c6">:=</span> kubecontainer.<span style="color:#50fa7b">ConvertPodStatusToRunningPod</span>(kl.<span style="color:#50fa7b">getRuntime</span>().<span style="color:#50fa7b">Type</span>(), podStatus)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> kl.<span style="color:#50fa7b">killPod</span>(pod, p, <span style="color:#ff79c6">nil</span>); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			kl.recorder.<span style="color:#50fa7b">Eventf</span>(pod, v1.EventTypeWarning, events.FailedToKillPod, <span style="color:#f1fa8c">&#34;error killing pod: %v&#34;</span>, err)
-</span></span><span style="display:flex;"><span>			syncErr = fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;error killing pod: %v&#34;</span>, err)
-</span></span><span style="display:flex;"><span>			utilruntime.<span style="color:#50fa7b">HandleError</span>(syncErr)
-</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// There was no error killing the pod, but the pod cannot be run.</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// Return an error to signal that the sync loop should back off.</span>
-</span></span><span style="display:flex;"><span>			syncErr = fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;pod cannot be run: %s&#34;</span>, runnable.Message)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 杀死不可运行的pod</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !runnable.Admit {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Pod is not runnable and must have running containers stopped&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;podUID&#34;</span>, pod.UID, <span style="color:#b8bb26">&#34;message&#34;</span>, runnable.Message)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">var</span> syncErr <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>		p <span style="color:#fe8019">:=</span> kubecontainer.<span style="color:#fabd2f">ConvertPodStatusToRunningPod</span>(kl.<span style="color:#fabd2f">getRuntime</span>().<span style="color:#fabd2f">Type</span>(), podStatus)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> kl.<span style="color:#fabd2f">killPod</span>(pod, p, <span style="color:#fe8019">nil</span>); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			kl.recorder.<span style="color:#fabd2f">Eventf</span>(pod, v1.EventTypeWarning, events.FailedToKillPod, <span style="color:#b8bb26">&#34;error killing pod: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>			syncErr = fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;error killing pod: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>			utilruntime.<span style="color:#fabd2f">HandleError</span>(syncErr)
+</span></span><span style="display:flex;"><span>		} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// There was no error killing the pod, but the pod cannot be run.</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// Return an error to signal that the sync loop should back off.</span>
+</span></span><span style="display:flex;"><span>			syncErr = fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;pod cannot be run: %s&#34;</span>, runnable.Message)
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, syncErr
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, syncErr
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 检查网络插件，如果网络插插进没有没有准备好，且pod的网络模式不是host ，直接返回错误</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> kl.runtimeState.<span style="color:#50fa7b">networkErrors</span>(); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> !kubecontainer.<span style="color:#50fa7b">IsHostNetworkPod</span>(pod) {
-</span></span><span style="display:flex;"><span>		kl.recorder.<span style="color:#50fa7b">Eventf</span>(pod, v1.EventTypeWarning, events.NetworkNotReady, <span style="color:#f1fa8c">&#34;%s: %v&#34;</span>, NetworkNotReadyErrorMsg, err)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;%s: %v&#34;</span>, NetworkNotReadyErrorMsg, err)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 检查网络插件，如果网络插插进没有没有准备好，且pod的网络模式不是host ，直接返回错误</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> kl.runtimeState.<span style="color:#fabd2f">networkErrors</span>(); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span> !kubecontainer.<span style="color:#fabd2f">IsHostNetworkPod</span>(pod) {
+</span></span><span style="display:flex;"><span>		kl.recorder.<span style="color:#fabd2f">Eventf</span>(pod, v1.EventTypeWarning, events.NetworkNotReady, <span style="color:#b8bb26">&#34;%s: %v&#34;</span>, NetworkNotReadyErrorMsg, err)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;%s: %v&#34;</span>, NetworkNotReadyErrorMsg, err)
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 把 pod 注册到 secretManager 和 configMapManager 里</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !kl.podWorkers.<span style="color:#50fa7b">IsPodTerminationRequested</span>(pod.UID) {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> kl.secretManager <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			kl.secretManager.<span style="color:#50fa7b">RegisterPod</span>(pod)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 把 pod 注册到 secretManager 和 configMapManager 里</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !kl.podWorkers.<span style="color:#fabd2f">IsPodTerminationRequested</span>(pod.UID) {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> kl.secretManager <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			kl.secretManager.<span style="color:#fabd2f">RegisterPod</span>(pod)
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> kl.configMapManager <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			kl.configMapManager.<span style="color:#50fa7b">RegisterPod</span>(pod)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> kl.configMapManager <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			kl.configMapManager.<span style="color:#fabd2f">RegisterPod</span>(pod)
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 给 pod 创建 cgroups</span>
-</span></span><span style="display:flex;"><span>	pcm <span style="color:#ff79c6">:=</span> kl.containerManager.<span style="color:#50fa7b">NewPodContainerManager</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// If pod has already been terminated then we need not create</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// or update the pod&#39;s cgroup</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// TODO: once context cancellation is added this check can be removed</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !kl.podWorkers.<span style="color:#50fa7b">IsPodTerminationRequested</span>(pod.UID) {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// When the kubelet is restarted with the cgroups-per-qos</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// flag enabled, all the pod&#39;s running containers</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// should be killed intermittently and brought back up</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// under the qos cgroup hierarchy.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Check if this is the pod&#39;s first sync</span>
-</span></span><span style="display:flex;"><span>		firstSync <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, containerStatus <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> apiPodStatus.ContainerStatuses {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> containerStatus.State.Running <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>				firstSync = <span style="color:#ff79c6">false</span>
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">break</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 给 pod 创建 cgroups</span>
+</span></span><span style="display:flex;"><span>	pcm <span style="color:#fe8019">:=</span> kl.containerManager.<span style="color:#fabd2f">NewPodContainerManager</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// If pod has already been terminated then we need not create</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// or update the pod&#39;s cgroup</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// TODO: once context cancellation is added this check can be removed</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !kl.podWorkers.<span style="color:#fabd2f">IsPodTerminationRequested</span>(pod.UID) {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// When the kubelet is restarted with the cgroups-per-qos</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// flag enabled, all the pod&#39;s running containers</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// should be killed intermittently and brought back up</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// under the qos cgroup hierarchy.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Check if this is the pod&#39;s first sync</span>
+</span></span><span style="display:flex;"><span>		firstSync <span style="color:#fe8019">:=</span> <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> _, containerStatus <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> apiPodStatus.ContainerStatuses {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> containerStatus.State.Running <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				firstSync = <span style="color:#fe8019">false</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">break</span>
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Don&#39;t kill containers in pod if pod&#39;s cgroups already</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// exists or the pod is running for the first time</span>
-</span></span><span style="display:flex;"><span>		podKilled <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">false</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !pcm.<span style="color:#50fa7b">Exists</span>(pod) <span style="color:#ff79c6">&amp;&amp;</span> !firstSync {
-</span></span><span style="display:flex;"><span>			p <span style="color:#ff79c6">:=</span> kubecontainer.<span style="color:#50fa7b">ConvertPodStatusToRunningPod</span>(kl.<span style="color:#50fa7b">getRuntime</span>().<span style="color:#50fa7b">Type</span>(), podStatus)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> kl.<span style="color:#50fa7b">killPod</span>(pod, p, <span style="color:#ff79c6">nil</span>); err <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>				podKilled = <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;KillPod failed&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod), <span style="color:#f1fa8c">&#34;podStatus&#34;</span>, podStatus)
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Don&#39;t kill containers in pod if pod&#39;s cgroups already</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// exists or the pod is running for the first time</span>
+</span></span><span style="display:flex;"><span>		podKilled <span style="color:#fe8019">:=</span> <span style="color:#fe8019">false</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !pcm.<span style="color:#fabd2f">Exists</span>(pod) <span style="color:#fe8019">&amp;&amp;</span> !firstSync {
+</span></span><span style="display:flex;"><span>			p <span style="color:#fe8019">:=</span> kubecontainer.<span style="color:#fabd2f">ConvertPodStatusToRunningPod</span>(kl.<span style="color:#fabd2f">getRuntime</span>().<span style="color:#fabd2f">Type</span>(), podStatus)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> kl.<span style="color:#fabd2f">killPod</span>(pod, p, <span style="color:#fe8019">nil</span>); err <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				podKilled = <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>			} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;KillPod failed&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;podStatus&#34;</span>, podStatus)
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Create and Update pod&#39;s Cgroups</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Don&#39;t create cgroups for run once pod if it was killed above</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// The current policy is not to restart the run once pods when</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// the kubelet is restarted with the new flag as run once pods are</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// expected to run only once and if the kubelet is restarted then</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// they are not expected to run again.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// We don&#39;t create and apply updates to cgroup if its a run once pod and was killed above</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !(podKilled <span style="color:#ff79c6">&amp;&amp;</span> pod.Spec.RestartPolicy <span style="color:#ff79c6">==</span> v1.RestartPolicyNever) {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> !pcm.<span style="color:#50fa7b">Exists</span>(pod) {
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> kl.containerManager.<span style="color:#50fa7b">UpdateQOSCgroups</span>(); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>					klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">2</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Failed to update QoS cgroups while syncing pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod), <span style="color:#f1fa8c">&#34;err&#34;</span>, err)
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Create and Update pod&#39;s Cgroups</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Don&#39;t create cgroups for run once pod if it was killed above</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// The current policy is not to restart the run once pods when</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// the kubelet is restarted with the new flag as run once pods are</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// expected to run only once and if the kubelet is restarted then</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// they are not expected to run again.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// We don&#39;t create and apply updates to cgroup if its a run once pod and was killed above</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !(podKilled <span style="color:#fe8019">&amp;&amp;</span> pod.Spec.RestartPolicy <span style="color:#fe8019">==</span> v1.RestartPolicyNever) {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> !pcm.<span style="color:#fabd2f">Exists</span>(pod) {
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> kl.containerManager.<span style="color:#fabd2f">UpdateQOSCgroups</span>(); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>					klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Failed to update QoS cgroups while syncing pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;err&#34;</span>, err)
 </span></span><span style="display:flex;"><span>				}
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> pcm.<span style="color:#50fa7b">EnsureExists</span>(pod); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>					kl.recorder.<span style="color:#50fa7b">Eventf</span>(pod, v1.EventTypeWarning, events.FailedToCreatePodContainer, <span style="color:#f1fa8c">&#34;unable to ensure pod container exists: %v&#34;</span>, err)
-</span></span><span style="display:flex;"><span>					<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;failed to ensure that the pod: %v cgroups exist and are correctly applied: %v&#34;</span>, pod.UID, err)
-</span></span><span style="display:flex;"><span>				}
-</span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Create Mirror Pod for Static Pod if it doesn&#39;t already exist</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 如果pod是 static  pod ，则创建一个 mirror pod,</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> kubetypes.<span style="color:#50fa7b">IsStaticPod</span>(pod) {
-</span></span><span style="display:flex;"><span>		deleted <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">false</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 如果mirror pod 已经存在, 则需要先清理掉</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> mirrorPod <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> mirrorPod.DeletionTimestamp <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">||</span> !kl.podManager.<span style="color:#50fa7b">IsMirrorPodOf</span>(mirrorPod, pod) {
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// The mirror pod is semantically different from the static pod. Remove</span>
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// it. The mirror pod will get recreated later.</span>
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Trying to delete pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod), <span style="color:#f1fa8c">&#34;podUID&#34;</span>, mirrorPod.ObjectMeta.UID)
-</span></span><span style="display:flex;"><span>				podFullName <span style="color:#ff79c6">:=</span> kubecontainer.<span style="color:#50fa7b">GetPodFullName</span>(pod)
-</span></span><span style="display:flex;"><span>				<span style="color:#8be9fd;font-style:italic">var</span> err <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>				deleted, err = kl.podManager.<span style="color:#50fa7b">DeleteMirrorPod</span>(podFullName, <span style="color:#ff79c6">&amp;</span>mirrorPod.ObjectMeta.UID)
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> deleted {
-</span></span><span style="display:flex;"><span>					klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Deleted mirror pod because it is outdated&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(mirrorPod))
-</span></span><span style="display:flex;"><span>				} <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>					klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed deleting mirror pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(mirrorPod))
-</span></span><span style="display:flex;"><span>				}
-</span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// mirror pod 不存在 或者已经成功删除之前已经存在的 mirror pod ，则创建 mirror pod</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> mirrorPod <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">||</span> deleted {
-</span></span><span style="display:flex;"><span>			node, err <span style="color:#ff79c6">:=</span> kl.<span style="color:#50fa7b">GetNode</span>()
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">||</span> node.DeletionTimestamp <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;No need to create a mirror pod, since node has been removed from the cluster&#34;</span>, <span style="color:#f1fa8c">&#34;node&#34;</span>, klog.<span style="color:#50fa7b">KRef</span>(<span style="color:#f1fa8c">&#34;&#34;</span>, <span style="color:#8be9fd;font-style:italic">string</span>(kl.nodeName)))
-</span></span><span style="display:flex;"><span>			} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Creating a mirror pod for static pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> kl.podManager.<span style="color:#50fa7b">CreateMirrorPod</span>(pod); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>					klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed creating a mirror pod for&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> pcm.<span style="color:#fabd2f">EnsureExists</span>(pod); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>					kl.recorder.<span style="color:#fabd2f">Eventf</span>(pod, v1.EventTypeWarning, events.FailedToCreatePodContainer, <span style="color:#b8bb26">&#34;unable to ensure pod container exists: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>					<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;failed to ensure that the pod: %v cgroups exist and are correctly applied: %v&#34;</span>, pod.UID, err)
 </span></span><span style="display:flex;"><span>				}
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 为pod 创建数据目录，主要有三个目录：</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// PodDir: /var/lib/kubelet/pods/{PodID}</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// PodVolumesDir: /var/lib/kubelet/pods/{PodID}/volumes</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// PodPluginsDir: /var/lib/kubelet/pods/{PodID}/plugins</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> kl.<span style="color:#50fa7b">makePodDataDirs</span>(pod); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		kl.recorder.<span style="color:#50fa7b">Eventf</span>(pod, v1.EventTypeWarning, events.FailedToMakePodDataDirectories, <span style="color:#f1fa8c">&#34;error making pod data directories: %v&#34;</span>, err)
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Unable to make pod data directories for pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, err
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 如果 pod 的状态不是 terminated ，则为其挂载 volume</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> !kl.podWorkers.<span style="color:#50fa7b">IsPodTerminationRequested</span>(pod.UID) {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 等待 volume attach 和 mount 完成</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> kl.volumeManager.<span style="color:#50fa7b">WaitForAttachAndMount</span>(pod); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			kl.recorder.<span style="color:#50fa7b">Eventf</span>(pod, v1.EventTypeWarning, events.FailedMountVolume, <span style="color:#f1fa8c">&#34;Unable to attach or mount volumes: %v&#34;</span>, err)
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Unable to attach or mount volumes for pod; skipping pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, err
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Create Mirror Pod for Static Pod if it doesn&#39;t already exist</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 如果pod是 static  pod ，则创建一个 mirror pod,</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> kubetypes.<span style="color:#fabd2f">IsStaticPod</span>(pod) {
+</span></span><span style="display:flex;"><span>		deleted <span style="color:#fe8019">:=</span> <span style="color:#fe8019">false</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 如果mirror pod 已经存在, 则需要先清理掉</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> mirrorPod <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> mirrorPod.DeletionTimestamp <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span> !kl.podManager.<span style="color:#fabd2f">IsMirrorPodOf</span>(mirrorPod, pod) {
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// The mirror pod is semantically different from the static pod. Remove</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// it. The mirror pod will get recreated later.</span>
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Trying to delete pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;podUID&#34;</span>, mirrorPod.ObjectMeta.UID)
+</span></span><span style="display:flex;"><span>				podFullName <span style="color:#fe8019">:=</span> kubecontainer.<span style="color:#fabd2f">GetPodFullName</span>(pod)
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">var</span> err <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>				deleted, err = kl.podManager.<span style="color:#fabd2f">DeleteMirrorPod</span>(podFullName, <span style="color:#fe8019">&amp;</span>mirrorPod.ObjectMeta.UID)
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> deleted {
+</span></span><span style="display:flex;"><span>					klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Deleted mirror pod because it is outdated&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(mirrorPod))
+</span></span><span style="display:flex;"><span>				} <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>					klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Failed deleting mirror pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(mirrorPod))
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// mirror pod 不存在 或者已经成功删除之前已经存在的 mirror pod ，则创建 mirror pod</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> mirrorPod <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span> deleted {
+</span></span><span style="display:flex;"><span>			node, err <span style="color:#fe8019">:=</span> kl.<span style="color:#fabd2f">GetNode</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span> node.DeletionTimestamp <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;No need to create a mirror pod, since node has been removed from the cluster&#34;</span>, <span style="color:#b8bb26">&#34;node&#34;</span>, klog.<span style="color:#fabd2f">KRef</span>(<span style="color:#b8bb26">&#34;&#34;</span>, <span style="color:#fabd2f">string</span>(kl.nodeName)))
+</span></span><span style="display:flex;"><span>			} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Creating a mirror pod for static pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> kl.podManager.<span style="color:#fabd2f">CreateMirrorPod</span>(pod); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>					klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Failed creating a mirror pod for&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取拉取 container 镜像所需的认证 secrets</span>
-</span></span><span style="display:flex;"><span>	pullSecrets <span style="color:#ff79c6">:=</span> kl.<span style="color:#50fa7b">getPullSecretsForPod</span>(pod)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 为pod 创建数据目录，主要有三个目录：</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// PodDir: /var/lib/kubelet/pods/{PodID}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// PodVolumesDir: /var/lib/kubelet/pods/{PodID}/volumes</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// PodPluginsDir: /var/lib/kubelet/pods/{PodID}/plugins</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> kl.<span style="color:#fabd2f">makePodDataDirs</span>(pod); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		kl.recorder.<span style="color:#fabd2f">Eventf</span>(pod, v1.EventTypeWarning, events.FailedToMakePodDataDirectories, <span style="color:#b8bb26">&#34;error making pod data directories: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Unable to make pod data directories for pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, err
+</span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 把 pod 添加到 probeManager，即给 pod 添加探针</span>
-</span></span><span style="display:flex;"><span>	kl.probeManager.<span style="color:#50fa7b">AddPod</span>(pod)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 如果 pod 的状态不是 terminated ，则为其挂载 volume</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !kl.podWorkers.<span style="color:#fabd2f">IsPodTerminationRequested</span>(pod.UID) {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 等待 volume attach 和 mount 完成</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> kl.volumeManager.<span style="color:#fabd2f">WaitForAttachAndMount</span>(pod); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			kl.recorder.<span style="color:#fabd2f">Eventf</span>(pod, v1.EventTypeWarning, events.FailedMountVolume, <span style="color:#b8bb26">&#34;Unable to attach or mount volumes: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Unable to attach or mount volumes for pod; skipping pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, err
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 调用container runtime的SyncPod 函数，执行pod 创建操作</span>
-</span></span><span style="display:flex;"><span>	result <span style="color:#ff79c6">:=</span> kl.containerRuntime.<span style="color:#50fa7b">SyncPod</span>(pod, podStatus, pullSecrets, kl.backOff)
-</span></span><span style="display:flex;"><span>	kl.reasonCache.<span style="color:#50fa7b">Update</span>(pod.UID, result)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> result.<span style="color:#50fa7b">Error</span>(); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Do not return error if the only failures were pods in backoff</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> _, r <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> result.SyncResults {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> r.Error <span style="color:#ff79c6">!=</span> kubecontainer.ErrCrashLoopBackOff <span style="color:#ff79c6">&amp;&amp;</span> r.Error <span style="color:#ff79c6">!=</span> images.ErrImagePullBackOff {
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// Do not record an event here, as we keep all event logging for sync pod failures</span>
-</span></span><span style="display:flex;"><span>				<span style="color:#6272a4">// local to container runtime, so we get better errors.</span>
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, err
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取拉取 container 镜像所需的认证 secrets</span>
+</span></span><span style="display:flex;"><span>	pullSecrets <span style="color:#fe8019">:=</span> kl.<span style="color:#fabd2f">getPullSecretsForPod</span>(pod)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 把 pod 添加到 probeManager，即给 pod 添加探针</span>
+</span></span><span style="display:flex;"><span>	kl.probeManager.<span style="color:#fabd2f">AddPod</span>(pod)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 调用container runtime的SyncPod 函数，执行pod 创建操作</span>
+</span></span><span style="display:flex;"><span>	result <span style="color:#fe8019">:=</span> kl.containerRuntime.<span style="color:#fabd2f">SyncPod</span>(pod, podStatus, pullSecrets, kl.backOff)
+</span></span><span style="display:flex;"><span>	kl.reasonCache.<span style="color:#fabd2f">Update</span>(pod.UID, result)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> result.<span style="color:#fabd2f">Error</span>(); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Do not return error if the only failures were pods in backoff</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> _, r <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> result.SyncResults {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> r.Error <span style="color:#fe8019">!=</span> kubecontainer.ErrCrashLoopBackOff <span style="color:#fe8019">&amp;&amp;</span> r.Error <span style="color:#fe8019">!=</span> images.ErrImagePullBackOff {
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// Do not record an event here, as we keep all event logging for sync pod failures</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// local to container runtime, so we get better errors.</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, err
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">false</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
@@ -643,191 +643,191 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
 </ul>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (m <span style="color:#ff79c6">*</span>kubeGenericRuntimeManager) <span style="color:#50fa7b">SyncPod</span>(pod <span style="color:#ff79c6">*</span>v1.Pod, podStatus <span style="color:#ff79c6">*</span>kubecontainer.PodStatus, pullSecrets []v1.Secret, backOff <span style="color:#ff79c6">*</span>flowcontrol.Backoff) (result kubecontainer.PodSyncResult) {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 计算 sandbox 和 容器发生的变动</span>
-</span></span><span style="display:flex;"><span>	podContainerChanges <span style="color:#ff79c6">:=</span> m.<span style="color:#50fa7b">computePodActions</span>(pod, podStatus)
-</span></span><span style="display:flex;"><span>	klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;computePodActions got for pod&#34;</span>, <span style="color:#f1fa8c">&#34;podActions&#34;</span>, podContainerChanges, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> podContainerChanges.CreateSandbox {
-</span></span><span style="display:flex;"><span>		ref, err <span style="color:#ff79c6">:=</span> ref.<span style="color:#50fa7b">GetReference</span>(legacyscheme.Scheme, pod)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Couldn&#39;t make a ref to pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>kubeGenericRuntimeManager) <span style="color:#fabd2f">SyncPod</span>(pod <span style="color:#fe8019">*</span>v1.Pod, podStatus <span style="color:#fe8019">*</span>kubecontainer.PodStatus, pullSecrets []v1.Secret, backOff <span style="color:#fe8019">*</span>flowcontrol.Backoff) (result kubecontainer.PodSyncResult) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 计算 sandbox 和 容器发生的变动</span>
+</span></span><span style="display:flex;"><span>	podContainerChanges <span style="color:#fe8019">:=</span> m.<span style="color:#fabd2f">computePodActions</span>(pod, podStatus)
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;computePodActions got for pod&#34;</span>, <span style="color:#b8bb26">&#34;podActions&#34;</span>, podContainerChanges, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> podContainerChanges.CreateSandbox {
+</span></span><span style="display:flex;"><span>		ref, err <span style="color:#fe8019">:=</span> ref.<span style="color:#fabd2f">GetReference</span>(legacyscheme.Scheme, pod)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Couldn&#39;t make a ref to pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> podContainerChanges.SandboxID <span style="color:#ff79c6">!=</span> <span style="color:#f1fa8c">&#34;&#34;</span> {
-</span></span><span style="display:flex;"><span>			m.recorder.<span style="color:#50fa7b">Eventf</span>(ref, v1.EventTypeNormal, events.SandboxChanged, <span style="color:#f1fa8c">&#34;Pod sandbox changed, it will be killed and re-created.&#34;</span>)
-</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;SyncPod received new pod, will create a sandbox for it&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> podContainerChanges.SandboxID <span style="color:#fe8019">!=</span> <span style="color:#b8bb26">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>			m.recorder.<span style="color:#fabd2f">Eventf</span>(ref, v1.EventTypeNormal, events.SandboxChanged, <span style="color:#b8bb26">&#34;Pod sandbox changed, it will be killed and re-created.&#34;</span>)
+</span></span><span style="display:flex;"><span>		} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;SyncPod received new pod, will create a sandbox for it&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 如果 sandbox 发生变动, 则杀死 sandbox</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> podContainerChanges.KillPod {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> podContainerChanges.CreateSandbox {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Stopping PodSandbox for pod, will start new one&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>		} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Stopping PodSandbox for pod, because all other containers are dead&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 如果 sandbox 发生变动, 则杀死 sandbox</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> podContainerChanges.KillPod {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> podContainerChanges.CreateSandbox {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Stopping PodSandbox for pod, will start new one&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>		} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Stopping PodSandbox for pod, because all other containers are dead&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		killResult <span style="color:#ff79c6">:=</span> m.<span style="color:#50fa7b">killPodWithSyncResult</span>(pod, kubecontainer.<span style="color:#50fa7b">ConvertPodStatusToRunningPod</span>(m.runtimeName, podStatus), <span style="color:#ff79c6">nil</span>)
-</span></span><span style="display:flex;"><span>		result.<span style="color:#50fa7b">AddPodSyncResult</span>(killResult)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> killResult.<span style="color:#50fa7b">Error</span>() <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">ErrorS</span>(killResult.<span style="color:#50fa7b">Error</span>(), <span style="color:#f1fa8c">&#34;killPodWithSyncResult failed&#34;</span>)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>		killResult <span style="color:#fe8019">:=</span> m.<span style="color:#fabd2f">killPodWithSyncResult</span>(pod, kubecontainer.<span style="color:#fabd2f">ConvertPodStatusToRunningPod</span>(m.runtimeName, podStatus), <span style="color:#fe8019">nil</span>)
+</span></span><span style="display:flex;"><span>		result.<span style="color:#fabd2f">AddPodSyncResult</span>(killResult)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> killResult.<span style="color:#fabd2f">Error</span>() <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">ErrorS</span>(killResult.<span style="color:#fabd2f">Error</span>(), <span style="color:#b8bb26">&#34;killPodWithSyncResult failed&#34;</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 清理 init 容器</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> podContainerChanges.CreateSandbox {
-</span></span><span style="display:flex;"><span>			m.<span style="color:#50fa7b">purgeInitContainers</span>(pod, podStatus)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 清理 init 容器</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> podContainerChanges.CreateSandbox {
+</span></span><span style="display:flex;"><span>			m.<span style="color:#fabd2f">purgeInitContainers</span>(pod, podStatus)
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 干掉不能运行在此pod 中的容器</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">for</span> containerID, containerInfo <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> podContainerChanges.ContainersToKill {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Killing unwanted container for pod&#34;</span>, <span style="color:#f1fa8c">&#34;containerName&#34;</span>, containerInfo.name, <span style="color:#f1fa8c">&#34;containerID&#34;</span>, containerID, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>			killContainerResult <span style="color:#ff79c6">:=</span> kubecontainer.<span style="color:#50fa7b">NewSyncResult</span>(kubecontainer.KillContainer, containerInfo.name)
-</span></span><span style="display:flex;"><span>			result.<span style="color:#50fa7b">AddSyncResult</span>(killContainerResult)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> m.<span style="color:#50fa7b">killContainer</span>(pod, containerID, containerInfo.name, containerInfo.message, containerInfo.reason, <span style="color:#ff79c6">nil</span>); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>				killContainerResult.<span style="color:#50fa7b">Fail</span>(kubecontainer.ErrKillContainer, err.<span style="color:#50fa7b">Error</span>())
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;killContainer for pod failed&#34;</span>, <span style="color:#f1fa8c">&#34;containerName&#34;</span>, containerInfo.name, <span style="color:#f1fa8c">&#34;containerID&#34;</span>, containerID, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 干掉不能运行在此pod 中的容器</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> containerID, containerInfo <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> podContainerChanges.ContainersToKill {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Killing unwanted container for pod&#34;</span>, <span style="color:#b8bb26">&#34;containerName&#34;</span>, containerInfo.name, <span style="color:#b8bb26">&#34;containerID&#34;</span>, containerID, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>			killContainerResult <span style="color:#fe8019">:=</span> kubecontainer.<span style="color:#fabd2f">NewSyncResult</span>(kubecontainer.KillContainer, containerInfo.name)
+</span></span><span style="display:flex;"><span>			result.<span style="color:#fabd2f">AddSyncResult</span>(killContainerResult)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> m.<span style="color:#fabd2f">killContainer</span>(pod, containerID, containerInfo.name, containerInfo.message, containerInfo.reason, <span style="color:#fe8019">nil</span>); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				killContainerResult.<span style="color:#fabd2f">Fail</span>(kubecontainer.ErrKillContainer, err.<span style="color:#fabd2f">Error</span>())
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;killContainer for pod failed&#34;</span>, <span style="color:#b8bb26">&#34;containerName&#34;</span>, containerInfo.name, <span style="color:#b8bb26">&#34;containerID&#34;</span>, containerID, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	m.<span style="color:#50fa7b">pruneInitContainersBeforeStart</span>(pod, podStatus)
+</span></span><span style="display:flex;"><span>	m.<span style="color:#fabd2f">pruneInitContainersBeforeStart</span>(pod, podStatus)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> podIPs []<span style="color:#8be9fd">string</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> podStatus <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">var</span> podIPs []<span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> podStatus <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>		podIPs = podStatus.IPs
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	podSandboxID <span style="color:#ff79c6">:=</span> podContainerChanges.SandboxID
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> podContainerChanges.CreateSandbox {
-</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">var</span> msg <span style="color:#8be9fd">string</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#8be9fd;font-style:italic">var</span> err <span style="color:#8be9fd">error</span>
+</span></span><span style="display:flex;"><span>	podSandboxID <span style="color:#fe8019">:=</span> podContainerChanges.SandboxID
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> podContainerChanges.CreateSandbox {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">var</span> msg <span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">var</span> err <span style="color:#fabd2f">error</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Creating PodSandbox for pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>		metrics.StartedPodsTotal.<span style="color:#50fa7b">Inc</span>()
-</span></span><span style="display:flex;"><span>		createSandboxResult <span style="color:#ff79c6">:=</span> kubecontainer.<span style="color:#50fa7b">NewSyncResult</span>(kubecontainer.CreatePodSandbox, format.<span style="color:#50fa7b">Pod</span>(pod))
-</span></span><span style="display:flex;"><span>		result.<span style="color:#50fa7b">AddSyncResult</span>(createSandboxResult)
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Creating PodSandbox for pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>		metrics.StartedPodsTotal.<span style="color:#fabd2f">Inc</span>()
+</span></span><span style="display:flex;"><span>		createSandboxResult <span style="color:#fe8019">:=</span> kubecontainer.<span style="color:#fabd2f">NewSyncResult</span>(kubecontainer.CreatePodSandbox, format.<span style="color:#fabd2f">Pod</span>(pod))
+</span></span><span style="display:flex;"><span>		result.<span style="color:#fabd2f">AddSyncResult</span>(createSandboxResult)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		sysctl.<span style="color:#50fa7b">ConvertPodSysctlsVariableToDotsSeparator</span>(pod.Spec.SecurityContext)
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 创建 sandbox</span>
-</span></span><span style="display:flex;"><span>		podSandboxID, msg, err = m.<span style="color:#50fa7b">createPodSandbox</span>(pod, podContainerChanges.Attempt)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> m.podStateProvider.<span style="color:#50fa7b">IsPodTerminationRequested</span>(pod.UID) {
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Pod was deleted and sandbox failed to be created&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod), <span style="color:#f1fa8c">&#34;podUID&#34;</span>, pod.UID)
-</span></span><span style="display:flex;"><span>				<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>		sysctl.<span style="color:#fabd2f">ConvertPodSysctlsVariableToDotsSeparator</span>(pod.Spec.SecurityContext)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 创建 sandbox</span>
+</span></span><span style="display:flex;"><span>		podSandboxID, msg, err = m.<span style="color:#fabd2f">createPodSandbox</span>(pod, podContainerChanges.Attempt)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> m.podStateProvider.<span style="color:#fabd2f">IsPodTerminationRequested</span>(pod.UID) {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Pod was deleted and sandbox failed to be created&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;podUID&#34;</span>, pod.UID)
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			metrics.StartedPodsErrorsTotal.<span style="color:#50fa7b">Inc</span>()
-</span></span><span style="display:flex;"><span>			createSandboxResult.<span style="color:#50fa7b">Fail</span>(kubecontainer.ErrCreatePodSandbox, msg)
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;CreatePodSandbox for pod failed&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>			ref, referr <span style="color:#ff79c6">:=</span> ref.<span style="color:#50fa7b">GetReference</span>(legacyscheme.Scheme, pod)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> referr <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">ErrorS</span>(referr, <span style="color:#f1fa8c">&#34;Couldn&#39;t make a ref to pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>			metrics.StartedPodsErrorsTotal.<span style="color:#fabd2f">Inc</span>()
+</span></span><span style="display:flex;"><span>			createSandboxResult.<span style="color:#fabd2f">Fail</span>(kubecontainer.ErrCreatePodSandbox, msg)
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;CreatePodSandbox for pod failed&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>			ref, referr <span style="color:#fe8019">:=</span> ref.<span style="color:#fabd2f">GetReference</span>(legacyscheme.Scheme, pod)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> referr <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">ErrorS</span>(referr, <span style="color:#b8bb26">&#34;Couldn&#39;t make a ref to pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			m.recorder.<span style="color:#50fa7b">Eventf</span>(ref, v1.EventTypeWarning, events.FailedCreatePodSandBox, <span style="color:#f1fa8c">&#34;Failed to create pod sandbox: %v&#34;</span>, err)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>			m.recorder.<span style="color:#fabd2f">Eventf</span>(ref, v1.EventTypeWarning, events.FailedCreatePodSandBox, <span style="color:#b8bb26">&#34;Failed to create pod sandbox: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Created PodSandbox for pod&#34;</span>, <span style="color:#f1fa8c">&#34;podSandboxID&#34;</span>, podSandboxID, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Created PodSandbox for pod&#34;</span>, <span style="color:#b8bb26">&#34;podSandboxID&#34;</span>, podSandboxID, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		resp, err <span style="color:#ff79c6">:=</span> m.runtimeService.<span style="color:#50fa7b">PodSandboxStatus</span>(podSandboxID, <span style="color:#ff79c6">false</span>)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			ref, referr <span style="color:#ff79c6">:=</span> ref.<span style="color:#50fa7b">GetReference</span>(legacyscheme.Scheme, pod)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> referr <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">ErrorS</span>(referr, <span style="color:#f1fa8c">&#34;Couldn&#39;t make a ref to pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>		resp, err <span style="color:#fe8019">:=</span> m.runtimeService.<span style="color:#fabd2f">PodSandboxStatus</span>(podSandboxID, <span style="color:#fe8019">false</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			ref, referr <span style="color:#fe8019">:=</span> ref.<span style="color:#fabd2f">GetReference</span>(legacyscheme.Scheme, pod)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> referr <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">ErrorS</span>(referr, <span style="color:#b8bb26">&#34;Couldn&#39;t make a ref to pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			m.recorder.<span style="color:#50fa7b">Eventf</span>(ref, v1.EventTypeWarning, events.FailedStatusPodSandBox, <span style="color:#f1fa8c">&#34;Unable to get pod sandbox status: %v&#34;</span>, err)
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to get pod sandbox status; Skipping pod&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>			result.<span style="color:#50fa7b">Fail</span>(err)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>			m.recorder.<span style="color:#fabd2f">Eventf</span>(ref, v1.EventTypeWarning, events.FailedStatusPodSandBox, <span style="color:#b8bb26">&#34;Unable to get pod sandbox status: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Failed to get pod sandbox status; Skipping pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>			result.<span style="color:#fabd2f">Fail</span>(err)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> resp.<span style="color:#50fa7b">GetStatus</span>() <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			result.<span style="color:#50fa7b">Fail</span>(errors.<span style="color:#50fa7b">New</span>(<span style="color:#f1fa8c">&#34;pod sandbox status is nil&#34;</span>))
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> resp.<span style="color:#fabd2f">GetStatus</span>() <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			result.<span style="color:#fabd2f">Fail</span>(errors.<span style="color:#fabd2f">New</span>(<span style="color:#b8bb26">&#34;pod sandbox status is nil&#34;</span>))
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 如果 pod 网络是 host 模式，则容器也是host模式</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 否则容器会使用 None 网络模式，kubelet 的网络插件进行网络配置</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> !kubecontainer.<span style="color:#50fa7b">IsHostNetworkPod</span>(pod) {
-</span></span><span style="display:flex;"><span>			podIPs = m.<span style="color:#50fa7b">determinePodSandboxIPs</span>(pod.Namespace, pod.Name, resp.<span style="color:#50fa7b">GetStatus</span>())
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Determined the ip for pod after sandbox changed&#34;</span>, <span style="color:#f1fa8c">&#34;IPs&#34;</span>, podIPs, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 如果 pod 网络是 host 模式，则容器也是host模式</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 否则容器会使用 None 网络模式，kubelet 的网络插件进行网络配置</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !kubecontainer.<span style="color:#fabd2f">IsHostNetworkPod</span>(pod) {
+</span></span><span style="display:flex;"><span>			podIPs = m.<span style="color:#fabd2f">determinePodSandboxIPs</span>(pod.Namespace, pod.Name, resp.<span style="color:#fabd2f">GetStatus</span>())
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Determined the ip for pod after sandbox changed&#34;</span>, <span style="color:#b8bb26">&#34;IPs&#34;</span>, podIPs, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	podIP <span style="color:#ff79c6">:=</span> <span style="color:#f1fa8c">&#34;&#34;</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> <span style="color:#8be9fd;font-style:italic">len</span>(podIPs) <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>		podIP = podIPs[<span style="color:#bd93f9">0</span>]
+</span></span><span style="display:flex;"><span>	podIP <span style="color:#fe8019">:=</span> <span style="color:#b8bb26">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(podIPs) <span style="color:#fe8019">!=</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		podIP = podIPs[<span style="color:#d3869b">0</span>]
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 获取 pod sandbox 的配置</span>
-</span></span><span style="display:flex;"><span>	configPodSandboxResult <span style="color:#ff79c6">:=</span> kubecontainer.<span style="color:#50fa7b">NewSyncResult</span>(kubecontainer.ConfigPodSandbox, podSandboxID)
-</span></span><span style="display:flex;"><span>	result.<span style="color:#50fa7b">AddSyncResult</span>(configPodSandboxResult)
-</span></span><span style="display:flex;"><span>	podSandboxConfig, err <span style="color:#ff79c6">:=</span> m.<span style="color:#50fa7b">generatePodSandboxConfig</span>(pod, podContainerChanges.Attempt)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		message <span style="color:#ff79c6">:=</span> fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;GeneratePodSandboxConfig for pod %q failed: %v&#34;</span>, format.<span style="color:#50fa7b">Pod</span>(pod), err)
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;GeneratePodSandboxConfig for pod failed&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>		configPodSandboxResult.<span style="color:#50fa7b">Fail</span>(kubecontainer.ErrConfigPodSandbox, message)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取 pod sandbox 的配置</span>
+</span></span><span style="display:flex;"><span>	configPodSandboxResult <span style="color:#fe8019">:=</span> kubecontainer.<span style="color:#fabd2f">NewSyncResult</span>(kubecontainer.ConfigPodSandbox, podSandboxID)
+</span></span><span style="display:flex;"><span>	result.<span style="color:#fabd2f">AddSyncResult</span>(configPodSandboxResult)
+</span></span><span style="display:flex;"><span>	podSandboxConfig, err <span style="color:#fe8019">:=</span> m.<span style="color:#fabd2f">generatePodSandboxConfig</span>(pod, podContainerChanges.Attempt)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		message <span style="color:#fe8019">:=</span> fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;GeneratePodSandboxConfig for pod %q failed: %v&#34;</span>, format.<span style="color:#fabd2f">Pod</span>(pod), err)
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;GeneratePodSandboxConfig for pod failed&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>		configPodSandboxResult.<span style="color:#fabd2f">Fail</span>(kubecontainer.ErrConfigPodSandbox, message)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// start 是一个函数变量， 该函数会启动容器</span>
-</span></span><span style="display:flex;"><span>	start <span style="color:#ff79c6">:=</span> <span style="color:#8be9fd;font-style:italic">func</span>(typeName, metricLabel <span style="color:#8be9fd">string</span>, spec <span style="color:#ff79c6">*</span>startSpec) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>		startContainerResult <span style="color:#ff79c6">:=</span> kubecontainer.<span style="color:#50fa7b">NewSyncResult</span>(kubecontainer.StartContainer, spec.container.Name)
-</span></span><span style="display:flex;"><span>		result.<span style="color:#50fa7b">AddSyncResult</span>(startContainerResult)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// start 是一个函数变量， 该函数会启动容器</span>
+</span></span><span style="display:flex;"><span>	start <span style="color:#fe8019">:=</span> <span style="color:#fe8019">func</span>(typeName, metricLabel <span style="color:#fabd2f">string</span>, spec <span style="color:#fe8019">*</span>startSpec) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>		startContainerResult <span style="color:#fe8019">:=</span> kubecontainer.<span style="color:#fabd2f">NewSyncResult</span>(kubecontainer.StartContainer, spec.container.Name)
+</span></span><span style="display:flex;"><span>		result.<span style="color:#fabd2f">AddSyncResult</span>(startContainerResult)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		isInBackOff, msg, err <span style="color:#ff79c6">:=</span> m.<span style="color:#50fa7b">doBackOff</span>(pod, spec.container, podStatus, backOff)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> isInBackOff {
-</span></span><span style="display:flex;"><span>			startContainerResult.<span style="color:#50fa7b">Fail</span>(err, msg)
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Backing Off restarting container in pod&#34;</span>, <span style="color:#f1fa8c">&#34;containerType&#34;</span>, typeName, <span style="color:#f1fa8c">&#34;container&#34;</span>, spec.container, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>		isInBackOff, msg, err <span style="color:#fe8019">:=</span> m.<span style="color:#fabd2f">doBackOff</span>(pod, spec.container, podStatus, backOff)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> isInBackOff {
+</span></span><span style="display:flex;"><span>			startContainerResult.<span style="color:#fabd2f">Fail</span>(err, msg)
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Backing Off restarting container in pod&#34;</span>, <span style="color:#b8bb26">&#34;containerType&#34;</span>, typeName, <span style="color:#b8bb26">&#34;container&#34;</span>, spec.container, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		metrics.StartedContainersTotal.<span style="color:#50fa7b">WithLabelValues</span>(metricLabel).<span style="color:#50fa7b">Inc</span>()
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> sc.<span style="color:#50fa7b">HasWindowsHostProcessRequest</span>(pod, spec.container) {
-</span></span><span style="display:flex;"><span>			metrics.StartedHostProcessContainersTotal.<span style="color:#50fa7b">WithLabelValues</span>(metricLabel).<span style="color:#50fa7b">Inc</span>()
+</span></span><span style="display:flex;"><span>		metrics.StartedContainersTotal.<span style="color:#fabd2f">WithLabelValues</span>(metricLabel).<span style="color:#fabd2f">Inc</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> sc.<span style="color:#fabd2f">HasWindowsHostProcessRequest</span>(pod, spec.container) {
+</span></span><span style="display:flex;"><span>			metrics.StartedHostProcessContainersTotal.<span style="color:#fabd2f">WithLabelValues</span>(metricLabel).<span style="color:#fabd2f">Inc</span>()
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Creating container in pod&#34;</span>, <span style="color:#f1fa8c">&#34;containerType&#34;</span>, typeName, <span style="color:#f1fa8c">&#34;container&#34;</span>, spec.container, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// NOTE (aramase) podIPs are populated for single stack and dual stack clusters. Send only podIPs.</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> msg, err <span style="color:#ff79c6">:=</span> m.<span style="color:#50fa7b">startContainer</span>(podSandboxID, podSandboxConfig, spec, pod, podStatus, pullSecrets, podIP, podIPs); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// startContainer() returns well-defined error codes that have reasonable cardinality for metrics and are</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// useful to cluster administrators to distinguish &#34;server errors&#34; from &#34;user errors&#34;.</span>
-</span></span><span style="display:flex;"><span>			metrics.StartedContainersErrorsTotal.<span style="color:#50fa7b">WithLabelValues</span>(metricLabel, err.<span style="color:#50fa7b">Error</span>()).<span style="color:#50fa7b">Inc</span>()
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> sc.<span style="color:#50fa7b">HasWindowsHostProcessRequest</span>(pod, spec.container) {
-</span></span><span style="display:flex;"><span>				metrics.StartedHostProcessContainersErrorsTotal.<span style="color:#50fa7b">WithLabelValues</span>(metricLabel, err.<span style="color:#50fa7b">Error</span>()).<span style="color:#50fa7b">Inc</span>()
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Creating container in pod&#34;</span>, <span style="color:#b8bb26">&#34;containerType&#34;</span>, typeName, <span style="color:#b8bb26">&#34;container&#34;</span>, spec.container, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// NOTE (aramase) podIPs are populated for single stack and dual stack clusters. Send only podIPs.</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> msg, err <span style="color:#fe8019">:=</span> m.<span style="color:#fabd2f">startContainer</span>(podSandboxID, podSandboxConfig, spec, pod, podStatus, pullSecrets, podIP, podIPs); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// startContainer() returns well-defined error codes that have reasonable cardinality for metrics and are</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// useful to cluster administrators to distinguish &#34;server errors&#34; from &#34;user errors&#34;.</span>
+</span></span><span style="display:flex;"><span>			metrics.StartedContainersErrorsTotal.<span style="color:#fabd2f">WithLabelValues</span>(metricLabel, err.<span style="color:#fabd2f">Error</span>()).<span style="color:#fabd2f">Inc</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> sc.<span style="color:#fabd2f">HasWindowsHostProcessRequest</span>(pod, spec.container) {
+</span></span><span style="display:flex;"><span>				metrics.StartedHostProcessContainersErrorsTotal.<span style="color:#fabd2f">WithLabelValues</span>(metricLabel, err.<span style="color:#fabd2f">Error</span>()).<span style="color:#fabd2f">Inc</span>()
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			startContainerResult.<span style="color:#50fa7b">Fail</span>(err, msg)
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// known errors that are logged in other places are logged at higher levels here to avoid</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#6272a4">// repetitive log spam</span>
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">switch</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">case</span> err <span style="color:#ff79c6">==</span> images.ErrImagePullBackOff:
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">3</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Container start failed in pod&#34;</span>, <span style="color:#f1fa8c">&#34;containerType&#34;</span>, typeName, <span style="color:#f1fa8c">&#34;container&#34;</span>, spec.container, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod), <span style="color:#f1fa8c">&#34;containerMessage&#34;</span>, msg, <span style="color:#f1fa8c">&#34;err&#34;</span>, err)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">default</span>:
-</span></span><span style="display:flex;"><span>				utilruntime.<span style="color:#50fa7b">HandleError</span>(fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;%v %+v start failed in pod %v: %v: %s&#34;</span>, typeName, spec.container, format.<span style="color:#50fa7b">Pod</span>(pod), err, msg))
+</span></span><span style="display:flex;"><span>			startContainerResult.<span style="color:#fabd2f">Fail</span>(err, msg)
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// known errors that are logged in other places are logged at higher levels here to avoid</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// repetitive log spam</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">switch</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">case</span> err <span style="color:#fe8019">==</span> images.ErrImagePullBackOff:
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Container start failed in pod&#34;</span>, <span style="color:#b8bb26">&#34;containerType&#34;</span>, typeName, <span style="color:#b8bb26">&#34;container&#34;</span>, spec.container, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;containerMessage&#34;</span>, msg, <span style="color:#b8bb26">&#34;err&#34;</span>, err)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">default</span>:
+</span></span><span style="display:flex;"><span>				utilruntime.<span style="color:#fabd2f">HandleError</span>(fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;%v %+v start failed in pod %v: %v: %s&#34;</span>, typeName, spec.container, format.<span style="color:#fabd2f">Pod</span>(pod), err, msg))
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> err
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 启动临时容器</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, idx <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> podContainerChanges.EphemeralContainersToStart {
-</span></span><span style="display:flex;"><span>		<span style="color:#50fa7b">start</span>(<span style="color:#f1fa8c">&#34;ephemeral container&#34;</span>, metrics.EphemeralContainer, <span style="color:#50fa7b">ephemeralContainerStartSpec</span>(<span style="color:#ff79c6">&amp;</span>pod.Spec.EphemeralContainers[idx]))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 启动临时容器</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> _, idx <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> podContainerChanges.EphemeralContainersToStart {
+</span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">start</span>(<span style="color:#b8bb26">&#34;ephemeral container&#34;</span>, metrics.EphemeralContainer, <span style="color:#fabd2f">ephemeralContainerStartSpec</span>(<span style="color:#fe8019">&amp;</span>pod.Spec.EphemeralContainers[idx]))
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 启动 init 容器</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> container <span style="color:#ff79c6">:=</span> podContainerChanges.NextInitContainerToStart; container <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">start</span>(<span style="color:#f1fa8c">&#34;init container&#34;</span>, metrics.InitContainer, <span style="color:#50fa7b">containerStartSpec</span>(container)); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 启动 init 容器</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> container <span style="color:#fe8019">:=</span> podContainerChanges.NextInitContainerToStart; container <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">start</span>(<span style="color:#b8bb26">&#34;init container&#34;</span>, metrics.InitContainer, <span style="color:#fabd2f">containerStartSpec</span>(container)); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">4</span>).<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Completed init container for pod&#34;</span>, <span style="color:#f1fa8c">&#34;containerName&#34;</span>, container.Name, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod))
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Completed init container for pod&#34;</span>, <span style="color:#b8bb26">&#34;containerName&#34;</span>, container.Name, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod))
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 启动业务容器</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, idx <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> podContainerChanges.ContainersToStart {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 调用的 start 为上面的定义的函数</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#50fa7b">start</span>(<span style="color:#f1fa8c">&#34;container&#34;</span>, metrics.Container, <span style="color:#50fa7b">containerStartSpec</span>(<span style="color:#ff79c6">&amp;</span>pod.Spec.Containers[idx]))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 启动业务容器</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> _, idx <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> podContainerChanges.ContainersToStart {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 调用的 start 为上面的定义的函数</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">start</span>(<span style="color:#b8bb26">&#34;container&#34;</span>, metrics.Container, <span style="color:#fabd2f">containerStartSpec</span>(<span style="color:#fe8019">&amp;</span>pod.Spec.Containers[idx]))
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
@@ -844,116 +844,116 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
 </ul>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (m <span style="color:#ff79c6">*</span>kubeGenericRuntimeManager) <span style="color:#50fa7b">startContainer</span>(podSandboxID <span style="color:#8be9fd">string</span>, podSandboxConfig <span style="color:#ff79c6">*</span>runtimeapi.PodSandboxConfig, spec <span style="color:#ff79c6">*</span>startSpec, pod <span style="color:#ff79c6">*</span>v1.Pod, podStatus <span style="color:#ff79c6">*</span>kubecontainer.PodStatus, pullSecrets []v1.Secret, podIP <span style="color:#8be9fd">string</span>, podIPs []<span style="color:#8be9fd">string</span>) (<span style="color:#8be9fd">string</span>, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>	container <span style="color:#ff79c6">:=</span> spec.container
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>kubeGenericRuntimeManager) <span style="color:#fabd2f">startContainer</span>(podSandboxID <span style="color:#fabd2f">string</span>, podSandboxConfig <span style="color:#fe8019">*</span>runtimeapi.PodSandboxConfig, spec <span style="color:#fe8019">*</span>startSpec, pod <span style="color:#fe8019">*</span>v1.Pod, podStatus <span style="color:#fe8019">*</span>kubecontainer.PodStatus, pullSecrets []v1.Secret, podIP <span style="color:#fabd2f">string</span>, podIPs []<span style="color:#fabd2f">string</span>) (<span style="color:#fabd2f">string</span>, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>	container <span style="color:#fe8019">:=</span> spec.container
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 拉取容器镜像</span>
-</span></span><span style="display:flex;"><span>	imageRef, msg, err <span style="color:#ff79c6">:=</span> m.imagePuller.<span style="color:#50fa7b">EnsureImageExists</span>(pod, container, pullSecrets, podSandboxConfig)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		s, _ <span style="color:#ff79c6">:=</span> grpcstatus.<span style="color:#50fa7b">FromError</span>(err)
-</span></span><span style="display:flex;"><span>		m.<span style="color:#50fa7b">recordContainerEvent</span>(pod, container, <span style="color:#f1fa8c">&#34;&#34;</span>, v1.EventTypeWarning, events.FailedToCreateContainer, <span style="color:#f1fa8c">&#34;Error: %v&#34;</span>, s.<span style="color:#50fa7b">Message</span>())
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> msg, err
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 拉取容器镜像</span>
+</span></span><span style="display:flex;"><span>	imageRef, msg, err <span style="color:#fe8019">:=</span> m.imagePuller.<span style="color:#fabd2f">EnsureImageExists</span>(pod, container, pullSecrets, podSandboxConfig)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		s, _ <span style="color:#fe8019">:=</span> grpcstatus.<span style="color:#fabd2f">FromError</span>(err)
+</span></span><span style="display:flex;"><span>		m.<span style="color:#fabd2f">recordContainerEvent</span>(pod, container, <span style="color:#b8bb26">&#34;&#34;</span>, v1.EventTypeWarning, events.FailedToCreateContainer, <span style="color:#b8bb26">&#34;Error: %v&#34;</span>, s.<span style="color:#fabd2f">Message</span>())
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> msg, err
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 配置容器的重启次数为0，每次重启都会累加1</span>
-</span></span><span style="display:flex;"><span>	restartCount <span style="color:#ff79c6">:=</span> <span style="color:#bd93f9">0</span>
-</span></span><span style="display:flex;"><span>	containerStatus <span style="color:#ff79c6">:=</span> podStatus.<span style="color:#50fa7b">FindContainerStatusByName</span>(container.Name)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> containerStatus <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		restartCount = containerStatus.RestartCount <span style="color:#ff79c6">+</span> <span style="color:#bd93f9">1</span>
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 创建容器的日志目录</span>
-</span></span><span style="display:flex;"><span>		logDir <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">BuildContainerLogsDirectory</span>(pod.Namespace, pod.Name, pod.UID, container.Name)
-</span></span><span style="display:flex;"><span>		restartCount, err = <span style="color:#50fa7b">calcRestartCountByLogDir</span>(logDir)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">InfoS</span>(<span style="color:#f1fa8c">&#34;Log directory exists but could not calculate restartCount&#34;</span>, <span style="color:#f1fa8c">&#34;logDir&#34;</span>, logDir, <span style="color:#f1fa8c">&#34;err&#34;</span>, err)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 配置容器的重启次数为0，每次重启都会累加1</span>
+</span></span><span style="display:flex;"><span>	restartCount <span style="color:#fe8019">:=</span> <span style="color:#d3869b">0</span>
+</span></span><span style="display:flex;"><span>	containerStatus <span style="color:#fe8019">:=</span> podStatus.<span style="color:#fabd2f">FindContainerStatusByName</span>(container.Name)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> containerStatus <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		restartCount = containerStatus.RestartCount <span style="color:#fe8019">+</span> <span style="color:#d3869b">1</span>
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 创建容器的日志目录</span>
+</span></span><span style="display:flex;"><span>		logDir <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">BuildContainerLogsDirectory</span>(pod.Namespace, pod.Name, pod.UID, container.Name)
+</span></span><span style="display:flex;"><span>		restartCount, err = <span style="color:#fabd2f">calcRestartCountByLogDir</span>(logDir)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Log directory exists but could not calculate restartCount&#34;</span>, <span style="color:#b8bb26">&#34;logDir&#34;</span>, logDir, <span style="color:#b8bb26">&#34;err&#34;</span>, err)
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	target, err <span style="color:#ff79c6">:=</span> spec.<span style="color:#50fa7b">getTargetID</span>(podStatus)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		s, _ <span style="color:#ff79c6">:=</span> grpcstatus.<span style="color:#50fa7b">FromError</span>(err)
-</span></span><span style="display:flex;"><span>		m.<span style="color:#50fa7b">recordContainerEvent</span>(pod, container, <span style="color:#f1fa8c">&#34;&#34;</span>, v1.EventTypeWarning, events.FailedToCreateContainer, <span style="color:#f1fa8c">&#34;Error: %v&#34;</span>, s.<span style="color:#50fa7b">Message</span>())
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> s.<span style="color:#50fa7b">Message</span>(), ErrCreateContainerConfig
+</span></span><span style="display:flex;"><span>	target, err <span style="color:#fe8019">:=</span> spec.<span style="color:#fabd2f">getTargetID</span>(podStatus)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		s, _ <span style="color:#fe8019">:=</span> grpcstatus.<span style="color:#fabd2f">FromError</span>(err)
+</span></span><span style="display:flex;"><span>		m.<span style="color:#fabd2f">recordContainerEvent</span>(pod, container, <span style="color:#b8bb26">&#34;&#34;</span>, v1.EventTypeWarning, events.FailedToCreateContainer, <span style="color:#b8bb26">&#34;Error: %v&#34;</span>, s.<span style="color:#fabd2f">Message</span>())
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> s.<span style="color:#fabd2f">Message</span>(), ErrCreateContainerConfig
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 生成容器配置</span>
-</span></span><span style="display:flex;"><span>	containerConfig, cleanupAction, err <span style="color:#ff79c6">:=</span> m.<span style="color:#50fa7b">generateContainerConfig</span>(container, pod, restartCount, podIP, imageRef, podIPs, target)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> cleanupAction <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">defer</span> <span style="color:#50fa7b">cleanupAction</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 生成容器配置</span>
+</span></span><span style="display:flex;"><span>	containerConfig, cleanupAction, err <span style="color:#fe8019">:=</span> m.<span style="color:#fabd2f">generateContainerConfig</span>(container, pod, restartCount, podIP, imageRef, podIPs, target)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> cleanupAction <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">defer</span> <span style="color:#fabd2f">cleanupAction</span>()
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		s, _ <span style="color:#ff79c6">:=</span> grpcstatus.<span style="color:#50fa7b">FromError</span>(err)
-</span></span><span style="display:flex;"><span>		m.<span style="color:#50fa7b">recordContainerEvent</span>(pod, container, <span style="color:#f1fa8c">&#34;&#34;</span>, v1.EventTypeWarning, events.FailedToCreateContainer, <span style="color:#f1fa8c">&#34;Error: %v&#34;</span>, s.<span style="color:#50fa7b">Message</span>())
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> s.<span style="color:#50fa7b">Message</span>(), ErrCreateContainerConfig
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		s, _ <span style="color:#fe8019">:=</span> grpcstatus.<span style="color:#fabd2f">FromError</span>(err)
+</span></span><span style="display:flex;"><span>		m.<span style="color:#fabd2f">recordContainerEvent</span>(pod, container, <span style="color:#b8bb26">&#34;&#34;</span>, v1.EventTypeWarning, events.FailedToCreateContainer, <span style="color:#b8bb26">&#34;Error: %v&#34;</span>, s.<span style="color:#fabd2f">Message</span>())
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> s.<span style="color:#fabd2f">Message</span>(), ErrCreateContainerConfig
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 预先创建容器</span>
-</span></span><span style="display:flex;"><span>	err = m.internalLifecycle.<span style="color:#50fa7b">PreCreateContainer</span>(pod, container, containerConfig)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		s, _ <span style="color:#ff79c6">:=</span> grpcstatus.<span style="color:#50fa7b">FromError</span>(err)
-</span></span><span style="display:flex;"><span>		m.<span style="color:#50fa7b">recordContainerEvent</span>(pod, container, <span style="color:#f1fa8c">&#34;&#34;</span>, v1.EventTypeWarning, events.FailedToCreateContainer, <span style="color:#f1fa8c">&#34;Internal PreCreateContainer hook failed: %v&#34;</span>, s.<span style="color:#50fa7b">Message</span>())
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> s.<span style="color:#50fa7b">Message</span>(), ErrPreCreateHook
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 预先创建容器</span>
+</span></span><span style="display:flex;"><span>	err = m.internalLifecycle.<span style="color:#fabd2f">PreCreateContainer</span>(pod, container, containerConfig)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		s, _ <span style="color:#fe8019">:=</span> grpcstatus.<span style="color:#fabd2f">FromError</span>(err)
+</span></span><span style="display:flex;"><span>		m.<span style="color:#fabd2f">recordContainerEvent</span>(pod, container, <span style="color:#b8bb26">&#34;&#34;</span>, v1.EventTypeWarning, events.FailedToCreateContainer, <span style="color:#b8bb26">&#34;Internal PreCreateContainer hook failed: %v&#34;</span>, s.<span style="color:#fabd2f">Message</span>())
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> s.<span style="color:#fabd2f">Message</span>(), ErrPreCreateHook
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 正式创建容器</span>
-</span></span><span style="display:flex;"><span>	containerID, err <span style="color:#ff79c6">:=</span> m.runtimeService.<span style="color:#50fa7b">CreateContainer</span>(podSandboxID, containerConfig, podSandboxConfig)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		s, _ <span style="color:#ff79c6">:=</span> grpcstatus.<span style="color:#50fa7b">FromError</span>(err)
-</span></span><span style="display:flex;"><span>		m.<span style="color:#50fa7b">recordContainerEvent</span>(pod, container, containerID, v1.EventTypeWarning, events.FailedToCreateContainer, <span style="color:#f1fa8c">&#34;Error: %v&#34;</span>, s.<span style="color:#50fa7b">Message</span>())
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> s.<span style="color:#50fa7b">Message</span>(), ErrCreateContainer
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 正式创建容器</span>
+</span></span><span style="display:flex;"><span>	containerID, err <span style="color:#fe8019">:=</span> m.runtimeService.<span style="color:#fabd2f">CreateContainer</span>(podSandboxID, containerConfig, podSandboxConfig)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		s, _ <span style="color:#fe8019">:=</span> grpcstatus.<span style="color:#fabd2f">FromError</span>(err)
+</span></span><span style="display:flex;"><span>		m.<span style="color:#fabd2f">recordContainerEvent</span>(pod, container, containerID, v1.EventTypeWarning, events.FailedToCreateContainer, <span style="color:#b8bb26">&#34;Error: %v&#34;</span>, s.<span style="color:#fabd2f">Message</span>())
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> s.<span style="color:#fabd2f">Message</span>(), ErrCreateContainer
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 预先启动容器</span>
-</span></span><span style="display:flex;"><span>	err = m.internalLifecycle.<span style="color:#50fa7b">PreStartContainer</span>(pod, container, containerID)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		s, _ <span style="color:#ff79c6">:=</span> grpcstatus.<span style="color:#50fa7b">FromError</span>(err)
-</span></span><span style="display:flex;"><span>		m.<span style="color:#50fa7b">recordContainerEvent</span>(pod, container, containerID, v1.EventTypeWarning, events.FailedToStartContainer, <span style="color:#f1fa8c">&#34;Internal PreStartContainer hook failed: %v&#34;</span>, s.<span style="color:#50fa7b">Message</span>())
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> s.<span style="color:#50fa7b">Message</span>(), ErrPreStartHook
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 预先启动容器</span>
+</span></span><span style="display:flex;"><span>	err = m.internalLifecycle.<span style="color:#fabd2f">PreStartContainer</span>(pod, container, containerID)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		s, _ <span style="color:#fe8019">:=</span> grpcstatus.<span style="color:#fabd2f">FromError</span>(err)
+</span></span><span style="display:flex;"><span>		m.<span style="color:#fabd2f">recordContainerEvent</span>(pod, container, containerID, v1.EventTypeWarning, events.FailedToStartContainer, <span style="color:#b8bb26">&#34;Internal PreStartContainer hook failed: %v&#34;</span>, s.<span style="color:#fabd2f">Message</span>())
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> s.<span style="color:#fabd2f">Message</span>(), ErrPreStartHook
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	m.<span style="color:#50fa7b">recordContainerEvent</span>(pod, container, containerID, v1.EventTypeNormal, events.CreatedContainer, fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;Created container %s&#34;</span>, container.Name))
+</span></span><span style="display:flex;"><span>	m.<span style="color:#fabd2f">recordContainerEvent</span>(pod, container, containerID, v1.EventTypeNormal, events.CreatedContainer, fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;Created container %s&#34;</span>, container.Name))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 启动容器</span>
-</span></span><span style="display:flex;"><span>	err = m.runtimeService.<span style="color:#50fa7b">StartContainer</span>(containerID)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		s, _ <span style="color:#ff79c6">:=</span> grpcstatus.<span style="color:#50fa7b">FromError</span>(err)
-</span></span><span style="display:flex;"><span>		m.<span style="color:#50fa7b">recordContainerEvent</span>(pod, container, containerID, v1.EventTypeWarning, events.FailedToStartContainer, <span style="color:#f1fa8c">&#34;Error: %v&#34;</span>, s.<span style="color:#50fa7b">Message</span>())
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> s.<span style="color:#50fa7b">Message</span>(), kubecontainer.ErrRunContainer
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 启动容器</span>
+</span></span><span style="display:flex;"><span>	err = m.runtimeService.<span style="color:#fabd2f">StartContainer</span>(containerID)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		s, _ <span style="color:#fe8019">:=</span> grpcstatus.<span style="color:#fabd2f">FromError</span>(err)
+</span></span><span style="display:flex;"><span>		m.<span style="color:#fabd2f">recordContainerEvent</span>(pod, container, containerID, v1.EventTypeWarning, events.FailedToStartContainer, <span style="color:#b8bb26">&#34;Error: %v&#34;</span>, s.<span style="color:#fabd2f">Message</span>())
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> s.<span style="color:#fabd2f">Message</span>(), kubecontainer.ErrRunContainer
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	m.<span style="color:#50fa7b">recordContainerEvent</span>(pod, container, containerID, v1.EventTypeNormal, events.StartedContainer, fmt.<span style="color:#50fa7b">Sprintf</span>(<span style="color:#f1fa8c">&#34;Started container %s&#34;</span>, container.Name))
+</span></span><span style="display:flex;"><span>	m.<span style="color:#fabd2f">recordContainerEvent</span>(pod, container, containerID, v1.EventTypeNormal, events.StartedContainer, fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;Started container %s&#34;</span>, container.Name))
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 为容器的日志目录做软链</span>
-</span></span><span style="display:flex;"><span>	containerMeta <span style="color:#ff79c6">:=</span> containerConfig.<span style="color:#50fa7b">GetMetadata</span>()
-</span></span><span style="display:flex;"><span>	sandboxMeta <span style="color:#ff79c6">:=</span> podSandboxConfig.<span style="color:#50fa7b">GetMetadata</span>()
-</span></span><span style="display:flex;"><span>	legacySymlink <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">legacyLogSymlink</span>(containerID, containerMeta.Name, sandboxMeta.Name,
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 为容器的日志目录做软链</span>
+</span></span><span style="display:flex;"><span>	containerMeta <span style="color:#fe8019">:=</span> containerConfig.<span style="color:#fabd2f">GetMetadata</span>()
+</span></span><span style="display:flex;"><span>	sandboxMeta <span style="color:#fe8019">:=</span> podSandboxConfig.<span style="color:#fabd2f">GetMetadata</span>()
+</span></span><span style="display:flex;"><span>	legacySymlink <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">legacyLogSymlink</span>(containerID, containerMeta.Name, sandboxMeta.Name,
 </span></span><span style="display:flex;"><span>		sandboxMeta.Namespace)
-</span></span><span style="display:flex;"><span>	containerLog <span style="color:#ff79c6">:=</span> filepath.<span style="color:#50fa7b">Join</span>(podSandboxConfig.LogDirectory, containerConfig.LogPath)
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// only create legacy symlink if containerLog path exists (or the error is not IsNotExist).</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// Because if containerLog path does not exist, only dangling legacySymlink is created.</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// This dangling legacySymlink is later removed by container gc, so it does not make sense</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">// to create it in the first place. it happens when journald logging driver is used with docker.</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> _, err <span style="color:#ff79c6">:=</span> m.osInterface.<span style="color:#50fa7b">Stat</span>(containerLog); !os.<span style="color:#50fa7b">IsNotExist</span>(err) {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> m.osInterface.<span style="color:#50fa7b">Symlink</span>(containerLog, legacySymlink); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to create legacy symbolic link&#34;</span>, <span style="color:#f1fa8c">&#34;path&#34;</span>, legacySymlink,
-</span></span><span style="display:flex;"><span>				<span style="color:#f1fa8c">&#34;containerID&#34;</span>, containerID, <span style="color:#f1fa8c">&#34;containerLogPath&#34;</span>, containerLog)
+</span></span><span style="display:flex;"><span>	containerLog <span style="color:#fe8019">:=</span> filepath.<span style="color:#fabd2f">Join</span>(podSandboxConfig.LogDirectory, containerConfig.LogPath)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// only create legacy symlink if containerLog path exists (or the error is not IsNotExist).</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Because if containerLog path does not exist, only dangling legacySymlink is created.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// This dangling legacySymlink is later removed by container gc, so it does not make sense</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// to create it in the first place. it happens when journald logging driver is used with docker.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> _, err <span style="color:#fe8019">:=</span> m.osInterface.<span style="color:#fabd2f">Stat</span>(containerLog); !os.<span style="color:#fabd2f">IsNotExist</span>(err) {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> m.osInterface.<span style="color:#fabd2f">Symlink</span>(containerLog, legacySymlink); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Failed to create legacy symbolic link&#34;</span>, <span style="color:#b8bb26">&#34;path&#34;</span>, legacySymlink,
+</span></span><span style="display:flex;"><span>				<span style="color:#b8bb26">&#34;containerID&#34;</span>, containerID, <span style="color:#b8bb26">&#34;containerLogPath&#34;</span>, containerLog)
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> container.Lifecycle <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> <span style="color:#ff79c6">&amp;&amp;</span> container.Lifecycle.PostStart <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		kubeContainerID <span style="color:#ff79c6">:=</span> kubecontainer.ContainerID{
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> container.Lifecycle <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span> container.Lifecycle.PostStart <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		kubeContainerID <span style="color:#fe8019">:=</span> kubecontainer.ContainerID{
 </span></span><span style="display:flex;"><span>			Type: m.runtimeName,
 </span></span><span style="display:flex;"><span>			ID:   containerID,
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 执行 post start hook</span>
-</span></span><span style="display:flex;"><span>		msg, handlerErr <span style="color:#ff79c6">:=</span> m.runner.<span style="color:#50fa7b">Run</span>(kubeContainerID, pod, container, container.Lifecycle.PostStart)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> handlerErr <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> { <span style="color:#6272a4">// 失败则杀掉容器</span>
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">ErrorS</span>(handlerErr, <span style="color:#f1fa8c">&#34;Failed to execute PostStartHook&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod),
-</span></span><span style="display:flex;"><span>				<span style="color:#f1fa8c">&#34;podUID&#34;</span>, pod.UID, <span style="color:#f1fa8c">&#34;containerName&#34;</span>, container.Name, <span style="color:#f1fa8c">&#34;containerID&#34;</span>, kubeContainerID.<span style="color:#50fa7b">String</span>())
-</span></span><span style="display:flex;"><span>			m.<span style="color:#50fa7b">recordContainerEvent</span>(pod, container, kubeContainerID.ID, v1.EventTypeWarning, events.FailedPostStartHook, msg)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> m.<span style="color:#50fa7b">killContainer</span>(pod, kubeContainerID, container.Name, <span style="color:#f1fa8c">&#34;FailedPostStartHook&#34;</span>, reasonFailedPostStartHook, <span style="color:#ff79c6">nil</span>); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>				klog.<span style="color:#50fa7b">ErrorS</span>(err, <span style="color:#f1fa8c">&#34;Failed to kill container&#34;</span>, <span style="color:#f1fa8c">&#34;pod&#34;</span>, klog.<span style="color:#50fa7b">KObj</span>(pod),
-</span></span><span style="display:flex;"><span>					<span style="color:#f1fa8c">&#34;podUID&#34;</span>, pod.UID, <span style="color:#f1fa8c">&#34;containerName&#34;</span>, container.Name, <span style="color:#f1fa8c">&#34;containerID&#34;</span>, kubeContainerID.<span style="color:#50fa7b">String</span>())
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 执行 post start hook</span>
+</span></span><span style="display:flex;"><span>		msg, handlerErr <span style="color:#fe8019">:=</span> m.runner.<span style="color:#fabd2f">Run</span>(kubeContainerID, pod, container, container.Lifecycle.PostStart)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> handlerErr <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> { <span style="color:#928374;font-style:italic">// 失败则杀掉容器</span>
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">ErrorS</span>(handlerErr, <span style="color:#b8bb26">&#34;Failed to execute PostStartHook&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod),
+</span></span><span style="display:flex;"><span>				<span style="color:#b8bb26">&#34;podUID&#34;</span>, pod.UID, <span style="color:#b8bb26">&#34;containerName&#34;</span>, container.Name, <span style="color:#b8bb26">&#34;containerID&#34;</span>, kubeContainerID.<span style="color:#fabd2f">String</span>())
+</span></span><span style="display:flex;"><span>			m.<span style="color:#fabd2f">recordContainerEvent</span>(pod, container, kubeContainerID.ID, v1.EventTypeWarning, events.FailedPostStartHook, msg)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> m.<span style="color:#fabd2f">killContainer</span>(pod, kubeContainerID, container.Name, <span style="color:#b8bb26">&#34;FailedPostStartHook&#34;</span>, reasonFailedPostStartHook, <span style="color:#fe8019">nil</span>); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Failed to kill container&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod),
+</span></span><span style="display:flex;"><span>					<span style="color:#b8bb26">&#34;podUID&#34;</span>, pod.UID, <span style="color:#b8bb26">&#34;containerName&#34;</span>, container.Name, <span style="color:#b8bb26">&#34;containerID&#34;</span>, kubeContainerID.<span style="color:#fabd2f">String</span>())
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">return</span> msg, ErrPostStartHook
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> msg, ErrPostStartHook
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#f1fa8c">&#34;&#34;</span>, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#b8bb26">&#34;&#34;</span>, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>

@@ -274,33 +274,33 @@ xv6 page table 上图是 RISC-V 多种虚拟内存布局中的一种 — Sv39。
 <p><img src="/images/os/xv6/user_process_pa_va_layout.png" alt="用户进程的page table 布局"></p>
 <p>下面来拆解这张图是怎么实现的。</p>
 <p>在交互环境（执行 <code>make qemu</code> 进入）下执行<code>ctrl + p</code> 可以看到类似<code>ps</code>命令的结果：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$
-</span></span><span style="display:flex;"><span><span style="color:#bd93f9">1</span> sleep  init
-</span></span><span style="display:flex;"><span><span style="color:#bd93f9">2</span> sleep  sh
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$
+</span></span><span style="display:flex;"><span><span style="color:#d3869b">1</span> sleep  init
+</span></span><span style="display:flex;"><span><span style="color:#d3869b">2</span> sleep  sh
 </span></span></code></pre></div><p>第一个用户进程就是<code>init</code>，它是通过 <code>kernel/main.c</code> 下的 <code>userinit</code> 初始化和拉起来的：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">userinit</span>(<span style="color:#8be9fd">void</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">userinit</span>(<span style="color:#fabd2f">void</span>)
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proc <span style="color:#ff79c6">*</span>p;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  p <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">allocproc</span>();
-</span></span><span style="display:flex;"><span>  initproc <span style="color:#ff79c6">=</span> p;
+</span></span><span style="display:flex;"><span>  p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">allocproc</span>();
+</span></span><span style="display:flex;"><span>  initproc <span style="color:#fe8019">=</span> p;
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// allocate one user page and copy initcode&#39;s instructions
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// and data into it.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#50fa7b">uvmfirst</span>(p<span style="color:#ff79c6">-&gt;</span>pagetable, initcode, <span style="color:#ff79c6">sizeof</span>(initcode));
-</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>sz <span style="color:#ff79c6">=</span> PGSIZE;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// allocate one user page and copy initcode&#39;s instructions
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// and data into it.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">uvmfirst</span>(p<span style="color:#fe8019">-&gt;</span>pagetable, initcode, <span style="color:#fe8019">sizeof</span>(initcode));
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>sz <span style="color:#fe8019">=</span> PGSIZE;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// prepare for the very first &#34;return&#34; from kernel to user.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  p<span style="color:#ff79c6">-&gt;</span>trapframe<span style="color:#ff79c6">-&gt;</span>epc <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;      <span style="color:#6272a4">// user program counter
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  p<span style="color:#ff79c6">-&gt;</span>trapframe<span style="color:#ff79c6">-&gt;</span>sp <span style="color:#ff79c6">=</span> PGSIZE;  <span style="color:#6272a4">// user stack pointer
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">safestrcpy</span>(p<span style="color:#ff79c6">-&gt;</span>name, <span style="color:#f1fa8c">&#34;initcode&#34;</span>, <span style="color:#ff79c6">sizeof</span>(p<span style="color:#ff79c6">-&gt;</span>name));
-</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>cwd <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">namei</span>(<span style="color:#f1fa8c">&#34;/&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// prepare for the very first &#34;return&#34; from kernel to user.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>epc <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;      <span style="color:#928374;font-style:italic">// user program counter
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>sp <span style="color:#fe8019">=</span> PGSIZE;  <span style="color:#928374;font-style:italic">// user stack pointer
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">safestrcpy</span>(p<span style="color:#fe8019">-&gt;</span>name, <span style="color:#b8bb26">&#34;initcode&#34;</span>, <span style="color:#fe8019">sizeof</span>(p<span style="color:#fe8019">-&gt;</span>name));
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>cwd <span style="color:#fe8019">=</span> <span style="color:#fabd2f">namei</span>(<span style="color:#b8bb26">&#34;/&#34;</span>);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>state <span style="color:#ff79c6">=</span> RUNNABLE;
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> RUNNABLE;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">release</span>(<span style="color:#ff79c6">&amp;</span>p<span style="color:#ff79c6">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">release</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>从上面的代码可以看到 <code>initcode</code> 的流程如下：</p>
 <ul>
@@ -309,34 +309,34 @@ xv6 page table 上图是 RISC-V 多种虚拟内存布局中的一种 — Sv39。
 <li>设置栈帧，并修改为状态为<code>RUNNABLE</code></li>
 </ul>
 <p>至此已经完成上图的头尾两端的映射逻辑实现。如下是<code>initcode.S</code> 的汇编代码，只需要知道是使用系统调用 <code>exec</code> 来调用 <code>init.c</code> 即可：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#6272a4"># Initial process that execs /init.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"># This code runs in user space.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">#include &#34;syscall.h&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4"># exec(init, argv)
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#50fa7b">.globl</span> start
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">start:</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">la</span> a0, init
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">la</span> a1, argv
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">li</span> a7, SYS_exec
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ecall</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># Initial process that execs /init.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># This code runs in user space.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">#include &#34;syscall.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># exec(init, argv)
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#b8bb26;font-weight:bold">.globl</span> <span style="color:#d3869b">start</span>
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">start:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">la</span> <span style="color:#d3869b">a0</span>, <span style="color:#d3869b">init</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">la</span> <span style="color:#d3869b">a1</span>, <span style="color:#d3869b">argv</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">li</span> <span style="color:#d3869b">a7</span>, <span style="color:#d3869b">SYS_exec</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ecall</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4"># for(;;) exit();
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#8be9fd;font-style:italic">exit:</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">li</span> a7, SYS_exit
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ecall</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">jal</span> exit
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># for(;;) exit();
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fb4934">exit:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">li</span> <span style="color:#d3869b">a7</span>, <span style="color:#d3869b">SYS_exit</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ecall</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">jal</span> <span style="color:#d3869b">exit</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4"># char init[] = &#34;/init\0&#34;;
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#8be9fd;font-style:italic">init:</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">.string</span> <span style="color:#f1fa8c">&#34;/init\0&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># char init[] = &#34;/init\0&#34;;
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fb4934">init:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#b8bb26;font-weight:bold">.string</span> <span style="color:#b8bb26">&#34;/init\0&#34;</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4"># char *argv[] = { init, 0 };
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#50fa7b">.p2align</span> <span style="color:#bd93f9">2</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">argv:</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">.quad</span> init
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">.quad</span> <span style="color:#bd93f9">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># char *argv[] = { init, 0 };
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#b8bb26;font-weight:bold">.p2align</span> <span style="color:#d3869b">2</span>
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">argv:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#b8bb26;font-weight:bold">.quad</span> <span style="color:#d3869b">init</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#b8bb26;font-weight:bold">.quad</span> <span style="color:#d3869b">0</span>
 </span></span></code></pre></div><p>如下是 <code>exec</code> 的代码：
 <code>exec</code> 执行流程如下：</p>
 <ul>
@@ -349,136 +349,136 @@ xv6 page table 上图是 RISC-V 多种虚拟内存布局中的一种 — Sv39。
 <p>至此，上面的用户态内存布局的拼图完成。</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">int</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">exec</span>(<span style="color:#8be9fd">char</span> <span style="color:#ff79c6">*</span>path, <span style="color:#8be9fd">char</span> <span style="color:#ff79c6">**</span>argv)
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">int</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">exec</span>(<span style="color:#fabd2f">char</span> <span style="color:#fe8019">*</span>path, <span style="color:#fabd2f">char</span> <span style="color:#fe8019">**</span>argv)
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">char</span> <span style="color:#ff79c6">*</span>s, <span style="color:#ff79c6">*</span>last;
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">int</span> i, off;
-</span></span><span style="display:flex;"><span>  uint64 argc, sz <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>, sp, ustack[MAXARG], stackbase;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> elfhdr elf;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> inode <span style="color:#ff79c6">*</span>ip;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proghdr ph;
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">pagetable_t</span> pagetable <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>, oldpagetable;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proc <span style="color:#ff79c6">*</span>p <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">myproc</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">char</span> <span style="color:#fe8019">*</span>s, <span style="color:#fe8019">*</span>last;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> i, off;
+</span></span><span style="display:flex;"><span>  uint64 argc, sz <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>, sp, ustack[MAXARG], stackbase;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> elfhdr elf;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> inode <span style="color:#fe8019">*</span>ip;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proghdr ph;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">pagetable_t</span> pagetable <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>, oldpagetable;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">myproc</span>();
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">begin_op</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">begin_op</span>();
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>((ip <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">namei</span>(path)) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span>){
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">end_op</span>();
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>((ip <span style="color:#fe8019">=</span> <span style="color:#fabd2f">namei</span>(path)) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span>){
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">end_op</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">-</span><span style="color:#d3869b">1</span>;
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">ilock</span>(ip);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">ilock</span>(ip);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Check ELF header
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">if</span>(<span style="color:#50fa7b">readi</span>(ip, <span style="color:#bd93f9">0</span>, (uint64)<span style="color:#ff79c6">&amp;</span>elf, <span style="color:#bd93f9">0</span>, <span style="color:#ff79c6">sizeof</span>(elf)) <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">sizeof</span>(elf))
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">goto</span> bad;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Check ELF header
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">readi</span>(ip, <span style="color:#d3869b">0</span>, (uint64)<span style="color:#fe8019">&amp;</span>elf, <span style="color:#d3869b">0</span>, <span style="color:#fe8019">sizeof</span>(elf)) <span style="color:#fe8019">!=</span> <span style="color:#fe8019">sizeof</span>(elf))
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">goto</span> bad;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(elf.magic <span style="color:#ff79c6">!=</span> ELF_MAGIC)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">goto</span> bad;
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 可以理解为其复制了调用exec的进程的头部虚拟地址映射关系
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">if</span>((pagetable <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">proc_pagetable</span>(p)) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">goto</span> bad;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(elf.magic <span style="color:#fe8019">!=</span> ELF_MAGIC)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 可以理解为其复制了调用exec的进程的头部虚拟地址映射关系
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">if</span>((pagetable <span style="color:#fe8019">=</span> <span style="color:#fabd2f">proc_pagetable</span>(p)) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">goto</span> bad;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Load program into memory.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">for</span>(i<span style="color:#ff79c6">=</span><span style="color:#bd93f9">0</span>, off<span style="color:#ff79c6">=</span>elf.phoff; i<span style="color:#ff79c6">&lt;</span>elf.phnum; i<span style="color:#ff79c6">++</span>, off<span style="color:#ff79c6">+=</span><span style="color:#ff79c6">sizeof</span>(ph)){
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(<span style="color:#50fa7b">readi</span>(ip, <span style="color:#bd93f9">0</span>, (uint64)<span style="color:#ff79c6">&amp;</span>ph, off, <span style="color:#ff79c6">sizeof</span>(ph)) <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">sizeof</span>(ph))
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">goto</span> bad;
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(ph.type <span style="color:#ff79c6">!=</span> ELF_PROG_LOAD)
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">continue</span>;
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(ph.memsz <span style="color:#ff79c6">&lt;</span> ph.filesz)
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">goto</span> bad;
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(ph.vaddr <span style="color:#ff79c6">+</span> ph.memsz <span style="color:#ff79c6">&lt;</span> ph.vaddr)
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">goto</span> bad;
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(ph.vaddr <span style="color:#ff79c6">%</span> PGSIZE <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">goto</span> bad;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Load program into memory.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">for</span>(i<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span>, off<span style="color:#fe8019">=</span>elf.phoff; i<span style="color:#fe8019">&lt;</span>elf.phnum; i<span style="color:#fe8019">++</span>, off<span style="color:#fe8019">+=</span><span style="color:#fe8019">sizeof</span>(ph)){
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">readi</span>(ip, <span style="color:#d3869b">0</span>, (uint64)<span style="color:#fe8019">&amp;</span>ph, off, <span style="color:#fe8019">sizeof</span>(ph)) <span style="color:#fe8019">!=</span> <span style="color:#fe8019">sizeof</span>(ph))
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(ph.type <span style="color:#fe8019">!=</span> ELF_PROG_LOAD)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">continue</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(ph.memsz <span style="color:#fe8019">&lt;</span> ph.filesz)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(ph.vaddr <span style="color:#fe8019">+</span> ph.memsz <span style="color:#fe8019">&lt;</span> ph.vaddr)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(ph.vaddr <span style="color:#fe8019">%</span> PGSIZE <span style="color:#fe8019">!=</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
 </span></span><span style="display:flex;"><span>    uint64 sz1;
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>((sz1 <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">uvmalloc</span>(pagetable, sz, ph.vaddr <span style="color:#ff79c6">+</span> ph.memsz, <span style="color:#50fa7b">flags2perm</span>(ph.flags))) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">goto</span> bad;
-</span></span><span style="display:flex;"><span>    sz <span style="color:#ff79c6">=</span> sz1;
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(<span style="color:#50fa7b">loadseg</span>(pagetable, ph.vaddr, ip, ph.off, ph.filesz) <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">goto</span> bad;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>((sz1 <span style="color:#fe8019">=</span> <span style="color:#fabd2f">uvmalloc</span>(pagetable, sz, ph.vaddr <span style="color:#fe8019">+</span> ph.memsz, <span style="color:#fabd2f">flags2perm</span>(ph.flags))) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    sz <span style="color:#fe8019">=</span> sz1;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">loadseg</span>(pagetable, ph.vaddr, ip, ph.off, ph.filesz) <span style="color:#fe8019">&lt;</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">iunlockput</span>(ip);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">end_op</span>();
-</span></span><span style="display:flex;"><span>  ip <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">iunlockput</span>(ip);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">end_op</span>();
+</span></span><span style="display:flex;"><span>  ip <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  p <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">myproc</span>();
-</span></span><span style="display:flex;"><span>  uint64 oldsz <span style="color:#ff79c6">=</span> p<span style="color:#ff79c6">-&gt;</span>sz;
+</span></span><span style="display:flex;"><span>  p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">myproc</span>();
+</span></span><span style="display:flex;"><span>  uint64 oldsz <span style="color:#fe8019">=</span> p<span style="color:#fe8019">-&gt;</span>sz;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Allocate some pages at the next page boundary.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// Make the first inaccessible as a stack guard.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// Use the rest as the user stack.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  sz <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">PGROUNDUP</span>(sz);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Allocate some pages at the next page boundary.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// Make the first inaccessible as a stack guard.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// Use the rest as the user stack.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  sz <span style="color:#fe8019">=</span> <span style="color:#fabd2f">PGROUNDUP</span>(sz);
 </span></span><span style="display:flex;"><span>  uint64 sz1;
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 申请两个页并做映射
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">if</span>((sz1 <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">uvmalloc</span>(pagetable, sz, sz <span style="color:#ff79c6">+</span> (USERSTACK<span style="color:#ff79c6">+</span><span style="color:#bd93f9">1</span>)<span style="color:#ff79c6">*</span>PGSIZE, PTE_W)) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">goto</span> bad;
-</span></span><span style="display:flex;"><span>  sz <span style="color:#ff79c6">=</span> sz1;
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 清除用户栈下的页的映射，作为 Guard page
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#50fa7b">uvmclear</span>(pagetable, sz<span style="color:#ff79c6">-</span>(USERSTACK<span style="color:#ff79c6">+</span><span style="color:#bd93f9">1</span>)<span style="color:#ff79c6">*</span>PGSIZE);
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 设置栈帧
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  sp <span style="color:#ff79c6">=</span> sz;
-</span></span><span style="display:flex;"><span>  stackbase <span style="color:#ff79c6">=</span> sp <span style="color:#ff79c6">-</span> USERSTACK<span style="color:#ff79c6">*</span>PGSIZE;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 申请两个页并做映射
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">if</span>((sz1 <span style="color:#fe8019">=</span> <span style="color:#fabd2f">uvmalloc</span>(pagetable, sz, sz <span style="color:#fe8019">+</span> (USERSTACK<span style="color:#fe8019">+</span><span style="color:#d3869b">1</span>)<span style="color:#fe8019">*</span>PGSIZE, PTE_W)) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>  sz <span style="color:#fe8019">=</span> sz1;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 清除用户栈下的页的映射，作为 Guard page
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">uvmclear</span>(pagetable, sz<span style="color:#fe8019">-</span>(USERSTACK<span style="color:#fe8019">+</span><span style="color:#d3869b">1</span>)<span style="color:#fe8019">*</span>PGSIZE);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 设置栈帧
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  sp <span style="color:#fe8019">=</span> sz;
+</span></span><span style="display:flex;"><span>  stackbase <span style="color:#fe8019">=</span> sp <span style="color:#fe8019">-</span> USERSTACK<span style="color:#fe8019">*</span>PGSIZE;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Push argument strings, prepare rest of stack in ustack.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// 把内核态的参数列表拷贝到刚申请的用户态的栈中
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">for</span>(argc <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>; argv[argc]; argc<span style="color:#ff79c6">++</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(argc <span style="color:#ff79c6">&gt;=</span> MAXARG)
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">goto</span> bad;
-</span></span><span style="display:flex;"><span>    sp <span style="color:#ff79c6">-=</span> <span style="color:#50fa7b">strlen</span>(argv[argc]) <span style="color:#ff79c6">+</span> <span style="color:#bd93f9">1</span>;
-</span></span><span style="display:flex;"><span>    sp <span style="color:#ff79c6">-=</span> sp <span style="color:#ff79c6">%</span> <span style="color:#bd93f9">16</span>; <span style="color:#6272a4">// riscv sp must be 16-byte aligned
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#ff79c6">if</span>(sp <span style="color:#ff79c6">&lt;</span> stackbase)
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">goto</span> bad;
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(<span style="color:#50fa7b">copyout</span>(pagetable, sp, argv[argc], <span style="color:#50fa7b">strlen</span>(argv[argc]) <span style="color:#ff79c6">+</span> <span style="color:#bd93f9">1</span>) <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">goto</span> bad;
-</span></span><span style="display:flex;"><span>    ustack[argc] <span style="color:#ff79c6">=</span> sp;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Push argument strings, prepare rest of stack in ustack.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 把内核态的参数列表拷贝到刚申请的用户态的栈中
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">for</span>(argc <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>; argv[argc]; argc<span style="color:#fe8019">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(argc <span style="color:#fe8019">&gt;=</span> MAXARG)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    sp <span style="color:#fe8019">-=</span> <span style="color:#fabd2f">strlen</span>(argv[argc]) <span style="color:#fe8019">+</span> <span style="color:#d3869b">1</span>;
+</span></span><span style="display:flex;"><span>    sp <span style="color:#fe8019">-=</span> sp <span style="color:#fe8019">%</span> <span style="color:#d3869b">16</span>; <span style="color:#928374;font-style:italic">// riscv sp must be 16-byte aligned
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#fe8019">if</span>(sp <span style="color:#fe8019">&lt;</span> stackbase)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">copyout</span>(pagetable, sp, argv[argc], <span style="color:#fabd2f">strlen</span>(argv[argc]) <span style="color:#fe8019">+</span> <span style="color:#d3869b">1</span>) <span style="color:#fe8019">&lt;</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    ustack[argc] <span style="color:#fe8019">=</span> sp;
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 休止标志位
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  ustack[argc] <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 休止标志位
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  ustack[argc] <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// push the array of argv[] pointers.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// 参数列表的首地址压入到栈中
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  sp <span style="color:#ff79c6">-=</span> (argc<span style="color:#ff79c6">+</span><span style="color:#bd93f9">1</span>) <span style="color:#ff79c6">*</span> <span style="color:#ff79c6">sizeof</span>(uint64);
-</span></span><span style="display:flex;"><span>  sp <span style="color:#ff79c6">-=</span> sp <span style="color:#ff79c6">%</span> <span style="color:#bd93f9">16</span>;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(sp <span style="color:#ff79c6">&lt;</span> stackbase)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">goto</span> bad;
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(<span style="color:#50fa7b">copyout</span>(pagetable, sp, (<span style="color:#8be9fd">char</span> <span style="color:#ff79c6">*</span>)ustack, (argc<span style="color:#ff79c6">+</span><span style="color:#bd93f9">1</span>)<span style="color:#ff79c6">*</span><span style="color:#ff79c6">sizeof</span>(uint64)) <span style="color:#ff79c6">&lt;</span> <span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">goto</span> bad;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// push the array of argv[] pointers.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 参数列表的首地址压入到栈中
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  sp <span style="color:#fe8019">-=</span> (argc<span style="color:#fe8019">+</span><span style="color:#d3869b">1</span>) <span style="color:#fe8019">*</span> <span style="color:#fe8019">sizeof</span>(uint64);
+</span></span><span style="display:flex;"><span>  sp <span style="color:#fe8019">-=</span> sp <span style="color:#fe8019">%</span> <span style="color:#d3869b">16</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(sp <span style="color:#fe8019">&lt;</span> stackbase)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">copyout</span>(pagetable, sp, (<span style="color:#fabd2f">char</span> <span style="color:#fe8019">*</span>)ustack, (argc<span style="color:#fe8019">+</span><span style="color:#d3869b">1</span>)<span style="color:#fe8019">*</span><span style="color:#fe8019">sizeof</span>(uint64)) <span style="color:#fe8019">&lt;</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">goto</span> bad;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// arguments to user main(argc, argv)
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// argc is returned via the system call return
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// value, which goes in a0.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  p<span style="color:#ff79c6">-&gt;</span>trapframe<span style="color:#ff79c6">-&gt;</span>a1 <span style="color:#ff79c6">=</span> sp;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// arguments to user main(argc, argv)
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// argc is returned via the system call return
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// value, which goes in a0.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>a1 <span style="color:#fe8019">=</span> sp;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Save program name for debugging.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">for</span>(last<span style="color:#ff79c6">=</span>s<span style="color:#ff79c6">=</span>path; <span style="color:#ff79c6">*</span>s; s<span style="color:#ff79c6">++</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(<span style="color:#ff79c6">*</span>s <span style="color:#ff79c6">==</span> <span style="color:#f1fa8c">&#39;/&#39;</span>)
-</span></span><span style="display:flex;"><span>      last <span style="color:#ff79c6">=</span> s<span style="color:#ff79c6">+</span><span style="color:#bd93f9">1</span>;
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">safestrcpy</span>(p<span style="color:#ff79c6">-&gt;</span>name, last, <span style="color:#ff79c6">sizeof</span>(p<span style="color:#ff79c6">-&gt;</span>name));
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Save program name for debugging.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">for</span>(last<span style="color:#fe8019">=</span>s<span style="color:#fe8019">=</span>path; <span style="color:#fe8019">*</span>s; s<span style="color:#fe8019">++</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(<span style="color:#fe8019">*</span>s <span style="color:#fe8019">==</span> <span style="color:#b8bb26">&#39;/&#39;</span>)
+</span></span><span style="display:flex;"><span>      last <span style="color:#fe8019">=</span> s<span style="color:#fe8019">+</span><span style="color:#d3869b">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">safestrcpy</span>(p<span style="color:#fe8019">-&gt;</span>name, last, <span style="color:#fe8019">sizeof</span>(p<span style="color:#fe8019">-&gt;</span>name));
 </span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// Commit to the user image.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// 替换page table
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  oldpagetable <span style="color:#ff79c6">=</span> p<span style="color:#ff79c6">-&gt;</span>pagetable;
-</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>pagetable <span style="color:#ff79c6">=</span> pagetable;
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 设置进程栈的大小，其实也是heap的起始位置
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  p<span style="color:#ff79c6">-&gt;</span>sz <span style="color:#ff79c6">=</span> sz;
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 设置pc 寄存器，指向下一个要执行的指令
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  p<span style="color:#ff79c6">-&gt;</span>trapframe<span style="color:#ff79c6">-&gt;</span>epc <span style="color:#ff79c6">=</span> elf.entry;  <span style="color:#6272a4">// initial program counter = main
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// 设置栈指针sp
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  p<span style="color:#ff79c6">-&gt;</span>trapframe<span style="color:#ff79c6">-&gt;</span>sp <span style="color:#ff79c6">=</span> sp; <span style="color:#6272a4">// initial stack pointer
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// 释放掉旧的pagetable
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#50fa7b">proc_freepagetable</span>(oldpagetable, oldsz);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Commit to the user image.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 替换page table
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  oldpagetable <span style="color:#fe8019">=</span> p<span style="color:#fe8019">-&gt;</span>pagetable;
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>pagetable <span style="color:#fe8019">=</span> pagetable;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 设置进程栈的大小，其实也是heap的起始位置
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>sz <span style="color:#fe8019">=</span> sz;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 设置pc 寄存器，指向下一个要执行的指令
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>epc <span style="color:#fe8019">=</span> elf.entry;  <span style="color:#928374;font-style:italic">// initial program counter = main
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 设置栈指针sp
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>sp <span style="color:#fe8019">=</span> sp; <span style="color:#928374;font-style:italic">// initial stack pointer
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 释放掉旧的pagetable
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">proc_freepagetable</span>(oldpagetable, oldsz);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> argc; <span style="color:#6272a4">// this ends up in a0, the first argument to main(argc, argv)
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
-</span></span><span style="display:flex;"><span> <span style="color:#8be9fd;font-style:italic">bad</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(pagetable)
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">proc_freepagetable</span>(pagetable, sz);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(ip){
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">iunlockput</span>(ip);
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">end_op</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> argc; <span style="color:#928374;font-style:italic">// this ends up in a0, the first argument to main(argc, argv)
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span> <span style="color:#fb4934">bad</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(pagetable)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">proc_freepagetable</span>(pagetable, sz);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(ip){
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">iunlockput</span>(ip);
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">end_op</span>();
 </span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">return</span> <span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#fe8019">-</span><span style="color:#d3869b">1</span>;
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>

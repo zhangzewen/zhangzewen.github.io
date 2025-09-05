@@ -245,69 +245,69 @@
 <p>在 kubernetes 中存储以插件的形似存在，kubernetes 提供了接口 <a href="https://github.com/kubernetes/kubernetes/blob/e4d4e1ab7cf1bf15273ef97303551b279f0920a9/pkg/volume/volume.go#L30">Volume</a> 极其扩展接口来表示存储卷，使用 <a href="https://github.com/kubernetes/kubernetes/blob/e4d4e1ab7cf1bf15273ef97303551b279f0920a9/pkg/volume/plugins.go#L134">VolumePlugin</a> 接口来表示一个存储卷插件。像常用的 <code>empty/hostpath/configmap/secert/csi</code> 等都是以插件形式存在的存储卷（这里的 csi 是让 kubernetes 可以使用第三方提供的存储功能），kubelet 使用 volume plugins manager 来管理它们。</p>
 <h2 id="实现">实现</h2>
 <p>结构体 volume plugins manager 的定义</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// VolumePluginMgr tracks registered plugins.</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">type</span> VolumePluginMgr <span style="color:#8be9fd;font-style:italic">struct</span> {
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// VolumePluginMgr tracks registered plugins.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> VolumePluginMgr <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>	mutex                     sync.RWMutex
-</span></span><span style="display:flex;"><span>	plugins                   <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]VolumePlugin
+</span></span><span style="display:flex;"><span>	plugins                   <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]VolumePlugin
 </span></span><span style="display:flex;"><span>	prober                    DynamicPluginProber
-</span></span><span style="display:flex;"><span>	probedPlugins             <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]VolumePlugin
+</span></span><span style="display:flex;"><span>	probedPlugins             <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]VolumePlugin
 </span></span><span style="display:flex;"><span>	loggedDeprecationWarnings sets.String
 </span></span><span style="display:flex;"><span>	Host                      VolumeHost
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>kubelet 在启动时，会创建和初始化 volume plugins manager：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/cmd/kubelet/app/plugins.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// kubernetes 支持的存储卷插件</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">ProbeVolumePlugins</span>(featureGate featuregate.FeatureGate) ([]volume.VolumePlugin, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>	allPlugins <span style="color:#ff79c6">:=</span> []volume.VolumePlugin{}
-</span></span><span style="display:flex;"><span>	<span style="color:#8be9fd;font-style:italic">var</span> err <span style="color:#8be9fd">error</span>
-</span></span><span style="display:flex;"><span>	allPlugins, err = <span style="color:#50fa7b">appendLegacyProviderVolumes</span>(allPlugins, featureGate)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> allPlugins, err
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/cmd/kubelet/app/plugins.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// kubernetes 支持的存储卷插件</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">ProbeVolumePlugins</span>(featureGate featuregate.FeatureGate) ([]volume.VolumePlugin, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>	allPlugins <span style="color:#fe8019">:=</span> []volume.VolumePlugin{}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">var</span> err <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	allPlugins, err = <span style="color:#fabd2f">appendLegacyProviderVolumes</span>(allPlugins, featureGate)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> allPlugins, err
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#8be9fd;font-style:italic">append</span>(allPlugins, emptydir.<span style="color:#50fa7b">ProbeVolumePlugins</span>()<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#8be9fd;font-style:italic">append</span>(allPlugins, git_repo.<span style="color:#50fa7b">ProbeVolumePlugins</span>()<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#8be9fd;font-style:italic">append</span>(allPlugins, hostpath.<span style="color:#50fa7b">ProbeVolumePlugins</span>(volume.VolumeConfig{})<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#8be9fd;font-style:italic">append</span>(allPlugins, nfs.<span style="color:#50fa7b">ProbeVolumePlugins</span>(volume.VolumeConfig{})<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#8be9fd;font-style:italic">append</span>(allPlugins, secret.<span style="color:#50fa7b">ProbeVolumePlugins</span>()<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#8be9fd;font-style:italic">append</span>(allPlugins, iscsi.<span style="color:#50fa7b">ProbeVolumePlugins</span>()<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#8be9fd;font-style:italic">append</span>(allPlugins, glusterfs.<span style="color:#50fa7b">ProbeVolumePlugins</span>()<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#8be9fd;font-style:italic">append</span>(allPlugins, cephfs.<span style="color:#50fa7b">ProbeVolumePlugins</span>()<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#8be9fd;font-style:italic">append</span>(allPlugins, downwardapi.<span style="color:#50fa7b">ProbeVolumePlugins</span>()<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#8be9fd;font-style:italic">append</span>(allPlugins, fc.<span style="color:#50fa7b">ProbeVolumePlugins</span>()<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#8be9fd;font-style:italic">append</span>(allPlugins, configmap.<span style="color:#50fa7b">ProbeVolumePlugins</span>()<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#8be9fd;font-style:italic">append</span>(allPlugins, projected.<span style="color:#50fa7b">ProbeVolumePlugins</span>()<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#8be9fd;font-style:italic">append</span>(allPlugins, local.<span style="color:#50fa7b">ProbeVolumePlugins</span>()<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#8be9fd;font-style:italic">append</span>(allPlugins, csi.<span style="color:#50fa7b">ProbeVolumePlugins</span>()<span style="color:#ff79c6">...</span>)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> allPlugins, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#fabd2f">append</span>(allPlugins, emptydir.<span style="color:#fabd2f">ProbeVolumePlugins</span>()<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#fabd2f">append</span>(allPlugins, git_repo.<span style="color:#fabd2f">ProbeVolumePlugins</span>()<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#fabd2f">append</span>(allPlugins, hostpath.<span style="color:#fabd2f">ProbeVolumePlugins</span>(volume.VolumeConfig{})<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#fabd2f">append</span>(allPlugins, nfs.<span style="color:#fabd2f">ProbeVolumePlugins</span>(volume.VolumeConfig{})<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#fabd2f">append</span>(allPlugins, secret.<span style="color:#fabd2f">ProbeVolumePlugins</span>()<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#fabd2f">append</span>(allPlugins, iscsi.<span style="color:#fabd2f">ProbeVolumePlugins</span>()<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#fabd2f">append</span>(allPlugins, glusterfs.<span style="color:#fabd2f">ProbeVolumePlugins</span>()<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#fabd2f">append</span>(allPlugins, cephfs.<span style="color:#fabd2f">ProbeVolumePlugins</span>()<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#fabd2f">append</span>(allPlugins, downwardapi.<span style="color:#fabd2f">ProbeVolumePlugins</span>()<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#fabd2f">append</span>(allPlugins, fc.<span style="color:#fabd2f">ProbeVolumePlugins</span>()<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#fabd2f">append</span>(allPlugins, configmap.<span style="color:#fabd2f">ProbeVolumePlugins</span>()<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#fabd2f">append</span>(allPlugins, projected.<span style="color:#fabd2f">ProbeVolumePlugins</span>()<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#fabd2f">append</span>(allPlugins, local.<span style="color:#fabd2f">ProbeVolumePlugins</span>()<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	allPlugins = <span style="color:#fabd2f">append</span>(allPlugins, csi.<span style="color:#fabd2f">ProbeVolumePlugins</span>()<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> allPlugins, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/cmd/kubelet/app/server.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 构建依赖项</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">UnsecuredDependencies</span>(s <span style="color:#ff79c6">*</span>options.KubeletServer, featureGate featuregate.FeatureGate) (<span style="color:#ff79c6">*</span>kubelet.Dependencies, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>	plugins, err <span style="color:#ff79c6">:=</span> <span style="color:#50fa7b">ProbeVolumePlugins</span>(featureGate)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/cmd/kubelet/app/server.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 构建依赖项</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">UnsecuredDependencies</span>(s <span style="color:#fe8019">*</span>options.KubeletServer, featureGate featuregate.FeatureGate) (<span style="color:#fe8019">*</span>kubelet.Dependencies, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>	plugins, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">ProbeVolumePlugins</span>(featureGate)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
 </span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/kubelet/kubelet.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// 创建 volume plugins manager 实例</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewMainKubelet</span>(<span style="color:#ff79c6">...</span>) {
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/kubelet.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 创建 volume plugins manager 实例</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewMainKubelet</span>(<span style="color:#fe8019">...</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
 </span></span><span style="display:flex;"><span>	klet.volumePluginMgr, err =
-</span></span><span style="display:flex;"><span>		<span style="color:#50fa7b">NewInitializedVolumePluginMgr</span>(klet, secretManager, configMapManager, tokenManager, kubeDeps.VolumePlugins, kubeDeps.DynamicPluginProber)
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">NewInitializedVolumePluginMgr</span>(klet, secretManager, configMapManager, tokenManager, kubeDeps.VolumePlugins, kubeDeps.DynamicPluginProber)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/kubelet/volume_host.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> <span style="color:#50fa7b">NewInitializedVolumePluginMgr</span>(<span style="color:#ff79c6">...</span>){
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> kvh.volumePluginMgr.<span style="color:#50fa7b">InitPlugins</span>(plugins, prober, kvh); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(
-</span></span><span style="display:flex;"><span>			<span style="color:#f1fa8c">&#34;could not initialize volume plugins for KubeletVolumePluginMgr: %v&#34;</span>,
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/volume_host.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewInitializedVolumePluginMgr</span>(<span style="color:#fe8019">...</span>){
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> kvh.volumePluginMgr.<span style="color:#fabd2f">InitPlugins</span>(plugins, prober, kvh); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, fmt.<span style="color:#fabd2f">Errorf</span>(
+</span></span><span style="display:flex;"><span>			<span style="color:#b8bb26">&#34;could not initialize volume plugins for KubeletVolumePluginMgr: %v&#34;</span>,
 </span></span><span style="display:flex;"><span>			err)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// ...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
@@ -315,59 +315,59 @@
 <p>并调用 InitPlugins 来初始化 kubernetes 所支持的存储卷插件：</p>
 <details>
     <summary>CLICK ME</summary>
-    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#6272a4">// k8s.io/kubernetes/pkg/volume/plugins.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (pm <span style="color:#ff79c6">*</span>VolumePluginMgr) <span style="color:#50fa7b">InitPlugins</span>(plugins []VolumePlugin, prober DynamicPluginProber, host VolumeHost) <span style="color:#8be9fd">error</span> {
-</span></span><span style="display:flex;"><span>	pm.mutex.<span style="color:#50fa7b">Lock</span>()
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">defer</span> pm.mutex.<span style="color:#50fa7b">Unlock</span>()
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/volume/plugins.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (pm <span style="color:#fe8019">*</span>VolumePluginMgr) <span style="color:#fabd2f">InitPlugins</span>(plugins []VolumePlugin, prober DynamicPluginProber, host VolumeHost) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>	pm.mutex.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> pm.mutex.<span style="color:#fabd2f">Unlock</span>()
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>	pm.Host = host
-</span></span><span style="display:flex;"><span>	pm.loggedDeprecationWarnings = sets.<span style="color:#50fa7b">NewString</span>()
+</span></span><span style="display:flex;"><span>	pm.loggedDeprecationWarnings = sets.<span style="color:#fabd2f">NewString</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> prober <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Use a dummy prober to prevent nil deference.</span>
-</span></span><span style="display:flex;"><span>		pm.prober = <span style="color:#ff79c6">&amp;</span>dummyPluginProber{}
-</span></span><span style="display:flex;"><span>	} <span style="color:#ff79c6">else</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> prober <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Use a dummy prober to prevent nil deference.</span>
+</span></span><span style="display:flex;"><span>		pm.prober = <span style="color:#fe8019">&amp;</span>dummyPluginProber{}
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> {
 </span></span><span style="display:flex;"><span>		pm.prober = prober
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">:=</span> pm.prober.<span style="color:#50fa7b">Init</span>(); err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#6272a4">// Prober init failure should not affect the initialization of other plugins.</span>
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Error initializing dynamic plugin prober: %s&#34;</span>, err)
-</span></span><span style="display:flex;"><span>		pm.prober = <span style="color:#ff79c6">&amp;</span>dummyPluginProber{}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> pm.prober.<span style="color:#fabd2f">Init</span>(); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Prober init failure should not affect the initialization of other plugins.</span>
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;Error initializing dynamic plugin prober: %s&#34;</span>, err)
+</span></span><span style="display:flex;"><span>		pm.prober = <span style="color:#fe8019">&amp;</span>dummyPluginProber{}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> pm.plugins <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		pm.plugins = <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]VolumePlugin{}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> pm.plugins <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		pm.plugins = <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]VolumePlugin{}
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> pm.probedPlugins <span style="color:#ff79c6">==</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		pm.probedPlugins = <span style="color:#8be9fd;font-style:italic">map</span>[<span style="color:#8be9fd">string</span>]VolumePlugin{}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> pm.probedPlugins <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		pm.probedPlugins = <span style="color:#fe8019">map</span>[<span style="color:#fabd2f">string</span>]VolumePlugin{}
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	allErrs <span style="color:#ff79c6">:=</span> []<span style="color:#8be9fd">error</span>{}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">for</span> _, plugin <span style="color:#ff79c6">:=</span> <span style="color:#ff79c6">range</span> plugins {
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 校验plugin的name</span>
-</span></span><span style="display:flex;"><span>		name <span style="color:#ff79c6">:=</span> plugin.<span style="color:#50fa7b">GetPluginName</span>()
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> errs <span style="color:#ff79c6">:=</span> validation.<span style="color:#50fa7b">IsQualifiedName</span>(name); <span style="color:#8be9fd;font-style:italic">len</span>(errs) <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">0</span> {
-</span></span><span style="display:flex;"><span>			allErrs = <span style="color:#8be9fd;font-style:italic">append</span>(allErrs, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;volume plugin has invalid name: %q: %s&#34;</span>, name, strings.<span style="color:#50fa7b">Join</span>(errs, <span style="color:#f1fa8c">&#34;;&#34;</span>)))
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>	allErrs <span style="color:#fe8019">:=</span> []<span style="color:#fabd2f">error</span>{}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> _, plugin <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> plugins {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 校验plugin的name</span>
+</span></span><span style="display:flex;"><span>		name <span style="color:#fe8019">:=</span> plugin.<span style="color:#fabd2f">GetPluginName</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> errs <span style="color:#fe8019">:=</span> validation.<span style="color:#fabd2f">IsQualifiedName</span>(name); <span style="color:#fabd2f">len</span>(errs) <span style="color:#fe8019">!=</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>			allErrs = <span style="color:#fabd2f">append</span>(allErrs, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;volume plugin has invalid name: %q: %s&#34;</span>, name, strings.<span style="color:#fabd2f">Join</span>(errs, <span style="color:#b8bb26">&#34;;&#34;</span>)))
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">continue</span>
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 避免注册plugin</span>
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> _, found <span style="color:#ff79c6">:=</span> pm.plugins[name]; found {
-</span></span><span style="display:flex;"><span>			allErrs = <span style="color:#8be9fd;font-style:italic">append</span>(allErrs, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;volume plugin %q was registered more than once&#34;</span>, name))
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 避免注册plugin</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> _, found <span style="color:#fe8019">:=</span> pm.plugins[name]; found {
+</span></span><span style="display:flex;"><span>			allErrs = <span style="color:#fabd2f">append</span>(allErrs, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;volume plugin %q was registered more than once&#34;</span>, name))
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">continue</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 调用plugin的Init来初始化plugin</span>
-</span></span><span style="display:flex;"><span>		err <span style="color:#ff79c6">:=</span> plugin.<span style="color:#50fa7b">Init</span>(host)
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>			klog.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;Failed to load volume plugin %s, error: %s&#34;</span>, name, err.<span style="color:#50fa7b">Error</span>())
-</span></span><span style="display:flex;"><span>			allErrs = <span style="color:#8be9fd;font-style:italic">append</span>(allErrs, err)
-</span></span><span style="display:flex;"><span>			<span style="color:#ff79c6">continue</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 调用plugin的Init来初始化plugin</span>
+</span></span><span style="display:flex;"><span>		err <span style="color:#fe8019">:=</span> plugin.<span style="color:#fabd2f">Init</span>(host)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;Failed to load volume plugin %s, error: %s&#34;</span>, name, err.<span style="color:#fabd2f">Error</span>())
+</span></span><span style="display:flex;"><span>			allErrs = <span style="color:#fabd2f">append</span>(allErrs, err)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">continue</span>
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4">// 进行关联映射</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 进行关联映射</span>
 </span></span><span style="display:flex;"><span>		pm.plugins[name] = plugin
-</span></span><span style="display:flex;"><span>		klog.<span style="color:#50fa7b">V</span>(<span style="color:#bd93f9">1</span>).<span style="color:#50fa7b">Infof</span>(<span style="color:#f1fa8c">&#34;Loaded volume plugin %q&#34;</span>, name)
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">1</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;Loaded volume plugin %q&#34;</span>, name)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> utilerrors.<span style="color:#50fa7b">NewAggregate</span>(allErrs)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> utilerrors.<span style="color:#fabd2f">NewAggregate</span>(allErrs)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
@@ -393,15 +393,15 @@
 <li>FindXXXBySpec</li>
 </ul>
 <p>这两个方法组很好理解，对其已经注册的 volume plugin 作类型判断过滤，返回符合要求的 volume plugin：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">func</span> (pm <span style="color:#ff79c6">*</span>VolumePluginMgr) <span style="color:#50fa7b">FindPersistentPluginBySpec</span>(spec <span style="color:#ff79c6">*</span>Spec) (PersistentVolumePlugin, <span style="color:#8be9fd">error</span>) {
-</span></span><span style="display:flex;"><span>	volumePlugin, err <span style="color:#ff79c6">:=</span> pm.<span style="color:#50fa7b">FindPluginBySpec</span>(spec)
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> err <span style="color:#ff79c6">!=</span> <span style="color:#ff79c6">nil</span> {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;could not find volume plugin for spec: %#v&#34;</span>, spec)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (pm <span style="color:#fe8019">*</span>VolumePluginMgr) <span style="color:#fabd2f">FindPersistentPluginBySpec</span>(spec <span style="color:#fe8019">*</span>Spec) (PersistentVolumePlugin, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>	volumePlugin, err <span style="color:#fe8019">:=</span> pm.<span style="color:#fabd2f">FindPluginBySpec</span>(spec)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;could not find volume plugin for spec: %#v&#34;</span>, spec)
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">if</span> persistentVolumePlugin, ok <span style="color:#ff79c6">:=</span> volumePlugin.(PersistentVolumePlugin); ok {
-</span></span><span style="display:flex;"><span>		<span style="color:#ff79c6">return</span> persistentVolumePlugin, <span style="color:#ff79c6">nil</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> persistentVolumePlugin, ok <span style="color:#fe8019">:=</span> volumePlugin.(PersistentVolumePlugin); ok {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> persistentVolumePlugin, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#ff79c6">return</span> <span style="color:#ff79c6">nil</span>, fmt.<span style="color:#50fa7b">Errorf</span>(<span style="color:#f1fa8c">&#34;no persistent volume plugin matched&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;no persistent volume plugin matched&#34;</span>)
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="帮助类接口-volumehost">帮助类接口 VolumeHost</h2>
 <p>帮助类接口 VolumeHost 可以让 volume plugin 能够通过 kubelet 获取到相关的数据，这样的接口还有：KubeletVolumeHost 和 AttachDetachVolumeHost。接口描述可以在<code>k8s.io/kubernetes/pkg/volume/plugins.go</code>下找到。</p>

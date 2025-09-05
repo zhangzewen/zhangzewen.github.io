@@ -345,11 +345,11 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 <li>SPIE，指示在陷入监督模式之前是否启用了中断。当陷入监督模式时，SPIE 的值设置为 SIE 的值，然后 SIE 设置为0。当执行 sret 指令时，SIE 的值设置为 SPIE 的值，然后 SPIE 设置为1。</li>
 </ul>
 <p>在 <code>kernel/start.c</code>，在机器模式下，设置前一个特权级别为监督模式，可以类比上面的SSP， 这个是给 mret 使用，即执行 mret 时候 返回到监督模式：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#6272a4">// set M Previous Privilege mode to Supervisor, for mret.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#8be9fd">unsigned</span> <span style="color:#8be9fd">long</span> x <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">r_mstatus</span>();
-</span></span><span style="display:flex;"><span>  x <span style="color:#ff79c6">&amp;=</span> <span style="color:#ff79c6">~</span>MSTATUS_MPP_MASK;
-</span></span><span style="display:flex;"><span>  x <span style="color:#ff79c6">|=</span> MSTATUS_MPP_S;
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">w_mstatus</span>(x);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// set M Previous Privilege mode to Supervisor, for mret.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">unsigned</span> <span style="color:#fabd2f">long</span> x <span style="color:#fe8019">=</span> <span style="color:#fabd2f">r_mstatus</span>();
+</span></span><span style="display:flex;"><span>  x <span style="color:#fe8019">&amp;=</span> <span style="color:#fe8019">~</span>MSTATUS_MPP_MASK;
+</span></span><span style="display:flex;"><span>  x <span style="color:#fe8019">|=</span> MSTATUS_MPP_S;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">w_mstatus</span>(x);
 </span></span></code></pre></div><h3 id="stvec">stvec</h3>
 <p>内核将它的异常处理程序地址写入寄存器 stvec，RISC-V 跳转到 stvec 中的地址来处理异常，即把寄存器 stvec 的值赋值给寄存器 pc。在 xv6 中，kernelvec（kernelvec.S）负责处理发生在内核态的 trap， uservec（trampoline.S）负责发生在用户态的 trap。</p>
 <h3 id="sepc">sepc</h3>
@@ -361,10 +361,10 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 <p>寄存器 sscratch 主要用于在用户态和内核态切换时临时保存数据，特别是在 trap 处理过程中。它的核心作用是<strong>提供一个安全的临时存储空间</strong>，避免关键寄存器的值被破坏。</p>
 <h2 id="trap-处理流程">trap 处理流程</h2>
 <p>在 <code>kernel/start.c</code> 中：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#6272a4">// delegate all interrupts and exceptions to supervisor mode.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#50fa7b">w_medeleg</span>(<span style="color:#bd93f9">0xffff</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">w_mideleg</span>(<span style="color:#bd93f9">0xffff</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">w_sie</span>(<span style="color:#50fa7b">r_sie</span>() <span style="color:#ff79c6">|</span> SIE_SEIE <span style="color:#ff79c6">|</span> SIE_STIE <span style="color:#ff79c6">|</span> SIE_SSIE);
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// delegate all interrupts and exceptions to supervisor mode.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">w_medeleg</span>(<span style="color:#d3869b">0xffff</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">w_mideleg</span>(<span style="color:#d3869b">0xffff</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">w_sie</span>(<span style="color:#fabd2f">r_sie</span>() <span style="color:#fe8019">|</span> SIE_SEIE <span style="color:#fe8019">|</span> SIE_STIE <span style="color:#fe8019">|</span> SIE_SSIE);
 </span></span></code></pre></div><p>即当 trap 发生时候，不管处在何种特权模式下，统一都是在监督模式下处理。</p>
 <p>总体来说，在监督模式下，当 trap 发生时候，硬件的处理流程如下：</p>
 <ul>
@@ -388,112 +388,112 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 <h2 id="xv6-用户态触发-trap-处理流程">xv6 用户态触发 trap 处理流程</h2>
 <h3 id="uservec">uservec</h3>
 <p>根据 上述 trap 的处理流程，用户态处理 trap 的回调逻辑地址是 uservec，其实现在 <code>kernel/trampoline.S</code> 下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span>        <span style="color:#6272a4">#
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># low-level code to handle traps from user space into
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># the kernel, and returns from kernel to user.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4">#
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># the kernel maps the page holding this code
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># at the same virtual address (TRAMPOLINE)
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># in user and kernel space so that it continues
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># to work when it switches page tables.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># kernel.ld causes this code to start at 
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># a page boundary.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4">#
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">#include &#34;riscv.h&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">#include &#34;memlayout.h&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">.section</span> trampsec
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">.globl</span> trampoline
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">.globl</span> usertrap
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">trampoline:</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">.align</span> <span style="color:#bd93f9">4</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">.globl</span> uservec
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">uservec:</span>    
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4">#
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># trap.c sets stvec to point here, so
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># traps from user space start here,
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># in supervisor mode, but with a
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># user page table.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4">#
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># save user a0 in sscratch so
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># a0 can be used to get at TRAPFRAME.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">csrw</span> sscratch, a0   <span style="color:#6272a4"># 保存 函数返回值 存储寄存器 a0 到 sscratch中
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># each process has a separate p-&gt;trapframe memory area,
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># but it&#39;s mapped to the same virtual address
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># (TRAPFRAME) in every process&#39;s user page table.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">li</span> a0, TRAPFRAME <span style="color:#6272a4">#把 p-&gt;trapframe 的地址保存到a0中 
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># save the user registers in TRAPFRAME 
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># 存储各个寄存器到 p-&gt;trapframe, 即保存进程的状态
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">sd</span> ra, <span style="color:#bd93f9">40</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> sp, <span style="color:#bd93f9">48</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> gp, <span style="color:#bd93f9">56</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> tp, <span style="color:#bd93f9">64</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t0, <span style="color:#bd93f9">72</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t1, <span style="color:#bd93f9">80</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t2, <span style="color:#bd93f9">88</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s0, <span style="color:#bd93f9">96</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s1, <span style="color:#bd93f9">104</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a1, <span style="color:#bd93f9">120</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a2, <span style="color:#bd93f9">128</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a3, <span style="color:#bd93f9">136</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a4, <span style="color:#bd93f9">144</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a5, <span style="color:#bd93f9">152</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a6, <span style="color:#bd93f9">160</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a7, <span style="color:#bd93f9">168</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s2, <span style="color:#bd93f9">176</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s3, <span style="color:#bd93f9">184</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s4, <span style="color:#bd93f9">192</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s5, <span style="color:#bd93f9">200</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s6, <span style="color:#bd93f9">208</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s7, <span style="color:#bd93f9">216</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s8, <span style="color:#bd93f9">224</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s9, <span style="color:#bd93f9">232</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s10, <span style="color:#bd93f9">240</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> s11, <span style="color:#bd93f9">248</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t3, <span style="color:#bd93f9">256</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t4, <span style="color:#bd93f9">264</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t5, <span style="color:#bd93f9">272</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t6, <span style="color:#bd93f9">280</span>(a0)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">#
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># low-level code to handle traps from user space into
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># the kernel, and returns from kernel to user.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic">#
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># the kernel maps the page holding this code
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># at the same virtual address (TRAMPOLINE)
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># in user and kernel space so that it continues
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># to work when it switches page tables.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># kernel.ld causes this code to start at 
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># a page boundary.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic">#
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">#include &#34;riscv.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">#include &#34;memlayout.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#b8bb26;font-weight:bold">.section</span> <span style="color:#d3869b">trampsec</span>
+</span></span><span style="display:flex;"><span><span style="color:#b8bb26;font-weight:bold">.globl</span> <span style="color:#d3869b">trampoline</span>
+</span></span><span style="display:flex;"><span><span style="color:#b8bb26;font-weight:bold">.globl</span> <span style="color:#d3869b">usertrap</span>
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">trampoline:</span>
+</span></span><span style="display:flex;"><span><span style="color:#b8bb26;font-weight:bold">.align</span> <span style="color:#d3869b">4</span>
+</span></span><span style="display:flex;"><span><span style="color:#b8bb26;font-weight:bold">.globl</span> <span style="color:#d3869b">uservec</span>
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">uservec:</span>    
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">#
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># trap.c sets stvec to point here, so
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># traps from user space start here,
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># in supervisor mode, but with a
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># user page table.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic">#
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># save user a0 in sscratch so
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># a0 can be used to get at TRAPFRAME.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">csrw</span> <span style="color:#d3869b">sscratch</span>, <span style="color:#d3869b">a0</span>   <span style="color:#928374;font-style:italic"># 保存 函数返回值 存储寄存器 a0 到 sscratch中
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># each process has a separate p-&gt;trapframe memory area,
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># but it&#39;s mapped to the same virtual address
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># (TRAPFRAME) in every process&#39;s user page table.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">li</span> <span style="color:#d3869b">a0</span>, <span style="color:#d3869b">TRAPFRAME</span> <span style="color:#928374;font-style:italic">#把 p-&gt;trapframe 的地址保存到a0中 
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># save the user registers in TRAPFRAME 
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># 存储各个寄存器到 p-&gt;trapframe, 即保存进程的状态
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">ra</span>, <span style="color:#d3869b">40</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">sp</span>, <span style="color:#d3869b">48</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">gp</span>, <span style="color:#d3869b">56</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">tp</span>, <span style="color:#d3869b">64</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t0</span>, <span style="color:#d3869b">72</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t1</span>, <span style="color:#d3869b">80</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t2</span>, <span style="color:#d3869b">88</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s0</span>, <span style="color:#d3869b">96</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s1</span>, <span style="color:#d3869b">104</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a1</span>, <span style="color:#d3869b">120</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a2</span>, <span style="color:#d3869b">128</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a3</span>, <span style="color:#d3869b">136</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a4</span>, <span style="color:#d3869b">144</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a5</span>, <span style="color:#d3869b">152</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a6</span>, <span style="color:#d3869b">160</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a7</span>, <span style="color:#d3869b">168</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s2</span>, <span style="color:#d3869b">176</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s3</span>, <span style="color:#d3869b">184</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s4</span>, <span style="color:#d3869b">192</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s5</span>, <span style="color:#d3869b">200</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s6</span>, <span style="color:#d3869b">208</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s7</span>, <span style="color:#d3869b">216</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s8</span>, <span style="color:#d3869b">224</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s9</span>, <span style="color:#d3869b">232</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s10</span>, <span style="color:#d3869b">240</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s11</span>, <span style="color:#d3869b">248</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t3</span>, <span style="color:#d3869b">256</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t4</span>, <span style="color:#d3869b">264</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t5</span>, <span style="color:#d3869b">272</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t6</span>, <span style="color:#d3869b">280</span>(<span style="color:#d3869b">a0</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4"># save the user a0 in p-&gt;trapframe-&gt;a0
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">csrr</span> t0, sscratch
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t0, <span style="color:#bd93f9">112</span>(a0)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic"># save the user a0 in p-&gt;trapframe-&gt;a0
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">csrr</span> <span style="color:#d3869b">t0</span>, <span style="color:#d3869b">sscratch</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t0</span>, <span style="color:#d3869b">112</span>(<span style="color:#d3869b">a0</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># initialize kernel stack pointer, from p-&gt;trapframe-&gt;kernel_sp
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># 将 kernel栈帧的栈顶存储到寄存器sp中
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">ld</span> sp, <span style="color:#bd93f9">8</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># initialize kernel stack pointer, from p-&gt;trapframe-&gt;kernel_sp
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># 将 kernel栈帧的栈顶存储到寄存器sp中
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">sp</span>, <span style="color:#d3869b">8</span>(<span style="color:#d3869b">a0</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># make tp hold the current hartid, from p-&gt;trapframe-&gt;kernel_hartid
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># 将 hartid 储存到寄存器 tp 中
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">ld</span> tp, <span style="color:#bd93f9">32</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># make tp hold the current hartid, from p-&gt;trapframe-&gt;kernel_hartid
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># 将 hartid 储存到寄存器 tp 中
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">tp</span>, <span style="color:#d3869b">32</span>(<span style="color:#d3869b">a0</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># load the address of usertrap(), from p-&gt;trapframe-&gt;kernel_trap
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># 将 函数 usertrap() 的地址存储到寄存器 t0 中
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">ld</span> t0, <span style="color:#bd93f9">16</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># load the address of usertrap(), from p-&gt;trapframe-&gt;kernel_trap
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># 将 函数 usertrap() 的地址存储到寄存器 t0 中
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t0</span>, <span style="color:#d3869b">16</span>(<span style="color:#d3869b">a0</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># fetch the kernel page table address, from p-&gt;trapframe-&gt;kernel_satp.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># 将 kernel 的 page table 的地址 kernel_pagetable 存储到寄存器 t1 中， 
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">ld</span> t1, <span style="color:#bd93f9">0</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># fetch the kernel page table address, from p-&gt;trapframe-&gt;kernel_satp.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># 将 kernel 的 page table 的地址 kernel_pagetable 存储到寄存器 t1 中， 
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t1</span>, <span style="color:#d3869b">0</span>(<span style="color:#d3869b">a0</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># wait for any previous memory operations to complete, so that
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># they use the user page table.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># 切换到内核的 page table
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">sfence.vma</span> zero, zero
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># wait for any previous memory operations to complete, so that
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># they use the user page table.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># 切换到内核的 page table
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">sfence.vma</span> <span style="color:#d3869b">zero</span>, <span style="color:#d3869b">zero</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># install the kernel page table.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">csrw</span> satp, t1
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># install the kernel page table.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">csrw</span> <span style="color:#d3869b">satp</span>, <span style="color:#d3869b">t1</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># flush now-stale user entries from the TLB.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">sfence.vma</span> zero, zero
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># flush now-stale user entries from the TLB.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">sfence.vma</span> <span style="color:#d3869b">zero</span>, <span style="color:#d3869b">zero</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># jump to usertrap(), which does not return
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># jump 到函数 usertrap()
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">jr</span> t0
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># ...
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># jump to usertrap(), which does not return
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># jump 到函数 usertrap()
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">jr</span> <span style="color:#d3869b">t0</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># ...
 </span></span></span></code></pre></div><p>根据上面的代码，uservec 的处理流程如下：</p>
 <ul>
 <li>用户态
@@ -511,58 +511,58 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 </ul>
 <h3 id="usertrap">usertrap</h3>
 <p>下面来看下 usertrap 这个函数，这个函数在 <code>kernel/trap.c</code> 下，这个是核心部分：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">usertrap</span>(<span style="color:#8be9fd">void</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">usertrap</span>(<span style="color:#fabd2f">void</span>)
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">int</span> which_dev <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> which_dev <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>((<span style="color:#50fa7b">r_sstatus</span>() <span style="color:#ff79c6">&amp;</span> SSTATUS_SPP) <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">panic</span>(<span style="color:#f1fa8c">&#34;usertrap: not from user mode&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>((<span style="color:#fabd2f">r_sstatus</span>() <span style="color:#fe8019">&amp;</span> SSTATUS_SPP) <span style="color:#fe8019">!=</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;usertrap: not from user mode&#34;</span>);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// send interrupts and exceptions to kerneltrap(),
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// since we&#39;re now in the kernel.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// 把内核态的 trap 处理函数 kernelvec的地址存储到 寄存器STVEC，因为需要处理内核态发生 trap 的情形
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#50fa7b">w_stvec</span>((uint64)kernelvec);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// send interrupts and exceptions to kerneltrap(),
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// since we&#39;re now in the kernel.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 把内核态的 trap 处理函数 kernelvec的地址存储到 寄存器STVEC，因为需要处理内核态发生 trap 的情形
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">w_stvec</span>((uint64)kernelvec);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proc <span style="color:#ff79c6">*</span>p <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">myproc</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">myproc</span>();
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// save user program counter.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// 把寄存器 SEPC 的值存储到 p-&gt;trapfram-&gt;epc, 从上面得知是用户态时候的寄存器 pc 的值
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  p<span style="color:#ff79c6">-&gt;</span>trapframe<span style="color:#ff79c6">-&gt;</span>epc <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">r_sepc</span>();
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 判断是因为啥而触发了trap 
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">if</span>(<span style="color:#50fa7b">r_scause</span>() <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">8</span>){
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// system call
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#6272a4">// 系统调用
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">if</span>(<span style="color:#50fa7b">killed</span>(p))
-</span></span><span style="display:flex;"><span>      <span style="color:#50fa7b">exit</span>(<span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// save user program counter.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 把寄存器 SEPC 的值存储到 p-&gt;trapfram-&gt;epc, 从上面得知是用户态时候的寄存器 pc 的值
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>epc <span style="color:#fe8019">=</span> <span style="color:#fabd2f">r_sepc</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 判断是因为啥而触发了trap 
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">r_scause</span>() <span style="color:#fe8019">==</span> <span style="color:#d3869b">8</span>){
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// system call
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#928374;font-style:italic">// 系统调用
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">killed</span>(p))
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">exit</span>(<span style="color:#fe8019">-</span><span style="color:#d3869b">1</span>);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// sepc points to the ecall instruction,
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#6272a4">// but we want to return to the next instruction.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#6272a4">// 用户态 调用 ecall 时的下一条指令，衔接 ecall 返回后，即返回到用户态后继续执行，避免再次调用ecall造成死循环
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    p<span style="color:#ff79c6">-&gt;</span>trapframe<span style="color:#ff79c6">-&gt;</span>epc <span style="color:#ff79c6">+=</span> <span style="color:#bd93f9">4</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// sepc points to the ecall instruction,
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#928374;font-style:italic">// but we want to return to the next instruction.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#928374;font-style:italic">// 用户态 调用 ecall 时的下一条指令，衔接 ecall 返回后，即返回到用户态后继续执行，避免再次调用ecall造成死循环
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>epc <span style="color:#fe8019">+=</span> <span style="color:#d3869b">4</span>;
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// an interrupt will change sepc, scause, and sstatus,
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#6272a4">// so enable only now that we&#39;re done with those registers.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#50fa7b">intr_on</span>();
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// 执行系统调用
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#50fa7b">sysdall</span>();
-</span></span><span style="display:flex;"><span>  } <span style="color:#ff79c6">else</span> <span style="color:#ff79c6">if</span>((which_dev <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">devintr</span>()) <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">0</span>){ <span style="color:#6272a4">// 设备中断
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#6272a4">// ok
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  } <span style="color:#ff79c6">else</span> { <span style="color:#6272a4">// 异常状态，杀死进程
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;usertrap(): unexpected scause 0x%lx pid=%d</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>, <span style="color:#50fa7b">r_scause</span>(), p<span style="color:#ff79c6">-&gt;</span>pid);
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;            sepc=0x%lx stval=0x%lx</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>, <span style="color:#50fa7b">r_sepc</span>(), <span style="color:#50fa7b">r_stval</span>());
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">setkilled</span>(p);
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// an interrupt will change sepc, scause, and sstatus,
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#928374;font-style:italic">// so enable only now that we&#39;re done with those registers.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#fabd2f">intr_on</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 执行系统调用
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#fabd2f">sysdall</span>();
+</span></span><span style="display:flex;"><span>  } <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span>((which_dev <span style="color:#fe8019">=</span> <span style="color:#fabd2f">devintr</span>()) <span style="color:#fe8019">!=</span> <span style="color:#d3869b">0</span>){ <span style="color:#928374;font-style:italic">// 设备中断
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#928374;font-style:italic">// ok
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  } <span style="color:#fe8019">else</span> { <span style="color:#928374;font-style:italic">// 异常状态，杀死进程
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#fabd2f">printf</span>(<span style="color:#b8bb26">&#34;usertrap(): unexpected scause 0x%lx pid=%d</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>, <span style="color:#fabd2f">r_scause</span>(), p<span style="color:#fe8019">-&gt;</span>pid);
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">printf</span>(<span style="color:#b8bb26">&#34;            sepc=0x%lx stval=0x%lx</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>, <span style="color:#fabd2f">r_sepc</span>(), <span style="color:#fabd2f">r_stval</span>());
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">setkilled</span>(p);
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(<span style="color:#50fa7b">killed</span>(p))
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">exit</span>(<span style="color:#ff79c6">-</span><span style="color:#bd93f9">1</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">killed</span>(p))
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">exit</span>(<span style="color:#fe8019">-</span><span style="color:#d3869b">1</span>);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// give up the CPU if this is a timer interrupt.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">if</span>(which_dev <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">2</span>)<span style="color:#6272a4">// 时钟中断
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#50fa7b">yield</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// give up the CPU if this is a timer interrupt.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">if</span>(which_dev <span style="color:#fe8019">==</span> <span style="color:#d3869b">2</span>)<span style="color:#928374;font-style:italic">// 时钟中断
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#fabd2f">yield</span>();
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">usertrapret</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">usertrapret</span>();
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>usertrap 的处理流程如下：</p>
 <ul>
@@ -579,56 +579,56 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 </ul>
 <h3 id="usertrapret">usertrapret</h3>
 <p>如下是 usertrapret 的代码：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8be9fd">void</span>
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">usertrapret</span>(<span style="color:#8be9fd">void</span>)
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">usertrapret</span>(<span style="color:#fabd2f">void</span>)
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">struct</span> proc <span style="color:#ff79c6">*</span>p <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">myproc</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">myproc</span>();
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// we&#39;re about to switch the destination of traps from
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// kerneltrap() to usertrap(), so turn off interrupts until
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// we&#39;re back in user space, where usertrap() is correct.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#50fa7b">intr_off</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// we&#39;re about to switch the destination of traps from
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// kerneltrap() to usertrap(), so turn off interrupts until
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// we&#39;re back in user space, where usertrap() is correct.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">intr_off</span>();
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// send syscalls, interrupts, and exceptions to uservec in trampoline.S
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// 设置寄存器STVEC ，指向 trampoline, 首尾呼应 
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  uint64 trampoline_uservec <span style="color:#ff79c6">=</span> TRAMPOLINE <span style="color:#ff79c6">+</span> (uservec <span style="color:#ff79c6">-</span> trampoline);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">w_stvec</span>(trampoline_uservec);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// send syscalls, interrupts, and exceptions to uservec in trampoline.S
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 设置寄存器STVEC ，指向 trampoline, 首尾呼应 
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  uint64 trampoline_uservec <span style="color:#fe8019">=</span> TRAMPOLINE <span style="color:#fe8019">+</span> (uservec <span style="color:#fe8019">-</span> trampoline);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">w_stvec</span>(trampoline_uservec);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// set up trapframe values that uservec will need when
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// the process next traps into the kernel.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// 填充 p-&gt;trapfram 中内核的相关参数，供下次trap的时候，uservec 使用
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  p<span style="color:#ff79c6">-&gt;</span>trapframe<span style="color:#ff79c6">-&gt;</span>kernel_satp <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">r_satp</span>();         <span style="color:#6272a4">// kernel page table
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  p<span style="color:#ff79c6">-&gt;</span>trapframe<span style="color:#ff79c6">-&gt;</span>kernel_sp <span style="color:#ff79c6">=</span> p<span style="color:#ff79c6">-&gt;</span>kstack <span style="color:#ff79c6">+</span> PGSIZE; <span style="color:#6272a4">// process&#39;s kernel stack
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  p<span style="color:#ff79c6">-&gt;</span>trapframe<span style="color:#ff79c6">-&gt;</span>kernel_trap <span style="color:#ff79c6">=</span> (uint64)usertrap;
-</span></span><span style="display:flex;"><span>  p<span style="color:#ff79c6">-&gt;</span>trapframe<span style="color:#ff79c6">-&gt;</span>kernel_hartid <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">r_tp</span>();         <span style="color:#6272a4">// hartid for cpuid()
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// set up the registers that trampoline.S&#39;s sret will use
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// to get to user space.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// set S Previous Privilege mode to User.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// 设置寄存器 sstatus
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#8be9fd">unsigned</span> <span style="color:#8be9fd">long</span> x <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">r_sstatus</span>();
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// 设置用户特权级别
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  x <span style="color:#ff79c6">&amp;=</span> <span style="color:#ff79c6">~</span>SSTATUS_SPP; <span style="color:#6272a4">// clear SPP to 0 for user mode
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// 恢复进入到监督模式之前中断开/关状态
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  x <span style="color:#ff79c6">|=</span> SSTATUS_SPIE; <span style="color:#6272a4">// enable interrupts in user mode
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#50fa7b">w_sstatus</span>(x);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// set up trapframe values that uservec will need when
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// the process next traps into the kernel.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 填充 p-&gt;trapfram 中内核的相关参数，供下次trap的时候，uservec 使用
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>kernel_satp <span style="color:#fe8019">=</span> <span style="color:#fabd2f">r_satp</span>();         <span style="color:#928374;font-style:italic">// kernel page table
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>kernel_sp <span style="color:#fe8019">=</span> p<span style="color:#fe8019">-&gt;</span>kstack <span style="color:#fe8019">+</span> PGSIZE; <span style="color:#928374;font-style:italic">// process&#39;s kernel stack
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>kernel_trap <span style="color:#fe8019">=</span> (uint64)usertrap;
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>kernel_hartid <span style="color:#fe8019">=</span> <span style="color:#fabd2f">r_tp</span>();         <span style="color:#928374;font-style:italic">// hartid for cpuid()
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// set up the registers that trampoline.S&#39;s sret will use
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// to get to user space.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// set S Previous Privilege mode to User.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 设置寄存器 sstatus
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">unsigned</span> <span style="color:#fabd2f">long</span> x <span style="color:#fe8019">=</span> <span style="color:#fabd2f">r_sstatus</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 设置用户特权级别
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  x <span style="color:#fe8019">&amp;=</span> <span style="color:#fe8019">~</span>SSTATUS_SPP; <span style="color:#928374;font-style:italic">// clear SPP to 0 for user mode
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 恢复进入到监督模式之前中断开/关状态
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  x <span style="color:#fe8019">|=</span> SSTATUS_SPIE; <span style="color:#928374;font-style:italic">// enable interrupts in user mode
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">w_sstatus</span>(x);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// set S Exception Program Counter to the saved user pc.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// 设置 寄存器 sepc 的值， 在sret 的时候，sepc 会赋值给寄存器 pc
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#50fa7b">w_sepc</span>(p<span style="color:#ff79c6">-&gt;</span>trapframe<span style="color:#ff79c6">-&gt;</span>epc);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// set S Exception Program Counter to the saved user pc.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 设置 寄存器 sepc 的值， 在sret 的时候，sepc 会赋值给寄存器 pc
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">w_sepc</span>(p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>epc);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// tell trampoline.S the user page table to switch to.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// 获取到用户态的page table
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  uint64 satp <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">MAKE_SATP</span>(p<span style="color:#ff79c6">-&gt;</span>pagetable);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// tell trampoline.S the user page table to switch to.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 获取到用户态的page table
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  uint64 satp <span style="color:#fe8019">=</span> <span style="color:#fabd2f">MAKE_SATP</span>(p<span style="color:#fe8019">-&gt;</span>pagetable);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// jump to userret in trampoline.S at the top of memory, which 
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// switches to the user page table, restores user registers,
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// and switches to user mode with sret.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// 调用 userret 从内核态切换到用户态
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  uint64 trampoline_userret <span style="color:#ff79c6">=</span> TRAMPOLINE <span style="color:#ff79c6">+</span> (userret <span style="color:#ff79c6">-</span> trampoline);
-</span></span><span style="display:flex;"><span>  ((<span style="color:#8be9fd">void</span> (<span style="color:#ff79c6">*</span>)(uint64))trampoline_userret)(satp); <span style="color:#6272a4">// satp 存储到寄存器a0中
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>}
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// jump to userret in trampoline.S at the top of memory, which 
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// switches to the user page table, restores user registers,
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// and switches to user mode with sret.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 调用 userret 从内核态切换到用户态
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  uint64 trampoline_userret <span style="color:#fe8019">=</span> TRAMPOLINE <span style="color:#fe8019">+</span> (userret <span style="color:#fe8019">-</span> trampoline);
+</span></span><span style="display:flex;"><span>  ((<span style="color:#fabd2f">void</span> (<span style="color:#fe8019">*</span>)(uint64))trampoline_userret)(satp); <span style="color:#928374;font-style:italic">// satp 存储到寄存器a0中
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>}
 </span></span></code></pre></div><p>usertrapret 的处理流程大致如下：</p>
 <ul>
 <li>设置寄存器 stvec, 指向 <code>kernel/trampoline.S</code> 中的 uservec，形成完美闭环。</li>
@@ -644,125 +644,125 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 <li>恢复用户态函数的执行状态（通过读取 trapframe 结构体来恢复各个寄存器的值)。</li>
 <li>调用 sret 指令，跳转到用户态， 会把寄存器 sepc 的值（从上述可知是 <code>ecall</code> 的下一条指令）就会加载到寄存器 pc，让用户态函数继续执行。</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#50fa7b">.globl</span> userret
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">userret:</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># userret(pagetable)
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># called by usertrapret() in trap.c to
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># switch from kernel to user.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># a0: user page table, for satp.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># switch to the user page table.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">sfence.vma</span> zero, zero
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">csrw</span> satp, a0
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sfence.vma</span> zero, zero
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#b8bb26;font-weight:bold">.globl</span> <span style="color:#d3869b">userret</span>
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">userret:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># userret(pagetable)
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># called by usertrapret() in trap.c to
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># switch from kernel to user.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># a0: user page table, for satp.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># switch to the user page table.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">sfence.vma</span> <span style="color:#d3869b">zero</span>, <span style="color:#d3869b">zero</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">csrw</span> <span style="color:#d3869b">satp</span>, <span style="color:#d3869b">a0</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sfence.vma</span> <span style="color:#d3869b">zero</span>, <span style="color:#d3869b">zero</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">li</span> a0, TRAPFRAME
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">li</span> <span style="color:#d3869b">a0</span>, <span style="color:#d3869b">TRAPFRAME</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># restore all but a0 from TRAPFRAME
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">ld</span> ra, <span style="color:#bd93f9">40</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> sp, <span style="color:#bd93f9">48</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> gp, <span style="color:#bd93f9">56</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> tp, <span style="color:#bd93f9">64</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> t0, <span style="color:#bd93f9">72</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> t1, <span style="color:#bd93f9">80</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> t2, <span style="color:#bd93f9">88</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s0, <span style="color:#bd93f9">96</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s1, <span style="color:#bd93f9">104</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a1, <span style="color:#bd93f9">120</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a2, <span style="color:#bd93f9">128</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a3, <span style="color:#bd93f9">136</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a4, <span style="color:#bd93f9">144</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a5, <span style="color:#bd93f9">152</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a6, <span style="color:#bd93f9">160</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a7, <span style="color:#bd93f9">168</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s2, <span style="color:#bd93f9">176</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s3, <span style="color:#bd93f9">184</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s4, <span style="color:#bd93f9">192</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s5, <span style="color:#bd93f9">200</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s6, <span style="color:#bd93f9">208</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s7, <span style="color:#bd93f9">216</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s8, <span style="color:#bd93f9">224</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s9, <span style="color:#bd93f9">232</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s10, <span style="color:#bd93f9">240</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> s11, <span style="color:#bd93f9">248</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> t3, <span style="color:#bd93f9">256</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> t4, <span style="color:#bd93f9">264</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> t5, <span style="color:#bd93f9">272</span>(a0)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> t6, <span style="color:#bd93f9">280</span>(a0)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># restore all but a0 from TRAPFRAME
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">ra</span>, <span style="color:#d3869b">40</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">sp</span>, <span style="color:#d3869b">48</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">gp</span>, <span style="color:#d3869b">56</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">tp</span>, <span style="color:#d3869b">64</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t0</span>, <span style="color:#d3869b">72</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t1</span>, <span style="color:#d3869b">80</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t2</span>, <span style="color:#d3869b">88</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s0</span>, <span style="color:#d3869b">96</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s1</span>, <span style="color:#d3869b">104</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a1</span>, <span style="color:#d3869b">120</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a2</span>, <span style="color:#d3869b">128</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a3</span>, <span style="color:#d3869b">136</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a4</span>, <span style="color:#d3869b">144</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a5</span>, <span style="color:#d3869b">152</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a6</span>, <span style="color:#d3869b">160</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a7</span>, <span style="color:#d3869b">168</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s2</span>, <span style="color:#d3869b">176</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s3</span>, <span style="color:#d3869b">184</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s4</span>, <span style="color:#d3869b">192</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s5</span>, <span style="color:#d3869b">200</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s6</span>, <span style="color:#d3869b">208</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s7</span>, <span style="color:#d3869b">216</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s8</span>, <span style="color:#d3869b">224</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s9</span>, <span style="color:#d3869b">232</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s10</span>, <span style="color:#d3869b">240</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s11</span>, <span style="color:#d3869b">248</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t3</span>, <span style="color:#d3869b">256</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t4</span>, <span style="color:#d3869b">264</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t5</span>, <span style="color:#d3869b">272</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t6</span>, <span style="color:#d3869b">280</span>(<span style="color:#d3869b">a0</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#6272a4"># restore user a0
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">ld</span> a0, <span style="color:#bd93f9">112</span>(a0)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic"># restore user a0
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a0</span>, <span style="color:#d3869b">112</span>(<span style="color:#d3869b">a0</span>)
 </span></span><span style="display:flex;"><span>        
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># return to user mode and user pc.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># usertrapret() set up sstatus and sepc.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">sret</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># return to user mode and user pc.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># usertrapret() set up sstatus and sepc.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">sret</span>
 </span></span></code></pre></div><h2 id="xv6-内核态触发-trap-处理流程">xv6 内核态触发 trap 处理流程</h2>
 <h3 id="kernelvec">kernelvec</h3>
 <p>内核态 trap 的处理要比用户态trap的处理简单的多，先存储寄存器，然后调用 kerneltrap 处理逻辑，最后恢复寄存器：</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span>        <span style="color:#6272a4">#
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># interrupts and exceptions while in supervisor
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># mode come here.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4">#
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># the current stack is a kernel stack.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># push registers, call kerneltrap().
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4"># when kerneltrap() returns, restore registers, return.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#6272a4">#
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#50fa7b">.globl</span> kerneltrap
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">.globl</span> kernelvec
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">.align</span> <span style="color:#bd93f9">4</span>
-</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">kernelvec:</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># make room to save registers.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">addi</span> sp, sp, -<span style="color:#bd93f9">256</span>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">#
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># interrupts and exceptions while in supervisor
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># mode come here.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic">#
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># the current stack is a kernel stack.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># push registers, call kerneltrap().
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># when kerneltrap() returns, restore registers, return.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic">#
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#b8bb26;font-weight:bold">.globl</span> <span style="color:#d3869b">kerneltrap</span>
+</span></span><span style="display:flex;"><span><span style="color:#b8bb26;font-weight:bold">.globl</span> <span style="color:#d3869b">kernelvec</span>
+</span></span><span style="display:flex;"><span><span style="color:#b8bb26;font-weight:bold">.align</span> <span style="color:#d3869b">4</span>
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">kernelvec:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># make room to save registers.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">addi</span> <span style="color:#d3869b">sp</span>, <span style="color:#d3869b">sp</span>, -<span style="color:#d3869b">256</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># save caller-saved registers.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">sd</span> ra, <span style="color:#bd93f9">0</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> sp, <span style="color:#bd93f9">8</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> gp, <span style="color:#bd93f9">16</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> tp, <span style="color:#bd93f9">24</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t0, <span style="color:#bd93f9">32</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t1, <span style="color:#bd93f9">40</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t2, <span style="color:#bd93f9">48</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a0, <span style="color:#bd93f9">72</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a1, <span style="color:#bd93f9">80</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a2, <span style="color:#bd93f9">88</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a3, <span style="color:#bd93f9">96</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a4, <span style="color:#bd93f9">104</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a5, <span style="color:#bd93f9">112</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a6, <span style="color:#bd93f9">120</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> a7, <span style="color:#bd93f9">128</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t3, <span style="color:#bd93f9">216</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t4, <span style="color:#bd93f9">224</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t5, <span style="color:#bd93f9">232</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">sd</span> t6, <span style="color:#bd93f9">240</span>(sp)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># save caller-saved registers.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">ra</span>, <span style="color:#d3869b">0</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">sp</span>, <span style="color:#d3869b">8</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">gp</span>, <span style="color:#d3869b">16</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">tp</span>, <span style="color:#d3869b">24</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t0</span>, <span style="color:#d3869b">32</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t1</span>, <span style="color:#d3869b">40</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t2</span>, <span style="color:#d3869b">48</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a0</span>, <span style="color:#d3869b">72</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a1</span>, <span style="color:#d3869b">80</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a2</span>, <span style="color:#d3869b">88</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a3</span>, <span style="color:#d3869b">96</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a4</span>, <span style="color:#d3869b">104</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a5</span>, <span style="color:#d3869b">112</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a6</span>, <span style="color:#d3869b">120</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">a7</span>, <span style="color:#d3869b">128</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t3</span>, <span style="color:#d3869b">216</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t4</span>, <span style="color:#d3869b">224</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t5</span>, <span style="color:#d3869b">232</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">t6</span>, <span style="color:#d3869b">240</span>(<span style="color:#d3869b">sp</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># call the C trap handler in trap.c
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">call</span> kerneltrap
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># call the C trap handler in trap.c
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">call</span> <span style="color:#d3869b">kerneltrap</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># restore registers.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">ld</span> ra, <span style="color:#bd93f9">0</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> sp, <span style="color:#bd93f9">8</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> gp, <span style="color:#bd93f9">16</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># not tp (contains hartid), in case we moved CPUs
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">ld</span> t0, <span style="color:#bd93f9">32</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> t1, <span style="color:#bd93f9">40</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> t2, <span style="color:#bd93f9">48</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a0, <span style="color:#bd93f9">72</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a1, <span style="color:#bd93f9">80</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a2, <span style="color:#bd93f9">88</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a3, <span style="color:#bd93f9">96</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a4, <span style="color:#bd93f9">104</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a5, <span style="color:#bd93f9">112</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a6, <span style="color:#bd93f9">120</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> a7, <span style="color:#bd93f9">128</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> t3, <span style="color:#bd93f9">216</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> t4, <span style="color:#bd93f9">224</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> t5, <span style="color:#bd93f9">232</span>(sp)
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">ld</span> t6, <span style="color:#bd93f9">240</span>(sp)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># restore registers.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">ra</span>, <span style="color:#d3869b">0</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">sp</span>, <span style="color:#d3869b">8</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">gp</span>, <span style="color:#d3869b">16</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># not tp (contains hartid), in case we moved CPUs
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t0</span>, <span style="color:#d3869b">32</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t1</span>, <span style="color:#d3869b">40</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t2</span>, <span style="color:#d3869b">48</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a0</span>, <span style="color:#d3869b">72</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a1</span>, <span style="color:#d3869b">80</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a2</span>, <span style="color:#d3869b">88</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a3</span>, <span style="color:#d3869b">96</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a4</span>, <span style="color:#d3869b">104</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a5</span>, <span style="color:#d3869b">112</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a6</span>, <span style="color:#d3869b">120</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">a7</span>, <span style="color:#d3869b">128</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t3</span>, <span style="color:#d3869b">216</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t4</span>, <span style="color:#d3869b">224</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t5</span>, <span style="color:#d3869b">232</span>(<span style="color:#d3869b">sp</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">t6</span>, <span style="color:#d3869b">240</span>(<span style="color:#d3869b">sp</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#50fa7b">addi</span> sp, sp, <span style="color:#bd93f9">256</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">addi</span> <span style="color:#d3869b">sp</span>, <span style="color:#d3869b">sp</span>, <span style="color:#d3869b">256</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#6272a4"># return to whatever we were doing in the kernel.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>        <span style="color:#50fa7b">sret</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># return to whatever we were doing in the kernel.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">sret</span>
 </span></span></code></pre></div><h3 id="kerneltrap">kerneltrap</h3>
 <p>kerneltrap 的处理也比较简单：</p>
 <ul>
@@ -773,35 +773,35 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 <li>对于时钟中断，调用 yield 进行进程切换。</li>
 <li>寄存器 spec，sstatus 复位。</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#6272a4">// interrupts and exceptions from kernel code go here via kernelvec,
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4">// on whatever the current kernel stack is.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span><span style="color:#8be9fd">void</span> 
-</span></span><span style="display:flex;"><span><span style="color:#50fa7b">kerneltrap</span>()
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// interrupts and exceptions from kernel code go here via kernelvec,
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// on whatever the current kernel stack is.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fabd2f">void</span> 
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">kerneltrap</span>()
 </span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>  <span style="color:#8be9fd">int</span> which_dev <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>;
-</span></span><span style="display:flex;"><span>  uint64 sepc <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">r_sepc</span>();
-</span></span><span style="display:flex;"><span>  uint64 sstatus <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">r_sstatus</span>();
-</span></span><span style="display:flex;"><span>  uint64 scause <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">r_scause</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> which_dev <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span>  uint64 sepc <span style="color:#fe8019">=</span> <span style="color:#fabd2f">r_sepc</span>();
+</span></span><span style="display:flex;"><span>  uint64 sstatus <span style="color:#fe8019">=</span> <span style="color:#fabd2f">r_sstatus</span>();
+</span></span><span style="display:flex;"><span>  uint64 scause <span style="color:#fe8019">=</span> <span style="color:#fabd2f">r_scause</span>();
 </span></span><span style="display:flex;"><span>  
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>((sstatus <span style="color:#ff79c6">&amp;</span> SSTATUS_SPP) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">panic</span>(<span style="color:#f1fa8c">&#34;kerneltrap: not from supervisor mode&#34;</span>);
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>(<span style="color:#50fa7b">intr_get</span>() <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">panic</span>(<span style="color:#f1fa8c">&#34;kerneltrap: interrupts enabled&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>((sstatus <span style="color:#fe8019">&amp;</span> SSTATUS_SPP) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;kerneltrap: not from supervisor mode&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">intr_get</span>() <span style="color:#fe8019">!=</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;kerneltrap: interrupts enabled&#34;</span>);
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">if</span>((which_dev <span style="color:#ff79c6">=</span> <span style="color:#50fa7b">devintr</span>()) <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">0</span>){
-</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// interrupt or trap from an unknown source
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#50fa7b">printf</span>(<span style="color:#f1fa8c">&#34;scause=0x%lx sepc=0x%lx stval=0x%lx</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>, scause, <span style="color:#50fa7b">r_sepc</span>(), <span style="color:#50fa7b">r_stval</span>());
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">panic</span>(<span style="color:#f1fa8c">&#34;kerneltrap&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>((which_dev <span style="color:#fe8019">=</span> <span style="color:#fabd2f">devintr</span>()) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span>){
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// interrupt or trap from an unknown source
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#fabd2f">printf</span>(<span style="color:#b8bb26">&#34;scause=0x%lx sepc=0x%lx stval=0x%lx</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>, scause, <span style="color:#fabd2f">r_sepc</span>(), <span style="color:#fabd2f">r_stval</span>());
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;kerneltrap&#34;</span>);
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// give up the CPU if this is a timer interrupt.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">if</span>(which_dev <span style="color:#ff79c6">==</span> <span style="color:#bd93f9">2</span> <span style="color:#ff79c6">&amp;&amp;</span> <span style="color:#50fa7b">myproc</span>() <span style="color:#ff79c6">!=</span> <span style="color:#bd93f9">0</span>)
-</span></span><span style="display:flex;"><span>    <span style="color:#50fa7b">yield</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// give up the CPU if this is a timer interrupt.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">if</span>(which_dev <span style="color:#fe8019">==</span> <span style="color:#d3869b">2</span> <span style="color:#fe8019">&amp;&amp;</span> <span style="color:#fabd2f">myproc</span>() <span style="color:#fe8019">!=</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">yield</span>();
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#6272a4">// the yield() may have caused some traps to occur,
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#6272a4">// so restore trap registers for use by kernelvec.S&#39;s sepc instruction.
-</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>  <span style="color:#50fa7b">w_sepc</span>(sepc);
-</span></span><span style="display:flex;"><span>  <span style="color:#50fa7b">w_sstatus</span>(sstatus);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// the yield() may have caused some traps to occur,
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// so restore trap registers for use by kernelvec.S&#39;s sepc instruction.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">w_sepc</span>(sepc);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">w_sstatus</span>(sstatus);
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
   </div>
