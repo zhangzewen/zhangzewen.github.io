@@ -20,14 +20,14 @@
       <link>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/</link>
       <pubDate>Mon, 21 Jul 2025 23:43:31 +0800</pubDate>
       <guid>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/</guid>
-      <description>&lt;p&gt;flannel 的 host-gw 网络模式不涉及数据包的封包和解包，就是在宿主机上配置路由规则，把其它宿主机ip当成其上所有pod的下一跳。&lt;/p&gt;&#xA;&lt;h2 id=&#34;注册和创建-host-gw-network-实例&#34;&gt;注册和创建 host-gw Network 实例&lt;/h2&gt;&#xA;&lt;p&gt;结构体 HostgwBackend 实现了接口 Backend 。&lt;/p&gt;</description>
+      <description>&lt;p&gt;flannel 的后端 host-gw 不涉及数据包的封包和解包，就是在宿主机上配置路由规则，把其它宿主机 ip 当成其上所有 pod 的下一跳。&lt;/p&gt;&#xA;&lt;h2 id=&#34;注册和创建后端-host-gw-实例&#34;&gt;注册和创建后端 host-gw 实例&lt;/h2&gt;&#xA;&lt;p&gt;结构体 HostgwBackend 实现了接口 Backend。&lt;/p&gt;</description>
     </item>
     <item>
-      <title>flannel 源码分析之 vxlan 模式</title>
+      <title>flannel 源码分析之 vxlan</title>
       <link>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/</link>
       <pubDate>Mon, 21 Jul 2025 23:43:31 +0800</pubDate>
       <guid>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/</guid>
-      <description>&lt;h2 id=&#34;注册和创建-vxlan-network-实例&#34;&gt;注册和创建 vxlan Network 实例&lt;/h2&gt;&#xA;&lt;p&gt;结构体 VXLANBackend 实现了接口 Backend 和 Network。&#xA;vxlan 注册到 flannel 的流程如下:&lt;/p&gt;</description>
+      <description>&lt;h2 id=&#34;注册和创建后端-vxlan--实例&#34;&gt;注册和创建后端 vxlan  实例&lt;/h2&gt;&#xA;&lt;p&gt;结构体 VXLANBackend 实现了接口 Backend 和 Network。&#xA;vxlan 注册到 flannel 的流程如下:&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

@@ -4,32 +4,32 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.149.0">
+  <meta name="generator" content="Hugo 0.149.1">
 
-  <title>flannel 源码分析之 vxlan 模式 &middot; What a Life!</title>
+  <title>flannel 源码分析之 vxlan &middot; What a Life!</title>
 
   <meta name="description" content="" />
 
   
-  <meta itemprop="name" content="flannel 源码分析之 vxlan 模式">
-  <meta itemprop="description" content="注册和创建 vxlan Network 实例 结构体 VXLANBackend 实现了接口 Backend 和 Network。 vxlan 注册到 flannel 的流程如下:">
+  <meta itemprop="name" content="flannel 源码分析之 vxlan">
+  <meta itemprop="description" content="注册和创建后端 vxlan 实例 结构体 VXLANBackend 实现了接口 Backend 和 Network。 vxlan 注册到 flannel 的流程如下:">
   <meta itemprop="datePublished" content="2025-07-21T23:43:31+08:00">
   <meta itemprop="dateModified" content="2025-07-21T23:43:31+08:00">
-  <meta itemprop="wordCount" content="1704">
+  <meta itemprop="wordCount" content="1703">
   <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
   <meta itemprop="keywords" content="Cni,Flannel">
 
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
-  <meta name="twitter:title" content="flannel 源码分析之 vxlan 模式">
-  <meta name="twitter:description" content="注册和创建 vxlan Network 实例 结构体 VXLANBackend 实现了接口 Backend 和 Network。 vxlan 注册到 flannel 的流程如下:">
+  <meta name="twitter:title" content="flannel 源码分析之 vxlan">
+  <meta name="twitter:description" content="注册和创建后端 vxlan 实例 结构体 VXLANBackend 实现了接口 Backend 和 Network。 vxlan 注册到 flannel 的流程如下:">
 
 
 <meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/">
   <meta property="og:site_name" content="What a Life!">
-  <meta property="og:title" content="flannel 源码分析之 vxlan 模式">
-  <meta property="og:description" content="注册和创建 vxlan Network 实例 结构体 VXLANBackend 实现了接口 Backend 和 Network。 vxlan 注册到 flannel 的流程如下:">
+  <meta property="og:title" content="flannel 源码分析之 vxlan">
+  <meta property="og:description" content="注册和创建后端 vxlan 实例 结构体 VXLANBackend 实现了接口 Backend 和 Network。 vxlan 注册到 flannel 的流程如下:">
   <meta property="og:locale" content="zh_cn">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -77,7 +77,7 @@
       "@type": "WebPage",
       "@id": "https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/#webpage",
       "url": "https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/",
-      "name": "flannel 源码分析之 vxlan 模式",
+      "name": "flannel 源码分析之 vxlan",
       "isPartOf": {
         "@id": "https://www.zhangzewen.net/#website"
       },
@@ -86,7 +86,7 @@
       },
       "datePublished": "2025-07-21T23:43:31+08:00",
       "dateModified": "2025-07-21T23:43:31+08:00",
-      "description": "\u003ch2 id=\"注册和创建-vxlan-network-实例\"\u003e注册和创建 vxlan Network 实例\u003c/h2\u003e\n\u003cp\u003e结构体 VXLANBackend 实现了接口 Backend 和 Network。\nvxlan 注册到 flannel 的流程如下:\u003c/p\u003e",
+      "description": "\u003ch2 id=\"注册和创建后端-vxlan--实例\"\u003e注册和创建后端 vxlan  实例\u003c/h2\u003e\n\u003cp\u003e结构体 VXLANBackend 实现了接口 Backend 和 Network。\nvxlan 注册到 flannel 的流程如下:\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -105,7 +105,7 @@
       "mainEntityOfPage": {
         "@id": "https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/#webpage"
       },
-      "headline": "flannel 源码分析之 vxlan 模式",
+      "headline": "flannel 源码分析之 vxlan",
       "datePublished": "2025-07-21T23:43:31+08:00",
       "dateModified": "2025-07-21T23:43:31+08:00",
       "publisher": {
@@ -170,7 +170,7 @@
   <ul>
     <li>
       <ul>
-        <li><a href="#注册和创建-vxlan-network-实例">注册和创建 vxlan Network 实例</a></li>
+        <li><a href="#注册和创建后端-vxlan--实例">注册和创建后端 vxlan  实例</a></li>
         <li><a href="#启动-vxlan-network-实例">启动 vxlan Network 实例</a></li>
         <li><a href="#vxlan-网络实现">vxlan 网络实现</a></li>
       </ul>
@@ -223,7 +223,7 @@
 
   <main class="content container">
     <div class="post">
-  <h1 class="title">flannel 源码分析之 vxlan 模式</h1>
+  <h1 class="title">flannel 源码分析之 vxlan</h1>
   
   
 
@@ -233,7 +233,7 @@
   </div>
 
   <div>
-    <h2 id="注册和创建-vxlan-network-实例">注册和创建 vxlan Network 实例</h2>
+    <h2 id="注册和创建后端-vxlan--实例">注册和创建后端 vxlan  实例</h2>
 <p>结构体 VXLANBackend 实现了接口 Backend 和 Network。
 vxlan 注册到 flannel 的流程如下:</p>
 <ul>
@@ -674,6 +674,7 @@ vxlan 注册到 flannel 的流程如下:</p>
 </span></span></code></pre></div>
 </details>
 
+<p><img src="/images/kubernetes/cni/flannel_vxlan.png" alt=""></p>
 
   </div>
 

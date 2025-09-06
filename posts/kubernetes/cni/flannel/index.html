@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.149.0">
+  <meta name="generator" content="Hugo 0.149.1">
 
   <title>flannel 源码分析 &middot; What a Life!</title>
 
@@ -16,7 +16,7 @@
 { &#34;Network&#34;:&#34;10.0.0.0/16&#34;, &#34;SubnetLen&#34;:24, &#34;SubnetMin&#34;:&#34;10.0.1.0&#34;, &#34;SubnetMax&#34;:&#34;10.0.20.0&#34;, &#34;Backend&#34;:{ &#34;Type&#34;:&#34;vxlan&#34; } } Network：用于指定 flannel 地址池。 SubnetLen：用于指定分配给单个宿主机的 docker0 的 ip 段的子网掩码的长度。 SubnetMin：用于指定最小能够分配的 ip 段。 SudbnetMax：用于指定最大能够分配的 ip 段，在上面的示例中，表示每个宿主机可以分配一个 24 位掩码长度的子网， 可以分配的子网从 10.0.1.0/24 到 10.0.20.0/24，也就意味着在这个网段中，最多只能有20台宿主机。 Backend：用于在跨主机通信时指定数据包以什么方式转发，如 vxlan、host-gw 和 udp 等。 flannel 中比较重要的概念：">
   <meta itemprop="datePublished" content="2025-07-21T23:43:31+08:00">
   <meta itemprop="dateModified" content="2025-07-21T23:43:31+08:00">
-  <meta itemprop="wordCount" content="1713">
+  <meta itemprop="wordCount" content="1718">
   <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Cni,Flannel">
 
@@ -175,8 +175,8 @@
   <ul>
     <li>
       <ul>
-        <li><a href="#子网管理">子网管理</a></li>
-        <li><a href="#后端网络管理">后端网络管理</a></li>
+        <li><a href="#subnet-管理">Subnet 管理</a></li>
+        <li><a href="#backend-管理">Backend 管理</a></li>
       </ul>
     </li>
   </ul>
@@ -263,7 +263,7 @@
 <li>租约 （Lease）：子网信息和主机关联信息的管理，至于问什么叫租约，可以理解为主机是租用 subnet，
 如果到了一定的时间不进行更新，该 subnet 就会过期从而会把该 subnet 分配给其他的主机。</li>
 </ul>
-<h2 id="子网管理">子网管理</h2>
+<h2 id="subnet-管理">Subnet 管理</h2>
 <p>subnet manager, 即子网 ip 的管理。接口 Manager 定义了 subnet manager 需要实现的方法：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Manager <span style="color:#fe8019">interface</span> {
 </span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetNetworkConfig</span>(ctx context.Context) (<span style="color:#fe8019">*</span>Config, <span style="color:#fabd2f">error</span>)
@@ -317,7 +317,7 @@
 </span></span><span style="display:flex;"><span>    cpu: <span style="color:#b8bb26">&#34;32&#34;</span>
 </span></span><span style="display:flex;"><span>    ephemeral-storage: <span style="color:#b8bb26">&#34;538365220792&#34;</span>
 </span></span><span style="display:flex;"><span>    hugepages-1Gi: <span style="color:#b8bb26">&#34;0&#34;</span>
-</span></span></code></pre></div><p><code>.metadata.annotations</code> 中的 &ldquo;flannel.alpha.coreos.com/xxx&rdquo; 都是在 flannel 成功部署到 kubernetes 后更新上去的，<code>spec.podCIDR</code> 即上述所说的 kubernetes把子网都分配，该节点上的所有的 pod 的 ip 都在这个子网内分配。</p>
+</span></span></code></pre></div><p><code>.metadata.annotations</code> 中的以 &ldquo;flannel.alpha.coreos.com/&rdquo; 为前缀的 key 所对应的键值对都是在 flannel 成功部署到 kubernetes 后更新上去的，<code>spec.podCIDR</code> 即上述所说的 kubernetes 所分配的子网，该节点上的所有的 pod 的 ip 都在这个子网内分配。</p>
 <p>结构体 kubeSubnetManager 实现了 Manager 接口。</p>
 <p>调用 NewSubnetManager 来创建 kubeSubnetManager：</p>
 <details>
@@ -644,7 +644,7 @@
 </span></span></code></pre></div>
 </details>
 
-<p>subnet manager 和接下来要分析的 backend 之间的交互是通过 <code>kubeSubnetManager.events</code> 管道，flannel 所支持的网络插件会消费 subnet manager 所生产的事件：</p>
+<p>subnet manager 和接下来要分析的 backend 之间的交互是通过 <code>kubeSubnetManager.events</code> 管道，flannel 所支持的网络后端会消费 subnet manager 所生产的事件：</p>
 <details>
     <summary>CLICK ME</summary>
     <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (ksm <span style="color:#fe8019">*</span>kubeSubnetManager) <span style="color:#fabd2f">WatchLeases</span>(ctx context.Context, receiver <span style="color:#fe8019">chan</span> []lease.LeaseWatchResult) <span style="color:#fabd2f">error</span> {
@@ -710,18 +710,18 @@
 </span></span></code></pre></div>
 </details>
 
-<h2 id="后端网络管理">后端网络管理</h2>
-<p>flannel 通过接口 Network 来表示其支持的网络模式应该实现的通用方法集：</p>
+<h2 id="backend-管理">Backend 管理</h2>
+<p>flannel 通过接口 Network 来表示其支持的网络后端应该实现的通用方法集：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Network <span style="color:#fe8019">interface</span> {
 </span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Lease</span>() <span style="color:#fe8019">*</span>lease.Lease
 </span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">MTU</span>() <span style="color:#fabd2f">int</span>
 </span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Run</span>(ctx context.Context)
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>且其支持的网络模式都实现了接口 Backend，以实现其支持的网络模式可以注册到 flannel backend manager:</p>
+</span></span></code></pre></div><p>且其支持的网络后端都实现了接口 Backend，以实现其支持的网络模式可以注册到 flannel backend manager:</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Backend <span style="color:#fe8019">interface</span> {
 </span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">RegisterNetwork</span>(ctx context.Context, wg <span style="color:#fe8019">*</span>sync.WaitGroup, config <span style="color:#fe8019">*</span>subnet.Config) (Network, <span style="color:#fabd2f">error</span>)
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>这里只展示 flannel 所支持的网络模式 vxlan 是如何注册进来的，flannel 在启动阶段就会注册 xvlan 网络模式：</p>
+</span></span></code></pre></div><p>这里只展示 flannel 所支持的网络后端 vxlan 是如何注册进来的，flannel 在启动阶段就会注册 xvlan 网络模式：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// pkg/backend/vxlan/vxlan.go</span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">init</span>() {
 </span></span><span style="display:flex;"><span>	backend.<span style="color:#fabd2f">Register</span>(<span style="color:#b8bb26">&#34;vxlan&#34;</span>, New)
@@ -759,7 +759,7 @@
 </span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> be, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 获取对应的网络模式的构造方法</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 获取对应的网络后端的构造方法</span>
 </span></span><span style="display:flex;"><span>	befunc, ok <span style="color:#fe8019">:=</span> constructors[betype]
 </span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !ok {
 </span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;unknown backend type: %v&#34;</span>, betype)
@@ -796,7 +796,7 @@
 </span></span></code></pre></div>
 </details>
 
-<p>篇幅有限，后端模式 xvlan 和 host-gw 的解析请查看如下文章：</p>
+<p>网络后端 xvlan 和 host-gw 的源码分析请查看如下文章：</p>
 <p><a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/">flannel 源码分析之 host-gw 模式</a></p>
 <p><a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/">flannel 源码分析之 xvlan 模式</a></p>
 
