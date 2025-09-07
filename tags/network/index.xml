@@ -15,12 +15,5 @@
       <guid>https://www.zhangzewen.net/posts/linux/cs144_simple_summary/</guid>
       <description>&lt;h2 id=&#34;环境准备&#34;&gt;环境准备&lt;/h2&gt;&#xA;&lt;p&gt;我的机器是 2020 年的 intel mbp， 该项目在 mac 下是跑不通的，需要安装虚拟机，这里提供一个 lima 的虚拟机配置：&lt;/p&gt;</description>
     </item>
-    <item>
-      <title>kubernetes Service 机制</title>
-      <link>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/services/</link>
-      <pubDate>Sat, 07 Sep 2024 19:43:31 +0800</pubDate>
-      <guid>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/services/</guid>
-      <description></description>
-    </item>
   </channel>
 </rss>

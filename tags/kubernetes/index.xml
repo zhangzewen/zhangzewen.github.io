@@ -149,13 +149,6 @@
       <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部署在集群的每个节点之上，负责在其宿主节点上配置 iptables，ipvs等规则。&lt;/p&gt;</description>
     </item>
     <item>
-      <title>kubernetes Service 机制</title>
-      <link>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/services/</link>
-      <pubDate>Sat, 07 Sep 2024 19:43:31 +0800</pubDate>
-      <guid>https://www.zhangzewen.net/posts/kubernetes/kube-proxy/services/</guid>
-      <description></description>
-    </item>
-    <item>
       <title>client-go 源码分析之 controller</title>
       <link>https://www.zhangzewen.net/posts/kubernetes/client-go/controller/</link>
       <pubDate>Thu, 29 Aug 2024 23:48:15 +0800</pubDate>

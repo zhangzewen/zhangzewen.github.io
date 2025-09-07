@@ -172,27 +172,6 @@
     <div class="posts">
       <article class="post">
         <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/">client-go 源码分析之 workqueue</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2024-07-03T21:43:31&#43;0800">Jul 3, 2024</time> &middot; 4 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 client-go release-1.25 分支</p></blockquote>
-<p>client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑实现在<code>k8s.io/client-go/util/workqueue</code> 目录下。</p>
-<h2 id="基础去重队列">基础：去重队列</h2>
-<p>基础队列接口 Interface 的定义如下：</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
           <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/event/">client-go 源码分析之 Event 机制</a>
         </h1>
 
@@ -392,6 +371,26 @@ CP1前的长下坡，沙地很松软，于是我是撒丫子跑的，一路上�
 
         <div class="read-more-link">
           <a href="https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/">[译]BPF CO-RE (Compile Once – Run Everywhere)</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2024-02-17T08:13:34&#43;0800">Feb 17, 2024</time> &middot; 3 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
+<p>原文：<a href="https://nakryiko.com/posts/bpf-portability-and-co-re/">BPF CO-RE (Compile Once – Run Everywhere)</a></p></blockquote>
+<p>BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一次 - 到处运行（CO-RE）**的情况下实现这一点实际上很困难？在这篇文章中，我们将探讨编写可以在多个内核版本上运行的BPF程序的挑战，以及BPF CO-RE如何帮助解决这个问题。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/">Read More</a>
         </div>
       </article>
   </div>
