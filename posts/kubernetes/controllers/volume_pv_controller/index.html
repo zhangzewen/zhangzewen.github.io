@@ -13,10 +13,10 @@
   
   <meta itemprop="name" content="kubernetes 源码分析之 PV Controller">
   <meta itemprop="description" content="本篇文章基于 Kubernetes v1.25.1
-PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建PersistentVolumeController，NewController 主要做了如下几件事情：">
+PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建 PersistentVolumeController，NewController 主要做了如下几件事情：">
   <meta itemprop="datePublished" content="2025-08-29T02:43:31+08:00">
   <meta itemprop="dateModified" content="2025-08-29T02:43:31+08:00">
-  <meta itemprop="wordCount" content="9609">
+  <meta itemprop="wordCount" content="9610">
   <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes,Kubelet,Csi">
 
@@ -25,14 +25,14 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
   <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
   <meta name="twitter:title" content="kubernetes 源码分析之 PV Controller">
   <meta name="twitter:description" content="本篇文章基于 Kubernetes v1.25.1
-PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建PersistentVolumeController，NewController 主要做了如下几件事情：">
+PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建 PersistentVolumeController，NewController 主要做了如下几件事情：">
 
 
 <meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes 源码分析之 PV Controller">
   <meta property="og:description" content="本篇文章基于 Kubernetes v1.25.1
-PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建PersistentVolumeController，NewController 主要做了如下几件事情：">
+PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建 PersistentVolumeController，NewController 主要做了如下几件事情：">
   <meta property="og:locale" content="zh_cn">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -91,7 +91,7 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
       },
       "datePublished": "2025-08-29T02:43:31+08:00",
       "dateModified": "2025-08-29T02:43:31+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ePV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建PersistentVolumeController，NewController 主要做了如下几件事情：\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ePV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建 PersistentVolumeController，NewController 主要做了如下几件事情：\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -274,7 +274,7 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
   <div>
     <blockquote>
 <p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
-<p>PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建PersistentVolumeController，NewController 主要做了如下几件事情：</p>
+<p>PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建 PersistentVolumeController，NewController 主要做了如下几件事情：</p>
 <ul>
 <li>初始化 eventRecorder</li>
 <li>初始化 PersistentVolumeController 对象，</li>

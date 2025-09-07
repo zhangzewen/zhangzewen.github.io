@@ -17,7 +17,7 @@ kubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资
 启动切入点 垃圾回收是在 kubelet 对象初始化完成后启动的，在 createAndInitKubelet 方法中首先调用 NewMainKubelet 初始化 Kubelet 实例，随后调用 Kubelet.StartGarbageCollection 启动了 GarbageCollect。">
   <meta itemprop="datePublished" content="2025-01-27T22:44:45+08:00">
   <meta itemprop="dateModified" content="2025-01-27T22:44:45+08:00">
-  <meta itemprop="wordCount" content="1585">
+  <meta itemprop="wordCount" content="1583">
   <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes,Kubelet">
 
@@ -322,7 +322,7 @@ kubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资
 <p>主要流程：</p>
 <ul>
 <li>拿到当前正在使用的镜像列表。</li>
-<li>找到可以清理的镜像列表，实际就是从所有镜像里过滤出用到的镜像， 那么剩下的就是可以清理的。</li>
+<li>找到可以清理的镜像列表，实际就是从所有镜像里过滤出用到的镜像，那么剩下的就是可以清理的。</li>
 <li>对可以清理的镜像按照上次时间时间排序，优先清理最久未使用的镜像。</li>
 <li>清理时跳过本轮检测到的新镜像和没有到最短存活时间的镜像。</li>
 <li>调用 runtime 接口移除镜像，并记录已经腾出的空间大小。</li>
@@ -542,7 +542,7 @@ kubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资
 <ul>
 <li>找到所有可以驱逐的容器，即当前状态不是 RUNNING 并且是其存在时间已经超过了<code>--minimum-container-ttl-duration</code> 配置的时间。</li>
 <li>每个pod 中存在已经挂掉的容器满足阀值，即<code>--maximum-dead-containers-per-container</code>，需要驱逐挂掉的容器。</li>
-<li>每个node 中存在已经挂掉的容器满足阀值, 即 <code>--maximum-dead-containers</code>, 需要驱逐挂掉的容器。</li>
+<li>每个node 中存在已经挂掉的容器满足阀值, 即 <code>--maximum-dead-containers</code>，需要驱逐挂掉的容器。</li>
 <li>驱逐直到满足条件上述条件。</li>
 </ul>
 <details>
@@ -657,7 +657,7 @@ kubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资
 </details>
 
 <h3 id="清除pod的日志目录">清除pod的日志目录</h3>
-<p>最后就是 pod 的日志了，pod 删除后（对应前两步，container 和 sandbox 的驱逐），它的日志数据就没有用了，就可以删除了：
+<p>最后就是 pod 的日志了，pod 删除后（对应前两步，container 和 sandbox 的驱逐），它的日志数据就没有用且可以删除：</p>
 <details>
     <summary>CLICK ME</summary>
     <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (cgc <span style="color:#fe8019">*</span>containerGC) <span style="color:#fabd2f">evictPodLogsDirectories</span>(allSourcesReady <span style="color:#fabd2f">bool</span>) <span style="color:#fabd2f">error</span> {
@@ -732,7 +732,7 @@ kubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div>
 </details>
-</p>
+
 
   </div>
 
