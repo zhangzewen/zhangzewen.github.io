@@ -12,7 +12,8 @@
 
   
   <meta itemprop="name" content="[译]BPF tips & tricks: the guide to bpf_trace_printk() and bpf_printk()">
-  <meta itemprop="description" content="介于能力有限，翻译有不当之处，不吝赐教 原文: BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()">
+  <meta itemprop="description" content="介于能力有限，翻译有不当之处，不吝赐教
+原文: BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()">
   <meta itemprop="datePublished" content="2024-05-17T08:13:34+08:00">
   <meta itemprop="dateModified" content="2024-05-17T08:13:34+08:00">
   <meta itemprop="wordCount" content="923">
@@ -23,13 +24,15 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
   <meta name="twitter:title" content="[译]BPF tips & tricks: the guide to bpf_trace_printk() and bpf_printk()">
-  <meta name="twitter:description" content="介于能力有限，翻译有不当之处，不吝赐教 原文: BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()">
+  <meta name="twitter:description" content="介于能力有限，翻译有不当之处，不吝赐教
+原文: BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()">
 
 
 <meta property="og:url" content="https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="[译]BPF tips & tricks: the guide to bpf_trace_printk() and bpf_printk()">
-  <meta property="og:description" content="介于能力有限，翻译有不当之处，不吝赐教 原文: BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()">
+  <meta property="og:description" content="介于能力有限，翻译有不当之处，不吝赐教
+原文: BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()">
   <meta property="og:locale" content="zh_cn">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -88,7 +91,7 @@
       },
       "datePublished": "2024-05-17T08:13:34+08:00",
       "dateModified": "2024-05-17T08:13:34+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\n原文: \u003cstrong\u003e\u003ca href=\"https://nakryiko.com/posts/bpf-tips-printk/\"\u003eBPF tips \u0026amp; tricks: the guide to bpf_trace_printk() and bpf_printk()\u003c/a\u003e\u003c/strong\u003e\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e原文: \u003cstrong\u003e\u003ca href=\"https://nakryiko.com/posts/bpf-tips-printk/\"\u003eBPF tips \u0026amp; tricks: the guide to bpf_trace_printk() and bpf_printk()\u003c/a\u003e\u003c/strong\u003e\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -241,8 +244,8 @@
 
   <div>
     <blockquote>
-<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em>
-原文: <strong><a href="https://nakryiko.com/posts/bpf-tips-printk/">BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()</a></strong></p></blockquote>
+<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
+<p>原文: <strong><a href="https://nakryiko.com/posts/bpf-tips-printk/">BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()</a></strong></p></blockquote>
 <p>任何BPF 程序总是需要一定量的调试才能正常工作。不幸的是，现在还没有 BPF 调试器，所以最好的方法是在程序代码中敲入类似于 <code>printf()</code> 的语句，以查看 BPF 程序的运行状况。BPF 中的<code>printf()</code> 是 <code>bpf_trace_printk()</code> 帮助程序。在这篇博客文章中，我们将研究如何使用它，它的局限性是什么，以及如何绕过这些局限性。我还会描述在最近几个内核版本中<code>bpf_trace_printk()</code>  发生的一些重要变化，以及如何使用 <a href="https://nakryiko.com/posts/bpf-portability-and-co-re/">BPF CO-RE</a>  来检测和处理这些变化。</p>
 <h1 id="前言">前言</h1>
 <p>我将使用 <a href="https://github.com/libbpf/libbpf-bootstrap">libbpf-bootstrap</a> 中的简单示例作为所有示例的基础。它已经全部配置好，并运行一个简单的 BPF 程序，我们将用它来测试<code>bpf_trace_printk()</code>  的输出。如果你想跟着示例动手操作，请确保克隆  <a href="https://github.com/libbpf/libbpf-bootstrap">libbpf-bootstrap</a>  并在你的编辑器中打开 <a href="https://github.com/libbpf/libbpf-bootstrap/blob/master/examples/c/minimal.bpf.c">minimap.bpf.c</a>：</p>

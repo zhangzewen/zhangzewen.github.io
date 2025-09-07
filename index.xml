@@ -370,7 +370,7 @@
       <link>https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/</link>
       <pubDate>Fri, 17 May 2024 08:13:34 +0800</pubDate>
       <guid>https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/</guid>
-      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&#xA;原文: &lt;strong&gt;&lt;a href=&#34;https://nakryiko.com/posts/bpf-tips-printk/&#34;&gt;BPF tips &amp;amp; tricks: the guide to bpf_trace_printk() and bpf_printk()&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;&lt;em&gt;&lt;strong&gt;介于能力有限，翻译有不当之处，不吝赐教&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;原文: &lt;strong&gt;&lt;a href=&#34;https://nakryiko.com/posts/bpf-tips-printk/&#34;&gt;BPF tips &amp;amp; tricks: the guide to bpf_trace_printk() and bpf_printk()&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>[译]Building BPF applications with libbpf-bootstrap</title>
