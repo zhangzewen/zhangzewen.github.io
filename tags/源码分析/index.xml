@@ -13,7 +13,7 @@
       <link>https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/</link>
       <pubDate>Fri, 29 Aug 2025 02:43:31 +0800</pubDate>
       <guid>https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/</guid>
-      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。&lt;/p&gt;</description>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 &lt;code&gt;k8s.io/kubernetes/pkg/controller/volume/attachdetach&lt;/code&gt; 下：&lt;/p&gt;</description>
     </item>
     <item>
       <title>kubernetes 源码分析之 PV Controller</title>

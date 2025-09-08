@@ -13,10 +13,10 @@
   
   <meta itemprop="name" content="kubernetes 源码分析之 AttachDetach Controller ">
   <meta itemprop="description" content="本篇文章基于 Kubernetes v1.25.1
-AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。">
+AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 k8s.io/kubernetes/pkg/controller/volume/attachdetach 下：">
   <meta itemprop="datePublished" content="2025-08-29T02:43:31+08:00">
   <meta itemprop="dateModified" content="2025-08-29T02:43:31+08:00">
-  <meta itemprop="wordCount" content="3763">
+  <meta itemprop="wordCount" content="4324">
   <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes,Kubelet,Csi">
 
@@ -25,14 +25,14 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
   <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
   <meta name="twitter:title" content="kubernetes 源码分析之 AttachDetach Controller ">
   <meta name="twitter:description" content="本篇文章基于 Kubernetes v1.25.1
-AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。">
+AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 k8s.io/kubernetes/pkg/controller/volume/attachdetach 下：">
 
 
 <meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes 源码分析之 AttachDetach Controller ">
   <meta property="og:description" content="本篇文章基于 Kubernetes v1.25.1
-AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。">
+AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 k8s.io/kubernetes/pkg/controller/volume/attachdetach 下：">
   <meta property="og:locale" content="zh_cn">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -91,7 +91,7 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
       },
       "datePublished": "2025-08-29T02:43:31+08:00",
       "dateModified": "2025-08-29T02:43:31+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eAttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eAttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 \u003ccode\u003ek8s.io/kubernetes/pkg/controller/volume/attachdetach\u003c/code\u003e 下：\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -191,12 +191,14 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
             <li><a href="#deletevolumenode">DeleteVolumeNode</a></li>
           </ul>
         </li>
+        <li><a href="#执行器">执行器</a></li>
         <li><a href="#协调器">协调器</a></li>
         <li><a href="#attachdetach-controller">AttachDetach Controller</a>
           <ul>
             <li><a href="#启动">启动</a></li>
             <li><a href="#初始化实际状态">初始化实际状态</a></li>
-            <li><a href="#注册的事件handler">注册的事件Handler</a>
+            <li><a href="#初始化期望状态">初始化期望状态</a></li>
+            <li><a href="#注册的资源变化事件回调handler">注册的资源变化事件回调handler</a>
               <ul>
                 <li><a href="#pod变更事件">Pod变更事件</a></li>
                 <li><a href="#node变更事件">Node变更事件</a></li>
@@ -261,62 +263,98 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 
   <div class="post-date">
     <time datetime=" 2025-08-29T02:43:31&#43;0800">Created: Aug 29, 2025</time>
-    <span class="readtime">&middot; 18 min read</span>
+    <span class="readtime">&middot; 21 min read</span>
   </div>
 
   <div>
     <blockquote>
 <p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
-<p>AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。</p>
-<p>AttachDetach Controller 维护着2份 Cache，一份是<a href="#%E6%9C%9F%E6%9C%9B%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">期望状态的Cache</a>, 其维护了 <code>node-&gt;volume-&gt;pod</code> 的信息。一份是<a href="#%E5%AE%9E%E9%99%85%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">实际状态Cache</a>，其维护着是 volume-&gt;node 的 attached 状态信息，以及是否 mount 的信息。实现来说， <a href="#%E6%9C%9F%E6%9C%9B%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">期望状态的 Cache</a> 要比<a href="#%E5%AE%9E%E9%99%85%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">实际状态 Cache</a>简单的多。</p>
+<p>AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 <code>k8s.io/kubernetes/pkg/controller/volume/attachdetach</code> 下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>$ tree  .  -L  <span style="color:#d3869b">1</span>
+</span></span><span style="display:flex;"><span>.
+</span></span><span style="display:flex;"><span>├── attach_detach_controller_test.go
+</span></span><span style="display:flex;"><span>├── attach_detach_controller.go
+</span></span><span style="display:flex;"><span>├── cache
+</span></span><span style="display:flex;"><span>├── config
+</span></span><span style="display:flex;"><span>├── metrics
+</span></span><span style="display:flex;"><span>├── OWNERS
+</span></span><span style="display:flex;"><span>├── populator
+</span></span><span style="display:flex;"><span>├── reconciler
+</span></span><span style="display:flex;"><span>├── statusupdater
+</span></span><span style="display:flex;"><span>├── testing
+</span></span><span style="display:flex;"><span>└── utilshell
+</span></span></code></pre></div><p>AttachDetach Controller 维护着2份 Cache，一份是<a href="#%E6%9C%9F%E6%9C%9B%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">期望状态的Cache</a>, 其维护了 <code>node-&gt;volume-&gt;pod</code> 的信息。一份是<a href="#%E5%AE%9E%E9%99%85%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">实际状态Cache</a>，其维护着是 volume-&gt;node 的 attached 状态信息，以及是否 mount 的信息。</p>
+<blockquote>
+<p>本片文章中的 期望状态即 DSW，际状态即 ASW。</p></blockquote>
 <h2 id="期望状态管理">期望状态管理</h2>
-<p>desiredStateOfWorld 有以下几个字段：</p>
-<ul>
-<li>nodesManaged 是一个 map 类型的数据，( NodeName，nodeManaged)是一条记录，nodeManaged维护着 node 的期望状态的信息，这个信息里面包括一个 map 类型的字段 volumesToAttach，这是一个 map 类型的数据，(volumeName，volumeToAttach)是一条记录，也就是说 DSW 维护着 node 上期望 attached 的所有 volume 的信息。还有就是 volumeToAttach 也维护着(volumeName, []Pod)的信息，也就是说可以通过 <code>node-&gt;volume-&gt;pod</code> 找到自己想要的信息</li>
-</ul>
+<p>接口 DesiredStateOfWorld 描述了期望状态缓存提供的修改和查询方法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> DesiredStateOfWorld <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">AddNode</span>(nodeName k8stypes.NodeName, keepTerminatedPodVolumes <span style="color:#fabd2f">bool</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">AddPod</span>(podName types.UniquePodName, pod <span style="color:#fe8019">*</span>v1.Pod, volumeSpec <span style="color:#fe8019">*</span>volume.Spec, nodeName k8stypes.NodeName) (v1.UniqueVolumeName, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">DeleteNode</span>(nodeName k8stypes.NodeName) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">DeletePod</span>(podName types.UniquePodName, volumeName v1.UniqueVolumeName, nodeName k8stypes.NodeName)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">NodeExists</span>(nodeName k8stypes.NodeName) <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">VolumeExists</span>(volumeName v1.UniqueVolumeName, nodeName k8stypes.NodeName) <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetVolumesToAttach</span>() []VolumeToAttach
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetPodToAdd</span>() <span style="color:#fe8019">map</span>[types.UniquePodName]PodToAdd
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetKeepTerminatedPodVolumesForNode</span>(k8stypes.NodeName) <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">SetMultiAttachError</span>(v1.UniqueVolumeName, k8stypes.NodeName)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetVolumePodsOnNodes</span>(nodes []k8stypes.NodeName, volumeName v1.UniqueVolumeName) []<span style="color:#fe8019">*</span>v1.Pod
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>本片文章主要分析修改方法集合：AddNode/AddPod/DeleteNode/DeletePod ，查询方法集合请自行查阅源码。</p>
+<p>结构体 desiredStateOfWorld 实现了 DesiredStateOfWorld 接口。其字段 nodesManaged 是一个 map 类型，<code>(NodeName，nodeManaged)</code> 是一条记录，nodeManaged 维护着 node 的期望状态的信息，这个信息里面包括一个 map 类型的字段 volumesToAttach，<code>(volumeName，volumeToAttach)</code>是一条记录。也就是说 DSW 维护着 node 上期望 attached 的所有 volume 的信息。另外 volumeToAttach 也维护着 <code>(volumeName, []volumeToAttach)</code> 的信息，这个 volumeToAttach 维护着 pod 的相关信息。总而言之，可以通过 <code>nodes-&gt;volumes-&gt;pods</code> 找到想要的信息。</p>
 <h3 id="添加node">添加Node</h3>
-<p>DSW 添加一条 Node 的记录的逻辑很简单，如果记录已经存在什么也不做，否着就添加一条记录：</p>
+<p>DSW 添加一条 Node 的记录的逻辑很简单，如果记录已经存在就什么也不做，否着就添加一条记录：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (dsw <span style="color:#fe8019">*</span>desiredStateOfWorld) <span style="color:#fabd2f">AddNode</span>(nodeName k8stypes.NodeName, keepTerminatedPodVolumes <span style="color:#fabd2f">bool</span>) {
-</span></span><span style="display:flex;"><span>    dsw.<span style="color:#fabd2f">Lock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">defer</span> dsw.<span style="color:#fabd2f">Unlock</span>()
-</span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> _, nodeExists <span style="color:#fe8019">:=</span> dsw.nodesManaged[nodeName]; !nodeExists {
-</span></span><span style="display:flex;"><span>        dsw.nodesManaged[nodeName] = nodeManaged{
-</span></span><span style="display:flex;"><span>            nodeName:                 nodeName,
-</span></span><span style="display:flex;"><span>            volumesToAttach:          <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">map</span>[v1.UniqueVolumeName]volumeToAttach),
-</span></span><span style="display:flex;"><span>            keepTerminatedPodVolumes: keepTerminatedPodVolumes,
-</span></span><span style="display:flex;"><span>        }   
-</span></span><span style="display:flex;"><span>    }   
-</span></span><span style="display:flex;"><span>}   
+</span></span><span style="display:flex;"><span>	dsw.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> dsw.<span style="color:#fabd2f">Unlock</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> _, nodeExists <span style="color:#fe8019">:=</span> dsw.nodesManaged[nodeName]; !nodeExists {
+</span></span><span style="display:flex;"><span>		dsw.nodesManaged[nodeName] = nodeManaged{
+</span></span><span style="display:flex;"><span>			nodeName:                 nodeName,
+</span></span><span style="display:flex;"><span>			volumesToAttach:          <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">map</span>[v1.UniqueVolumeName]volumeToAttach),
+</span></span><span style="display:flex;"><span>			keepTerminatedPodVolumes: keepTerminatedPodVolumes,
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="删除node">删除Node</h3>
 <ul>
-<li>当Node的记录不存在的时候直接返回</li>
-<li>如果Node的记录存在，且其期望要 attach 的 volume 列表不为空的时候直接返回错误</li>
-<li>最后删除该 Node 记录</li>
+<li>当 Node 的记录不存在的时候直接返回。</li>
+<li>如果 Node 的记录存在，且其期望要 attach 的 volume 列表不为空的时候直接返回错误。</li>
+<li>最后删除该 Node 记录。</li>
 </ul>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (dsw <span style="color:#fe8019">*</span>desiredStateOfWorld) <span style="color:#fabd2f">DeleteNode</span>(nodeName k8stypes.NodeName) <span style="color:#fabd2f">error</span> {
-</span></span><span style="display:flex;"><span>    dsw.<span style="color:#fabd2f">Lock</span>()
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">defer</span> dsw.<span style="color:#fabd2f">Unlock</span>()
-</span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    nodeObj, nodeExists <span style="color:#fe8019">:=</span> dsw.nodesManaged[nodeName]
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> !nodeExists {
-</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span> 
-</span></span><span style="display:flex;"><span>    }   
+</span></span><span style="display:flex;"><span>	dsw.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> dsw.<span style="color:#fabd2f">Unlock</span>()
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(nodeObj.volumesToAttach) &gt; <span style="color:#d3869b">0</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(
-</span></span><span style="display:flex;"><span>            <span style="color:#b8bb26">&#34;failed to delete node %q from list of nodes managed by attach/detach controller--the node still contains %v volumes in its list of volumes to attach&#34;</span>,
-</span></span><span style="display:flex;"><span>            nodeName,
-</span></span><span style="display:flex;"><span>            <span style="color:#fabd2f">len</span>(nodeObj.volumesToAttach))
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    
-</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">delete</span>(
-</span></span><span style="display:flex;"><span>        dsw.nodesManaged,
-</span></span><span style="display:flex;"><span>        nodeName)
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
+</span></span><span style="display:flex;"><span>	nodeObj, nodeExists <span style="color:#fe8019">:=</span> dsw.nodesManaged[nodeName]
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !nodeExists {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(nodeObj.volumesToAttach) &gt; <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(
+</span></span><span style="display:flex;"><span>			<span style="color:#b8bb26">&#34;failed to delete node %q from list of nodes managed by attach/detach controller--the node still contains %v volumes in its list of volumes to attach&#34;</span>,
+</span></span><span style="display:flex;"><span>			nodeName,
+</span></span><span style="display:flex;"><span>			<span style="color:#fabd2f">len</span>(nodeObj.volumesToAttach))
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">delete</span>(
+</span></span><span style="display:flex;"><span>		dsw.nodesManaged,
+</span></span><span style="display:flex;"><span>		nodeName)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h3 id="添加pod">添加Pod</h3>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (dsw <span style="color:#fe8019">*</span>desiredStateOfWorld) <span style="color:#fabd2f">AddPod</span>(
+<p>添加 Pod 的流程比添加 Node 的稍微复杂一些：</p>
+<ul>
+<li>检测 Pod 所在的 Node 的记录是否存在，如果不存在返回错误。</li>
+<li>寻找合适的 csi plugin（kubernetes 自带或者第三方插件） 来执行 attach， 如果不存在返回错误。</li>
+<li>生成唯一的 volumeName，即 <code>&lt;pluginName&gt;/&lt;volumeName&gt;</code>。</li>
+<li>更新 <code>nodes-&gt;volumes-&gt;pods</code> 的记录。</li>
+</ul>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (dsw <span style="color:#fe8019">*</span>desiredStateOfWorld) <span style="color:#fabd2f">AddPod</span>(
 </span></span><span style="display:flex;"><span>    podName types.UniquePodName,
 </span></span><span style="display:flex;"><span>    podToAdd <span style="color:#fe8019">*</span>v1.Pod,
 </span></span><span style="display:flex;"><span>    volumeSpec <span style="color:#fe8019">*</span>volume.Spec,
@@ -373,7 +411,16 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> volumeName, <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><h3 id="删除pod">删除Pod</h3>
+</span></span></code></pre></div>
+</details>
+
+<h3 id="删除pod">删除Pod</h3>
+<p>删除 Pod 的流程如下：</p>
+<ul>
+<li>检测 Pod 所在的 Node 的记录是否存在，如果不存在返回错误。</li>
+<li>检测 Pod 所挂载的 volume 的记录是否存在，如果不存在返回错误。</li>
+<li>更新 <code>nodes-&gt;volumes-&gt;pods</code> 的记录。</li>
+</ul>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (dsw <span style="color:#fe8019">*</span>desiredStateOfWorld) <span style="color:#fabd2f">DeletePod</span>(
 </span></span><span style="display:flex;"><span>    podName types.UniquePodName,
 </span></span><span style="display:flex;"><span>    volumeName v1.UniqueVolumeName,
@@ -405,22 +452,38 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>} 
 </span></span></code></pre></div><h2 id="实际状态管理">实际状态管理</h2>
-<p>attachDetachController 有如下几个字段：</p>
-<ul>
-<li>attachedVolumes 这是一个 map 类型的数据, <code>(volumeName， attachedVolume)</code>是一条记录，这里的 attachedVolume 维护着 volume 自身的信息，以及一个nodeName 到 nodeAttachedTo 的映射表。总而言之，就是 attachedVolumes 维护着 volume 绑定到所有node节点的信息。</li>
-<li>nodesToUpdateStatusFor 这个也是一个map类型的数据, (nodeName, nodeToUpdateStatusFor)也是一条记录，其维护着需要更新 <code>node.Status.VolumeAttached</code>(Node API Object)的node的信息</li>
-</ul>
-<p>Attach的三个状态</p>
+<p>接口 ActualStateOfWorld 描述了实际状态缓存提供的修改和查询方法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> ActualStateOfWorld <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	operationexecutor.ActualStateOfWorldAttacherUpdater
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">AddVolumeNode</span>(uniqueName v1.UniqueVolumeName, volumeSpec <span style="color:#fe8019">*</span>volume.Spec, nodeName types.NodeName, devicePath <span style="color:#fabd2f">string</span>, attached <span style="color:#fabd2f">bool</span>) (v1.UniqueVolumeName, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">SetVolumeMountedByNode</span>(volumeName v1.UniqueVolumeName, nodeName types.NodeName, mounted <span style="color:#fabd2f">bool</span>) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">SetNodeStatusUpdateNeeded</span>(nodeName types.NodeName)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">ResetDetachRequestTime</span>(volumeName v1.UniqueVolumeName, nodeName types.NodeName)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">SetDetachRequestTime</span>(volumeName v1.UniqueVolumeName, nodeName types.NodeName) (time.Duration, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">DeleteVolumeNode</span>(volumeName v1.UniqueVolumeName, nodeName types.NodeName)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetAttachState</span>(volumeName v1.UniqueVolumeName, nodeName types.NodeName) AttachState
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetAttachedVolumes</span>() []AttachedVolume
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetAttachedVolumesForNode</span>(nodeName types.NodeName) []AttachedVolume
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetAttachedVolumesPerNode</span>() <span style="color:#fe8019">map</span>[types.NodeName][]operationexecutor.AttachedVolume
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetNodesForAttachedVolume</span>(volumeName v1.UniqueVolumeName) []types.NodeName
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetVolumesToReportAttached</span>() <span style="color:#fe8019">map</span>[types.NodeName][]v1.AttachedVolume
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetVolumesToReportAttachedForNode</span>(name types.NodeName) (<span style="color:#fabd2f">bool</span>, []v1.AttachedVolume)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetNodesToUpdateStatusFor</span>() <span style="color:#fe8019">map</span>[types.NodeName]nodeToUpdateStatusFor
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>结构体 actualStateOfWorld 实现了接口 ActualStateOfWorld。其字段 attachedVolumes 是一个 map 类型，<code>(volumeName， attachedVolume)</code> 是一条记录，这里的 attachedVolume 维护着 volume 自身的信息，以及一个nodeName 到 nodeAttachedTo 的映射表。即 attachedVolumes 维护着 volume 绑定到所有node节点的信息。 另外一个字段 nodesToUpdateStatusFor 这个也是 map 类型，<code>(nodeName, nodeToUpdateStatusFor)</code> 是一条记录，其维护着需要更新 <code>node.Status.VolumeAttached</code>(Node API Object)的node的信息。 总而言之，可以通过 <code>volumes-&gt;nodes</code> 找到想要的信息。</p>
+<p>Volume 的三个状态</p>
 <ul>
 <li>Attached：volume 已经 attach 到 node 上了</li>
 <li>Uncertain：volume 的 attach 或者 detach 状态未知</li>
 <li>Detached：volume 已经从 node 上 detached</li>
 </ul>
-<p>和这三个状态相关的函数有三个，如下图：</p>
-<p><img src="/images/k8s/csi/volume_ad_controller/attach_detach_controller_02.svg" alt="node_driver_registrar_02"></p>
-<p>下面来看看这几个函数的逻辑，从中理解实际状态管理的实现逻辑</p>
+<p>attachDetachController 的方法 MarkVolumeAsAttached、MarkVolumeAsUncertain 和 MarkVolumeAsDetached 分别和上述三个状态相关，跟踪源码可以发现最后调用的是 AddVolumeNode 和 DeleteVolumeNode。 下面来分析这两个方法的逻辑。 <code>SetXXX/MarkXXX</code> 都是修改上述映射表中的记录，请自行查阅。</p>
 <h3 id="addvolumenode">AddVolumeNode</h3>
-<p>该函数的逻辑主要是更新 attachedVolumes 和 nodesToUpdateStatusFor 这两个字段中的记录</p>
+<p>AddVolumeNode  流程如下：</p>
+<ul>
+<li>如果没有提供 volumeName ，就需要找到合适的 csi plugin（kubernetes自带或者第三方插件）来获取 volumeName，获取不成功返回错误。</li>
+<li>更新 <code>volumes-&gt;nodes</code> 的记录。</li>
+</ul>
 <details>
     <summary>CLICK ME</summary>
     <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (asw <span style="color:#fe8019">*</span>actualStateOfWorld) <span style="color:#fabd2f">AddVolumeNode</span>(
@@ -535,6 +598,11 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 </details>
 
 <h3 id="deletevolumenode">DeleteVolumeNode</h3>
+<p>DeleteVolumeNode  流程如下：</p>
+<ul>
+<li>如果 volume 记录不存在直接返回错误。</li>
+<li>更新 <code>volumes-&gt;nodes</code> 的记录。</li>
+</ul>
 <details>
     <summary>CLICK ME</summary>
     <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
@@ -584,21 +652,72 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 </span></span></code></pre></div>
 </details>
 
+<h2 id="执行器">执行器</h2>
+<p>在 kubernetes 的源码中，经常会遇见实际状态和期望状态调协的模式。在调协的过程中会有执行器来让实际状态和期望状态一致。在 kubernetes 中的协调器由两部分组成。</p>
+<p>一是执行逻辑生成器，其生成的都是相关操作的匿名函数，其接口 OperationGenerator 定义如下：
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/volume/util/operationexecutor/operation_generator.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> OperationGenerator <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GenerateMountVolumeFunc</span>(waitForAttachTimeout time.Duration, volumeToMount VolumeToMount, actualStateOfWorldMounterUpdater ActualStateOfWorldMounterUpdater, isRemount <span style="color:#fabd2f">bool</span>) volumetypes.GeneratedOperations
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GenerateUnmountVolumeFunc</span>(volumeToUnmount MountedVolume, actualStateOfWorld ActualStateOfWorldMounterUpdater, podsDir <span style="color:#fabd2f">string</span>) (volumetypes.GeneratedOperations, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GenerateAttachVolumeFunc</span>(volumeToAttach VolumeToAttach, actualStateOfWorld ActualStateOfWorldAttacherUpdater) volumetypes.GeneratedOperations
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GenerateDetachVolumeFunc</span>(volumeToDetach AttachedVolume, verifySafeToDetach <span style="color:#fabd2f">bool</span>, actualStateOfWorld ActualStateOfWorldAttacherUpdater) (volumetypes.GeneratedOperations, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GenerateVolumesAreAttachedFunc</span>(attachedVolumes []AttachedVolume, nodeName types.NodeName, actualStateOfWorld ActualStateOfWorldAttacherUpdater) (volumetypes.GeneratedOperations, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GenerateUnmountDeviceFunc</span>(deviceToDetach AttachedVolume, actualStateOfWorld ActualStateOfWorldMounterUpdater, mounter hostutil.HostUtils) (volumetypes.GeneratedOperations, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GenerateVerifyControllerAttachedVolumeFunc</span>(volumeToMount VolumeToMount, nodeName types.NodeName, actualStateOfWorld ActualStateOfWorldAttacherUpdater) (volumetypes.GeneratedOperations, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GenerateMapVolumeFunc</span>(waitForAttachTimeout time.Duration, volumeToMount VolumeToMount, actualStateOfWorldMounterUpdater ActualStateOfWorldMounterUpdater) (volumetypes.GeneratedOperations, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GenerateUnmapVolumeFunc</span>(volumeToUnmount MountedVolume, actualStateOfWorld ActualStateOfWorldMounterUpdater) (volumetypes.GeneratedOperations, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GenerateUnmapDeviceFunc</span>(deviceToDetach AttachedVolume, actualStateOfWorld ActualStateOfWorldMounterUpdater, mounter hostutil.HostUtils) (volumetypes.GeneratedOperations, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetVolumePluginMgr</span>() <span style="color:#fe8019">*</span>volume.VolumePluginMgr
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetCSITranslator</span>() InTreeToCSITranslator
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GenerateBulkVolumeVerifyFunc</span>(
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">map</span>[types.NodeName][]<span style="color:#fe8019">*</span>volume.Spec,
+</span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">string</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">map</span>[<span style="color:#fe8019">*</span>volume.Spec]v1.UniqueVolumeName, ActualStateOfWorldAttacherUpdater) (volumetypes.GeneratedOperations, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GenerateExpandVolumeFunc</span>(<span style="color:#fe8019">*</span>v1.PersistentVolumeClaim, <span style="color:#fe8019">*</span>v1.PersistentVolume) (volumetypes.GeneratedOperations, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GenerateExpandAndRecoverVolumeFunc</span>(<span style="color:#fe8019">*</span>v1.PersistentVolumeClaim, <span style="color:#fe8019">*</span>v1.PersistentVolume, <span style="color:#fabd2f">string</span>) (volumetypes.GeneratedOperations, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GenerateExpandInUseVolumeFunc</span>(volumeToMount VolumeToMount, actualStateOfWorld ActualStateOfWorldMounterUpdater, currentSize resource.Quantity) (volumetypes.GeneratedOperations, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+</p>
+<details>
+    <summary>CLICK ME</summary>
+    <p>执行器执行上述所生成的匿名函数，其接口 OperationGenerator 定义如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/volume/util/operationexecutor/operation_executor.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> OperationExecutor <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">AttachVolume</span>(volumeToAttach VolumeToAttach, actualStateOfWorld ActualStateOfWorldAttacherUpdater) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">VerifyVolumesAreAttachedPerNode</span>(AttachedVolumes []AttachedVolume, nodeName types.NodeName, actualStateOfWorld ActualStateOfWorldAttacherUpdater) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">VerifyVolumesAreAttached</span>(volumesToVerify <span style="color:#fe8019">map</span>[types.NodeName][]AttachedVolume, actualStateOfWorld ActualStateOfWorldAttacherUpdater)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">DetachVolume</span>(volumeToDetach AttachedVolume, verifySafeToDetach <span style="color:#fabd2f">bool</span>, actualStateOfWorld ActualStateOfWorldAttacherUpdater) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">MountVolume</span>(waitForAttachTimeout time.Duration, volumeToMount VolumeToMount, actualStateOfWorld ActualStateOfWorldMounterUpdater, isRemount <span style="color:#fabd2f">bool</span>) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">UnmountVolume</span>(volumeToUnmount MountedVolume, actualStateOfWorld ActualStateOfWorldMounterUpdater, podsDir <span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">UnmountDevice</span>(deviceToDetach AttachedVolume, actualStateOfWorld ActualStateOfWorldMounterUpdater, hostutil hostutil.HostUtils) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">VerifyControllerAttachedVolume</span>(volumeToMount VolumeToMount, nodeName types.NodeName, actualStateOfWorld ActualStateOfWorldAttacherUpdater) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">IsOperationPending</span>(volumeName v1.UniqueVolumeName, podName volumetypes.UniquePodName, nodeName types.NodeName) <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">IsOperationSafeToRetry</span>(volumeName v1.UniqueVolumeName, podName volumetypes.UniquePodName, nodeName types.NodeName, operationName <span style="color:#fabd2f">string</span>) <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">ExpandInUseVolume</span>(volumeToMount VolumeToMount, actualStateOfWorld ActualStateOfWorldMounterUpdater, currentSize resource.Quantity) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">ReconstructVolumeOperation</span>(volumeMode v1.PersistentVolumeMode, plugin volume.VolumePlugin, mapperPlugin volume.BlockVolumePlugin, uid types.UID, podName volumetypes.UniquePodName, volumeSpecName <span style="color:#fabd2f">string</span>, volumePath <span style="color:#fabd2f">string</span>, pluginName <span style="color:#fabd2f">string</span>) (<span style="color:#fe8019">*</span>volume.Spec, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">CheckVolumeExistenceOperation</span>(volumeSpec <span style="color:#fe8019">*</span>volume.Spec, mountPath, volumeName <span style="color:#fabd2f">string</span>, mounter mount.Interface, uniqueVolumeName v1.UniqueVolumeName, podName volumetypes.UniquePodName, podUID types.UID, attachable volume.AttachableVolumePlugin) (<span style="color:#fabd2f">bool</span>, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<p>执行器不在本篇文章所讨论的范围，此处仅罗列接口源码以方便理解<a href="#协调器">协调器</a>，如果兴趣请自行查阅源码。</p>
 <h2 id="协调器">协调器</h2>
-<p>reconciler 有如下几个字段:</p>
-<ul>
-<li>desiredStateOfWorld：<a href="#%E6%9C%9F%E6%9C%9B%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">期望状态管理</a></li>
-<li>actualStateOfWorld：<a href="#%E5%AE%9E%E9%99%85%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">实际状态管理</a></li>
-<li>attacherDetacher：在协调实际状态和期望状态时候需要进行 Attach 或者 Detach 操作。</li>
-</ul>
-<p>协调器 reconciler 会启动协程运行 reconciliationLoopFunc：</p>
+<p>协调器根据<a href="#期望状态管理">期望状态</a>和<a href="#期望状态管理">实际状态</a> 的出入来让<a href="#执行器">执行器</a>执行相关操作，从而让<a href="#期望状态管理">实际状态</a>逐渐和<a href="#期望状态管理">期望状态</a>一致。</p>
+<p>协调器的接口 Reconciler 很简单，就一个 Run 方法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Reconciler <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Run</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{})
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>结构体 reconciler 实现了接口 Reconciler，其字段 desiredStateOfWorld 和 actualStateOfWorld 分别代表了<a href="#%E6%9C%9F%E6%9C%9B%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">期望状态管理</a>和<a href="#%E5%AE%9E%E9%99%85%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">实际状态管理</a>。 字段 attacherDetacher 提供了在协调实际状态和期望状态时候需要进行 Attach 或者 Detach 操作方法。</p>
+<p>reconciler 会启动协程运行 reconciliationLoopFunc：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (rc <span style="color:#fe8019">*</span>reconciler) <span style="color:#fabd2f">Run</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}) {
 </span></span><span style="display:flex;"><span>	wait.<span style="color:#fabd2f">Until</span>(rc.<span style="color:#fabd2f">reconciliationLoopFunc</span>(), rc.loopPeriod, stopCh)
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// reconciliationLoopFunc this can be disabled via cli option disableReconciliation.</span>
-</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// It periodically checks whether the attached volumes from actual state</span>
-</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// are still attached to the node and update the status if they are not.</span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (rc <span style="color:#fe8019">*</span>reconciler) <span style="color:#fabd2f">reconciliationLoopFunc</span>() <span style="color:#fe8019">func</span>() {
 </span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">func</span>() {
 </span></span><span style="display:flex;"><span>
@@ -808,7 +927,7 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 </details>
 
 <h2 id="attachdetach-controller">AttachDetach Controller</h2>
-<p>在完成<a href="#%E6%9C%9B%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">望状态管理</a>、<a href="#%E5%AE%9E%E9%99%85%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">实际状态管理</a>和<a href="#%E5%8D%8F%E8%B0%83%E5%99%A8">协调器</a> 的研究后，AttachDetach Controller 的实现逻辑就变的很清晰明了了。</p>
+<p>在完成<a href="#期望状态管理">期望状态管理</a>、<a href="#实际状态管理">实际状态管理</a>和<a href="#协调器">协调器</a> 的研究后，AttachDetach Controller 的实现逻辑就变的很清晰明了了。</p>
 <p>结构体 attachDetachController 实现了接口 AttachDetachController：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> AttachDetachController <span style="color:#fe8019">interface</span> {                                                                                                       
 </span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// AttacheDetach Controller  运行起来</span>
@@ -816,16 +935,16 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 </span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 返回期望的状态。</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">GetDesiredStateOfWorld</span>() cache.DesiredStateOfWorld                  
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>结构体 attachDetachController 字段繁多，但很多字段都和 List-Watch 相关资源有关，如：PVC，CSINode，Node，PV，AttachDetachment，Pod。以及<a href="#%E5%AE%9E%E9%99%85%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">实际状态</a>，<a href="#%E6%9C%9F%E6%9C%9B%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">期望状态</a> 和二者的<a href="#%E5%8D%8F%E8%B0%83%E5%99%A8">协调器</a>，如下代码是创建 attachDetachController 实例：</p>
-<p>通过方法 NewAttachDetachController 来创建 attachDetachController 时，List-Watch 相关的字段都是通过参数传递进去的，毕竟是 kubernetes 众多控制器中的一个，需要状态一致。 attachDetachController 还实现了接口 VolumeHost，也就是简单的实现(方法没有实现函数逻辑，简单的返回)。</p>
+</span></span></code></pre></div><p>结构体 attachDetachController 字段繁多，但很多字段都和 List-Watch 相关资源有关，如：PVC，CSINode，Node，PV，AttachDetachment，Pod。以及<a href="#%E5%AE%9E%E9%99%85%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">实际状态</a>，<a href="#%E6%9C%9F%E6%9C%9B%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">期望状态</a> 和二者的<a href="#%E5%8D%8F%E8%B0%83%E5%99%A8">协调器</a>。</p>
+<p>通过方法 NewAttachDetachController 来创建 attachDetachController 时，List-Watch 相关的字段都是通过参数传递进去的，毕竟是 kubernetes 众多控制器中的一个，需要状态一致。 attachDetachController 还实现了接口 VolumeHost，也就是简单的实现（方法没有实现函数逻辑，简单的返回）。</p>
 <h3 id="启动">启动</h3>
 <p>attachDetachController 通过调用 Run 启动：</p>
 <ul>
 <li>设置了在程序退出时候的函数调用链，优雅退出</li>
 <li>例行同步缓存，缓存的资源有Pod，Node，PVC，PV，CSINode，CSiDriver，VolumeAttachment。</li>
-<li><a href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%AE%9E%E9%99%85%E7%8A%B6%E6%80%81">遍历Node，生成此时实际状态。</a></li>
-<li><a href="#%E6%9C%9F%E6%9C%9B%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">遍历Pod，根据 Pod 以及 spec 得到期望状态</a></li>
-<li><a href="#%E5%8D%8F%E8%B0%83%E5%99%A8">后台周期性协调实际检测的状态和期望的状态</a></li>
+<li>遍历Node，生成此时实际状态。</li>
+<li>遍历Pod，根据 Pod 以及 spec 得到期望状态。</li>
+<li>后台周期性协调实际状态和期望的状态。</li>
 <li>启动协程在后台周期性的更新 DSW，这个是根据 pod 的添加和删除以及 pod 的状态为依据来更新的，具体逻辑可以看
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>k8s.io/kubernetes/pkg/controller/volume/attachdetach/populator/desired_state_of_world_populator.go
 </span></span></code></pre></div>代码实现很简单，这里不再过多赘述。</li>
@@ -892,12 +1011,12 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 </details>
 
 <h3 id="初始化实际状态">初始化实际状态</h3>
-<p>populateActualStateOfWorld 主要是初始化了ASW的各种数据状态：</p>
+<p>populateActualStateOfWorld 主要是初始化了实际状态 cache：</p>
 <ul>
-<li>拉取所有的Node资源信息</li>
-<li>把 <code>node.Status.VolumesAttached</code>信息更新到 AWS 中， 这里的 <code>node.Status.VolumeAttached</code>是该 node 上已经 attached 的 volume 信息，详细可看实际状态管理中 <a href="#AddVolumeNode">AddVolumeNode</a> 的实现。</li>
-<li>根据 <code>node.Status.VolumesInUse</code> 来更新 ASW，主要是设置 `nodeAttachedTo.mountedByNode的值为 ture 或者false，详细看下面 processVolumesInUse 的分析。</li>
-<li>根据集群中的 VolumeAttachment 资源来更新ASW，详细看下面 processVolumeAttachments 的分析。</li>
+<li>拉取所有的Node资源信息。</li>
+<li>把 <code>node.Status.VolumesAttached</code> 信息更新到 AWS 中，这里的 <code>node.Status.VolumeAttached</code> 是该 node 上已经 attached 的 volume 信息，详细可看实际状态管理中 AddVolumeNode 的实现。</li>
+<li>根据 <code>node.Status.VolumesInUse</code> 来更新 ASW，主要是设置 <code>nodeAttachedTo.mountedByNode</code> 的值为 ture 或者 false，详细看下面 processVolumesInUse 的分析。</li>
+<li>根据集群中的 VolumeAttachment 资源来更新 ASW，详细看下面 processVolumeAttachments 的分析。</li>
 </ul>
 <details>
     <summary>CLICK ME</summary>
@@ -940,11 +1059,7 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 
 <p>processVolumesInUse 根据 <code>node.Status.VolumesInUse</code> 来更新 ASW, 这里的 <code>node.Status.VolumesInUse</code> 是表示已经 attached 的 volume 中已经被 mounted 的 volume 集合，顺着代码跟踪过去的话，其实就是更新。</p>
 <p>volume 和 node在attached之后的是否mount的信息, 可以看 <code>actualStateOfWorld.SetVolumeMountedByNode</code> 的实现，其实现很简单，这里就不再过多赘述。</p>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// processVolumesInUse processes the list of volumes marked as &#34;in-use&#34;</span>
-</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// according to the specified Node&#39;s Status.VolumesInUse and updates the</span>
-</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// corresponding volume in the actual state of the world to indicate that it is</span>
-</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// mounted.</span>
-</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (adc <span style="color:#fe8019">*</span>attachDetachController) <span style="color:#fabd2f">processVolumesInUse</span>(
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (adc <span style="color:#fe8019">*</span>attachDetachController) <span style="color:#fabd2f">processVolumesInUse</span>(
 </span></span><span style="display:flex;"><span>	nodeName types.NodeName, volumesInUse []v1.UniqueVolumeName) {
 </span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;processVolumesInUse for node %q&#34;</span>, nodeName)
 </span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> _, attachedVolume <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> adc.actualStateOfWorld.<span style="color:#fabd2f">GetAttachedVolumesForNode</span>(nodeName) {
@@ -966,7 +1081,7 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 </span></span></code></pre></div><p>addNodeToDswp 的流程如下：</p>
 <ul>
 <li>
-<p>检查 Node 资源的注释项 <code>volumes.kubernetes.io/controller-managed-attach-detach</code> 是否存在，现在都是由AD Controller来控制 Attach/Detach，即都是存在的，且值是ture。</p>
+<p>检查 Node 资源的注释项 <code>volumes.kubernetes.io/controller-managed-attach-detach</code> 是否存在，现在都是由 AD Controller来控制 Attach/Detach，即都是存在的，且值是ture。</p>
 </li>
 <li>
 <p>然后检查 Node 资源的注释项 <code>volumes.kubernetes.io/keep-terminated-pod-volumes</code>是否存在且其值是否是true，当 pod terminated 保留其 volume 的 mount，这个看源码后续是要废弃了，可以看<a href="https://github.com/kubernetes/kubernetes/issues/45191">issues#45191</a>。</p>
@@ -976,7 +1091,7 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 </span></span><span style="display:flex;"><span>367:	fs.MarkDeprecated<span style="color:#fe8019">(</span><span style="color:#b8bb26">&#34;keep-terminated-pod-volumes&#34;</span>, <span style="color:#b8bb26">&#34;will be removed in a future version&#34;</span><span style="color:#fe8019">)</span>
 </span></span></code></pre></div></li>
 <li>
-<p>调用 DSW 的 AddNode 方法添加Node记录，详细请看<a href="#%E6%B7%BB%E5%8A%A0Node">添加Node</a>。</p>
+<p>调用 DSW 的 AddNode 方法添加Node记录：</p>
 </li>
 </ul>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (adc <span style="color:#fe8019">*</span>attachDetachController) <span style="color:#fabd2f">addNodeToDswp</span>(node <span style="color:#fe8019">*</span>v1.Node, nodeName types.NodeName) {
@@ -994,8 +1109,8 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>processVolumeAttachments 根据集群中的 VolumeAttachment 资源来更新 ASW：</p>
 <ul>
-<li>从集群中获取所有的VolumeAttachment资源。</li>
-<li><a href="#AddVolumeNode">获取目前node和volume之间的attached状态，并更新ASW</a>。</li>
+<li>从集群中获取所有的 VolumeAttachment 资源。</li>
+<li>获取目前 node 和 volume 之间的 attached 状态，并调用 AddVolumeNode 更新 ASW。</li>
 </ul>
 <details>
     <summary>CLICK ME</summary>
@@ -1090,7 +1205,8 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 </span></span></code></pre></div>
 </details>
 
-<p>populateDesiredStateOfWorld 调用[desiredStateOfWorld.AddPod](#添加 POD)向DSW中添加记录以及一些其他的记录，也可能会修改ASW的记录信息，这里不再过多赘述，好多函数在本片文章的中都注解了。
+<h3 id="初始化期望状态">初始化期望状态</h3>
+<p>populateDesiredStateOfWorld 调用 AddPod 向 DSW 中添加记录：
 <details>
     <summary>CLICK ME</summary>
     <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (adc <span style="color:#fe8019">*</span>attachDetachController) <span style="color:#fabd2f">populateDesiredStateOfWorld</span>() <span style="color:#fabd2f">error</span> {
@@ -1162,104 +1278,150 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 </span></span></code></pre></div>
 </details>
 </p>
-<h3 id="注册的事件handler">注册的事件Handler</h3>
-<p>attachDetachController 在 List-Watch Pod 和 Node 资源变化的时候注册了回调函数，随着 Pod 和 Node 资源的变化，attachDetachController 管理的实际状态和期望状态肯定是有变化的</p>
-<h4 id="pod变更事件">Pod变更事件</h4>
-<p>代码逻辑很简单，主要是<a href="#util/util.go#ProcessPodVolumes">util.ProcessPodVolumes的调用</a>, 逻辑简单，这里就不再过多赘述了</p>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (adc <span style="color:#fe8019">*</span>attachDetachController) <span style="color:#fabd2f">podAdd</span>(obj <span style="color:#fe8019">interface</span>{}) {
-</span></span><span style="display:flex;"><span>    pod, ok <span style="color:#fe8019">:=</span> obj.(<span style="color:#fe8019">*</span>v1.Pod)
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> pod <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span> !ok {
-</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span>
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> pod.Spec.NodeName <span style="color:#fe8019">==</span> <span style="color:#b8bb26">&#34;&#34;</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// Ignore pods without NodeName, indicating they are not scheduled.</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> 
-</span></span><span style="display:flex;"><span>    }           
-</span></span><span style="display:flex;"><span>     
-</span></span><span style="display:flex;"><span>    volumeActionFlag <span style="color:#fe8019">:=</span> util.<span style="color:#fabd2f">DetermineVolumeAction</span>(
-</span></span><span style="display:flex;"><span>        pod,        
-</span></span><span style="display:flex;"><span>        adc.desiredStateOfWorld,
-</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">true</span> <span style="color:#928374;font-style:italic">/* default volume action */</span>)
-</span></span><span style="display:flex;"><span>                
-</span></span><span style="display:flex;"><span>    util.<span style="color:#fabd2f">ProcessPodVolumes</span>(pod, volumeActionFlag, <span style="color:#928374;font-style:italic">/* addVolumes */</span>
-</span></span><span style="display:flex;"><span>        adc.desiredStateOfWorld, <span style="color:#fe8019">&amp;</span>adc.volumePluginMgr, adc.pvcLister, adc.pvLister, adc.csiMigratedPluginManager, adc.intreeToCSITranslator)
+<h3 id="注册的资源变化事件回调handler">注册的资源变化事件回调handler</h3>
+<p>attachDetachController 在 List-Watch Pod 和 Node 资源变化的时候注册了回调函数：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>	podInformer.<span style="color:#fabd2f">Informer</span>().<span style="color:#fabd2f">AddEventHandler</span>(kcache.ResourceEventHandlerFuncs{
+</span></span><span style="display:flex;"><span>		AddFunc:    adc.podAdd,
+</span></span><span style="display:flex;"><span>		UpdateFunc: adc.podUpdate,
+</span></span><span style="display:flex;"><span>		DeleteFunc: adc.podDelete,
+</span></span><span style="display:flex;"><span>	})
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>	nodeInformer.<span style="color:#fabd2f">Informer</span>().<span style="color:#fabd2f">AddEventHandler</span>(kcache.ResourceEventHandlerFuncs{
+</span></span><span style="display:flex;"><span>		AddFunc:    adc.nodeAdd,
+</span></span><span style="display:flex;"><span>		UpdateFunc: adc.nodeUpdate,
+</span></span><span style="display:flex;"><span>		DeleteFunc: adc.nodeDelete,
+</span></span><span style="display:flex;"><span>	})
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span></code></pre></div><h4 id="pod变更事件">Pod变更事件</h4>
+<p>Pod 变更事件的回调函数 podAdd/podUpdate/podDelete 最终会调用 ProcessPodVolumes 来处理，该函数 ProcessPodVolumes 会更新 期望状态：</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">ProcessPodVolumes</span>(pod <span style="color:#fe8019">*</span>v1.Pod, addVolumes <span style="color:#fabd2f">bool</span>, desiredStateOfWorld cache.DesiredStateOfWorld, volumePluginMgr <span style="color:#fe8019">*</span>volume.VolumePluginMgr, pvcLister corelisters.PersistentVolumeClaimLister, pvLister corelisters.PersistentVolumeLister, csiMigratedPluginManager csimigration.PluginManager, csiTranslator csimigration.InTreeToCSITranslator) {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> pod <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// pod 没有挂载的需求直接返回</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(pod.Spec.Volumes) <span style="color:#fe8019">&lt;=</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">10</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;Skipping processing of pod %q/%q: it has no volumes.&#34;</span>,
+</span></span><span style="display:flex;"><span>			pod.Namespace,
+</span></span><span style="display:flex;"><span>			pod.Name)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	nodeName <span style="color:#fe8019">:=</span> types.<span style="color:#fabd2f">NodeName</span>(pod.Spec.NodeName)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> nodeName <span style="color:#fe8019">==</span> <span style="color:#b8bb26">&#34;&#34;</span> { <span style="color:#928374;font-style:italic">// 如果 pod 还没有调度到任何node 上的时候，也返回</span>
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">10</span>).<span style="color:#fabd2f">Infof</span>(
+</span></span><span style="display:flex;"><span>			<span style="color:#b8bb26">&#34;Skipping processing of pod %q/%q: it is not scheduled to a node.&#34;</span>,
+</span></span><span style="display:flex;"><span>			pod.Namespace,
+</span></span><span style="display:flex;"><span>			pod.Name)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
+</span></span><span style="display:flex;"><span>	} <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span> !desiredStateOfWorld.<span style="color:#fabd2f">NodeExists</span>(nodeName) { <span style="color:#928374;font-style:italic">// node 在期望状态管理 cache 中不存在，即 ad controller 还没有同步到该node ，直接返回</span>
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(
+</span></span><span style="display:flex;"><span>			<span style="color:#b8bb26">&#34;Skipping processing of pod %q/%q: it is scheduled to node %q which is not managed by the controller.&#34;</span>,
+</span></span><span style="display:flex;"><span>			pod.Namespace,
+</span></span><span style="display:flex;"><span>			pod.Name,
+</span></span><span style="display:flex;"><span>			nodeName)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Process volume spec for each volume defined in pod</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> _, podVolume <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> pod.Spec.Volumes {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 构建 volume spec</span>
+</span></span><span style="display:flex;"><span>		volumeSpec, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">CreateVolumeSpec</span>(podVolume, pod, nodeName, volumePluginMgr, pvcLister, pvLister, csiMigratedPluginManager, csiTranslator)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">10</span>).<span style="color:#fabd2f">Infof</span>(
+</span></span><span style="display:flex;"><span>				<span style="color:#b8bb26">&#34;Error processing volume %q for pod %q/%q: %v&#34;</span>,
+</span></span><span style="display:flex;"><span>				podVolume.Name,
+</span></span><span style="display:flex;"><span>				pod.Namespace,
+</span></span><span style="display:flex;"><span>				pod.Name,
+</span></span><span style="display:flex;"><span>				err)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">continue</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 寻找合适的插件</span>
+</span></span><span style="display:flex;"><span>		attachableVolumePlugin, err <span style="color:#fe8019">:=</span>
+</span></span><span style="display:flex;"><span>			volumePluginMgr.<span style="color:#fabd2f">FindAttachablePluginBySpec</span>(volumeSpec)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span> attachableVolumePlugin <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">10</span>).<span style="color:#fabd2f">Infof</span>(
+</span></span><span style="display:flex;"><span>				<span style="color:#b8bb26">&#34;Skipping volume %q for pod %q/%q: it does not implement attacher interface. err=%v&#34;</span>,
+</span></span><span style="display:flex;"><span>				podVolume.Name,
+</span></span><span style="display:flex;"><span>				pod.Namespace,
+</span></span><span style="display:flex;"><span>				pod.Name,
+</span></span><span style="display:flex;"><span>				err)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">continue</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		uniquePodName <span style="color:#fe8019">:=</span> util.<span style="color:#fabd2f">GetUniquePodName</span>(pod)
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 根据是新增或者删除，来修改 期望状态管理 cache</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> addVolumes {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// Add volume to desired state of world</span>
+</span></span><span style="display:flex;"><span>			_, err <span style="color:#fe8019">:=</span> desiredStateOfWorld.<span style="color:#fabd2f">AddPod</span>(
+</span></span><span style="display:flex;"><span>				uniquePodName, pod, volumeSpec, nodeName)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">10</span>).<span style="color:#fabd2f">Infof</span>(
+</span></span><span style="display:flex;"><span>					<span style="color:#b8bb26">&#34;Failed to add volume %q for pod %q/%q to desiredStateOfWorld. %v&#34;</span>,
+</span></span><span style="display:flex;"><span>					podVolume.Name,
+</span></span><span style="display:flex;"><span>					pod.Namespace,
+</span></span><span style="display:flex;"><span>					pod.Name,
+</span></span><span style="display:flex;"><span>					err)
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// Remove volume from desired state of world</span>
+</span></span><span style="display:flex;"><span>			uniqueVolumeName, err <span style="color:#fe8019">:=</span> util.<span style="color:#fabd2f">GetUniqueVolumeNameFromSpec</span>(
+</span></span><span style="display:flex;"><span>				attachableVolumePlugin, volumeSpec)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">10</span>).<span style="color:#fabd2f">Infof</span>(
+</span></span><span style="display:flex;"><span>					<span style="color:#b8bb26">&#34;Failed to delete volume %q for pod %q/%q from desiredStateOfWorld. GetUniqueVolumeNameFromSpec failed with %v&#34;</span>,
+</span></span><span style="display:flex;"><span>					podVolume.Name,
+</span></span><span style="display:flex;"><span>					pod.Namespace,
+</span></span><span style="display:flex;"><span>					pod.Name,
+</span></span><span style="display:flex;"><span>					err)
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">continue</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			desiredStateOfWorld.<span style="color:#fabd2f">DeletePod</span>(
+</span></span><span style="display:flex;"><span>				uniquePodName, uniqueVolumeName, nodeName)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span>
 </span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (adc <span style="color:#fe8019">*</span>attachDetachController) <span style="color:#fabd2f">podDelete</span>(obj <span style="color:#fe8019">interface</span>{}) {
-</span></span><span style="display:flex;"><span>    pod, ok <span style="color:#fe8019">:=</span> obj.(<span style="color:#fe8019">*</span>v1.Pod)
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> pod <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span> !ok {
-</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span>
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    util.<span style="color:#fabd2f">ProcessPodVolumes</span>(pod, <span style="color:#fe8019">false</span>, <span style="color:#928374;font-style:italic">/* addVolumes */</span>
-</span></span><span style="display:flex;"><span>        adc.desiredStateOfWorld, <span style="color:#fe8019">&amp;</span>adc.volumePluginMgr, adc.pvcLister, adc.pvLister, adc.csiMigratedPluginManager, adc.intreeToCSITranslator)
-</span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span>          
-</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (adc <span style="color:#fe8019">*</span>attachDetachController) <span style="color:#fabd2f">podUpdate</span>(oldObj, newObj <span style="color:#fe8019">interface</span>{}) {
-</span></span><span style="display:flex;"><span>    pod, ok <span style="color:#fe8019">:=</span> newObj.(<span style="color:#fe8019">*</span>v1.Pod)
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> pod <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span> !ok {
-</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> 
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> pod.Spec.NodeName <span style="color:#fe8019">==</span> <span style="color:#b8bb26">&#34;&#34;</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// Ignore pods without NodeName, indicating they are not scheduled.</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span>
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    volumeActionFlag <span style="color:#fe8019">:=</span> util.<span style="color:#fabd2f">DetermineVolumeAction</span>(
-</span></span><span style="display:flex;"><span>        pod,
-</span></span><span style="display:flex;"><span>        adc.desiredStateOfWorld,
-</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">true</span> <span style="color:#928374;font-style:italic">/* default volume action */</span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    util.<span style="color:#fabd2f">ProcessPodVolumes</span>(pod, volumeActionFlag, <span style="color:#928374;font-style:italic">/* addVolumes */</span>
-</span></span><span style="display:flex;"><span>        adc.desiredStateOfWorld, <span style="color:#fe8019">&amp;</span>adc.volumePluginMgr, adc.pvcLister, adc.pvLister, adc.csiMigratedPluginManager, adc.intreeToCSITranslator)
-</span></span></code></pre></div><h4 id="node变更事件">Node变更事件</h4>
-<p>好多方法的调用前面都有详述，直接看源码，逻辑简单，这里不再赘述。</p>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (adc <span style="color:#fe8019">*</span>attachDetachController) <span style="color:#fabd2f">nodeAdd</span>(obj <span style="color:#fe8019">interface</span>{}) {
-</span></span><span style="display:flex;"><span>    node, ok <span style="color:#fe8019">:=</span> obj.(<span style="color:#fe8019">*</span>v1.Node)
-</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// TODO: investigate if nodeName is empty then if we can return</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// kubernetes/kubernetes/issues/37777</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> node <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span> !ok {
-</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span> 
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>    nodeName <span style="color:#fe8019">:=</span> types.<span style="color:#fabd2f">NodeName</span>(node.Name)
-</span></span><span style="display:flex;"><span>    adc.<span style="color:#fabd2f">nodeUpdate</span>(<span style="color:#fe8019">nil</span>, obj)
-</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// kubernetes/kubernetes/issues/37586</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// This is to workaround the case when a node add causes to wipe out</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// the attached volumes field. This function ensures that we sync with</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// the actual status.</span>
-</span></span><span style="display:flex;"><span>    adc.actualStateOfWorld.<span style="color:#fabd2f">SetNodeStatusUpdateNeeded</span>(nodeName)
+</span></span></code></pre></div>
+</details>
+
+<h4 id="node变更事件">Node变更事件</h4>
+<p>Node 变更事件的回调函数 nodeUpdate/nodeDelete 最终会调用 processVolumesInUse 来处理，而 nodeAdd 会调用 SetNodeStatusUpdateNeeded，但都最终是更新实际状态：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (asw <span style="color:#fe8019">*</span>actualStateOfWorld) <span style="color:#fabd2f">SetNodeStatusUpdateNeeded</span>(nodeName types.NodeName) {
+</span></span><span style="display:flex;"><span>	asw.<span style="color:#fabd2f">Lock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">defer</span> asw.<span style="color:#fabd2f">Unlock</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> asw.<span style="color:#fabd2f">updateNodeStatusUpdateNeeded</span>(nodeName, <span style="color:#fe8019">true</span>); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">Warningf</span>(<span style="color:#b8bb26">&#34;Failed to update statusUpdateNeeded field in actual state of world: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (adc <span style="color:#fe8019">*</span>attachDetachController) <span style="color:#fabd2f">nodeUpdate</span>(oldObj, newObj <span style="color:#fe8019">interface</span>{}) {
-</span></span><span style="display:flex;"><span>    node, ok <span style="color:#fe8019">:=</span> newObj.(<span style="color:#fe8019">*</span>v1.Node)
-</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// TODO: investigate if nodeName is empty then if we can return</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> node <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span> !ok {
-</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span>
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    nodeName <span style="color:#fe8019">:=</span> types.<span style="color:#fabd2f">NodeName</span>(node.Name)
-</span></span><span style="display:flex;"><span>    adc.<span style="color:#fabd2f">addNodeToDswp</span>(node, nodeName)
-</span></span><span style="display:flex;"><span>    adc.<span style="color:#fabd2f">processVolumesInUse</span>(nodeName, node.Status.VolumesInUse)
-</span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (adc <span style="color:#fe8019">*</span>attachDetachController) <span style="color:#fabd2f">nodeDelete</span>(obj <span style="color:#fe8019">interface</span>{}) {
-</span></span><span style="display:flex;"><span>    node, ok <span style="color:#fe8019">:=</span> obj.(<span style="color:#fe8019">*</span>v1.Node)
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> node <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">||</span> !ok {
-</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span>
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    nodeName <span style="color:#fe8019">:=</span> types.<span style="color:#fabd2f">NodeName</span>(node.Name)
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> adc.desiredStateOfWorld.<span style="color:#fabd2f">DeleteNode</span>(nodeName); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
-</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// This might happen during drain, but we still want it to appear in our logs</span>
-</span></span><span style="display:flex;"><span>        klog.<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;error removing node %q from desired-state-of-world: %v&#34;</span>, nodeName, err)
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    adc.<span style="color:#fabd2f">processVolumesInUse</span>(nodeName, node.Status.VolumesInUse)
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (adc <span style="color:#fe8019">*</span>attachDetachController) <span style="color:#fabd2f">processVolumesInUse</span>(
+</span></span><span style="display:flex;"><span>	nodeName types.NodeName, volumesInUse []v1.UniqueVolumeName) {
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;processVolumesInUse for node %q&#34;</span>, nodeName)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> _, attachedVolume <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> adc.actualStateOfWorld.<span style="color:#fabd2f">GetAttachedVolumesForNode</span>(nodeName) {
+</span></span><span style="display:flex;"><span>		mounted <span style="color:#fe8019">:=</span> <span style="color:#fe8019">false</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> _, volumeInUse <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> volumesInUse {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> attachedVolume.VolumeName <span style="color:#fe8019">==</span> volumeInUse {
+</span></span><span style="display:flex;"><span>				mounted = <span style="color:#fe8019">true</span>
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">break</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		err <span style="color:#fe8019">:=</span> adc.actualStateOfWorld.<span style="color:#fabd2f">SetVolumeMountedByNode</span>(attachedVolume.VolumeName, nodeName, mounted)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">Warningf</span>(
+</span></span><span style="display:flex;"><span>				<span style="color:#b8bb26">&#34;SetVolumeMountedByNode(%q, %q, %v) returned an error: %v&#34;</span>,
+</span></span><span style="display:flex;"><span>				attachedVolume.VolumeName, nodeName, mounted, err)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="总结">总结</h2>
 <ol>
 <li>AD Controller 对 volume 和 node 的 attach 维护了2个状态集合：实际状态和期望状态，并通过协调器进行 attach/detach 操作来完成实际状态和期望状态的协调。</li>
 <li>AD Controller 在运行初始通过 <code>node.Status.VolumesAttached</code> 和 <code>node.Status.VolumesInUse</code>，以及集群 VolumeAttachment 资源来初始化实际状态。</li>
-<li>AD Controller在运行初始通过遍历集群 Pod 资源来初始化期望状态，并通过 List-Watch Pod 和 Node 资源为其注册相应的事件回调函数来进一步在运行的过程中修正期望状态。</li>
+<li>AD Controller在运行初始通过遍历集群 Pod 资源来初始化期望状态，并通过 List-Watch Pod 和 Node 资源为其注册相应的事件回调函数来进一步在运行的过程中修正期望状态和实际状态。</li>
+<li>后台运行的协调器通过期望状态和实际状态的出入启动执行器来执行attach/detach操作，逐渐使期望状态和实际状态一致。</li>
 </ol>
 
   </div>
