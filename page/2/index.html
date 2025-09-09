@@ -172,41 +172,6 @@
     <div class="posts">
       <article class="post">
         <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel/">flannel 源码分析</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-07-21T23:43:31&#43;0800">Jul 21, 2025</time> &middot; 9 min read
-        </div>
-
-        <div>
-          <p>flannel 的配置一般如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;Network&#34;</span>:<span style="color:#b8bb26">&#34;10.0.0.0/16&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetLen&#34;</span>:<span style="color:#d3869b">24</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetMin&#34;</span>:<span style="color:#b8bb26">&#34;10.0.1.0&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetMax&#34;</span>:<span style="color:#b8bb26">&#34;10.0.20.0&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;Backend&#34;</span>:{
-</span></span><span style="display:flex;"><span>        <span style="color:#fb4934">&#34;Type&#34;</span>:<span style="color:#b8bb26">&#34;vxlan&#34;</span>
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><ul>
-<li>Network：用于指定 flannel 地址池。</li>
-<li>SubnetLen：用于指定分配给单个宿主机的 docker0 的 ip 段的子网掩码的长度。</li>
-<li>SubnetMin：用于指定最小能够分配的 ip 段。</li>
-<li>SudbnetMax：用于指定最大能够分配的 ip 段，在上面的示例中，表示每个宿主机可以分配一个 24 位掩码长度的子网，
-可以分配的子网从 <code>10.0.1.0/24</code> 到 <code>10.0.20.0/24</code>，也就意味着在这个网段中，最多只能有20台宿主机。</li>
-<li>Backend：用于在跨主机通信时指定数据包以什么方式转发，如 <code>vxlan</code>、<code>host-gw</code> 和 <code>udp</code> 等。</li>
-</ul>
-<p>flannel 中比较重要的概念：</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
           <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/">flannel 源码分析之 host-gw 模式</a>
         </h1>
 
@@ -392,6 +357,25 @@ vxlan 注册到 flannel 的流程如下:</p>
 
         <div class="read-more-link">
           <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/syncloop/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pleg/">kubernetes 源码分析之 kubelet pleg</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-05-06T01:27:07&#43;0800">May 6, 2025</time> &middot; 7 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>PLEG 是 &ldquo;Pod Lifecycle Event Generator&rdquo; 的缩写，监控运行在集群各个节点上的容器状态变化，并将这些变化事件推送给 kubelet，kubelet 处理后同步到 apiserver。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pleg/">Read More</a>
         </div>
       </article>
   </div>

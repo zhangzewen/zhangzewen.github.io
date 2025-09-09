@@ -16,7 +16,7 @@
 接口 sig-storage-lib-external-provisioner 中的接口 Provisioner 提供了 external provisioners 实现创建/删除 PV 的方法 Provision/Delete, 接口 BlockProvisioner 扩展了 Provisioner：能够判断 provisioner是否支持块设备。">
   <meta itemprop="datePublished" content="2025-08-02T00:43:31+08:00">
   <meta itemprop="dateModified" content="2025-08-02T00:43:31+08:00">
-  <meta itemprop="wordCount" content="2653">
+  <meta itemprop="wordCount" content="2652">
   <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes,Kubelet,Csi">
 
@@ -184,7 +184,7 @@
             <li><a href="#启动">启动</a></li>
             <li><a href="#pv的创建和删除">PV的创建和删除</a>
               <ul>
-                <li><a href="#创建-pvsyncclaim">创建 PV：syncClaim</a></li>
+                <li><a href="#创建pvsyncclaim">创建PV：syncClaim</a></li>
                 <li><a href="#删除pvsyncvolume">删除PV：syncVolume</a></li>
               </ul>
             </li>
@@ -519,7 +519,7 @@
 
 <h3 id="pv的创建和删除">PV的创建和删除</h3>
 <p>上述说到 ProvisionController 执行 Run 运行时会启动两个协程分别处理 PVC 和 PV，这两个协程分别是：runClaimWorker 和 runVolumeWorker，这两个协程协同工作实现 PV 的创建和删除。如果去跟踪代码的话，最终是分别调用的 syncClaim 和 syncVolume。 下面就具体分析这两个方法。</p>
-<h4 id="创建-pvsyncclaim">创建 PV：syncClaim</h4>
+<h4 id="创建pvsyncclaim">创建PV：syncClaim</h4>
 <p>syncClaim 的流程如下：</p>
 <ul>
 <li>首先判断是否需要创建PV

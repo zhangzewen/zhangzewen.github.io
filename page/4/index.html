@@ -172,35 +172,6 @@
     <div class="posts">
       <article class="post">
         <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-five/">Effective Modern C&#43;&#43; 读书笔记之第五章</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-02-18T18:34:43&#43;0800">Feb 18, 2025</time> &middot; 3 min read
-        </div>
-
-        <div>
-          <h2 id="item-23-stdmove-和-stdforward语义">Item 23: std::move 和 std::forward语义</h2>
-<p><code>Item23</code>开篇就直接说明了<code>std::move</code>不移动任何变量，<code>std::forward</code>不转发任何变量，这两个语义仅仅做的是转换的工作(类似c/c++的类型转换)，<code>std::move</code>无条件的把它的参数转换为一个右值，但是<code>std::forward</code>只有在满足一定条件下才会做转换工作。
-书中为<code>std::move</code>的实现，写了一个伪码：</p>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>                              <span style="color:#928374;font-style:italic">// in namespace std
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">typename</span> remove_reference<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;::</span>type<span style="color:#fe8019">&amp;&amp;</span>
-</span></span><span style="display:flex;"><span>move(T<span style="color:#fe8019">&amp;&amp;</span> param)
-</span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">using</span> ReturnType <span style="color:#fe8019">=</span>                            <span style="color:#928374;font-style:italic">// alias declaration;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fe8019">typename</span> remove_reference<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;::</span>type<span style="color:#fe8019">&amp;&amp;</span>;     <span style="color:#928374;font-style:italic">// see Item 9
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">static_cast</span><span style="color:#fe8019">&lt;</span>ReturnType<span style="color:#fe8019">&gt;</span>(param);
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>在这段代码中，返回值类型为<code>typename remove_reference&lt;T&gt;::type&amp;&amp;</code>说明 <code>std::move</code>返回的是一个右值引用。函数<code>move</code>的参数类型为<code>T&amp;&amp;</code>，具体来说这个一个<code>universal reference</code>(后面会说到),如果传入的参数T是一个左值引用的话，参数推导的结果仍然是一个左值引用，调用<a href="http://en.cppreference.com/w/cpp/types/remove_reference">std::remove_reference</a>剔除掉引用来确保右值引用作用在一个不是左值引用的类型上。然后就是&rsquo;公理&rsquo;<code>右值引用坐作函数的返回值返回后是右值</code>。
-需要注意的是如果<code>std::move</code>的参数如果是<code>a reference-to-const</code>的话，虽然通过移动语义的作用，使其转换成了右值，但是<code>const</code>语义仍然保存了下来，这时候需要注意如果把其赋值给变量，这里用的就不是移动拷贝语义了，而是用的的赋值拷贝语义。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-five/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
           <a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/">Effective Modern C&#43;&#43; 读书笔记之第四章</a>
         </h1>
 
@@ -388,6 +359,31 @@
 
         <div class="read-more-link">
           <a href="https://www.zhangzewen.net/posts/kubernetes/kube-proxy/iptables/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/life/2024_zhengzhou_marathon/">2024年11月03日郑州马拉松赛记</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2024-11-05T21:43:33&#43;0800">Nov 5, 2024</time> &middot; 1 min read
+        </div>
+
+        <div>
+          <p>本来我是不跑马拉松的，但是刚好有个契机，老早之前就计划着回郑州办事情，刚好郑州马拉松延期重新补录且时间合适，我就报名了，还给中签了，毕竟想着自己可是完赛 3 个百公里越野的人，区区一个马拉松还不是轻松拿捏。
+“姓氏马拉松” 是郑州马拉松的一大特色，让人有文化归属感和那种无以名状的凝聚力。完赛还有姓氏鞋扣，但是我完赛后忘了领了，这是这次马拉松唯一的遗憾。领物的现场还有武术表演，我的目光都被功夫少年们给吸引了，他们在现场表演武术，抱拳迎接我们，稚嫩的脸庞和坚毅的眼神让我感觉年轻是真的好。比赛当日他们也在赛道上给我们助威。
+<img src="/images/utral_running/2024_zhengzhou_marathon/%E5%A7%93%E6%B0%8F%E6%97%97%E6%89%8B.jpeg" alt="姓氏旗手">
+<img src="/images/utral_running/2024_zhengzhou_marathon/%E5%8A%9F%E5%A4%AB%E5%B0%91%E5%B9%B4.JPG" alt="功夫少年"></p>
+<p>比赛的当日从寄存到站到出发区域都井然有序，从大连半马之后就从未见过这么大的阵势的比赛，后面才得知郑州马拉松的参赛人数是当日在全国各地举办的马拉松的参赛人数之最。
+<img src="/images/utral_running/2024_zhengzhou_marathon/%E5%87%BA%E5%8F%91%E5%8C%BA%E5%9F%9F.jpeg" alt="出发区域">
+<img src="/images/utral_running/2024_zhengzhou_marathon/%E8%AE%A1%E6%97%B6%E8%B5%B7%E7%82%B9.jpeg" alt="计时起点"></p>
+<p>从鸣枪到拱门计时开跑用了差不多10分钟，前半程我的配速一直在5分40秒左右。 后半程的考验才开始，先是大腿逐渐酸痛，然后就是小腿也开始酸痛起来，应该是快到25公里的时候我追上了 4:30 的兔子，但是在后面的一个补给点我上完厕所的时候，他们已经远远的把我甩在身后。我开始跑跑停停，因为每次我感觉我大腿和小腿要抽筋时候我就走路，我很不喜欢抽筋的感觉，但是每次都在疯狂的试探，慢慢的双腿的肌肉开始变的僵硬，索性摆烂，想走就走，想跑就跑。
+<img src="/images/utral_running/2024_zhengzhou_marathon/%E5%A4%A7%E6%A1%A5.JPG" alt="大桥"></p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/life/2024_zhengzhou_marathon/">Read More</a>
         </div>
       </article>
   </div>
