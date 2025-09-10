@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.149.1">
+  <meta name="generator" content="Hugo 0.150.0">
 
   <title>What a Life!</title>
 
@@ -227,6 +227,27 @@
       </article>
       <article class="post">
         <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/ebpf/translate-bpf-co-re-reference-guide/">[译]BPF CO-RE reference guide</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-08-17T08:13:34&#43;0800">Aug 17, 2025</time> &middot; 7 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
+<p>原文：<a href="https://nakryiko.com/posts/bpf-core-reference-guide/">BPF CO-RE reference guide</a></p></blockquote>
+<h2 id="缺失的手册">缺失的手册</h2>
+<p>BPF CO-RE（编译一次-到处运行）是编写可移植BPF应用程序的现代方法，应用程序可以在不同的内核版本和配置上运行，而无需在目标机器上修改和编译运行时源代码。这与<a href="https://github.com/iovisor/bcc">BCC</a>框架提供的更传统的方法有很大的区别，在BCC框架中，BPF应用程序源代码编译被延迟到目标主机上，其携带了一个重量级的编译器工具链来实现这一点。请阅读<a href="https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/">[译]BPF CO-RE (Compile Once – Run Everywhere)</a>这篇文章，该文章介绍了 BPF CO-RE 的概念，并解释了为什么 BPF CO-RE对这些现实世界的 BPF 应用程序来说都是重要且必要的，以及在没有<a href="https://nakryiko.com/posts/btf-dedup/">内核BTF</a>的情况下变得困难的原因。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/ebpf/translate-bpf-co-re-reference-guide/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
           <a href="https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/">xv6 之 进程调度</a>
         </h1>
 
@@ -379,41 +400,6 @@
 
         <div class="read-more-link">
           <a href="https://www.zhangzewen.net/posts/os/xv6/xv6_memory_management/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel/">flannel 源码分析</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-07-21T23:43:31&#43;0800">Jul 21, 2025</time> &middot; 9 min read
-        </div>
-
-        <div>
-          <p>flannel 的配置一般如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;Network&#34;</span>:<span style="color:#b8bb26">&#34;10.0.0.0/16&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetLen&#34;</span>:<span style="color:#d3869b">24</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetMin&#34;</span>:<span style="color:#b8bb26">&#34;10.0.1.0&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetMax&#34;</span>:<span style="color:#b8bb26">&#34;10.0.20.0&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;Backend&#34;</span>:{
-</span></span><span style="display:flex;"><span>        <span style="color:#fb4934">&#34;Type&#34;</span>:<span style="color:#b8bb26">&#34;vxlan&#34;</span>
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><ul>
-<li>Network：用于指定 flannel 地址池。</li>
-<li>SubnetLen：用于指定分配给单个宿主机的 docker0 的 ip 段的子网掩码的长度。</li>
-<li>SubnetMin：用于指定最小能够分配的 ip 段。</li>
-<li>SudbnetMax：用于指定最大能够分配的 ip 段，在上面的示例中，表示每个宿主机可以分配一个 24 位掩码长度的子网，
-可以分配的子网从 <code>10.0.1.0/24</code> 到 <code>10.0.20.0/24</code>，也就意味着在这个网段中，最多只能有20台宿主机。</li>
-<li>Backend：用于在跨主机通信时指定数据包以什么方式转发，如 <code>vxlan</code>、<code>host-gw</code> 和 <code>udp</code> 等。</li>
-</ul>
-<p>flannel 中比较重要的概念：</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel/">Read More</a>
         </div>
       </article>
   </div>

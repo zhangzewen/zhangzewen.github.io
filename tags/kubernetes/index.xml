@@ -86,6 +86,27 @@
       <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubernetes 支持三种 container 探针：startupProbe、readinessProbe、livenessProbe。 livenessProbe 决定是否要重启容器，readinessProbe 确认是服务是否可用，startupProbe 是为了避免 container 启动时间过长使得 liveness 失败而造成无限重启的场景。&lt;/p&gt;</description>
     </item>
     <item>
+      <title>kubernetes 源码分析之 apiserver admission</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-control/</link>
+      <pubDate>Mon, 14 Apr 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-control/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;准入控制（ admission control ）会在请求经过&lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/&#34;&gt;认证和授权&lt;/a&gt;前置检查后，资源对象被持久化（存储到 etcd ）前的最后一道防线，准入控制会对资源对象进行修改或者验证。apiserver 准入控制由一系列的插件组成，同时也提供了 webhook 准入控制插件支持用户自定义的准入控制插件来进行扩展。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 apiserver Authentication &amp; Authoriztion</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/</link>
+      <pubDate>Mon, 14 Apr 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客户端的访问请求，其对接口请求访问提供了3种安全权限控制，每个请求都需要经过认证，授权以及准入控制器才有权限操作资源对象。&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;认证：针对请求的认证，确认是否具有访问 kubernetes 集群的权限。&lt;/li&gt;&#xA;&lt;li&gt;授权：针对资源的授权，确认是否对资源具有相关权限。&lt;/li&gt;&#xA;&lt;li&gt;准入控制器：在认证和授权之后，对象被持久化之前，拦截对 apiserver 的请求，拦截后的请求进入准入控制器中处理，对请求的资源对象进行自定义(校验，修改或者拒绝)等操作。&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/kubernetes/apiserver/access_control_01.svg&#34; alt=&#34;apiserver_access_control_01&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 apiserver NonGoRestfulMux</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/apiserver/nongorestfulmux/</link>
+      <pubDate>Mon, 14 Apr 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/apiserver/nongorestfulmux/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;在 kube-apiserver 的实现过程中，相对 go-restful 还有个 NonGoRestfulMux，其实现在 &lt;code&gt;k8s.io/apiserver/pkg/server/mux&lt;/code&gt;：&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>kubernetes 源码分析之 kubelet plugin manager</title>
       <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/</link>
       <pubDate>Tue, 11 Mar 2025 00:43:31 +0800</pubDate>
