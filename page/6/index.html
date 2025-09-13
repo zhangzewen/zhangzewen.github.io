@@ -172,6 +172,28 @@
     <div class="posts">
       <article class="post">
         <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-one/">Effective Modern C&#43;&#43; 读书笔记之第一章</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-01-07T18:34:39&#43;0800">Jan 7, 2025</time> &middot; 5 min read
+        </div>
+
+        <div>
+          <h2 id="item-1-模板类型推导">Item 1: 模板类型推导</h2>
+<p><code>C++98</code>只有一种模板参数类型推导即函数模板参数类型推导，但是在<code>C++11</code>之后，修改了原有的类型推导规则，并加入了<code>auto</code>和<code>decltype</code>的推导规则。
+函数模板形如：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> f(ParamType param);<span style="color:#928374;font-style:italic">// ParamType可以是T加上各种修饰，如const， reference，指针等
+</span></span></span></code></pre></div><p>然后在程序逻辑中调用该函数：</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-one/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
           <a href="https://www.zhangzewen.net/posts/kubernetes/kube-proxy/iptables/">kubernetes 源码分析之 kube-proxy iptables 模式</a>
         </h1>
 
@@ -377,27 +399,6 @@
 
         <div class="read-more-link">
           <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/cache/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/">client-go 源码分析之 workqueue</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2024-07-03T21:43:31&#43;0800">Jul 3, 2024</time> &middot; 4 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 client-go release-1.25 分支</p></blockquote>
-<p>client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑实现在<code>k8s.io/client-go/util/workqueue</code> 目录下。</p>
-<h2 id="基础去重队列">基础：去重队列</h2>
-<p>基础队列接口 Interface 的定义如下：</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/workqueue/">Read More</a>
         </div>
       </article>
   </div>

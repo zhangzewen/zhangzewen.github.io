@@ -100,6 +100,13 @@
       <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;准入控制（ admission control ）会在请求经过&lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/&#34;&gt;认证和授权&lt;/a&gt;前置检查后，资源对象被持久化（存储到 etcd ）前的最后一道防线，准入控制会对资源对象进行修改或者验证。apiserver 准入控制由一系列的插件组成，同时也提供了 webhook 准入控制插件支持用户自定义的准入控制插件来进行扩展。&lt;/p&gt;</description>
     </item>
     <item>
+      <title>kubernetes 源码分析之 apiserver admission webhook</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-webhook/</link>
+      <pubDate>Mon, 14 Apr 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-webhook/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;在&lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-control/&#34;&gt;kubernetes 源码分析之 apiserver admission&lt;/a&gt; 中提到 apiserver 的准入控制是由一系列的插件组成，同时也提供了 webhook 机制支持第三方插件（apiserver admission webhook plugin）来进行扩展。&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>kubernetes 源码分析之 apiserver Authentication &amp; Authoriztion</title>
       <link>https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/</link>
       <pubDate>Mon, 14 Apr 2025 22:36:42 +0800</pubDate>

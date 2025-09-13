@@ -113,7 +113,7 @@
     <loc>https://www.zhangzewen.net/posts/kubernetes/kubelet/volume_plugins_manager/</loc>
     <lastmod>2025-06-18T09:43:31+08:00</lastmod>
   </url><url>
-    <loc>https://www.zhangzewen.net/posts/database/cmu15445/summary/</loc>
+    <loc>https://www.zhangzewen.net/posts/database/cmu15445/2023fall/</loc>
     <lastmod>2025-06-14T22:36:42+08:00</lastmod>
   </url><url>
     <loc>https://www.zhangzewen.net/tags/cmu/</loc>
@@ -144,6 +144,9 @@
     <lastmod>2025-04-14T22:36:42+08:00</lastmod>
   </url><url>
     <loc>https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-control/</loc>
+    <lastmod>2025-04-14T22:36:42+08:00</lastmod>
+  </url><url>
+    <loc>https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-webhook/</loc>
     <lastmod>2025-04-14T22:36:42+08:00</lastmod>
   </url><url>
     <loc>https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/</loc>

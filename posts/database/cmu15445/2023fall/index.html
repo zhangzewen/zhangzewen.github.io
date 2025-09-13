@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.150.0">
+
+  <title>2023年秋季 cmu15-445 公开课 实现踩坑不完全指北 &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="2023年秋季 cmu15-445 公开课 实现踩坑不完全指北">
+  <meta itemprop="description" content="赶在评分系统关闭前完成了这个很有挑战的 2023 年秋季 cmu15-445 公开课。 根据此公开课的规定，不会提供任何代码。
+环境配置 mac 下没什么好说的，但是在 linux 下着实费了点功夫，bits/c&#43;&#43;-config.h 这个在lsp的插件上总是显示该文件无法找到，解决办法如下：">
+  <meta itemprop="datePublished" content="2025-06-14T22:36:42+08:00">
+  <meta itemprop="dateModified" content="2025-06-14T22:36:42+08:00">
+  <meta itemprop="wordCount" content="664">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="公开课,Cmu,Database">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="2023年秋季 cmu15-445 公开课 实现踩坑不完全指北">
+  <meta name="twitter:description" content="赶在评分系统关闭前完成了这个很有挑战的 2023 年秋季 cmu15-445 公开课。 根据此公开课的规定，不会提供任何代码。
+环境配置 mac 下没什么好说的，但是在 linux 下着实费了点功夫，bits/c&#43;&#43;-config.h 这个在lsp的插件上总是显示该文件无法找到，解决办法如下：">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/database/cmu15445/2023fall/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="2023年秋季 cmu15-445 公开课 实现踩坑不完全指北">
+  <meta property="og:description" content="赶在评分系统关闭前完成了这个很有挑战的 2023 年秋季 cmu15-445 公开课。 根据此公开课的规定，不会提供任何代码。
+环境配置 mac 下没什么好说的，但是在 linux 下着实费了点功夫，bits/c&#43;&#43;-config.h 这个在lsp的插件上总是显示该文件无法找到，解决办法如下：">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-14T22:36:42+08:00">
+    <meta property="article:modified_time" content="2025-06-14T22:36:42+08:00">
+    <meta property="article:tag" content="公开课">
+    <meta property="article:tag" content="Cmu">
+    <meta property="article:tag" content="Database">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/database/cmu15445/2023fall/#webpage",
+      "url": "https://www.zhangzewen.net/posts/database/cmu15445/2023fall/",
+      "name": "2023年秋季 cmu15-445 公开课 实现踩坑不完全指北",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2025-06-14T22:36:42+08:00",
+      "dateModified": "2025-06-14T22:36:42+08:00",
+      "description": "\u003cp\u003e赶在评分系统关闭前完成了这个很有挑战的 2023 年秋季 cmu15-445 公开课。\n\u003cimg src=\"/images/database/cmu15445/2023fall/gradescope_done.png\" alt=\"gradescope_done.png\"\u003e\u003c/p\u003e\n\u003cp\u003e根据此公开课的规定，不会提供任何代码。\u003c/p\u003e\n\u003ch2 id=\"环境配置\"\u003e环境配置\u003c/h2\u003e\n\u003cp\u003emac 下没什么好说的，但是在 linux 下着实费了点功夫，\u003ccode\u003ebits/c++-config.h\u003c/code\u003e 这个在lsp的插件上总是显示该文件无法找到，解决办法如下：\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/database/cmu15445/2023fall/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/database/cmu15445/2023fall/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/database/cmu15445/2023fall/#webpage"
+      },
+      "headline": "2023年秋季 cmu15-445 公开课 实现踩坑不完全指北",
+      "datePublished": "2025-06-14T22:36:42+08:00",
+      "dateModified": "2025-06-14T22:36:42+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "公开课",
+        "Cmu",
+        "Database"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/database/cmu15445/2023fall/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#环境配置">环境配置</a></li>
+        <li><a href="#project-2hash-index">project #2：Hash Index</a>
+          <ul>
+            <li><a href="#directory-growing">Directory Growing</a></li>
+            <li><a href="#depth-的增减">depth 的增减</a></li>
+            <li><a href="#directory-shrinking">Directory shrinking</a></li>
+            <li><a href="#踩坑">踩坑</a></li>
+          </ul>
+        </li>
+        <li><a href="#project-3-query-execution">project #3： Query Execution</a>
+          <ul>
+            <li><a href="#踩坑-1">踩坑</a></li>
+          </ul>
+        </li>
+        <li><a href="#project-4concurrency-control">project #4：concurrency control</a>
+          <ul>
+            <li><a href="#bonus-task-1-abort">Bonus Task 1： Abort</a></li>
+            <li><a href="#踩坑-2">踩坑</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">2023年秋季 cmu15-445 公开课 实现踩坑不完全指北</h1>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+
+
+  <div class="post-date">
+    <time datetime=" 2025-06-14T22:36:42&#43;0800">Created: Jun 14, 2025</time>
+    <span class="readtime">&middot; 4 min read</span>
+  </div>
+
+  <div>
+    <p>赶在评分系统关闭前完成了这个很有挑战的 2023 年秋季 cmu15-445 公开课。
+<img src="/images/database/cmu15445/2023fall/gradescope_done.png" alt="gradescope_done.png"></p>
+<p>根据此公开课的规定，不会提供任何代码。</p>
+<h2 id="环境配置">环境配置</h2>
+<p>mac 下没什么好说的，但是在 linux 下着实费了点功夫，<code>bits/c++-config.h</code> 这个在lsp的插件上总是显示该文件无法找到，解决办法如下：</p>
+<ul>
+<li>首先，使用 <code>locate c++-config.h</code> 找到该头文件所在的目录，我的 Fedora 42 环境下是<code>/usr/include/c++/15/x86_64-redhat-linux/bits</code></li>
+<li>在 cmake 的时候，在 Debug 模式下设置变量 <code>-DCMAKE_CXX_FLAGS_DEBUG=-I/usr/include/c++/15/x86_64-redhat-linux</code>
+提供一个我的环境下使用的命令:</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">#linux - fedora 42</span>
+</span></span><span style="display:flex;"><span>cmake -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL<span style="color:#fe8019">=</span>TRUE -DCMAKE_BUILD_TYPE:STRING<span style="color:#fe8019">=</span>Debug   -DCMAKE_CXX_FLAGS_DEBUG<span style="color:#fe8019">=</span>-Wno-deprecated-literal-operator<span style="color:#b8bb26">\ </span>-I/usr/include/c++/15/x86_64-redhat-linux    -DCMAKE_C_COMPILER:FILEPATH<span style="color:#fe8019">=</span>/usr/bin/clang  -DCMAKE_CXX_COMPILER:FILEPATH<span style="color:#fe8019">=</span>/usr/bin/clang++  ..
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">#mac</span>
+</span></span><span style="display:flex;"><span>cmake -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL<span style="color:#fe8019">=</span>TRUE -DCMAKE_BUILD_TYPE:STRING<span style="color:#fe8019">=</span>Debug   ..
+</span></span></code></pre></div><p>即可正常使用。</p>
+<p>唯一不爽的是，clang-tidy 检查这个本地没有问题，一提交总是会出错，虽然很尴尬，但是可以忍受，所以也就没有去查找原因。</p>
+<p>project #0 用来熟悉 modern c++ 语法。 project #1 的难点是实现 lru-k 算法，这两个 project 提供了完备的 test cases，没啥坑点。</p>
+<h2 id="project-2hash-index">project #2：Hash Index</h2>
+<p>这个 project 主要是实现 Extendible Hash 算法，document 上的描述很少，所以翻了不少资料，下面描述其实现逻辑。</p>
+<p>Extendible Hash 是一种动态可扩展哈希数据结构，常用在数据库的实现中。它有几个重要的概念：</p>
+<ul>
+<li>Bucket，桶，用来存储键值对，Bucket 中的 K/V 的个数是固定的。</li>
+<li>Directory，目录，用来存放指向 Bucket 的指针，可以动态生长，是一个线性的数组。</li>
+<li>Global Depth，假设其值为$n$，则该 Directory 的大小：$2^{n}$，且通过 <code>hash(key)</code> 二进制的低 $n$ 位来进行索引。例如，<code>hash(key)</code> 的二进制为111且 $n=2$, 则 Bucket 就是 $Directory[(11)_{2}]$</li>
+<li>Local Depth，每个 Bucket 都有各自的 Local Depth，且必定小于或者等于 Global Depth。假设其值为 $n$，在当前 Bucket 下的 <code>hash(key)</code>的二进制 <strong>低</strong> $n$ 位都是相同的。</li>
+</ul>
+<p>如下图就是一个 Global Depth 和 Local Depth 都为1, Bucket size 为2 的 Extendible Hash table：</p>
+<p><img src="/images/database/cmu15445/2023fall/deep_dive_into_extendible_hash/extendilb_hash_table_setup.svg" alt="extendilb_hash_table_setup"></p>
+<p>对于某个 Bucket，当 Local Depth 和 Global Depth 相等，通过 Directory 有且只有唯一的下标可以索引到该 Bucket；当 Local Depth 小于 Global Depth时，通过 Directory 必定有多个 下标可以索引到该 Bucket，下标的个数计算公式：$2^{Global_Depth - Local_Depth}$。</p>
+<p>以 Global Depth 和 Local Depth 都为1, Bucket size 为2 为例来分析插入的流程。
+插入 $0$（为了方便描述，key为数字，hash后的值为其本身）, 根据上述对 Extendible Hash 的描述，此时 Global Depth 为 1, 所以取 0 的二进制的低1位也就是0来获取 Bucket：$Directory[0]$，然后把其存储到 Bucke中。依次类推插入1,2,3 后如下图：
+<img src="/images/database/cmu15445/2023fall/deep_dive_into_extendible_hash/insert_0_1_2_3.svg" alt="insert_0_1_2_3"></p>
+<h3 id="directory-growing">Directory Growing</h3>
+<p>插入 4，其二进制为 100，根据规则应该放入到 上图中的 <code>Bucket1</code> 中，但是该 Bucket 已经满了，需要进行分裂，有如下步骤：</p>
+<ul>
+<li>当前桶的 Local Depth 增 1, 然后分裂出新桶，新桶的 Local Depth 等于 当前桶的 Local Depth。</li>
+<li>因为当前桶的 Local Depth 增1后，大于 Global Depth， 此时 Global Depth 需要 增1，这意味着需要对 Directory 进行扩容，扩容后的大小是当前容量的2倍。</li>
+<li>记住一个前提：** Bucket 下的 key 哈希后的值的二进制低 $Local Depth$ 位都是相同的**。需要对被分裂的桶中的键值对和新插入的4在这两个桶中进行重新分配，然后以 key 哈希后的值的二进制低 $Local Depth$ 位为下标，更新 Directory 中指向各个Bucket的指针。
+<img src="/images/database/cmu15445/2023fall/deep_dive_into_extendible_hash/insert_4.svg" alt="insert_4"></li>
+</ul>
+<p>从上图可以看到，Bucket2 的 Local Depth 的值为1,所以指向该 Bucket 的指针有 $2^{2-1}$ 个，也就是2个。
+按照上面的逻辑，在插入8，结果如下：
+<img src="/images/database/cmu15445/2023fall/deep_dive_into_extendible_hash/insert_8.svg" alt="insert_8">
+下面，让我们来插入 9， 其二进制为 <em>1001</em>，这里是要插入到 Bucket2 中， Bucket2 的 Local Depth 为1 且是个满桶，所以需要分裂，其 Local Depth的值加 1 后仍然小于 Global Depth，所以 Directory不会扩容，但是指向 Bucket2 的指针的条数会减半，具体如下下图所示。
+<img src="/images/database/cmu15445/2023fall/deep_dive_into_extendible_hash/insert_9.svg" alt="insert_9"></p>
+<h3 id="depth-的增减">depth 的增减</h3>
+<p>在实现的过程中会涉及到 bit 位的计算，depth 的增减会导致比特位的组合，如下图所示：
+<img src="/images/database/cmu15445/2023fall/deep_dive_into_extendible_hash/directory_get_bucket_indexes.svg" alt=""></p>
+<h3 id="directory-shrinking">Directory shrinking</h3>
+<p>没啥好说的，画画图，根据 document 上的要求实现即可。需要注意递归的情况，这里提供一个在 Discord 上找的测试用例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>TEST(ExtendibleHTableTest, RemoveTest5) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">auto</span> disk_mgr <span style="color:#fe8019">=</span> std<span style="color:#fe8019">::</span>make_unique<span style="color:#fe8019">&lt;</span>DiskManagerUnlimitedMemory<span style="color:#fe8019">&gt;</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">auto</span> bpm <span style="color:#fe8019">=</span> std<span style="color:#fe8019">::</span>make_unique<span style="color:#fe8019">&lt;</span>BufferPoolManager<span style="color:#fe8019">&gt;</span>(<span style="color:#d3869b">50</span>, disk_mgr.get());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  DiskExtendibleHashTable<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span>, <span style="color:#fabd2f">int</span>, IntComparator<span style="color:#fe8019">&gt;</span> ht(<span style="color:#b8bb26">&#34;blah&#34;</span>, bpm.get(), IntComparator(), HashFunction<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span><span style="color:#fe8019">&gt;</span>(), <span style="color:#d3869b">2</span>, <span style="color:#d3869b">3</span>, <span style="color:#d3869b">2</span>);
+</span></span><span style="display:flex;"><span>  ht.VerifyIntegrity();
+</span></span><span style="display:flex;"><span>  ht.Insert(<span style="color:#d3869b">4</span>, <span style="color:#d3869b">4</span>);
+</span></span><span style="display:flex;"><span>  ht.PrintHT();
+</span></span><span style="display:flex;"><span>  ht.Insert(<span style="color:#d3869b">5</span>, <span style="color:#d3869b">5</span>);
+</span></span><span style="display:flex;"><span>  ht.PrintHT();
+</span></span><span style="display:flex;"><span>  ht.Insert(<span style="color:#d3869b">6</span>, <span style="color:#d3869b">6</span>);
+</span></span><span style="display:flex;"><span>  ht.PrintHT();
+</span></span><span style="display:flex;"><span>  ht.Insert(<span style="color:#d3869b">14</span>, <span style="color:#d3869b">14</span>);
+</span></span><span style="display:flex;"><span>  ht.VerifyIntegrity();
+</span></span><span style="display:flex;"><span>  ht.PrintHT();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;remove 5&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
+</span></span><span style="display:flex;"><span>  ht.Remove(<span style="color:#d3869b">5</span>);
+</span></span><span style="display:flex;"><span>  ht.PrintHT();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;remove 14&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
+</span></span><span style="display:flex;"><span>  ht.Remove(<span style="color:#d3869b">14</span>);
+</span></span><span style="display:flex;"><span>  ht.PrintHT();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;remove 4&#34;</span> <span style="color:#fe8019">&lt;&lt;</span> std<span style="color:#fe8019">::</span>endl;
+</span></span><span style="display:flex;"><span>  ht.Remove(<span style="color:#d3869b">4</span>);
+</span></span><span style="display:flex;"><span>  ht.PrintHT();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="踩坑">踩坑</h3>
+<p>完成之后，在打分上唯独QPS出错了，死活找不到原因，严重怀疑人生，然后在爬Discord时找到了原因，因为我在代码中做了判断<code>assert(futrue.get() == true)</code>。Release版本会忽略该调语句。</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#fe8019">[</span>info<span style="color:#fe8019">]</span> total_page<span style="color:#fe8019">=</span>6400, duration_ms<span style="color:#fe8019">=</span>5000, latency<span style="color:#fe8019">=</span>1, lru_k_size<span style="color:#fe8019">=</span>16, bpm_size<span style="color:#fe8019">=</span>64, scan_thread_cnt<span style="color:#fe8019">=</span>8, get_thread_cnt<span style="color:#fe8019">=</span><span style="color:#d3869b">8</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">[</span>info<span style="color:#fe8019">]</span> benchmark start
+</span></span><span style="display:flex;"><span>page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">1</span>
+</span></span><span style="display:flex;"><span>page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">1</span>
+</span></span><span style="display:flex;"><span>page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">27</span>
+</span></span><span style="display:flex;"><span>page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">143</span>
+</span></span><span style="display:flex;"><span>page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">3</span>
+</span></span><span style="display:flex;"><span>page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">800</span>
+</span></span><span style="display:flex;"><span>page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">4000</span>
+</span></span><span style="display:flex;"><span>page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">5600</span>
+</span></span><span style="display:flex;"><span>Stack trace <span style="color:#fe8019">(</span>most recent call last<span style="color:#fe8019">)</span>page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">2400</span>
+</span></span><span style="display:flex;"><span>page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">1600</span>
+</span></span><span style="display:flex;"><span>Stack trace <span style="color:#fe8019">(</span>most recent call last<span style="color:#fe8019">)</span>Stack trace <span style="color:#fe8019">(</span>most recent call last<span style="color:#fe8019">)</span>page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">3600</span>
+</span></span><span style="display:flex;"><span> in thread Stack trace <span style="color:#fe8019">(</span>most recent call last<span style="color:#fe8019">)</span>page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">3200</span>
+</span></span><span style="display:flex;"><span>Stack trace <span style="color:#fe8019">(</span>most recent call last<span style="color:#fe8019">)</span> in thread page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">855</span>
+</span></span><span style="display:flex;"><span>Stack trace <span style="color:#fe8019">(</span>most recent call last<span style="color:#fe8019">)</span>Stack trace <span style="color:#fe8019">(</span>most recent call last<span style="color:#fe8019">)</span> in thread Stack trace <span style="color:#fe8019">(</span>most recent call last<span style="color:#fe8019">)</span>Stack trace <span style="color:#fe8019">(</span>most recent call last<span style="color:#fe8019">)</span> in thread Stack trace <span style="color:#fe8019">(</span>most recent call last<span style="color:#fe8019">)</span> in thread  in thread Stack trace <span style="color:#fe8019">(</span>most recent call last<span style="color:#fe8019">)</span><span style="color:#d3869b">123145415200768</span> in thread  in thread :
+</span></span><span style="display:flex;"><span>123145413054464page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">3495</span>
+</span></span><span style="display:flex;"><span> in thread 123145409835008123145412517888Stack trace <span style="color:#fe8019">(</span>most recent call last<span style="color:#fe8019">)</span>:
+</span></span><span style="display:flex;"><span>:
+</span></span><span style="display:flex;"><span>123145413591040:
+</span></span><span style="display:flex;"><span>123145416273920page header not consistent: page_id_<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span> page_idx<span style="color:#fe8019">=</span><span style="color:#d3869b">4800</span>
+</span></span><span style="display:flex;"><span>...
+</span></span></code></pre></div><h2 id="project-3-query-execution">project #3： Query Execution</h2>
+<p>这个 project 感觉纯粹是读代码和依葫芦画瓢，需要对 sql query executor 和planer 有足够的理解，但是基础是对 query parser 的理解， 一图胜过千言万语：</p>
+<p><img src="/images/database/cmu15445/2023fall/query_parser.png" alt="2023fall project4 passed"></p>
+<h3 id="踩坑-1">踩坑</h3>
+<p>把 NestedLoopJoin 优化为 HashJoin，根据文档的描述：</p>
+<blockquote>
+<p><em>the hash join algorithm can be used when a join predicate is a conjunction of several equi-conditions between two columns. For this project, you should be able to handle a varying number of equi-conditions connected by <code>AND</code>.</em></p></blockquote>
+<p>刚开始我以为是必须至少有一个<code>AND</code>， 测试一直不过，然后索性去掉这个条件，测试就通过了。</p>
+<p>在实现 window function 的时候，在执行 文档中的</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#fe8019">SELECT</span> user_name, dept_name, <span style="color:#fe8019">AVG</span>(salary) OVER (PARTITION <span style="color:#fe8019">BY</span> dept_name <span style="color:#fe8019">ORDER</span> <span style="color:#fe8019">BY</span> user_name) <span style="color:#fe8019">FROM</span> t;
+</span></span></code></pre></div><p>的时候，会出错，是因为其没有实现 AVG这个聚合函数。</p>
+<p>做 nest-loop-join 的时候，有个性能测试 PerformChecks， 这个没有搞明白为啥，没办法，最后只能在左表执行 Next 的时候，右表 init 了一下。</p>
+<h2 id="project-4concurrency-control">project #4：concurrency control</h2>
+<p>难点是在于 undo log 在 insert/delete/update 的生成逻辑。 在实现的时候只需要考虑单进程的逻辑即可，文档一定要看懂，其提供的本地测试足够用。</p>
+<p>然后就是 Write-Write conflict check 了，在我的实现逻辑中，我只实现了tuple 级别的，undo log 级别的没有理会，即文档中提到的 <code>_in_progress_</code> 这个字段没有用到，足够解决并发问题，本地和线上的测试都通过。</p>
+<p>然后是有索引下的并发操作需要注意的一个问题是：update 是一个两阶段的过程（根据文档描述），这个时候你就需要留意你的 IndexScan，你需要在这里处理该情况。</p>
+<p>在完成这些你的线上评分就应该如下图所示了：</p>
+<p><img src="/images/database/cmu15445/2023fall/project_4_100.png" alt="2023fall project4 passed"></p>
+<h3 id="bonus-task-1-abort">Bonus Task 1： Abort</h3>
+<p>IndexConcurrentUpdateAbortTest 这个 case 不过的原因是 &ldquo;abort rate too high&rdquo;， 当你完成bonus task 1 的时候，这case就会解决， bonus task 1 是实现事务 abort 的逻辑，document 中提供了两种解决方法，我使用的是第二种。</p>
+<p><img src="/images/database/cmu15445/2023fall/project_4_110.png" alt="2023fall project4 bonus task 1"></p>
+<h3 id="踩坑-2">踩坑</h3>
+<p>这个 project 没啥坑点，没有实现对的话，其提供的 test cases 中总会有一款不让你通过。</p>
+
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E5%85%AC%E5%BC%80%E8%AF%BE/" class="tag-link">公开课</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/cmu/" class="tag-link">Cmu</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/database/" class="tag-link">Database</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

@@ -129,9 +129,9 @@
     </item>
     <item>
       <title>2023年秋季 cmu15-445 公开课 实现踩坑不完全指北</title>
-      <link>https://www.zhangzewen.net/posts/database/cmu15445/summary/</link>
+      <link>https://www.zhangzewen.net/posts/database/cmu15445/2023fall/</link>
       <pubDate>Sat, 14 Jun 2025 22:36:42 +0800</pubDate>
-      <guid>https://www.zhangzewen.net/posts/database/cmu15445/summary/</guid>
+      <guid>https://www.zhangzewen.net/posts/database/cmu15445/2023fall/</guid>
       <description>&lt;p&gt;赶在评分系统关闭前完成了这个很有挑战的 2023 年秋季 cmu15-445 公开课。&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/database/cmu15445/2023fall/gradescope_done.png&#34; alt=&#34;gradescope_done.png&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;根据此公开课的规定，不会提供任何代码。&lt;/p&gt;&#xA;&lt;h2 id=&#34;环境配置&#34;&gt;环境配置&lt;/h2&gt;&#xA;&lt;p&gt;mac 下没什么好说的，但是在 linux 下着实费了点功夫，&lt;code&gt;bits/c++-config.h&lt;/code&gt; 这个在lsp的插件上总是显示该文件无法找到，解决办法如下：&lt;/p&gt;</description>
     </item>
     <item>
@@ -182,6 +182,13 @@
       <pubDate>Mon, 14 Apr 2025 22:36:42 +0800</pubDate>
       <guid>https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-control/</guid>
       <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;准入控制（ admission control ）会在请求经过&lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/&#34;&gt;认证和授权&lt;/a&gt;前置检查后，资源对象被持久化（存储到 etcd ）前的最后一道防线，准入控制会对资源对象进行修改或者验证。apiserver 准入控制由一系列的插件组成，同时也提供了 webhook 准入控制插件支持用户自定义的准入控制插件来进行扩展。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 apiserver admission webhook</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-webhook/</link>
+      <pubDate>Mon, 14 Apr 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-webhook/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;在&lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-control/&#34;&gt;kubernetes 源码分析之 apiserver admission&lt;/a&gt; 中提到 apiserver 的准入控制是由一系列的插件组成，同时也提供了 webhook 机制支持第三方插件（apiserver admission webhook plugin）来进行扩展。&lt;/p&gt;</description>
     </item>
     <item>
       <title>kubernetes 源码分析之 apiserver Authentication &amp; Authoriztion</title>

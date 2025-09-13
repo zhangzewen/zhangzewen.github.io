@@ -172,6 +172,28 @@
     <div class="posts">
       <article class="post">
         <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/linux/gdb_init_script/">gdb init script</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-02-25T09:43:31&#43;0800">Feb 25, 2025</time> &middot; 1 min read
+        </div>
+
+        <div>
+          <p>.gdbinit 能够将gdb基本命令添加到文件中以避免每次启动gdb 进行 debug 时候输入他们，例如</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>b main
+</span></span><span style="display:flex;"><span>r
+</span></span><span style="display:flex;"><span>b main.c:56
+</span></span><span style="display:flex;"><span>c
+</span></span></code></pre></div><p>这样就可以避免重复性的劳动。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/linux/gdb_init_script/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
           <a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-five/">Effective Modern C&#43;&#43; 读书笔记之第五章</a>
         </h1>
 
@@ -367,28 +389,6 @@
 
         <div class="read-more-link">
           <a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-two/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-one/">Effective Modern C&#43;&#43; 读书笔记之第一章</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-01-07T18:34:39&#43;0800">Jan 7, 2025</time> &middot; 5 min read
-        </div>
-
-        <div>
-          <h2 id="item-1-模板类型推导">Item 1: 模板类型推导</h2>
-<p><code>C++98</code>只有一种模板参数类型推导即函数模板参数类型推导，但是在<code>C++11</code>之后，修改了原有的类型推导规则，并加入了<code>auto</code>和<code>decltype</code>的推导规则。
-函数模板形如：</p>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
-</span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> f(ParamType param);<span style="color:#928374;font-style:italic">// ParamType可以是T加上各种修饰，如const， reference，指针等
-</span></span></span></code></pre></div><p>然后在程序逻辑中调用该函数：</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-one/">Read More</a>
         </div>
       </article>
   </div>
