@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.150.0">
+
+  <title>kubernetes 源码分析之 apiserver storage etcd 层实现分析 &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="kubernetes 源码分析之 apiserver storage etcd 层实现分析">
+  <meta itemprop="description" content="本篇文章基于 apiserver v0.25.1
+kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：">
+  <meta itemprop="datePublished" content="2025-05-11T22:36:42+08:00">
+  <meta itemprop="dateModified" content="2025-05-11T22:36:42+08:00">
+  <meta itemprop="wordCount" content="941">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="源码分析,Kubernetes">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="kubernetes 源码分析之 apiserver storage etcd 层实现分析">
+  <meta name="twitter:description" content="本篇文章基于 apiserver v0.25.1
+kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="kubernetes 源码分析之 apiserver storage etcd 层实现分析">
+  <meta property="og:description" content="本篇文章基于 apiserver v0.25.1
+kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-05-11T22:36:42+08:00">
+    <meta property="article:modified_time" content="2025-05-11T22:36:42+08:00">
+    <meta property="article:tag" content="源码分析">
+    <meta property="article:tag" content="Kubernetes">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/#webpage",
+      "url": "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/",
+      "name": "kubernetes 源码分析之 apiserver storage etcd 层实现分析",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2025-05-11T22:36:42+08:00",
+      "dateModified": "2025-05-11T22:36:42+08:00",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ekubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/#webpage"
+      },
+      "headline": "kubernetes 源码分析之 apiserver storage etcd 层实现分析",
+      "datePublished": "2025-05-11T22:36:42+08:00",
+      "dateModified": "2025-05-11T22:36:42+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "源码分析",
+        "Kubernetes"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#watch机制的实现">watch机制的实现</a>
+          <ul>
+            <li><a href="#监听事件">监听事件</a></li>
+            <li><a href="#处理事件">处理事件</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">kubernetes 源码分析之 apiserver storage etcd 层实现分析</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2025-05-11T22:36:42&#43;0800">Created: May 11, 2025</time>
+    <span class="readtime">&middot; 5 min read</span>
+  </div>
+
+  <div>
+    <blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：</p>
+<ul>
+<li>Versioner： 资源对象的 metadata 操作（更新 resourceversion 和 selflink ）接口，结构体 <a href="https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/api_object_versioner.go#L30">APIObjectVersioner</a> 实现了该接口。</li>
+<li>Create 创建资源对象的方法。</li>
+<li>Delete 删除资源对象的方法。</li>
+<li>Watch 通过Watch机制监控资源对象变化方法。</li>
+<li>Get 获取资源对象的方法。</li>
+<li>GetList 获取资源对象的方法，以列表的形式返回。</li>
+<li>GuaranteedUpdate： 保证传入的tryUpdate函数运行成功。</li>
+<li>Count： 获取指定key下的条目数量。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Interface <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Versioner</span>() Versioner
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Create</span>(ctx context.Context, key <span style="color:#fabd2f">string</span>, obj, out runtime.Object, ttl <span style="color:#fabd2f">uint64</span>) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Delete</span>(
+</span></span><span style="display:flex;"><span>		ctx context.Context, key <span style="color:#fabd2f">string</span>, out runtime.Object, preconditions <span style="color:#fe8019">*</span>Preconditions,
+</span></span><span style="display:flex;"><span>		validateDeletion ValidateObjectFunc, cachedExistingObject runtime.Object) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Watch</span>(ctx context.Context, key <span style="color:#fabd2f">string</span>, opts ListOptions) (watch.Interface, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Get</span>(ctx context.Context, key <span style="color:#fabd2f">string</span>, opts GetOptions, objPtr runtime.Object) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetList</span>(ctx context.Context, key <span style="color:#fabd2f">string</span>, opts ListOptions, listObj runtime.Object) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GuaranteedUpdate</span>(
+</span></span><span style="display:flex;"><span>		ctx context.Context, key <span style="color:#fabd2f">string</span>, destination runtime.Object, ignoreNotFound <span style="color:#fabd2f">bool</span>,
+</span></span><span style="display:flex;"><span>		preconditions <span style="color:#fe8019">*</span>Preconditions, tryUpdate UpdateFunc, cachedExistingObject runtime.Object) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Count</span>(key <span style="color:#fabd2f">string</span>) (<span style="color:#fabd2f">int64</span>, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>在目录 <code>k8s.io/apiserver/pkg/storage/etcd3</code> 中的代码对 etcd 官方库进行了封装， 结构体 store 实现了该接口，以 Get 为例：</p>
+<ul>
+<li>通过官方库获取 etcd 集群中资源对象的数据。</li>
+<li>解码从 etcd 获取的二进制数据，解码后的数据存储在objPtr。</li>
+<li>最后通过 <code>versioner.UpdateObject</code> 函数更新最新的资源对象的 resourceVersion 资源版本号(即 kv.ModRevision， 也称为 modifiedIndex)。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Get implements storage.Interface.Get.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (s <span style="color:#fe8019">*</span>store) <span style="color:#fabd2f">Get</span>(ctx context.Context, key <span style="color:#fabd2f">string</span>, opts storage.GetOptions, out runtime.Object) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>	key = path.<span style="color:#fabd2f">Join</span>(s.pathPrefix, key)
+</span></span><span style="display:flex;"><span>	startTime <span style="color:#fe8019">:=</span> time.<span style="color:#fabd2f">Now</span>()
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 使用官方库获取 key 所对应的资源</span>
+</span></span><span style="display:flex;"><span>	getResp, err <span style="color:#fe8019">:=</span> s.client.KV.<span style="color:#fabd2f">Get</span>(ctx, key)
+</span></span><span style="display:flex;"><span>	metrics.<span style="color:#fabd2f">RecordEtcdRequestLatency</span>(<span style="color:#b8bb26">&#34;get&#34;</span>, <span style="color:#fabd2f">getTypeName</span>(out), startTime)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err = s.<span style="color:#fabd2f">validateMinimumResourceVersion</span>(opts.ResourceVersion, <span style="color:#fabd2f">uint64</span>(getResp.Header.Revision)); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 处理记录不存在的情况</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(getResp.Kvs) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> opts.IgnoreNotFound {
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> runtime.<span style="color:#fabd2f">SetZeroValue</span>(out)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> storage.<span style="color:#fabd2f">NewKeyNotFoundError</span>(key, <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	kv <span style="color:#fe8019">:=</span> getResp.Kvs[<span style="color:#d3869b">0</span>]
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 解码并存储在参数 out 中，并更新 资源版本号</span>
+</span></span><span style="display:flex;"><span>	data, _, err <span style="color:#fe8019">:=</span> s.transformer.<span style="color:#fabd2f">TransformFromStorage</span>(ctx, kv.Value, <span style="color:#fabd2f">authenticatedDataString</span>(key))
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> storage.<span style="color:#fabd2f">NewInternalError</span>(err.<span style="color:#fabd2f">Error</span>())
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fabd2f">decode</span>(s.codec, s.versioner, data, out, kv.ModRevision)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">decode</span>(codec runtime.Codec, versioner storage.Versioner, value []<span style="color:#fabd2f">byte</span>, objPtr runtime.Object, rev <span style="color:#fabd2f">int64</span>) <span style="color:#fabd2f">error</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> _, err <span style="color:#fe8019">:=</span> conversion.<span style="color:#fabd2f">EnforcePtr</span>(objPtr); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;unable to convert output object to pointer: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	_, _, err <span style="color:#fe8019">:=</span> codec.<span style="color:#fabd2f">Decode</span>(value, <span style="color:#fe8019">nil</span>, objPtr)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// being unable to set the version does not prevent the object from being extracted</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> versioner.<span style="color:#fabd2f">UpdateObject</span>(objPtr, <span style="color:#fabd2f">uint64</span>(rev)); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;failed to update object version: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Get 返回的 reversion 是 etcd 中的 mod reversion。 但是GetList的就不一样了, 是etcd返回的结果中的header中的reversion， 这个reversion是全局的，是单调递增的值。这个reversion是单个key的create_reversion和mod_reversion的来源。</p>
+<h2 id="watch机制的实现">watch机制的实现</h2>
+<p>结构体 watchChan 实现了接口 watch 机制的接口 Interface：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/apimachinery/pkg/watch/watch.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> Interface <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Stop</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">ResultChan</span>() <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> Event
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>结构体 watchChan 的定义如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> watchChan <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>  watcher           <span style="color:#fe8019">*</span>watcher  <span style="color:#928374;font-style:italic">// 由那个watcher所生成的</span>
+</span></span><span style="display:flex;"><span>  key               <span style="color:#fabd2f">string</span>   <span style="color:#928374;font-style:italic">// 监听的key</span>
+</span></span><span style="display:flex;"><span>  initialRev        <span style="color:#fabd2f">int64</span>    <span style="color:#928374;font-style:italic">// key的reversion</span>
+</span></span><span style="display:flex;"><span>  recursive         <span style="color:#fabd2f">bool</span>     <span style="color:#928374;font-style:italic">// 是不是要监听key以及key/下的路径</span>
+</span></span><span style="display:flex;"><span>  progressNotify    <span style="color:#fabd2f">bool</span>     <span style="color:#928374;font-style:italic">// 有点keepalive的味道，即每隔一段时间发送一个event，验活</span>
+</span></span><span style="display:flex;"><span>  internalPred      storage.SelectionPredicate
+</span></span><span style="display:flex;"><span>  ctx               context.Context
+</span></span><span style="display:flex;"><span>  cancel            context.CancelFunc
+</span></span><span style="display:flex;"><span>  incomingEventChan <span style="color:#fe8019">chan</span> <span style="color:#fe8019">*</span>event
+</span></span><span style="display:flex;"><span>  resultChan        <span style="color:#fe8019">chan</span> watch.Event
+</span></span><span style="display:flex;"><span>  errChan           <span style="color:#fe8019">chan</span> <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>watchChan 通过结构体 watcher 调用其方法 Watch来创建：</p>
+<ul>
+<li>通过 createWatchChan 来创建 watchChan，并返回。</li>
+<li>因为 watchChan 实现了接口 <a href="https://github.com/kubernetes/apimachinery/blob/825264154b159a97fc8d577c677d0c1ce434ca30/pkg/watch/watch.go#L29"><code>watch.Interface</code></a>，所以消费者 可以通过 ResultChan 来消费监听到的event了。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (w <span style="color:#fe8019">*</span>watcher) <span style="color:#fabd2f">Watch</span>(ctx context.Context, key <span style="color:#fabd2f">string</span>, rev <span style="color:#fabd2f">int64</span>, recursive, progressNotify <span style="color:#fabd2f">bool</span>, pred storage.SelectionPredicate) (watch.Interface, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> recursive <span style="color:#fe8019">&amp;&amp;</span> !strings.<span style="color:#fabd2f">HasSuffix</span>(key, <span style="color:#b8bb26">&#34;/&#34;</span>) {
+</span></span><span style="display:flex;"><span>		key <span style="color:#fe8019">+=</span> <span style="color:#b8bb26">&#34;/&#34;</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	wc <span style="color:#fe8019">:=</span> w.<span style="color:#fabd2f">createWatchChan</span>(ctx, key, rev, recursive, progressNotify, pred)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">go</span> wc.<span style="color:#fabd2f">run</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	utilflowcontrol.<span style="color:#fabd2f">WatchInitialized</span>(ctx)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> wc, <span style="color:#fe8019">nil</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>watchChan 通过其 run 方法来运行：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (wc <span style="color:#fe8019">*</span>watchChan) <span style="color:#fabd2f">run</span>() {
+</span></span><span style="display:flex;"><span>  watchClosedCh <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{})
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">go</span> wc.<span style="color:#fabd2f">startWatching</span>(watchClosedCh)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">var</span> resultChanWG sync.WaitGroup
+</span></span><span style="display:flex;"><span>  resultChanWG.<span style="color:#fabd2f">Add</span>(<span style="color:#d3869b">1</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">go</span> wc.<span style="color:#fabd2f">processEvent</span>(<span style="color:#fe8019">&amp;</span>resultChanWG)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">case</span> err <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&lt;-</span>wc.errChan:
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> err <span style="color:#fe8019">==</span> context.Canceled {
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">break</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//把错误转化成watch.Event,然后发送到resultChan</span>
+</span></span><span style="display:flex;"><span>    errResult <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">transformErrorToEvent</span>(err)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span> errResult <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#928374;font-style:italic">// error result is guaranteed to be received by user before closing ResultChan.</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">case</span> wc.resultChan <span style="color:#fe8019">&lt;-</span> <span style="color:#fe8019">*</span>errResult:
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>wc.ctx.<span style="color:#fabd2f">Done</span>(): <span style="color:#928374;font-style:italic">// user has given up all results</span>
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>watchClosedCh:
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>wc.ctx.<span style="color:#fabd2f">Done</span>(): <span style="color:#928374;font-style:italic">// user cancel</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// We use wc.ctx to reap all goroutines. Under whatever condition, we should stop them all.</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// It&#39;s fine to double cancel.</span>
+</span></span><span style="display:flex;"><span>  wc.<span style="color:#fabd2f">cancel</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// we need to wait until resultChan wouldn&#39;t be used anymore</span>
+</span></span><span style="display:flex;"><span>  resultChanWG.<span style="color:#fabd2f">Wait</span>()
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">close</span>(wc.resultChan)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>在这里一共启动了2个协程：startWatching 和 processEvent，即监听事件和处理事件。</p>
+<h3 id="监听事件">监听事件</h3>
+<p>通过 startWatching 来监听事件：</p>
+<ul>
+<li>如果 initialRev 提供的 reversion 的值是 0，则首先获取 key 的值，并封装成 event 发送出去，然后在以给定 <code>reversion+1</code> 为 option 中 reversion 的确定值进行监听。</li>
+<li>如果 initialRev 提供的 reversion 的值非 0，则给定 <code>reversion+1</code> 为 option 中 reversion 的确定值进行监听。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (wc <span style="color:#fe8019">*</span>watchChan) <span style="color:#fabd2f">startWatching</span>(watchClosedCh <span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}) {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> wc.initialRev <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> {<span style="color:#8ec07c">//如果initialRev为0的话，说明是首次watch，需要做一下同步</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> wc.<span style="color:#fabd2f">sync</span>(); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;failed to sync with latest state: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>			wc.<span style="color:#fabd2f">sendError</span>(err)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//监听当前RV+1</span>
+</span></span><span style="display:flex;"><span>	opts <span style="color:#fe8019">:=</span> []clientv3.OpOption{clientv3.<span style="color:#fabd2f">WithRev</span>(wc.initialRev <span style="color:#fe8019">+</span> <span style="color:#d3869b">1</span>), clientv3.<span style="color:#fabd2f">WithPrevKV</span>()}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> wc.recursive {
+</span></span><span style="display:flex;"><span>		opts = <span style="color:#fabd2f">append</span>(opts, clientv3.<span style="color:#fabd2f">WithPrefix</span>())
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> wc.progressNotify {
+</span></span><span style="display:flex;"><span>		opts = <span style="color:#fabd2f">append</span>(opts, clientv3.<span style="color:#fabd2f">WithProgressNotify</span>())
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//调用ETCD官方库</span>
+</span></span><span style="display:flex;"><span>	wch <span style="color:#fe8019">:=</span> wc.watcher.client.<span style="color:#fabd2f">Watch</span>(wc.ctx, wc.key, opts<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> wres <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> wch {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> wres.<span style="color:#fabd2f">Err</span>() <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> { <span style="color:#928374;font-style:italic">// 错误处理</span>
+</span></span><span style="display:flex;"><span>			err <span style="color:#fe8019">:=</span> wres.<span style="color:#fabd2f">Err</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// If there is an error on server (e.g. compaction), the channel will return it before closed.</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fabd2f">logWatchChannelErr</span>(err) <span style="color:#928374;font-style:italic">// 日志记录</span>
+</span></span><span style="display:flex;"><span>			wc.<span style="color:#fabd2f">sendError</span>(err)<span style="color:#8ec07c">//把日志发送到channel</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> wres.<span style="color:#fabd2f">IsProgressNotify</span>() {
+</span></span><span style="display:flex;"><span>			wc.<span style="color:#fabd2f">sendEvent</span>(<span style="color:#fabd2f">progressNotifyEvent</span>(wres.Header.<span style="color:#fabd2f">GetRevision</span>()))
+</span></span><span style="display:flex;"><span>			metrics.<span style="color:#fabd2f">RecordEtcdBookmark</span>(wc.watcher.objectType)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">continue</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#8ec07c">//把 etcd 官方库 event 转化成 event</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">for</span> _, e <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> wres.Events {
+</span></span><span style="display:flex;"><span>			parsedEvent, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">parseEvent</span>(e)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				<span style="color:#fabd2f">logWatchChannelErr</span>(err)
+</span></span><span style="display:flex;"><span>				wc.<span style="color:#fabd2f">sendError</span>(err)
+</span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span>
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>            <span style="color:#8ec07c">//把event发送出去</span>
+</span></span><span style="display:flex;"><span>			wc.<span style="color:#fabd2f">sendEvent</span>(parsedEvent)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// When we come to this point, it&#39;s only possible that client side ends the watch.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// e.g. cancel the context, close the client.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// If this watch chan is broken and context isn&#39;t cancelled, other goroutines will still hang.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// We should notify the main thread that this goroutine has exited.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">close</span>(watchClosedCh)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>监听过程产生的 etcd 官方库的 <code>clientv3.Event</code> 需要转换成内部的 event 通过 sendEvent 发送出去。 sendEvent 的实现很简单，从逻辑来看是一个阻塞发送，当 channel 中的元素数量为 incomingBufSize 的时候，会打印 warnning 日志</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (wc <span style="color:#fe8019">*</span>watchChan) <span style="color:#fabd2f">sendEvent</span>(e <span style="color:#fe8019">*</span>event) {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(wc.incomingEventChan) <span style="color:#fe8019">==</span> incomingBufSize {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Fast watcher, slow processing. Probably caused by slow decoding, user not receiving fast, or other processing logic&#34;</span>, <span style="color:#b8bb26">&#34;incomingEvents&#34;</span>, incomingBufSize, <span style="color:#b8bb26">&#34;objectType&#34;</span>, wc.watcher.objectType)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> wc.incomingEventChan <span style="color:#fe8019">&lt;-</span> e:
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>wc.ctx.<span style="color:#fabd2f">Done</span>():
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="处理事件">处理事件</h3>
+<p>processEvent 的逻辑也很明了， 从管道中获取 event， 然后转换成 <a href="https://github.com/kubernetes/apimachinery/blob/825264154b159a97fc8d577c677d0c1ce434ca30/pkg/watch/watch.go#L57"><code>watch.Event</code></a> 推送到管道供监听者消费：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// processEvent processes events from etcd watcher and sends results to resultChan.</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (wc <span style="color:#fe8019">*</span>watchChan) <span style="color:#fabd2f">processEvent</span>(wg <span style="color:#fe8019">*</span>sync.WaitGroup) {
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">defer</span> wg.<span style="color:#fabd2f">Done</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">for</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">case</span> e <span style="color:#fe8019">:=</span> <span style="color:#fe8019">&lt;-</span>wc.incomingEventChan:<span style="color:#8ec07c">//获取到event</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#928374;font-style:italic">// 把event转换为watch.Event</span>
+</span></span><span style="display:flex;"><span>      res <span style="color:#fe8019">:=</span> wc.<span style="color:#fabd2f">transform</span>(e)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">if</span> res <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">continue</span>
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(wc.resultChan) <span style="color:#fe8019">==</span> outgoingBufSize {
+</span></span><span style="display:flex;"><span>        klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Fast watcher, slow processing. Probably caused by slow dispatching events to watchers&#34;</span>, <span style="color:#b8bb26">&#34;outgoingEvents&#34;</span>, outgoingBufSize, <span style="color:#b8bb26">&#34;objectType&#34;</span>, wc.watcher.objectType)
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#8ec07c">//把watch.event发送到resultChan中</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">case</span> wc.resultChan <span style="color:#fe8019">&lt;-</span> <span style="color:#fe8019">*</span>res:
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>wc.ctx.<span style="color:#fabd2f">Done</span>():
+</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">return</span>
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>wc.ctx.<span style="color:#fabd2f">Done</span>():
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">return</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><img src="/images/kubernetes/apiserver/storage_etcd.svg" alt="stroage_etcd"></p>
+
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

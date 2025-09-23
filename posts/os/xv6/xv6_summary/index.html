@@ -6,33 +6,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="Hugo 0.150.0">
 
-  <title>xv6 之 trap 机制 &middot; What a Life!</title>
+  <title>xv6 总结 &middot; What a Life!</title>
 
   <meta name="description" content="" />
 
   
-  <meta itemprop="name" content="xv6 之 trap 机制">
-  <meta itemprop="description" content="本片文章结合 xv6 的代码、配套 xv6-book 和 RISC-V 的文档，根据自己理解总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。如果错误，望不吝赐教。
-trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到内核态的切换：">
+  <meta itemprop="name" content="xv6 总结">
+  <meta itemprop="description" content="本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃和不连贯，请见谅。
+内存管理 xv6 page table">
   <meta itemprop="datePublished" content="2025-08-05T09:43:31+08:00">
   <meta itemprop="dateModified" content="2025-08-05T09:43:31+08:00">
-  <meta itemprop="wordCount" content="1750">
+  <meta itemprop="wordCount" content="2991">
   <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
   <meta itemprop="keywords" content="公开课,操作系统,Linux,Mit,Xv6">
 
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
-  <meta name="twitter:title" content="xv6 之 trap 机制">
-  <meta name="twitter:description" content="本片文章结合 xv6 的代码、配套 xv6-book 和 RISC-V 的文档，根据自己理解总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。如果错误，望不吝赐教。
-trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到内核态的切换：">
+  <meta name="twitter:title" content="xv6 总结">
+  <meta name="twitter:description" content="本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃和不连贯，请见谅。
+内存管理 xv6 page table">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/os/xv6/xv6_trap/">
+<meta property="og:url" content="https://www.zhangzewen.net/posts/os/xv6/xv6_summary/">
   <meta property="og:site_name" content="What a Life!">
-  <meta property="og:title" content="xv6 之 trap 机制">
-  <meta property="og:description" content="本片文章结合 xv6 的代码、配套 xv6-book 和 RISC-V 的文档，根据自己理解总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。如果错误，望不吝赐教。
-trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到内核态的切换：">
+  <meta property="og:title" content="xv6 总结">
+  <meta property="og:description" content="本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃和不连贯，请见谅。
+内存管理 xv6 page table">
   <meta property="og:locale" content="zh_cn">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -81,9 +81,9 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/os/xv6/xv6_trap/#webpage",
-      "url": "https://www.zhangzewen.net/posts/os/xv6/xv6_trap/",
-      "name": "xv6 之 trap 机制",
+      "@id": "https://www.zhangzewen.net/posts/os/xv6/xv6_summary/#webpage",
+      "url": "https://www.zhangzewen.net/posts/os/xv6/xv6_summary/",
+      "name": "xv6 总结",
       "isPartOf": {
         "@id": "https://www.zhangzewen.net/#website"
       },
@@ -92,13 +92,13 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
       },
       "datePublished": "2025-08-05T09:43:31+08:00",
       "dateModified": "2025-08-05T09:43:31+08:00",
-      "description": "\u003cp\u003e本片文章结合 xv6 的代码、配套 xv6-book 和 RISC-V 的文档，根据自己理解总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。如果错误，望不吝赐教。\u003c/p\u003e\n\u003ch2 id=\"trap-机制\"\u003etrap 机制\u003c/h2\u003e\n\u003cp\u003e根据 xv6 book 所述，以下三种状况会导致从用户态到内核态的切换：\u003c/p\u003e",
+      "description": "\u003cp\u003e本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃和不连贯，请见谅。\u003c/p\u003e\n\u003ch2 id=\"内存管理\"\u003e内存管理\u003c/h2\u003e\n\u003ch3 id=\"xv6-page-table\"\u003exv6 page table\u003c/h3\u003e\n\u003cp\u003e\u003cimg src=\"/images/os/xv6/risc-v-pagetable.png\" alt=\"risc-v page table\"\u003e\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/os/xv6/xv6_trap/"
+            "https://www.zhangzewen.net/posts/os/xv6/xv6_summary/"
           ]
         }
       ]
@@ -106,12 +106,12 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/os/xv6/xv6_trap/#webpage"
+        "@id": "https://www.zhangzewen.net/posts/os/xv6/xv6_summary/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/os/xv6/xv6_trap/#webpage"
+        "@id": "https://www.zhangzewen.net/posts/os/xv6/xv6_summary/#webpage"
       },
-      "headline": "xv6 之 trap 机制",
+      "headline": "xv6 总结",
       "datePublished": "2025-08-05T09:43:31+08:00",
       "dateModified": "2025-08-05T09:43:31+08:00",
       "publisher": {
@@ -136,7 +136,7 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/os/xv6/xv6_trap/#comments"
+            "https://www.zhangzewen.net/posts/os/xv6/xv6_summary/#comments"
           ]
         }
       ]
@@ -179,32 +179,43 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
   <ul>
     <li>
       <ul>
-        <li><a href="#trap-机制">trap 机制</a></li>
-        <li><a href="#risc-v-特权级别">RISC-V 特权级别</a></li>
-        <li><a href="#控制和状态寄存器">控制和状态寄存器</a>
+        <li><a href="#内存管理">内存管理</a>
           <ul>
-            <li><a href="#mstatussstatus">mstatus/sstatus</a></li>
-            <li><a href="#stvec">stvec</a></li>
-            <li><a href="#sepc">sepc</a></li>
-            <li><a href="#scause">scause</a></li>
-            <li><a href="#sscratch">sscratch</a></li>
+            <li><a href="#xv6-page-table">xv6 page table</a></li>
+            <li><a href="#xv6-内核内存布局">xv6 内核内存布局</a></li>
+            <li><a href="#xv6-用户进程内存布局">xv6 用户进程内存布局</a></li>
           </ul>
         </li>
-        <li><a href="#trap-处理流程">trap 处理流程</a></li>
-        <li><a href="#xv6-用户态触发-trap-处理流程">xv6 用户态触发 trap 处理流程</a>
+        <li><a href="#trap-机制">trap 机制</a>
           <ul>
-            <li><a href="#uservec">uservec</a></li>
-            <li><a href="#usertrap">usertrap</a></li>
-            <li><a href="#usertrapret">usertrapret</a></li>
-            <li><a href="#userret">userret</a></li>
+            <li><a href="#risc-v-特权级别">RISC-V 特权级别</a></li>
+            <li><a href="#控制和状态寄存器">控制和状态寄存器</a>
+              <ul>
+                <li><a href="#mstatussstatus">mstatus/sstatus</a></li>
+                <li><a href="#stvec">stvec</a></li>
+                <li><a href="#sepc">sepc</a></li>
+                <li><a href="#scause">scause</a></li>
+                <li><a href="#sscratch">sscratch</a></li>
+              </ul>
+            </li>
+            <li><a href="#trap-处理流程">trap 处理流程</a>
+              <ul>
+                <li><a href="#xv6-用户态触发-trap-处理流程">xv6 用户态触发 trap 处理流程</a></li>
+                <li><a href="#xv6-内核态触发-trap-处理流程">xv6 内核态触发 trap 处理流程</a></li>
+              </ul>
+            </li>
           </ul>
         </li>
-        <li><a href="#xv6-内核态触发-trap-处理流程">xv6 内核态触发 trap 处理流程</a>
+        <li><a href="#进程调度">进程调度</a>
           <ul>
-            <li><a href="#kernelvec">kernelvec</a></li>
-            <li><a href="#kerneltrap">kerneltrap</a></li>
+            <li><a href="#寄存器">寄存器</a></li>
+            <li><a href="#上下文切换">上下文切换</a></li>
+            <li><a href="#yield-和-sched">yield 和 sched</a></li>
+            <li><a href="#scheduler-切换到-用户进程">scheduler 切换到 用户进程</a></li>
+            <li><a href="#sleep-和-wake">sleep 和 wake</a></li>
           </ul>
         </li>
+        <li><a href="#文件系统">文件系统</a></li>
       </ul>
     </li>
   </ul>
@@ -255,7 +266,7 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 
   <main class="content container">
     <div class="post">
-  <h1 class="title">xv6 之 trap 机制</h1>
+  <h1 class="title">xv6 总结</h1>
   
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"></script>
@@ -276,11 +287,237 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 
   <div class="post-date">
     <time datetime=" 2025-08-05T09:43:31&#43;0800">Created: Aug 5, 2025</time>
-    <span class="readtime">&middot; 9 min read</span>
+    <span class="readtime">&middot; 15 min read</span>
   </div>
 
   <div>
-    <p>本片文章结合 xv6 的代码、配套 xv6-book 和 RISC-V 的文档，根据自己理解总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。如果错误，望不吝赐教。</p>
+    <p>本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃和不连贯，请见谅。</p>
+<h2 id="内存管理">内存管理</h2>
+<h3 id="xv6-page-table">xv6 page table</h3>
+<p><img src="/images/os/xv6/risc-v-pagetable.png" alt="risc-v page table"></p>
+<p>上图是 <code>RISC-V</code> 多种虚拟内存布局中的一种 — <code>Sv39</code>。</p>
+<p>通常，第一级 page table entry（上图的L2）指向第二级 page table，第二级 page table entry（上图的L1）指向第三级 page table，第三级 page table entry（上图的L0）指向的是实际的物理内存，将连续的且对齐的 4KB 虚拟内存映射到连续的且对齐的 4KB 物理内存（注意上面的虚拟地址的 offset， $1&laquo;12 = 4096$，所以对一个实际的物理地址左右移动不超过 12 位，都可以复原到原本的物理地址）。</p>
+<p>和第三级 page table entry 的功能相似，如果第二级 page table entry 是叶子节点，则它指向的是 2MB 的物理内存。还需要知道的是如果第一级 page table entry 是叶子节点，则它指向的是 1GB 的物理内存。</p>
+<p>一个 page table 的大小是 4KB， 一个 page table entry 的大小是 8 bytes，所以 <code>Sv39</code> 可以的表达 512GB 的内存空间。</p>
+<p><img src="/images/os/xv6/pagetable-level.png" alt=""></p>
+<p>xv6 为每个进程维护一个page table，描述每个进程的用户地址空间，再加上一个单独的页表（全局 <code>kernel_pagetable</code>）来描述内核的地址空间映射。内核通过预设地址空间的布局，以便通过虚拟地址获得对物理内存和各种硬件资源的访问。</p>
+<h3 id="xv6-内核内存布局">xv6 内核内存布局</h3>
+<p>如下是内核的page table 映射布局，其逻辑实现在 <code>kernel/vm.c</code> 下的 <code>kvminit</code>，特别需要注意的是<code>proc_mapstacks</code> 和 <code>procinit</code>，他给每个进程都分配了内核栈且映射信息是保存在内核 page table上的，下图的 Guard page 其实就是没有做映射的虚拟地址段。然后调用<code>kvminithart</code> 把 内核 page table 的物理地址写入到寄存器 <code>satp</code>中。</p>
+<p><img src="/images/os/xv6/xv6_kernel_va_pa_layout.png" alt="xv6 内核内存布局"></p>
+<h3 id="xv6-用户进程内存布局">xv6 用户进程内存布局</h3>
+<p>每个进程都有自己的page table，当xv6在进程之间切换时，它也切换了page table，用户进程的page table 的虚拟地址最大为 <code>MAXVA</code>，即可以达高达 256GB 的内存空间，这个值定义在<code>kernel/riscv.h</code>中。</p>
+<p><img src="/images/os/xv6/user_process_pa_va_layout.png" alt="用户进程的page table 布局"></p>
+<p>下面来拆解这张图是怎么实现的。</p>
+<p>在交互环境（执行 <code>make qemu</code> 进入）下执行<code>ctrl + p</code> 可以看到类似<code>ps</code>命令的结果：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>$
+</span></span><span style="display:flex;"><span><span style="color:#d3869b">1</span> sleep  init
+</span></span><span style="display:flex;"><span><span style="color:#d3869b">2</span> sleep  sh
+</span></span></code></pre></div><p>第一个用户进程就是<code>init</code>，它是通过 <code>kernel/main.c</code> 下的 <code>userinit</code> 初始化和拉起来的：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">userinit</span>(<span style="color:#fabd2f">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">allocproc</span>();
+</span></span><span style="display:flex;"><span>  initproc <span style="color:#fe8019">=</span> p;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// allocate one user page and copy initcode&#39;s instructions
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// and data into it.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">uvmfirst</span>(p<span style="color:#fe8019">-&gt;</span>pagetable, initcode, <span style="color:#fe8019">sizeof</span>(initcode));
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>sz <span style="color:#fe8019">=</span> PGSIZE;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// prepare for the very first &#34;return&#34; from kernel to user.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>epc <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;      <span style="color:#928374;font-style:italic">// user program counter
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>sp <span style="color:#fe8019">=</span> PGSIZE;  <span style="color:#928374;font-style:italic">// user stack pointer
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">safestrcpy</span>(p<span style="color:#fe8019">-&gt;</span>name, <span style="color:#b8bb26">&#34;initcode&#34;</span>, <span style="color:#fe8019">sizeof</span>(p<span style="color:#fe8019">-&gt;</span>name));
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>cwd <span style="color:#fe8019">=</span> <span style="color:#fabd2f">namei</span>(<span style="color:#b8bb26">&#34;/&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> RUNNABLE;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">release</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>从上面的代码可以看到 <code>initcode</code> 的流程如下：</p>
+<ul>
+<li>使用 <code>allocproc</code> 分配进程，在这里会给每个进程分配一个page table，并调用 <code>proc_pagetable</code> 设置初始的映射，这里需要注意 <code>TRAMPOLINE</code> 的映射信息，这个是实现用户态和内核态平滑切换的关键。</li>
+<li>把 <code>initcode.S</code> 拷贝到分配到的 页 中，并把该页映射到虚拟地址<code>0x0</code>，这段逻辑在<code>uvmfirst</code>中实现。</li>
+<li>设置栈帧，并修改为状态为<code>RUNNABLE</code></li>
+</ul>
+<p>至此已经完成上图的头尾两端的映射逻辑实现。如下是<code>initcode.S</code> 的汇编代码，只需要知道是使用系统调用 <code>exec</code> 来调用 <code>init.c</code> 即可：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># Initial process that execs /init.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># This code runs in user space.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">#include &#34;syscall.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># exec(init, argv)
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#b8bb26;font-weight:bold">.globl</span> <span style="color:#d3869b">start</span>
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">start:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">la</span> <span style="color:#d3869b">a0</span>, <span style="color:#d3869b">init</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">la</span> <span style="color:#d3869b">a1</span>, <span style="color:#d3869b">argv</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">li</span> <span style="color:#d3869b">a7</span>, <span style="color:#d3869b">SYS_exec</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ecall</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># for(;;) exit();
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fb4934">exit:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">li</span> <span style="color:#d3869b">a7</span>, <span style="color:#d3869b">SYS_exit</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ecall</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">jal</span> <span style="color:#d3869b">exit</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># char init[] = &#34;/init\0&#34;;
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fb4934">init:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#b8bb26;font-weight:bold">.string</span> <span style="color:#b8bb26">&#34;/init\0&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># char *argv[] = { init, 0 };
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#b8bb26;font-weight:bold">.p2align</span> <span style="color:#d3869b">2</span>
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">argv:</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#b8bb26;font-weight:bold">.quad</span> <span style="color:#d3869b">init</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#b8bb26;font-weight:bold">.quad</span> <span style="color:#d3869b">0</span>
+</span></span></code></pre></div><p>如下是 <code>exec</code> 的代码：
+<code>exec</code> 执行流程如下：</p>
+<ul>
+<li>创建新的page table，并设置其虚拟地址顶部的映射关系，完成上图的顶端部分。</li>
+<li>装载可执行文件到内存中，以虚拟地址<code>0x0</code>开始，注意如下代码中的变量<code>sz</code>，这就完成了上图的底端部分。</li>
+<li>然后申请两个页来做用户态的栈空间，但是又清除一个页（用户栈下方）的映射作为Guard page，即用户栈的大小是一个页，用户栈是向下增长的，生长到 Guard page 会产生 exception。</li>
+<li>拷贝参数到用户栈，此步骤和上一步完成上图的中间部分。</li>
+<li>替换page table，以及设置寄存器</li>
+</ul>
+<p>至此，上面的用户态内存布局的拼图完成。</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">int</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">exec</span>(<span style="color:#fabd2f">char</span> <span style="color:#fe8019">*</span>path, <span style="color:#fabd2f">char</span> <span style="color:#fe8019">**</span>argv)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">char</span> <span style="color:#fe8019">*</span>s, <span style="color:#fe8019">*</span>last;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> i, off;
+</span></span><span style="display:flex;"><span>  uint64 argc, sz <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>, sp, ustack[MAXARG], stackbase;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> elfhdr elf;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> inode <span style="color:#fe8019">*</span>ip;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proghdr ph;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">pagetable_t</span> pagetable <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>, oldpagetable;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">myproc</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">begin_op</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>((ip <span style="color:#fe8019">=</span> <span style="color:#fabd2f">namei</span>(path)) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span>){
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">end_op</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">-</span><span style="color:#d3869b">1</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">ilock</span>(ip);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Check ELF header
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">readi</span>(ip, <span style="color:#d3869b">0</span>, (uint64)<span style="color:#fe8019">&amp;</span>elf, <span style="color:#d3869b">0</span>, <span style="color:#fe8019">sizeof</span>(elf)) <span style="color:#fe8019">!=</span> <span style="color:#fe8019">sizeof</span>(elf))
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(elf.magic <span style="color:#fe8019">!=</span> ELF_MAGIC)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 可以理解为其复制了调用exec的进程的头部虚拟地址映射关系
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">if</span>((pagetable <span style="color:#fe8019">=</span> <span style="color:#fabd2f">proc_pagetable</span>(p)) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Load program into memory.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">for</span>(i<span style="color:#fe8019">=</span><span style="color:#d3869b">0</span>, off<span style="color:#fe8019">=</span>elf.phoff; i<span style="color:#fe8019">&lt;</span>elf.phnum; i<span style="color:#fe8019">++</span>, off<span style="color:#fe8019">+=</span><span style="color:#fe8019">sizeof</span>(ph)){
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">readi</span>(ip, <span style="color:#d3869b">0</span>, (uint64)<span style="color:#fe8019">&amp;</span>ph, off, <span style="color:#fe8019">sizeof</span>(ph)) <span style="color:#fe8019">!=</span> <span style="color:#fe8019">sizeof</span>(ph))
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(ph.type <span style="color:#fe8019">!=</span> ELF_PROG_LOAD)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">continue</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(ph.memsz <span style="color:#fe8019">&lt;</span> ph.filesz)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(ph.vaddr <span style="color:#fe8019">+</span> ph.memsz <span style="color:#fe8019">&lt;</span> ph.vaddr)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(ph.vaddr <span style="color:#fe8019">%</span> PGSIZE <span style="color:#fe8019">!=</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    uint64 sz1;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>((sz1 <span style="color:#fe8019">=</span> <span style="color:#fabd2f">uvmalloc</span>(pagetable, sz, ph.vaddr <span style="color:#fe8019">+</span> ph.memsz, <span style="color:#fabd2f">flags2perm</span>(ph.flags))) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    sz <span style="color:#fe8019">=</span> sz1;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">loadseg</span>(pagetable, ph.vaddr, ip, ph.off, ph.filesz) <span style="color:#fe8019">&lt;</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">iunlockput</span>(ip);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">end_op</span>();
+</span></span><span style="display:flex;"><span>  ip <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">myproc</span>();
+</span></span><span style="display:flex;"><span>  uint64 oldsz <span style="color:#fe8019">=</span> p<span style="color:#fe8019">-&gt;</span>sz;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Allocate some pages at the next page boundary.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// Make the first inaccessible as a stack guard.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// Use the rest as the user stack.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  sz <span style="color:#fe8019">=</span> <span style="color:#fabd2f">PGROUNDUP</span>(sz);
+</span></span><span style="display:flex;"><span>  uint64 sz1;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 申请两个页并做映射
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">if</span>((sz1 <span style="color:#fe8019">=</span> <span style="color:#fabd2f">uvmalloc</span>(pagetable, sz, sz <span style="color:#fe8019">+</span> (USERSTACK<span style="color:#fe8019">+</span><span style="color:#d3869b">1</span>)<span style="color:#fe8019">*</span>PGSIZE, PTE_W)) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>  sz <span style="color:#fe8019">=</span> sz1;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 清除用户栈下的页的映射，作为 Guard page
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">uvmclear</span>(pagetable, sz<span style="color:#fe8019">-</span>(USERSTACK<span style="color:#fe8019">+</span><span style="color:#d3869b">1</span>)<span style="color:#fe8019">*</span>PGSIZE);
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 设置栈帧
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  sp <span style="color:#fe8019">=</span> sz;
+</span></span><span style="display:flex;"><span>  stackbase <span style="color:#fe8019">=</span> sp <span style="color:#fe8019">-</span> USERSTACK<span style="color:#fe8019">*</span>PGSIZE;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Push argument strings, prepare rest of stack in ustack.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 把内核态的参数列表拷贝到刚申请的用户态的栈中
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">for</span>(argc <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>; argv[argc]; argc<span style="color:#fe8019">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(argc <span style="color:#fe8019">&gt;=</span> MAXARG)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    sp <span style="color:#fe8019">-=</span> <span style="color:#fabd2f">strlen</span>(argv[argc]) <span style="color:#fe8019">+</span> <span style="color:#d3869b">1</span>;
+</span></span><span style="display:flex;"><span>    sp <span style="color:#fe8019">-=</span> sp <span style="color:#fe8019">%</span> <span style="color:#d3869b">16</span>; <span style="color:#928374;font-style:italic">// riscv sp must be 16-byte aligned
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    <span style="color:#fe8019">if</span>(sp <span style="color:#fe8019">&lt;</span> stackbase)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">copyout</span>(pagetable, sp, argv[argc], <span style="color:#fabd2f">strlen</span>(argv[argc]) <span style="color:#fe8019">+</span> <span style="color:#d3869b">1</span>) <span style="color:#fe8019">&lt;</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>    ustack[argc] <span style="color:#fe8019">=</span> sp;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 休止标志位
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  ustack[argc] <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// push the array of argv[] pointers.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 参数列表的首地址压入到栈中
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  sp <span style="color:#fe8019">-=</span> (argc<span style="color:#fe8019">+</span><span style="color:#d3869b">1</span>) <span style="color:#fe8019">*</span> <span style="color:#fe8019">sizeof</span>(uint64);
+</span></span><span style="display:flex;"><span>  sp <span style="color:#fe8019">-=</span> sp <span style="color:#fe8019">%</span> <span style="color:#d3869b">16</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(sp <span style="color:#fe8019">&lt;</span> stackbase)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">copyout</span>(pagetable, sp, (<span style="color:#fabd2f">char</span> <span style="color:#fe8019">*</span>)ustack, (argc<span style="color:#fe8019">+</span><span style="color:#d3869b">1</span>)<span style="color:#fe8019">*</span><span style="color:#fe8019">sizeof</span>(uint64)) <span style="color:#fe8019">&lt;</span> <span style="color:#d3869b">0</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">goto</span> bad;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// arguments to user main(argc, argv)
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// argc is returned via the system call return
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// value, which goes in a0.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>a1 <span style="color:#fe8019">=</span> sp;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Save program name for debugging.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">for</span>(last<span style="color:#fe8019">=</span>s<span style="color:#fe8019">=</span>path; <span style="color:#fe8019">*</span>s; s<span style="color:#fe8019">++</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(<span style="color:#fe8019">*</span>s <span style="color:#fe8019">==</span> <span style="color:#b8bb26">&#39;/&#39;</span>)
+</span></span><span style="display:flex;"><span>      last <span style="color:#fe8019">=</span> s<span style="color:#fe8019">+</span><span style="color:#d3869b">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">safestrcpy</span>(p<span style="color:#fe8019">-&gt;</span>name, last, <span style="color:#fe8019">sizeof</span>(p<span style="color:#fe8019">-&gt;</span>name));
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// Commit to the user image.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 替换page table
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  oldpagetable <span style="color:#fe8019">=</span> p<span style="color:#fe8019">-&gt;</span>pagetable;
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>pagetable <span style="color:#fe8019">=</span> pagetable;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 设置进程栈的大小，其实也是heap的起始位置
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>sz <span style="color:#fe8019">=</span> sz;
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// 设置pc 寄存器，指向下一个要执行的指令
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>epc <span style="color:#fe8019">=</span> elf.entry;  <span style="color:#928374;font-style:italic">// initial program counter = main
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 设置栈指针sp
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>sp <span style="color:#fe8019">=</span> sp; <span style="color:#928374;font-style:italic">// initial stack pointer
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// 释放掉旧的pagetable
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">proc_freepagetable</span>(oldpagetable, oldsz);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> argc; <span style="color:#928374;font-style:italic">// this ends up in a0, the first argument to main(argc, argv)
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span> <span style="color:#fb4934">bad</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(pagetable)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">proc_freepagetable</span>(pagetable, sz);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(ip){
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">iunlockput</span>(ip);
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">end_op</span>();
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#fe8019">-</span><span style="color:#d3869b">1</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
 <h2 id="trap-机制">trap 机制</h2>
 <p>根据 xv6 book 所述，以下三种状况会导致从用户态到内核态的切换：</p>
 <ul>
@@ -289,7 +526,7 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 <li>设备中断，当设备发出需要处理的信号时，例如磁盘硬件完成读或写请求，该中断无论发生在用户态或者是内核态，回调函数的处理都是在内核态下处理。</li>
 </ul>
 <p>这里使用 &ldquo;trap&rdquo; 作为以上这些情况的通用词。</p>
-<h2 id="risc-v-特权级别">RISC-V 特权级别</h2>
+<h3 id="risc-v-特权级别">RISC-V 特权级别</h3>
 <p>任何时候一个 RISC-V 硬件线程（hart）都在某个特权级别上运行，该特权级别存储在一个或多个控制和状态寄存器中。尝试执行当前权限级别不允许的操作将导致引发异常，这些异常通常会导致陷入底层执行环境。</p>
 <table>
   <thead>
@@ -328,9 +565,9 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
   </tbody>
 </table>
 <p>Machine Mode（ M 模式）具有最高的特权，User Mode（用户模式，即 U 模式）和 Supervisor Mode（监督模式，即 S 模式，更常用的称呼为 内核模式）分别用于常规应用程序和操作系统使用。</p>
-<h2 id="控制和状态寄存器">控制和状态寄存器</h2>
+<h3 id="控制和状态寄存器">控制和状态寄存器</h3>
 <p>控制和状态寄存器即 CSRs，是存储CPU中各种信息的寄存器。标准的 RISC-V ISA 保留了一个12位的编码空间，因此最多可以有 4096 个 CSR。 在这 12 位的编码空间中，其中最高两位指示寄存器是读/写（00、01或10）还是只读（11）。接下来的两位确定可以访问该寄存器的最低权限级别。 RISC-V 只分配了部分地址空间，以便在未使用的地址中添加自定义的 CSR。</p>
-<h3 id="mstatussstatus">mstatus/sstatus</h3>
+<h4 id="mstatussstatus">mstatus/sstatus</h4>
 <p>寄存器 mstatus/sstatus 跟踪并控制 CPU 当前的运行状态（机器模式/监督模式），sstatus 继承自 mstatus：
 <img src="/images/os/xv6/xv6_trap_mstatus_layout.png" alt="mstatus"></p>
 <ul>
@@ -350,16 +587,16 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 </span></span><span style="display:flex;"><span>  x <span style="color:#fe8019">&amp;=</span> <span style="color:#fe8019">~</span>MSTATUS_MPP_MASK;
 </span></span><span style="display:flex;"><span>  x <span style="color:#fe8019">|=</span> MSTATUS_MPP_S;
 </span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">w_mstatus</span>(x);
-</span></span></code></pre></div><h3 id="stvec">stvec</h3>
+</span></span></code></pre></div><h4 id="stvec">stvec</h4>
 <p>内核将它的异常处理程序地址写入寄存器 stvec，RISC-V 跳转到 stvec 中的地址来处理异常，即把寄存器 stvec 的值赋值给寄存器 pc。在 xv6 中，kernelvec（kernelvec.S）负责处理发生在内核态的 trap， uservec（trampoline.S）负责发生在用户态的 trap。</p>
-<h3 id="sepc">sepc</h3>
+<h4 id="sepc">sepc</h4>
 <p>当 trap 触发时，寄存器 pc 的值保存于此（因为此时 pc 被 stvec 中的值覆盖）。sret（从 trap 返回）指令将 sepc 的值复制到pc。</p>
-<h3 id="scause">scause</h3>
+<h4 id="scause">scause</h4>
 <p>寄存器 scause 存储的是 trap 产生的原因：</p>
 <p><img src="/images/os/xv6/xv6_trap_scause.png" alt="scause"></p>
-<h3 id="sscratch">sscratch</h3>
+<h4 id="sscratch">sscratch</h4>
 <p>寄存器 sscratch 主要用于在用户态和内核态切换时临时保存数据，特别是在 trap 处理过程中。它的核心作用是<strong>提供一个安全的临时存储空间</strong>，避免关键寄存器的值被破坏。</p>
-<h2 id="trap-处理流程">trap 处理流程</h2>
+<h3 id="trap-处理流程">trap 处理流程</h3>
 <p>在 <code>kernel/start.c</code> 中：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// delegate all interrupts and exceptions to supervisor mode.
 </span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">w_medeleg</span>(<span style="color:#d3869b">0xffff</span>);
@@ -385,8 +622,8 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 </li>
 </ul>
 <p>机器模式下 trap 的处理可以类比上述流程。</p>
-<h2 id="xv6-用户态触发-trap-处理流程">xv6 用户态触发 trap 处理流程</h2>
-<h3 id="uservec">uservec</h3>
+<h4 id="xv6-用户态触发-trap-处理流程">xv6 用户态触发 trap 处理流程</h4>
+<h5 id="uservec">uservec</h5>
 <p>根据 上述 trap 的处理流程，用户态处理 trap 的回调逻辑地址是 uservec，其实现在 <code>kernel/trampoline.S</code> 下：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">#
 </span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># low-level code to handle traps from user space into
@@ -509,7 +746,7 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 </ul>
 </li>
 </ul>
-<h3 id="usertrap">usertrap</h3>
+<h5 id="usertrap">usertrap</h5>
 <p>下面来看下 usertrap 这个函数，这个函数在 <code>kernel/trap.c</code> 下，这个是核心部分：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">usertrap</span>(<span style="color:#fabd2f">void</span>)
@@ -577,7 +814,7 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 </li>
 <li>上述处理完成后，执行 usertrapret 从处理 trap 回调逻辑中返回。</li>
 </ul>
-<h3 id="usertrapret">usertrapret</h3>
+<h5 id="usertrapret">usertrapret</h5>
 <p>如下是 usertrapret 的代码：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">usertrapret</span>(<span style="color:#fabd2f">void</span>)
@@ -637,7 +874,7 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 <li>获取到用户态的 page table</li>
 <li>执行 <code>kernel/trampoline.S</code>  中的 userret 函数，用户态 page table 的地址作为参数。</li>
 </ul>
-<h3 id="userret">userret</h3>
+<h5 id="userret">userret</h5>
 <p>userret 的逻辑和 uservec 的逻辑正好相反：</p>
 <ul>
 <li>切换页表，从内核态 page table 切换到 用户态 page table。</li>
@@ -696,8 +933,8 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 </span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># return to user mode and user pc.
 </span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># usertrapret() set up sstatus and sepc.
 </span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">sret</span>
-</span></span></code></pre></div><h2 id="xv6-内核态触发-trap-处理流程">xv6 内核态触发 trap 处理流程</h2>
-<h3 id="kernelvec">kernelvec</h3>
+</span></span></code></pre></div><h4 id="xv6-内核态触发-trap-处理流程">xv6 内核态触发 trap 处理流程</h4>
+<h5 id="kernelvec">kernelvec</h5>
 <p>内核态 trap 的处理要比用户态trap的处理简单的多，先存储寄存器，然后调用 kerneltrap 处理逻辑，最后恢复寄存器：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">#
 </span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic"># interrupts and exceptions while in supervisor
@@ -763,7 +1000,7 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic"># return to whatever we were doing in the kernel.
 </span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#fabd2f">sret</span>
-</span></span></code></pre></div><h3 id="kerneltrap">kerneltrap</h3>
+</span></span></code></pre></div><h5 id="kerneltrap">kerneltrap</h5>
 <p>kerneltrap 的处理也比较简单：</p>
 <ul>
 <li>保存 spec， sstatus 寄存器，应对进程切换的状况。</li>
@@ -803,7 +1040,222 @@ trap 机制 根据 xv6 book 所述，以下三种状况会导致从用户态到�
 </span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">w_sepc</span>(sepc);
 </span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">w_sstatus</span>(sstatus);
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div>
+</span></span></code></pre></div><h2 id="进程调度">进程调度</h2>
+<p>xv6 进程间切换发生在如下两种情况：</p>
+<ul>
+<li>系统中断， 比如 time interrupt， 会调用 yield 进行切换。</li>
+<li>调用 xv6 的 sleep 和 wakeup 。</li>
+</ul>
+<h3 id="寄存器">寄存器</h3>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: center">寄存器</th>
+          <th style="text-align: center">描述</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: center">x0/zero</td>
+          <td style="text-align: center">始终为0</td>
+      </tr>
+      <tr>
+          <td style="text-align: center">ra</td>
+          <td style="text-align: center">保存 return address</td>
+      </tr>
+      <tr>
+          <td style="text-align: center">sp</td>
+          <td style="text-align: center">保存栈顶地址</td>
+      </tr>
+      <tr>
+          <td style="text-align: center">t0-t6</td>
+          <td style="text-align: center">保存临时数据，这些数据会在函数调用返回后失效，调用函数作用域内的数据</td>
+      </tr>
+      <tr>
+          <td style="text-align: center">s0-s11</td>
+          <td style="text-align: center">保存数据，这些数据在函数调用返回后不失效，调用幻术作用域外的数据</td>
+      </tr>
+      <tr>
+          <td style="text-align: center">a0-a1</td>
+          <td style="text-align: center">保存参数列表中的前两个/保存返回值</td>
+      </tr>
+      <tr>
+          <td style="text-align: center">a2-a7</td>
+          <td style="text-align: center">保存参数列表前两位之后的参数</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="上下文切换">上下文切换</h3>
+<p>xv6 中上下文切换是通过 swtch 完成的， swtch 是一段汇编代码， 其实就是保存要保存出让cpu进程的寄存器，加载获取cpu进程的寄存器：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># Context switch
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">#
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">#   void swtch(struct context *old, struct context *new);
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># 
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># Save current registers in old. Load from new.	
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span><span style="display:flex;"><span><span style="color:#b8bb26;font-weight:bold">.globl</span> <span style="color:#d3869b">swtch</span>
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">swtch:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">ra</span>, <span style="color:#d3869b">0</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">sp</span>, <span style="color:#d3869b">8</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s0</span>, <span style="color:#d3869b">16</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s1</span>, <span style="color:#d3869b">24</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s2</span>, <span style="color:#d3869b">32</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s3</span>, <span style="color:#d3869b">40</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s4</span>, <span style="color:#d3869b">48</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s5</span>, <span style="color:#d3869b">56</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s6</span>, <span style="color:#d3869b">64</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s7</span>, <span style="color:#d3869b">72</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s8</span>, <span style="color:#d3869b">80</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s9</span>, <span style="color:#d3869b">88</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s10</span>, <span style="color:#d3869b">96</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">sd</span> <span style="color:#d3869b">s11</span>, <span style="color:#d3869b">104</span>(<span style="color:#d3869b">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">ra</span>, <span style="color:#d3869b">0</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">sp</span>, <span style="color:#d3869b">8</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s0</span>, <span style="color:#d3869b">16</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s1</span>, <span style="color:#d3869b">24</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s2</span>, <span style="color:#d3869b">32</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s3</span>, <span style="color:#d3869b">40</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s4</span>, <span style="color:#d3869b">48</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s5</span>, <span style="color:#d3869b">56</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s6</span>, <span style="color:#d3869b">64</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s7</span>, <span style="color:#d3869b">72</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s8</span>, <span style="color:#d3869b">80</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s9</span>, <span style="color:#d3869b">88</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s10</span>, <span style="color:#d3869b">96</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ld</span> <span style="color:#d3869b">s11</span>, <span style="color:#d3869b">104</span>(<span style="color:#d3869b">a1</span>)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">ret</span>
+</span></span></code></pre></div><h3 id="yield-和-sched">yield 和 sched</h3>
+<p>sched 切换到 scheduler 的上下文，yield 修改进程状态： RUNNING -&gt; RUNNABLE ,并调用 sched 切换到 scheduler。</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">sched</span>(<span style="color:#fabd2f">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> intena;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">myproc</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fe8019">!</span><span style="color:#fabd2f">holding</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock))
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;sched p-&gt;lock&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">mycpu</span>()<span style="color:#fe8019">-&gt;</span>noff <span style="color:#fe8019">!=</span> <span style="color:#d3869b">1</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;sched locks&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">==</span> RUNNING)
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;sched RUNNING&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span>(<span style="color:#fabd2f">intr_get</span>())
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">panic</span>(<span style="color:#b8bb26">&#34;sched interruptible&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  intena <span style="color:#fe8019">=</span> <span style="color:#fabd2f">mycpu</span>()<span style="color:#fe8019">-&gt;</span>intena;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">swtch</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>context, <span style="color:#fe8019">&amp;</span><span style="color:#fabd2f">mycpu</span>()<span style="color:#fe8019">-&gt;</span>context);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">mycpu</span>()<span style="color:#fe8019">-&gt;</span>intena <span style="color:#fe8019">=</span> intena;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// Give up the CPU for one scheduling round.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">yield</span>(<span style="color:#fabd2f">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">myproc</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">acquire</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> RUNNABLE;
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">sched</span>();
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">release</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="scheduler-切换到-用户进程">scheduler 切换到 用户进程</h3>
+<p>在<code>kernel/main.c</code> 的 main 函数最后，会在每个 hart 执行进程的调度 scheduler：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">main</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">scheduler</span>();        
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>scheduler 其内部是一个死循环，其遍历 proc，寻找状态为 RNNABLE 的进程，通过调用 swtch 来进行进程切换， 如果没有合适的进程，则执行 wfi 指令进入到低功耗待机状态，等待中断的到来。</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">scheduler</span>(<span style="color:#fabd2f">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> cpu <span style="color:#fe8019">*</span>c <span style="color:#fe8019">=</span> <span style="color:#fabd2f">mycpu</span>();
+</span></span><span style="display:flex;"><span>  c<span style="color:#fe8019">-&gt;</span>proc <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">for</span>(;;){
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">intr_on</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#fabd2f">int</span> found <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">for</span>(p <span style="color:#fe8019">=</span> proc; p <span style="color:#fe8019">&lt;</span> <span style="color:#fe8019">&amp;</span>proc[NPROC]; p<span style="color:#fe8019">++</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">acquire</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">if</span>(p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">==</span> RUNNABLE) {
+</span></span><span style="display:flex;"><span>        p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> RUNNING;
+</span></span><span style="display:flex;"><span>        c<span style="color:#fe8019">-&gt;</span>proc <span style="color:#fe8019">=</span> p;
+</span></span><span style="display:flex;"><span>        <span style="color:#fabd2f">swtch</span>(<span style="color:#fe8019">&amp;</span>c<span style="color:#fe8019">-&gt;</span>context, <span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>context);
+</span></span><span style="display:flex;"><span>        c<span style="color:#fe8019">-&gt;</span>proc <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span>        found <span style="color:#fe8019">=</span> <span style="color:#d3869b">1</span>;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">release</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(found <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">intr_on</span>();
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">asm</span> <span style="color:#fe8019">volatile</span>(<span style="color:#b8bb26">&#34;wfi&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>在 scheduler 中最重要的两行代码：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>        <span style="color:#fabd2f">swtch</span>(<span style="color:#fe8019">&amp;</span>c<span style="color:#fe8019">-&gt;</span>context, <span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>context);
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// Process is done running for now.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        <span style="color:#928374;font-style:italic">// It should have changed its p-&gt;state before coming back.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>        c<span style="color:#fe8019">-&gt;</span>proc <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span></code></pre></div><p>如果单看注释，会云里雾里。从 swtch 的汇编代码中可以看出，并没有寄存器 pc 的变更，但是需要注意的是，在 allocproc 这个函数里面有如下代码：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>context.ra <span style="color:#fe8019">=</span> (uint64)forkret;
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>context.sp <span style="color:#fe8019">=</span> p<span style="color:#fe8019">-&gt;</span>kstack <span style="color:#fe8019">+</span> PGSIZE;
+</span></span></code></pre></div><p>在 调用 swtch 的时候， forkret 的地址会写入寄存器 ra， 当 swtch 返回的时候，ra 的值会写入到寄存器 pc，所以会从 forkret 开始执行。最终会调用 prepare_return ：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">prepare_return</span>(<span style="color:#fabd2f">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#928374;font-style:italic">// set S Exception Program Counter to the saved user pc.
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">w_sepc</span>(p<span style="color:#fe8019">-&gt;</span>trapframe<span style="color:#fe8019">-&gt;</span>epc);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>最终会切换到用户进程执行。</p>
+<h3 id="sleep-和-wake">sleep 和 wake</h3>
+<p>sleep  调用 sched 出让 cpu， wake 修改下进程的状态：SLEEPING -&gt; RUNNABLE：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">sleep</span>(<span style="color:#fabd2f">void</span> <span style="color:#fe8019">*</span>chan, <span style="color:#fe8019">struct</span> spinlock <span style="color:#fe8019">*</span>lk)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p <span style="color:#fe8019">=</span> <span style="color:#fabd2f">myproc</span>();
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">acquire</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">release</span>(lk);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>chan <span style="color:#fe8019">=</span> chan;
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> SLEEPING;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">sched</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  p<span style="color:#fe8019">-&gt;</span>chan <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">release</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">acquire</span>(lk);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span>
+</span></span><span style="display:flex;"><span><span style="color:#fabd2f">wakeup</span>(<span style="color:#fabd2f">void</span> <span style="color:#fe8019">*</span>chan)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> proc <span style="color:#fe8019">*</span>p;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#fe8019">for</span>(p <span style="color:#fe8019">=</span> proc; p <span style="color:#fe8019">&lt;</span> <span style="color:#fe8019">&amp;</span>proc[NPROC]; p<span style="color:#fe8019">++</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#fe8019">if</span>(p <span style="color:#fe8019">!=</span> <span style="color:#fabd2f">myproc</span>()){
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">acquire</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>      <span style="color:#fe8019">if</span>(p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">==</span> SLEEPING <span style="color:#fe8019">&amp;&amp;</span> p<span style="color:#fe8019">-&gt;</span>chan <span style="color:#fe8019">==</span> chan) {
+</span></span><span style="display:flex;"><span>        p<span style="color:#fe8019">-&gt;</span>state <span style="color:#fe8019">=</span> RUNNABLE;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#fabd2f">release</span>(<span style="color:#fe8019">&amp;</span>p<span style="color:#fe8019">-&gt;</span>lock);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="文件系统">文件系统</h2>
+<p><code>kernel/mkfs.c</code> 创建 QEMU 需要挂载的硬盘，block 的大小是 1024 bytes，其结构图如下：</p>
+<p><img src="/images/os/xv6/filesystem_disk_layout.png" alt="filesystem disk layout">
+需要注意的是上图中的 inode block：在内存中是struct inode， 在磁盘中是 struct dinode，具体看二者的结构体定义，以及函数 ialloc 和 iupdate 的实现。</p>
+<p>硬盘文件 <code>fs.img</code> 的解析如下：
+<img src="/images/os/xv6/filesystem_fs_img_layout.png" alt="filesystem disk layout"></p>
+<p><code>struct inode</code> 需要注意的是字段 addr， addr 是一个 int 类型的数组，数组中<code>addr[0]</code> 到 <code>addr[11]</code> 直接指向的是 data block，当文件足够大的时候会用到 <code>addr[12]</code>，<code>addr[12]</code> 指向的是索引block，即这个指向的 block 可以指向 <code>1024/4</code> 个 data block，称之为 single indirect，同理也有 double indirect 和 triple indirect。具体逻辑可以看 <code>kernel/fs.c</code> 中 函数 bmap 的逻辑。</p>
+<p><img src="/images/os/xv6/inode.png" alt="struct inode"></p>
+
   </div>
 
 

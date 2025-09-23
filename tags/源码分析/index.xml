@@ -51,6 +51,20 @@
       <description>&lt;p&gt;flannel 的配置一般如下：&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;{&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#fb4934&#34;&gt;&amp;#34;Network&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#b8bb26&#34;&gt;&amp;#34;10.0.0.0/16&amp;#34;&lt;/span&gt;,&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#fb4934&#34;&gt;&amp;#34;SubnetLen&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#d3869b&#34;&gt;24&lt;/span&gt;,&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#fb4934&#34;&gt;&amp;#34;SubnetMin&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#b8bb26&#34;&gt;&amp;#34;10.0.1.0&amp;#34;&lt;/span&gt;,&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#fb4934&#34;&gt;&amp;#34;SubnetMax&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#b8bb26&#34;&gt;&amp;#34;10.0.20.0&amp;#34;&lt;/span&gt;,&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#fb4934&#34;&gt;&amp;#34;Backend&amp;#34;&lt;/span&gt;:{&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#fb4934&#34;&gt;&amp;#34;Type&amp;#34;&lt;/span&gt;:&lt;span style=&#34;color:#b8bb26&#34;&gt;&amp;#34;vxlan&amp;#34;&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;&#xA;&lt;li&gt;Network：用于指定 flannel 地址池。&lt;/li&gt;&#xA;&lt;li&gt;SubnetLen：用于指定分配给单个宿主机的 docker0 的 ip 段的子网掩码的长度。&lt;/li&gt;&#xA;&lt;li&gt;SubnetMin：用于指定最小能够分配的 ip 段。&lt;/li&gt;&#xA;&lt;li&gt;SudbnetMax：用于指定最大能够分配的 ip 段，在上面的示例中，表示每个宿主机可以分配一个 24 位掩码长度的子网，&#xA;可以分配的子网从 &lt;code&gt;10.0.1.0/24&lt;/code&gt; 到 &lt;code&gt;10.0.20.0/24&lt;/code&gt;，也就意味着在这个网段中，最多只能有20台宿主机。&lt;/li&gt;&#xA;&lt;li&gt;Backend：用于在跨主机通信时指定数据包以什么方式转发，如 &lt;code&gt;vxlan&lt;/code&gt;、&lt;code&gt;host-gw&lt;/code&gt; 和 &lt;code&gt;udp&lt;/code&gt; 等。&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;flannel 中比较重要的概念：&lt;/p&gt;</description>
     </item>
     <item>
+      <title>flannel 源码分析之 host-gw 模式</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/</link>
+      <pubDate>Mon, 21 Jul 2025 23:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/</guid>
+      <description>&lt;p&gt;flannel 的后端 host-gw 不涉及数据包的封包和解包，就是在宿主机上配置路由规则，把其它宿主机 ip 当成其上所有 pod 的下一跳。&lt;/p&gt;&#xA;&lt;h2 id=&#34;注册和创建后端-host-gw-实例&#34;&gt;注册和创建后端 host-gw 实例&lt;/h2&gt;&#xA;&lt;p&gt;结构体 HostgwBackend 实现了接口 Backend。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>flannel 源码分析之 vxlan</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/</link>
+      <pubDate>Mon, 21 Jul 2025 23:43:31 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/</guid>
+      <description>&lt;h2 id=&#34;注册和创建后端-vxlan--实例&#34;&gt;注册和创建后端 vxlan  实例&lt;/h2&gt;&#xA;&lt;p&gt;结构体 VXLANBackend 实现了接口 Backend 和 Network。&#xA;vxlan 注册到 flannel 的流程如下:&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>kubernetes 源码分析之 CSI Volume Plugin</title>
       <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/csi-volume-plugin/</link>
       <pubDate>Fri, 27 Jun 2025 09:43:31 +0800</pubDate>
@@ -77,6 +91,34 @@
       <pubDate>Sun, 25 May 2025 16:31:39 +0800</pubDate>
       <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/syncloop/</guid>
       <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubelet 是由多个生产者和多个消费者组成的后台服务，其内部实现是一个控制循环，由事件驱动着控制循环的运行，如下图所示：&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/kubernetes/kubelet/syncLoop.png&#34; alt=&#34;syncLoop&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;这个图片是展示的组件和本篇分析所使用的kubernetes 版本已经有所不同，但是其设计理念没有变法，依旧是 syncLoop 驱动着整个控制循环的运行。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 apiserver storage etcd 层实现分析</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/</link>
+      <pubDate>Sun, 11 May 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 apiserver storage 通用实现</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-generic/</link>
+      <pubDate>Sun, 11 May 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-generic/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之apiserver endpoints</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/apiserver/endpoint/</link>
+      <pubDate>Sun, 11 May 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/apiserver/endpoint/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;在 kubernetes 中，所有的资源访问都是通过 RESTful api 来完成的，这些 RESTful api 是程序生成的。本片文章将详细分析其逻辑实现。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之apiserver storage 的 cache 层实现分析</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-cache/</link>
+      <pubDate>Sun, 11 May 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-cache/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;apiserver storage 的 cache 层的设计有利于快速响应请求并返回所需的数据。&lt;/p&gt;&#xA;&lt;p&gt;结构体 cacher 实现了 底层存储接口&lt;a href=&#34;https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/interfaces.go#L159&#34;&gt;Interface&lt;/a&gt;。请参考&lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/&#34;&gt;kubernetes 源码分析之 apiserver storage etcd 层实现分析&lt;/a&gt;。&lt;/p&gt;</description>
     </item>
     <item>
       <title>kubernetes 源码分析之 kubelet pleg</title>
@@ -188,7 +230,7 @@
       <link>https://www.zhangzewen.net/posts/kubernetes/client-go/informer/</link>
       <pubDate>Tue, 13 Aug 2024 23:42:19 +0800</pubDate>
       <guid>https://www.zhangzewen.net/posts/kubernetes/client-go/informer/</guid>
-      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;h2 id=&#34;变更事件分发和消费&#34;&gt;变更事件分发和消费&lt;/h2&gt;&#xA;&lt;p&gt;在讲解 Informer 机制之前，先来简单了解两个数据结构，这两个数据结构设计到变更事件的监听，事件分发，事件消费。&lt;/p&gt;&#xA;&lt;h3 id=&#34;processorlistener&#34;&gt;processorListener&lt;/h3&gt;&#xA;&lt;p&gt;processorListener 是用户对特定资源对象变更事件的回调处理逻辑接口 ResourceEventHandler 的封装，其监听变更事件以及调用用户注册的回调逻辑来消费这些变更事件。&lt;/p&gt;</description>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;h2 id=&#34;变更事件分发和消费&#34;&gt;变更事件分发和消费&lt;/h2&gt;&#xA;&lt;p&gt;在讲解 Informer 机制之前，先来简单了解两个数据结构，这两个数据结构设计到变更事件的监听，事件分发，事件消费。&lt;/p&gt;&#xA;&lt;h3 id=&#34;processorlistener&#34;&gt;processorListener&lt;/h3&gt;&#xA;&lt;p&gt;接口 processorListener 是用户对特定资源对象变更事件的回调处理逻辑接口 ResourceEventHandler 的封装，其监听变更事件以及调用用户注册的回调逻辑来消费这些变更事件:&lt;/p&gt;</description>
     </item>
     <item>
       <title>client-go 源码分析之 reflector</title>

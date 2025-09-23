@@ -72,6 +72,34 @@
       <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubelet 是由多个生产者和多个消费者组成的后台服务，其内部实现是一个控制循环，由事件驱动着控制循环的运行，如下图所示：&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/kubernetes/kubelet/syncLoop.png&#34; alt=&#34;syncLoop&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;这个图片是展示的组件和本篇分析所使用的kubernetes 版本已经有所不同，但是其设计理念没有变法，依旧是 syncLoop 驱动着整个控制循环的运行。&lt;/p&gt;</description>
     </item>
     <item>
+      <title>kubernetes 源码分析之 apiserver storage etcd 层实现分析</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/</link>
+      <pubDate>Sun, 11 May 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 apiserver storage 通用实现</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-generic/</link>
+      <pubDate>Sun, 11 May 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-generic/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之apiserver endpoints</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/apiserver/endpoint/</link>
+      <pubDate>Sun, 11 May 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/apiserver/endpoint/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;在 kubernetes 中，所有的资源访问都是通过 RESTful api 来完成的，这些 RESTful api 是程序生成的。本片文章将详细分析其逻辑实现。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之apiserver storage 的 cache 层实现分析</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-cache/</link>
+      <pubDate>Sun, 11 May 2025 22:36:42 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-cache/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;apiserver storage 的 cache 层的设计有利于快速响应请求并返回所需的数据。&lt;/p&gt;&#xA;&lt;p&gt;结构体 cacher 实现了 底层存储接口&lt;a href=&#34;https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/interfaces.go#L159&#34;&gt;Interface&lt;/a&gt;。请参考&lt;a href=&#34;https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/&#34;&gt;kubernetes 源码分析之 apiserver storage etcd 层实现分析&lt;/a&gt;。&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>kubernetes 源码分析之 kubelet pleg</title>
       <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/pleg/</link>
       <pubDate>Tue, 06 May 2025 01:27:07 +0800</pubDate>
@@ -181,7 +209,7 @@
       <link>https://www.zhangzewen.net/posts/kubernetes/client-go/informer/</link>
       <pubDate>Tue, 13 Aug 2024 23:42:19 +0800</pubDate>
       <guid>https://www.zhangzewen.net/posts/kubernetes/client-go/informer/</guid>
-      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;h2 id=&#34;变更事件分发和消费&#34;&gt;变更事件分发和消费&lt;/h2&gt;&#xA;&lt;p&gt;在讲解 Informer 机制之前，先来简单了解两个数据结构，这两个数据结构设计到变更事件的监听，事件分发，事件消费。&lt;/p&gt;&#xA;&lt;h3 id=&#34;processorlistener&#34;&gt;processorListener&lt;/h3&gt;&#xA;&lt;p&gt;processorListener 是用户对特定资源对象变更事件的回调处理逻辑接口 ResourceEventHandler 的封装，其监听变更事件以及调用用户注册的回调逻辑来消费这些变更事件。&lt;/p&gt;</description>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 client-go release-1.25 分支&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;h2 id=&#34;变更事件分发和消费&#34;&gt;变更事件分发和消费&lt;/h2&gt;&#xA;&lt;p&gt;在讲解 Informer 机制之前，先来简单了解两个数据结构，这两个数据结构设计到变更事件的监听，事件分发，事件消费。&lt;/p&gt;&#xA;&lt;h3 id=&#34;processorlistener&#34;&gt;processorListener&lt;/h3&gt;&#xA;&lt;p&gt;接口 processorListener 是用户对特定资源对象变更事件的回调处理逻辑接口 ResourceEventHandler 的封装，其监听变更事件以及调用用户注册的回调逻辑来消费这些变更事件:&lt;/p&gt;</description>
     </item>
     <item>
       <title>client-go 源码分析之 reflector</title>

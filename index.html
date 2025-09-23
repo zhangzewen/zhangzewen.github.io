@@ -210,23 +210,6 @@
       </article>
       <article class="post">
         <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/os/xv6/6.s081_summary/">MIT 公开课 6.S081 实现总结</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-08-20T09:43:31&#43;0800">Aug 20, 2025</time> &middot; 75 min read
-        </div>
-
-        <div>
-          <p><strong>6.S081</strong> 是非常著名的 MIT 操作系统课程。该公开课链接的年份后缀的是可以更改的，这个课程提供的可编程 lab 每年都稍微有些不同，每个 lab 的自评测中的 answers-*.txt 和 time.txt 需要自行填写。 本篇文章对应的是<a href="https://pdos.csail.mit.edu/6.828/2024/"> 2024 年度课程</a>的实现总结。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/os/xv6/6.s081_summary/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
           <a href="https://www.zhangzewen.net/posts/ebpf/translate-bpf-co-re-reference-guide/">[译]BPF CO-RE reference guide</a>
         </h1>
 
@@ -248,84 +231,39 @@
       </article>
       <article class="post">
         <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/">xv6 之 进程调度</a>
+          <a href="https://www.zhangzewen.net/posts/os/xv6/6.s081_summary/">MIT 公开课 6.S081 实现总结</a>
         </h1>
 
         <div class="post-date">
-          <time datetime="2025-08-10T09:43:31&#43;0800">Aug 10, 2025</time> &middot; 3 min read
+          <time datetime="2025-08-05T09:43:31&#43;0800">Aug 5, 2025</time> &middot; 75 min read
         </div>
 
         <div>
-          <p>本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。 请结合 <a href="https://www.zhangzewen.net/posts/os/xv6/xv6_trap/">xv6 trap 机制</a> 来查阅本篇笔记。</p>
-<p>xv6 进程间切换发生在如下两种情况：</p>
-<ul>
-<li>系统中断， 比如 time interrupt， 会调用 yield 进行切换。</li>
-<li>调用 xv6 的 sleep 和 wakeup 。</li>
-</ul>
-<h2 id="寄存器">寄存器</h2>
-<table>
-  <thead>
-      <tr>
-          <th style="text-align: center">寄存器</th>
-          <th style="text-align: center">描述</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td style="text-align: center">x0/zero</td>
-          <td style="text-align: center">始终为0</td>
-      </tr>
-      <tr>
-          <td style="text-align: center">ra</td>
-          <td style="text-align: center">保存 return address</td>
-      </tr>
-      <tr>
-          <td style="text-align: center">sp</td>
-          <td style="text-align: center">保存栈顶地址</td>
-      </tr>
-      <tr>
-          <td style="text-align: center">t0-t6</td>
-          <td style="text-align: center">保存临时数据，这些数据会在函数调用返回后失效，调用函数作用域内的数据</td>
-      </tr>
-      <tr>
-          <td style="text-align: center">s0-s11</td>
-          <td style="text-align: center">保存数据，这些数据在函数调用返回后不失效，调用幻术作用域外的数据</td>
-      </tr>
-      <tr>
-          <td style="text-align: center">a0-a1</td>
-          <td style="text-align: center">保存参数列表中的前两个/保存返回值</td>
-      </tr>
-      <tr>
-          <td style="text-align: center">a2-a7</td>
-          <td style="text-align: center">保存参数列表前两位之后的参数</td>
-      </tr>
-  </tbody>
-</table>
-<h2 id="上下文切换">上下文切换</h2>
-<p>xv6 中上下文切换是通过 swtch 完成的， swtch 是一段汇编代码， 其实就是保存要保存出让cpu进程的寄存器，加载获取cpu进程的寄存器：</p>
+          <p><strong>6.S081</strong> 是非常著名的 MIT 操作系统课程。该公开课链接的年份后缀的是可以更改的，这个课程提供的可编程 lab 每年都稍微有些不同，每个 lab 的自评测中的 answers-*.txt 和 time.txt 需要自行填写。 本篇文章对应的是<a href="https://pdos.csail.mit.edu/6.828/2024/"> 2024 年度课程</a>的实现总结。</p>
         </div>
 
         <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/os/xv6/xv6_scheduling/">Read More</a>
+          <a href="https://www.zhangzewen.net/posts/os/xv6/6.s081_summary/">Read More</a>
         </div>
       </article>
       <article class="post">
         <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/os/xv6/xv6_trap/">xv6 之 trap 机制</a>
+          <a href="https://www.zhangzewen.net/posts/os/xv6/xv6_summary/">xv6 总结</a>
         </h1>
 
         <div class="post-date">
-          <time datetime="2025-08-05T09:43:31&#43;0800">Aug 5, 2025</time> &middot; 9 min read
+          <time datetime="2025-08-05T09:43:31&#43;0800">Aug 5, 2025</time> &middot; 15 min read
         </div>
 
         <div>
-          <p>本片文章结合 xv6 的代码、配套 xv6-book 和 RISC-V 的文档，根据自己理解总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃，请见谅。如果错误，望不吝赐教。</p>
-<h2 id="trap-机制">trap 机制</h2>
-<p>根据 xv6 book 所述，以下三种状况会导致从用户态到内核态的切换：</p>
+          <p>本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃和不连贯，请见谅。</p>
+<h2 id="内存管理">内存管理</h2>
+<h3 id="xv6-page-table">xv6 page table</h3>
+<p><img src="/images/os/xv6/risc-v-pagetable.png" alt="risc-v page table"></p>
         </div>
 
         <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/os/xv6/xv6_trap/">Read More</a>
+          <a href="https://www.zhangzewen.net/posts/os/xv6/xv6_summary/">Read More</a>
         </div>
       </article>
       <article class="post">
@@ -384,22 +322,56 @@
       </article>
       <article class="post">
         <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/os/xv6/xv6_memory_management/">xv6 之 内存管理</a>
+          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel/">flannel 源码分析</a>
         </h1>
 
         <div class="post-date">
-          <time datetime="2025-07-28T09:43:31&#43;0800">Jul 28, 2025</time> &middot; 4 min read
+          <time datetime="2025-07-21T23:43:31&#43;0800">Jul 21, 2025</time> &middot; 9 min read
         </div>
 
         <div>
-          <p>本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃和不连贯，请见谅。</p>
-<h2 id="xv6-page-table">xv6 page table</h2>
-<p><img src="/images/os/xv6/risc-v-pagetable.png" alt="risc-v page table"></p>
-<p>上图是 <code>RISC-V</code> 多种虚拟内存布局中的一种 — <code>Sv39</code>。</p>
+          <p>flannel 的配置一般如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;Network&#34;</span>:<span style="color:#b8bb26">&#34;10.0.0.0/16&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetLen&#34;</span>:<span style="color:#d3869b">24</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetMin&#34;</span>:<span style="color:#b8bb26">&#34;10.0.1.0&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetMax&#34;</span>:<span style="color:#b8bb26">&#34;10.0.20.0&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;Backend&#34;</span>:{
+</span></span><span style="display:flex;"><span>        <span style="color:#fb4934">&#34;Type&#34;</span>:<span style="color:#b8bb26">&#34;vxlan&#34;</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><ul>
+<li>Network：用于指定 flannel 地址池。</li>
+<li>SubnetLen：用于指定分配给单个宿主机的 docker0 的 ip 段的子网掩码的长度。</li>
+<li>SubnetMin：用于指定最小能够分配的 ip 段。</li>
+<li>SudbnetMax：用于指定最大能够分配的 ip 段，在上面的示例中，表示每个宿主机可以分配一个 24 位掩码长度的子网，
+可以分配的子网从 <code>10.0.1.0/24</code> 到 <code>10.0.20.0/24</code>，也就意味着在这个网段中，最多只能有20台宿主机。</li>
+<li>Backend：用于在跨主机通信时指定数据包以什么方式转发，如 <code>vxlan</code>、<code>host-gw</code> 和 <code>udp</code> 等。</li>
+</ul>
+<p>flannel 中比较重要的概念：</p>
         </div>
 
         <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/os/xv6/xv6_memory_management/">Read More</a>
+          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/">flannel 源码分析之 host-gw 模式</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-07-21T23:43:31&#43;0800">Jul 21, 2025</time> &middot; 4 min read
+        </div>
+
+        <div>
+          <p>flannel 的后端 host-gw 不涉及数据包的封包和解包，就是在宿主机上配置路由规则，把其它宿主机 ip 当成其上所有 pod 的下一跳。</p>
+<h2 id="注册和创建后端-host-gw-实例">注册和创建后端 host-gw 实例</h2>
+<p>结构体 HostgwBackend 实现了接口 Backend。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/">Read More</a>
         </div>
       </article>
   </div>

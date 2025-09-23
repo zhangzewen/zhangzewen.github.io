@@ -172,21 +172,60 @@
     <div class="posts">
       <article class="post">
         <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/">[译]BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()</a>
+          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-generic/">kubernetes 源码分析之 apiserver storage 通用实现</a>
         </h1>
 
         <div class="post-date">
-          <time datetime="2025-05-17T08:13:34&#43;0800">May 17, 2025</time> &middot; 5 min read
+          <time datetime="2025-05-11T22:36:42&#43;0800">May 11, 2025</time> &middot; 9 min read
         </div>
 
         <div>
           <blockquote>
-<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>原文: <strong><a href="https://nakryiko.com/posts/bpf-tips-printk/">BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()</a></strong></p>
+<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：</p>
         </div>
 
         <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/">Read More</a>
+          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-generic/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/endpoint/">kubernetes 源码分析之apiserver endpoints</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-05-11T22:36:42&#43;0800">May 11, 2025</time> &middot; 7 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>在 kubernetes 中，所有的资源访问都是通过 RESTful api 来完成的，这些 RESTful api 是程序生成的。本片文章将详细分析其逻辑实现。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/endpoint/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-cache/">kubernetes 源码分析之apiserver storage 的 cache 层实现分析</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-05-11T22:36:42&#43;0800">May 11, 2025</time> &middot; 9 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>apiserver storage 的 cache 层的设计有利于快速响应请求并返回所需的数据。</p>
+<p>结构体 cacher 实现了 底层存储接口<a href="https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/interfaces.go#L159">Interface</a>。请参考<a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/">kubernetes 源码分析之 apiserver storage etcd 层实现分析</a>。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-cache/">Read More</a>
         </div>
       </article>
       <article class="post">
@@ -327,48 +366,6 @@
 
         <div class="read-more-link">
           <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/nongorestfulmux/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/life/nan_tai_hang/">三月份南太行穿越</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-04-13T14:54:32&#43;0800">Apr 13, 2025</time> &middot; 1 min read
-        </div>
-
-        <div>
-          <p>为了准备3月底的熊猫蜀道山比赛，3月份去了两次南太行，都是两天的行程。</p>
-<p>第一天的路线： 双底村—马武寨—抱犊村—西莲—隧道—锡崖沟—张沟。 全程39公里左右，爬升1500m - 1600m。</p>
-<p>双底村出来后红豆衫大峡谷，三月份的时候还是是枯水期，河床的石头很光滑，背阴处的冰瀑布还是很壮观的，就是有些脏。</p>
-<p>过了大峡谷就是一段爬升，应该有600-700左右，然后下到马武寨，从马武寨到老龙口整体下降趋势，很简单，只是刚开始会很泥泞，因为化冻。</p>
-<p>从老龙口到西莲这一段我觉得是精华所在， 这一段是沿着山边儿的小路切到西莲，路旁边就是悬崖，垂直的崖壁，感觉就是凭空拔地而起，一点都不拖泥带水，只要不是低着头往前冲，还是很安全的。一路跑跑停停，拍照，拍照，还是拍照。有很多突出来的平台，好多人都在那儿排队打卡，我只是看了眼就走了，有些恐高，无福消受。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/life/nan_tai_hang/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/life/xiong_mao_shu_dao_shan/">四川成都之行：熊猫蜀道山赛记</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-04-05T14:21:45&#43;0800">Apr 5, 2025</time> &middot; 1 min read
-        </div>
-
-        <div>
-          <p>准备已久的比赛以 DNF 收尾，这篇就记录个流水账吧。</p>
-<p>在成都下飞机就上午10点了，到天府广场都快12点了，计划去宽窄巷子逛逛也没有时间，下地铁随便吃了些就去成都博物馆。 成都博物馆提供了免费的行李寄存处，虽然我预约的是下午1点的，但是没有到点也让进了。</p>
-<p>博物馆里逛了差不多3个小时，我最喜欢的就是看各种陶俑了，总是喜哈哈地，还有蜀锦(不怎么好拍照，显示不了细节)，然后就是一些器皿上的纹理，真的很细腻很不真实，总让我有种这不是现代仿的吧的感觉。然后就是木偶和皮影，想起了这些年追的金光布袋戏。然后是震撼了我一百年的皮影，三打白骨精 白骨夫人变换人形简直神了，然后就是杨丽萍的《月光》皮影版也是让人叹为观止，这也让我想起了我的姥爷，他以前也是唱皮影戏的。</p>
-<p>从博物馆出来后直接坐地铁到犀黄坐火车去彭州，然后在彭州又坐去白鹿的旅游专线到了白鹿音乐小镇，挺折腾的。每次出去比赛，出行总是最耗时的，也是消费大头。</p>
-<p>比赛的当天天气有些冷，但是现场很是热闹，我们168KM组别的首先出发，广场里面挤满了人，到点儿比赛准时开始。 我在CP1和CP2之间把肌肉拉伤(我觉得是，人生第一次，没有啥经验，恢复的很快)了。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/life/xiong_mao_shu_dao_shan/">Read More</a>
         </div>
       </article>
   </div>
