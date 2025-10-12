@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.150.0">
+  <meta name="generator" content="Hugo 0.151.0">
 
   <title>What a Life!</title>
 
@@ -170,6 +170,74 @@
 
   <main class="content container">
     <div class="posts">
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-03-09T15:03:00&#43;0800">Mar 9, 2025</time> &middot; 3 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
+<p>这是一个系列文章：</p>
+<ul>
+<li><a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></li>
+<li><a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/">[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</a></li>
+</ul>
+<p>原文: <strong><a href="https://blog.px.dev/ebpf-function-tracing/">Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></strong></p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/">[译] Lifetime of BPF objects</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-03-04T21:42:07&#43;0800">Mar 4, 2025</time> &middot; 1 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
+<p>原文链接: <a href="https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html">Lifetime of BPF objects</a></p></blockquote>
+<p>BPF验证器保证程序本身能够被内核安全地执行，但为了安全地且无意外地使用整个BPF，用户需要理解 BPF 程序和 Maps 的生命周期。本文深入介绍了这些细节。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/cpp/deep_dive_into_cpp_iterators/">C&#43;&#43; STL 迭代器</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-03-02T09:43:31&#43;0800">Mar 2, 2025</time> &middot; 2 min read
+        </div>
+
+        <div>
+          <h2 id="c-迭代器的种类">c++ 迭代器的种类</h2>
+<p>在STL中，迭代器的种类可以分为输入迭代器、输出迭代器、前向迭代器、双向迭代器、随机访问迭代器：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> input_iterator_tag {};  <span style="color:#928374;font-style:italic">// 输入迭代器
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> output_iterator_tag {}; <span style="color:#928374;font-style:italic">// 输出迭代器
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> forward_iterator_tag <span style="color:#fe8019">:</span> <span style="color:#fe8019">public</span> input_iterator_tag {};  <span style="color:#928374;font-style:italic">// 向前迭代器
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> bidirectional_iterator_tag <span style="color:#fe8019">:</span> <span style="color:#fe8019">public</span> forward_iterator_tag {}; <span style="color:#928374;font-style:italic">// 双向迭代器
+</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> random_access_iterator_tag <span style="color:#fe8019">:</span> <span style="color:#fe8019">public</span> bidirectional_iterator_tag {}; <span style="color:#928374;font-style:italic">// 随机访问迭代器
+</span></span></span></code></pre></div><p>输入迭代器指向的位置只能被顺序读取：</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/cpp/deep_dive_into_cpp_iterators/">Read More</a>
+        </div>
+      </article>
       <article class="post">
         <h1 class="post-title">
           <a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-six/">Effective Modern C&#43;&#43; 读书笔记之第六章</a>
@@ -356,66 +424,6 @@
           <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/resource-qos/">Read More</a>
         </div>
       </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-three/">Effective Modern C&#43;&#43; 读书笔记之第三章</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-02-07T18:34:41&#43;0800">Feb 7, 2025</time> &middot; 5 min read
-        </div>
-
-        <div>
-          <h2 id="item-7-区别和在声明和初始化变量时的不同">Item 7: 区别()和{}在声明和初始化变量时的不同</h2>
-<p>在<a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-one/">Effective Modern C++ 读书笔记之第一章</a>关于<code>auto</code>的参数类型推导中，里面说到<code>auto</code>的类型推导中与模版参数类型推导唯一的不同之处：</p>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">auto</span> a <span style="color:#fe8019">=</span> {<span style="color:#d3869b">1</span>}; <span style="color:#928374;font-style:italic">// a 的类型为 std::initializer_list&lt;int&gt;
-</span></span></span></code></pre></div><p>在<code>C++11</code>中有四种声明变量的方式：</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-three/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pause/">kubernetes 源码分析之 Pause 容器</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-01-27T23:16:45&#43;0800">Jan 27, 2025</time> &middot; 1 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
-<p>Pod 是 kubernetes 里最小调度单元，一个 Pod 里面可以包含由多个容器。 这些容器之间通过 linux namespace 来共享资源以及和宿主节点环境隔离。Pod 里面最基础的容器是 pause 容器，它是 Pod 启动的时候，首先创建的容器，其他的业务容器都依赖该 pause 容器，毕竟它提供了可共享的 linux namspace。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pause/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/">kubernetes 源码分析之 kubelet 镜像回收和容器回收</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-01-27T22:44:45&#43;0800">Jan 27, 2025</time> &middot; 8 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
-<p>kubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资源不会被消耗殆尽。本片文章从源码角度来分析 kubelet 的垃圾回收功能，即清理不需要的容器和镜像。</p>
-<h2 id="启动切入点">启动切入点</h2>
-<p>垃圾回收是在 kubelet 对象初始化完成后启动的，在 createAndInitKubelet 方法中首先调用 NewMainKubelet 初始化 Kubelet 实例，随后调用 <code>Kubelet.StartGarbageCollection</code> 启动了 GarbageCollect。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/">Read More</a>
-        </div>
-      </article>
   </div>
 
   
@@ -445,7 +453,7 @@
         <a href="/page/6/" aria-label="Next" class="page-link" role="button"><span aria-hidden="true">&raquo;</span></a>
       </li>
       <li class="page-item">
-        <a href="/page/7/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
+        <a href="/page/8/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
       </li>
     </ul>
   </main>

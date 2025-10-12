@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.150.0">
+  <meta name="generator" content="Hugo 0.151.0">
 
   <title>What a Life!</title>
 
@@ -170,6 +170,79 @@
 
   <main class="content container">
     <div class="posts">
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/status-manager/">kubernetes 源码分析之 kubelet status manager</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-07-27T22:44:45&#43;0800">Jul 27, 2025</time> &middot; 13 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>在 kubernetes 中将 Pod 调度到某一节点之后，后续的状态维护信息则是由节点上的 kubelet 进行维护，及时地把变更状态报告给 apiserver，status manager 需要根据当前 Pod 运行中的状态和 apiserver 存储的数据决定 Pod 的状态转换。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/status-manager/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel/">flannel 源码分析</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-07-21T23:43:31&#43;0800">Jul 21, 2025</time> &middot; 9 min read
+        </div>
+
+        <div>
+          <p>flannel 的配置一般如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;Network&#34;</span>:<span style="color:#b8bb26">&#34;10.0.0.0/16&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetLen&#34;</span>:<span style="color:#d3869b">24</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetMin&#34;</span>:<span style="color:#b8bb26">&#34;10.0.1.0&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetMax&#34;</span>:<span style="color:#b8bb26">&#34;10.0.20.0&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;Backend&#34;</span>:{
+</span></span><span style="display:flex;"><span>        <span style="color:#fb4934">&#34;Type&#34;</span>:<span style="color:#b8bb26">&#34;vxlan&#34;</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><ul>
+<li>Network：用于指定 flannel 地址池。</li>
+<li>SubnetLen：用于指定分配给单个宿主机的 docker0 的 ip 段的子网掩码的长度。</li>
+<li>SubnetMin：用于指定最小能够分配的 ip 段。</li>
+<li>SudbnetMax：用于指定最大能够分配的 ip 段，在上面的示例中，表示每个宿主机可以分配一个 24 位掩码长度的子网，
+可以分配的子网从 <code>10.0.1.0/24</code> 到 <code>10.0.20.0/24</code>，也就意味着在这个网段中，最多只能有20台宿主机。</li>
+<li>Backend：用于在跨主机通信时指定数据包以什么方式转发，如 <code>vxlan</code>、<code>host-gw</code> 和 <code>udp</code> 等。</li>
+</ul>
+<p>flannel 中比较重要的概念：</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/">flannel 源码分析之 host-gw 模式</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-07-21T23:43:31&#43;0800">Jul 21, 2025</time> &middot; 4 min read
+        </div>
+
+        <div>
+          <p>flannel 的后端 host-gw 不涉及数据包的封包和解包，就是在宿主机上配置路由规则，把其它宿主机 ip 当成其上所有 pod 的下一跳。</p>
+<h2 id="注册和创建后端-host-gw-实例">注册和创建后端 host-gw 实例</h2>
+<p>结构体 HostgwBackend 实现了接口 Backend。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/">Read More</a>
+        </div>
+      </article>
       <article class="post">
         <h1 class="post-title">
           <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel-vxlan/">flannel 源码分析之 vxlan</a>
@@ -2374,65 +2447,6 @@ vxlan 注册到 flannel 的流程如下:</p>
           <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-create-and-start/">Read More</a>
         </div>
       </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/syncloop/">kubernetes 源码分析之 kubelet syncLoop</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-05-25T16:31:39&#43;0800">May 25, 2025</time> &middot; 5 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
-<p>kubelet 是由多个生产者和多个消费者组成的后台服务，其内部实现是一个控制循环，由事件驱动着控制循环的运行，如下图所示：</p>
-<p><img src="/images/kubernetes/kubelet/syncLoop.png" alt="syncLoop"></p>
-<p>这个图片是展示的组件和本篇分析所使用的kubernetes 版本已经有所不同，但是其设计理念没有变法，依旧是 syncLoop 驱动着整个控制循环的运行。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/syncloop/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/">[译]BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-05-17T08:13:34&#43;0800">May 17, 2025</time> &middot; 5 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>原文: <strong><a href="https://nakryiko.com/posts/bpf-tips-printk/">BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()</a></strong></p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/">kubernetes 源码分析之 apiserver storage etcd 层实现分析</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-05-11T22:36:42&#43;0800">May 11, 2025</time> &middot; 5 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
-<p>kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/">Read More</a>
-        </div>
-      </article>
   </div>
 
   
@@ -2462,7 +2476,7 @@ vxlan 注册到 flannel 的流程如下:</p>
         <a href="/page/3/" aria-label="Next" class="page-link" role="button"><span aria-hidden="true">&raquo;</span></a>
       </li>
       <li class="page-item">
-        <a href="/page/7/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
+        <a href="/page/8/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
       </li>
     </ul>
   </main>

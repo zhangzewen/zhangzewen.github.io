@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.150.0">
+  <meta name="generator" content="Hugo 0.151.0">
 
   <title>What a Life!</title>
 
@@ -172,6 +172,65 @@
     <div class="posts">
       <article class="post">
         <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/syncloop/">kubernetes 源码分析之 kubelet syncLoop</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-05-25T16:31:39&#43;0800">May 25, 2025</time> &middot; 5 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>kubelet 是由多个生产者和多个消费者组成的后台服务，其内部实现是一个控制循环，由事件驱动着控制循环的运行，如下图所示：</p>
+<p><img src="/images/kubernetes/kubelet/syncLoop.png" alt="syncLoop"></p>
+<p>这个图片是展示的组件和本篇分析所使用的kubernetes 版本已经有所不同，但是其设计理念没有变法，依旧是 syncLoop 驱动着整个控制循环的运行。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/syncloop/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/">[译]BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-05-17T08:13:34&#43;0800">May 17, 2025</time> &middot; 5 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
+<p>原文: <strong><a href="https://nakryiko.com/posts/bpf-tips-printk/">BPF tips &amp; tricks: the guide to bpf_trace_printk() and bpf_printk()</a></strong></p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/ebpf/translate-bpf-tips-and-tricks-the-guide-to-bpf_trace_printk-and-bpf_printk/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/">kubernetes 源码分析之 apiserver storage etcd 层实现分析</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-05-11T22:36:42&#43;0800">May 11, 2025</time> &middot; 5 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
           <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-generic/">kubernetes 源码分析之 apiserver storage 通用实现</a>
         </h1>
 
@@ -305,69 +364,6 @@
           <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-control/">Read More</a>
         </div>
       </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-webhook/">kubernetes 源码分析之 apiserver admission webhook</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-04-14T22:36:42&#43;0800">Apr 14, 2025</time> &middot; 9 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
-<p>在<a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-control/">kubernetes 源码分析之 apiserver admission</a> 中提到 apiserver 的准入控制是由一系列的插件组成，同时也提供了 webhook 机制支持第三方插件（apiserver admission webhook plugin）来进行扩展。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-webhook/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/">kubernetes 源码分析之 apiserver Authentication &amp; Authoriztion</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-04-14T22:36:42&#43;0800">Apr 14, 2025</time> &middot; 4 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
-<p>apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客户端的访问请求，其对接口请求访问提供了3种安全权限控制，每个请求都需要经过认证，授权以及准入控制器才有权限操作资源对象。</p>
-<ul>
-<li>认证：针对请求的认证，确认是否具有访问 kubernetes 集群的权限。</li>
-<li>授权：针对资源的授权，确认是否对资源具有相关权限。</li>
-<li>准入控制器：在认证和授权之后，对象被持久化之前，拦截对 apiserver 的请求，拦截后的请求进入准入控制器中处理，对请求的资源对象进行自定义(校验，修改或者拒绝)等操作。</li>
-</ul>
-<p><img src="/images/kubernetes/apiserver/access_control_01.svg" alt="apiserver_access_control_01"></p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/nongorestfulmux/">kubernetes 源码分析之 apiserver NonGoRestfulMux</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-04-14T22:36:42&#43;0800">Apr 14, 2025</time> &middot; 2 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
-<p>在 kube-apiserver 的实现过程中，相对 go-restful 还有个 NonGoRestfulMux，其实现在 <code>k8s.io/apiserver/pkg/server/mux</code>：</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/nongorestfulmux/">Read More</a>
-        </div>
-      </article>
   </div>
 
   
@@ -397,7 +393,7 @@
         <a href="/page/4/" aria-label="Next" class="page-link" role="button"><span aria-hidden="true">&raquo;</span></a>
       </li>
       <li class="page-item">
-        <a href="/page/7/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
+        <a href="/page/8/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
       </li>
     </ul>
   </main>

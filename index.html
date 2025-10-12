@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.150.0">
+  <meta name="generator" content="Hugo 0.151.0">
 
   <title>What a Life!</title>
 
@@ -322,56 +322,40 @@
       </article>
       <article class="post">
         <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel/">flannel 源码分析</a>
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-lifecycle/">kubernetes 源码分析之 kubelet pod lifecycle</a>
         </h1>
 
         <div class="post-date">
-          <time datetime="2025-07-21T23:43:31&#43;0800">Jul 21, 2025</time> &middot; 9 min read
+          <time datetime="2025-07-27T22:44:45&#43;0800">Jul 27, 2025</time> &middot; 6 min read
         </div>
 
         <div>
-          <p>flannel 的配置一般如下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;Network&#34;</span>:<span style="color:#b8bb26">&#34;10.0.0.0/16&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetLen&#34;</span>:<span style="color:#d3869b">24</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetMin&#34;</span>:<span style="color:#b8bb26">&#34;10.0.1.0&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;SubnetMax&#34;</span>:<span style="color:#b8bb26">&#34;10.0.20.0&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">&#34;Backend&#34;</span>:{
-</span></span><span style="display:flex;"><span>        <span style="color:#fb4934">&#34;Type&#34;</span>:<span style="color:#b8bb26">&#34;vxlan&#34;</span>
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><ul>
-<li>Network：用于指定 flannel 地址池。</li>
-<li>SubnetLen：用于指定分配给单个宿主机的 docker0 的 ip 段的子网掩码的长度。</li>
-<li>SubnetMin：用于指定最小能够分配的 ip 段。</li>
-<li>SudbnetMax：用于指定最大能够分配的 ip 段，在上面的示例中，表示每个宿主机可以分配一个 24 位掩码长度的子网，
-可以分配的子网从 <code>10.0.1.0/24</code> 到 <code>10.0.20.0/24</code>，也就意味着在这个网段中，最多只能有20台宿主机。</li>
-<li>Backend：用于在跨主机通信时指定数据包以什么方式转发，如 <code>vxlan</code>、<code>host-gw</code> 和 <code>udp</code> 等。</li>
-</ul>
-<p>flannel 中比较重要的概念：</p>
+          <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>kubelet pod liefcycle 的源码在 <code>k8s.io/kubernetes/pkg/kubelet/lifecycle</code>，其提供了接口用于 kubelet 上 pod的准入控制、同步、驱逐、运行前后执行函数功能。</p>
         </div>
 
         <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel/">Read More</a>
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-lifecycle/">Read More</a>
         </div>
       </article>
       <article class="post">
         <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/">flannel 源码分析之 host-gw 模式</a>
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-preemption/">kubernetes 源码分析之 kubelet pod preemption</a>
         </h1>
 
         <div class="post-date">
-          <time datetime="2025-07-21T23:43:31&#43;0800">Jul 21, 2025</time> &middot; 4 min read
+          <time datetime="2025-07-27T22:44:45&#43;0800">Jul 27, 2025</time> &middot; 3 min read
         </div>
 
         <div>
-          <p>flannel 的后端 host-gw 不涉及数据包的封包和解包，就是在宿主机上配置路由规则，把其它宿主机 ip 当成其上所有 pod 的下一跳。</p>
-<h2 id="注册和创建后端-host-gw-实例">注册和创建后端 host-gw 实例</h2>
-<p>结构体 HostgwBackend 实现了接口 Backend。</p>
+          <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>当 pod 被调度到某个节点，因资源不满足出现抢占现象，会触发对低优先级的 pod 的驱逐，被调度的 pod 称为 Critical Pod：</p>
         </div>
 
         <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/cni/flannel-hostgw/">Read More</a>
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-preemption/">Read More</a>
         </div>
       </article>
   </div>
@@ -403,7 +387,7 @@
         <a href="/page/2/" aria-label="Next" class="page-link" role="button"><span aria-hidden="true">&raquo;</span></a>
       </li>
       <li class="page-item">
-        <a href="/page/7/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
+        <a href="/page/8/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
       </li>
     </ul>
   </main>

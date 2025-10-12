@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.150.0">
+  <meta name="generator" content="Hugo 0.151.0">
 
   <title>What a Life!</title>
 
@@ -172,6 +172,110 @@
     <div class="posts">
       <article class="post">
         <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-three/">Effective Modern C&#43;&#43; 读书笔记之第三章</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-02-07T18:34:41&#43;0800">Feb 7, 2025</time> &middot; 5 min read
+        </div>
+
+        <div>
+          <h2 id="item-7-区别和在声明和初始化变量时的不同">Item 7: 区别()和{}在声明和初始化变量时的不同</h2>
+<p>在<a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-one/">Effective Modern C++ 读书笔记之第一章</a>关于<code>auto</code>的参数类型推导中，里面说到<code>auto</code>的类型推导中与模版参数类型推导唯一的不同之处：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">auto</span> a <span style="color:#fe8019">=</span> {<span style="color:#d3869b">1</span>}; <span style="color:#928374;font-style:italic">// a 的类型为 std::initializer_list&lt;int&gt;
+</span></span></span></code></pre></div><p>在<code>C++11</code>中有四种声明变量的方式：</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-three/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pause/">kubernetes 源码分析之 Pause 容器</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-01-27T23:16:45&#43;0800">Jan 27, 2025</time> &middot; 1 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>Pod 是 kubernetes 里最小调度单元，一个 Pod 里面可以包含由多个容器。 这些容器之间通过 linux namespace 来共享资源以及和宿主节点环境隔离。Pod 里面最基础的容器是 pause 容器，它是 Pod 启动的时候，首先创建的容器，其他的业务容器都依赖该 pause 容器，毕竟它提供了可共享的 linux namspace。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pause/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/image-manager/">kubernetes 源码分析之 kubelet image manager</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-01-27T22:44:45&#43;0800">Jan 27, 2025</time> &middot; 3 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>kubelet 的镜像管理实现在 <code>k8s.io/kubernetes/pkg/kubelet/image</code>目录下。镜像管理需要实现接口 ImageManager ：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/images/image_manager.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> ImageManager <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">EnsureImageExists</span>(pod <span style="color:#fe8019">*</span>v1.Pod, container <span style="color:#fe8019">*</span>v1.Container, pullSecrets []v1.Secret, podSandboxConfig <span style="color:#fe8019">*</span>runtimeapi.PodSandboxConfig) (<span style="color:#fabd2f">string</span>, <span style="color:#fabd2f">string</span>, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>该接口只有一个方法，即确保指定镜像存在，结构体 imageManager 实现了该接口：</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/image-manager/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-manager/">kubernetes 源码分析之 kubelet pod manager</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-01-27T22:44:45&#43;0800">Jan 27, 2025</time> &middot; 6 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<h2 id="基础-manager">基础 Manager</h2>
+<p>在阅读 kubelet 的源码中，有诸多 Manager：configmap manager，secret manager， pod manager 等，这些 manager 都和 pod 息息相关，在 kublet 的代码中专门抽象出了最基础的接口 Manager ：</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-manager/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/">kubernetes 源码分析之 kubelet 镜像回收和容器回收</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-01-27T22:44:45&#43;0800">Jan 27, 2025</time> &middot; 8 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>kubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资源不会被消耗殆尽。本片文章从源码角度来分析 kubelet 的垃圾回收功能，即清理不需要的容器和镜像。</p>
+<h2 id="启动切入点">启动切入点</h2>
+<p>垃圾回收是在 kubelet 对象初始化完成后启动的，在 createAndInitKubelet 方法中首先调用 NewMainKubelet 初始化 Kubelet 实例，随后调用 <code>Kubelet.StartGarbageCollection</code> 启动了 GarbageCollect。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
           <a href="https://www.zhangzewen.net/posts/kubernetes/kube-proxy/ipvs/">kubernetes 源码分析之 kube-proxy ipvs 模式</a>
         </h1>
 
@@ -277,128 +381,6 @@
           <a href="https://www.zhangzewen.net/posts/life/2024_zhengzhou_marathon/">Read More</a>
         </div>
       </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/life/ninghai_2024_100km_utra_trail/">2024年10月19日宁海ByUTMB 100公里组赛记</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2024-10-22T16:43:31&#43;0800">Oct 22, 2024</time> &middot; 1 min read
-        </div>
-
-        <div>
-          <p>宁海越野挑战赛顺利完赛，成绩23:01， 虽然比自己预期的要晚了2个小时左右，但好在年度比赛顺利收官，今年就三场比赛，每一场都是雨战，运气是真的差。</p>
-<p>刚下火车就感觉热的受不了，这边丝毫没有降温的迹象，太阳高照，打车到西门城楼的会场后，快速领物就开始逛各个品牌临时搭建起来的的集市，然后看了会儿精英选手见面会，主持人很有趣，随后见证了宁海给四郎多吉举办的传统婚礼，之后就回酒店了。
-<img src="/images/utral_running/ninghai_2024_100KM_Utra_Trail/%E8%B5%B7%E7%BB%88%E7%82%B9%E5%89%8D%E7%9A%84hoka%E9%A3%9E%E9%97%A8.JPG" alt="起终点前的hoka飞门"></p>
-<p>比赛当日早上起来的时候零星下了些雨，但不一会儿就停了，我在酒店的附近吃完早餐，慢悠悠地走到起点。起点还是很热闹，我存完包的时候，100KM组别的第一波已经出发了。稍做热身就进入了起点线前，赛事总监再一次强调赛事纪律和安全，主持人随机采访跑友热场，头顶的屏幕实时直播着第一波出发的精英和大众跑者，好多人都抬着头看直播，第一波发枪20分钟后，我们起跑了。</p>
-<p>鸣枪出发的时候，心情还是有些激动和兴奋的。比赛出发后先沿着河边和村间水泥路跑上几公里进行热身，我的速度比平时路跑要慢些，心里也不是很着急。进山后就很滑了，石头都磨的和鹅卵石一样光滑，石板上布满了青苔，溪边的石头也是布满青苔，所以一直都在全神贯注地下脚。赛道把宁海线周边的山和村落都串了起来，这里最常见的就是漫山的竹海了，在竹林中穿梭也别有意境，特别是手持登山杖，有种侠客的感觉。
-<img src="/images/utral_running/ninghai_2024_100KM_Utra_Trail/%E8%BF%9B%E5%B1%B1%E5%89%8D%E7%9A%84%E8%B7%AF.jpeg" alt="进山前的路">
-<img src="/images/utral_running/ninghai_2024_100KM_Utra_Trail/%E7%AB%B9%E6%B5%B7.jpeg" alt="竹海"></p>
-<p>这边的村落大多都是依山层层叠叠而建，房子的外墙大多都刷成了白色，很精致和干净。这些村落还保存了以前的老房子。最让我记忆深刻的是进入榧坑这个 CP 点前的桥上，桥程拱形，桥身由石头筑成，长满了青苔，桥下是清澈的溪流，很有古韵，跑在上面肯定是很出片儿的，很可惜我翻遍的赛事的照片都没有找到我的身影。这里的每个村落都有公共厕所，而且卫生做的真的很干净，终于不用在野外打野了。
-<img src="/images/utral_running/ninghai_2024_100KM_Utra_Trail/%E8%80%81%E6%88%BF%E5%AD%90.JPG" alt="老房子">
-<img src="/images/utral_running/ninghai_2024_100KM_Utra_Trail/%E6%A6%A7%E5%9D%91.JPG" alt="榧坑">
-<img src="/images/utral_running/ninghai_2024_100KM_Utra_Trail/%E9%97%A8%E7%A5%9E.JPG" alt="榧坑">
-<img src="/images/utral_running/ninghai_2024_100KM_Utra_Trail/%E6%9D%91%E5%BA%84%E5%8F%B0%E9%98%B6.JPG" alt="榧坑"></p>
-<p>整个上午都是很潮湿和闷热，帽子早早就被我收起来放到背包里面。应该是下午的时候出了一会儿太阳，但是到 CP5 前就开始下雨了，这前半程用了9个小时，在补给的时候心里还很乐观地盘算着21小时左右就完赛的计划。在 CP5 的强装检查很严格，出站的时候我把冲锋衣套上了，看着这大雨，低头就冲出了 CP 点。CP5到CP6这段的大部分时间都是我一个人，下到公路和村庄后才看到有跑友。天黑的特别块，又在下雨，加之林子很密，光线不是很好，在 CP5 的时候忘了把头灯拿出来放到称手的包里，想着下去就是 CP 点了就没有戴头灯，所以最后的一段下坡我几乎是摸着黑下去的，很幸运没有出任何事故，下次不敢了。在田埂上走了一段后就进了村子来到了 CP6，此时雨也停了，整个村子灯火通明。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/life/ninghai_2024_100km_utra_trail/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/">kubernetes 源码分析之 kube-proxy</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2024-10-06T00:27:07&#43;0800">Oct 6, 2024</time> &middot; 6 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
-<p>kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部署在集群的每个节点之上，负责在其宿主节点上配置 iptables，ipvs等规则。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/controller/">client-go 源码分析之 controller</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2024-08-29T23:48:15&#43;0800">Aug 29, 2024</time> &middot; 2 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 client-go release-1.25 分支</p></blockquote>
-<p><code>Controller</code>是一个接口，该接口的实例的主要作用是构建和启动 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/">reflector</a>。</p>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> Controller <span style="color:#fe8019">interface</span> {
-</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Run</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{})
-</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">HasSynced</span>() <span style="color:#fabd2f">bool</span>
-</span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">LastSyncResourceVersion</span>() <span style="color:#fabd2f">string</span>
-</span></span><span style="display:flex;"><span>}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> controller <span style="color:#fe8019">struct</span> {
-</span></span><span style="display:flex;"><span>  config         Config
-</span></span><span style="display:flex;"><span>  reflector      <span style="color:#fe8019">*</span>Reflector
-</span></span><span style="display:flex;"><span>  reflectorMutex sync.RWMutex
-</span></span><span style="display:flex;"><span>  clock          clock.Clock
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>controller 实现了上述的 Controller，Config 存储的是配置信息， 通过调用 New 构造 controller 实例：</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/controller/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/informer/">client-go 源码分析之 informer</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2024-08-13T23:42:19&#43;0800">Aug 13, 2024</time> &middot; 7 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 client-go release-1.25 分支</p></blockquote>
-<h2 id="变更事件分发和消费">变更事件分发和消费</h2>
-<p>在讲解 Informer 机制之前，先来简单了解两个数据结构，这两个数据结构设计到变更事件的监听，事件分发，事件消费。</p>
-<h3 id="processorlistener">processorListener</h3>
-<p>接口 processorListener 是用户对特定资源对象变更事件的回调处理逻辑接口 ResourceEventHandler 的封装，其监听变更事件以及调用用户注册的回调逻辑来消费这些变更事件:</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/informer/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/">client-go 源码分析之 reflector</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2024-07-27T09:43:31&#43;0800">Jul 27, 2024</time> &middot; 6 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 client-go release-1.25 分支</p></blockquote>
-<p>reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取目标资源数据，然后再监听目标资源的变更事件, 并将数据同步到本地缓存。下面来具体说细节之处。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/">Read More</a>
-        </div>
-      </article>
   </div>
 
   
@@ -408,9 +390,6 @@
       </li>
       <li class="page-item">
         <a href="/page/5/" aria-label="Previous" class="page-link" role="button"><span aria-hidden="true">&laquo;</span></a>
-      </li>
-      <li class="page-item">
-        <a href="/page/3/" aria-label="Page 3" class="page-link" role="button">3</a>
       </li>
       <li class="page-item">
         <a href="/page/4/" aria-label="Page 4" class="page-link" role="button">4</a>
@@ -425,10 +404,13 @@
         <a href="/page/7/" aria-label="Page 7" class="page-link" role="button">7</a>
       </li>
       <li class="page-item">
+        <a href="/page/8/" aria-label="Page 8" class="page-link" role="button">8</a>
+      </li>
+      <li class="page-item">
         <a href="/page/7/" aria-label="Next" class="page-link" role="button"><span aria-hidden="true">&raquo;</span></a>
       </li>
       <li class="page-item">
-        <a href="/page/7/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
+        <a href="/page/8/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
       </li>
     </ul>
   </main>

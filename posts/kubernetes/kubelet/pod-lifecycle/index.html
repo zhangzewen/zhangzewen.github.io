@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xml:lang="zh-cn" lang="zh-cn" >
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.151.0">
+
+  <title>kubernetes 源码分析之 kubelet pod lifecycle &middot; What a Life!</title>
+
+  <meta name="description" content="" />
+
+  
+  <meta itemprop="name" content="kubernetes 源码分析之 kubelet pod lifecycle">
+  <meta itemprop="description" content="本篇文章基于 Kubernetes v1.25.1
+kubelet pod liefcycle 的源码在 k8s.io/kubernetes/pkg/kubelet/lifecycle，其提供了接口用于 kubelet 上 pod的准入控制、同步、驱逐、运行前后执行函数功能。">
+  <meta itemprop="datePublished" content="2025-07-27T22:44:45+08:00">
+  <meta itemprop="dateModified" content="2025-07-27T22:44:45+08:00">
+  <meta itemprop="wordCount" content="1259">
+  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="keywords" content="源码分析,Kubernetes">
+
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:title" content="kubernetes 源码分析之 kubelet pod lifecycle">
+  <meta name="twitter:description" content="本篇文章基于 Kubernetes v1.25.1
+kubelet pod liefcycle 的源码在 k8s.io/kubernetes/pkg/kubelet/lifecycle，其提供了接口用于 kubelet 上 pod的准入控制、同步、驱逐、运行前后执行函数功能。">
+
+
+<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-lifecycle/">
+  <meta property="og:site_name" content="What a Life!">
+  <meta property="og:title" content="kubernetes 源码分析之 kubelet pod lifecycle">
+  <meta property="og:description" content="本篇文章基于 Kubernetes v1.25.1
+kubelet pod liefcycle 的源码在 k8s.io/kubernetes/pkg/kubelet/lifecycle，其提供了接口用于 kubelet 上 pod的准入控制、同步、驱逐、运行前后执行函数功能。">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-07-27T22:44:45+08:00">
+    <meta property="article:modified_time" content="2025-07-27T22:44:45+08:00">
+    <meta property="article:tag" content="源码分析">
+    <meta property="article:tag" content="Kubernetes">
+    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":"Person",
+      "@id": "https://www.zhangzewen.net/#author",
+      "name": "Zhang Zewen",
+      "image": {
+        "@type":"ImageObject",
+        
+        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        
+      },
+      "description": "Software Engineer"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.zhangzewen.net/#website",
+      "url": "https://www.zhangzewen.net/",
+      "name": "What a Life!",
+      "description": "Software Engineer",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "inLanguage": "zh-cn"
+    },
+    {
+      "@type": "ImageObject",
+      "url": "https://www.zhangzewen.net/images/profile.png",
+      "caption": "What a Life!"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-lifecycle/#webpage",
+      "url": "https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-lifecycle/",
+      "name": "kubernetes 源码分析之 kubelet pod lifecycle",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/#website"
+      },
+      "about": {
+         "@id": "https://www.zhangzewen.net/#author"
+      },
+      "datePublished": "2025-07-27T22:44:45+08:00",
+      "dateModified": "2025-07-27T22:44:45+08:00",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ekubelet pod liefcycle 的源码在 \u003ccode\u003ek8s.io/kubernetes/pkg/kubelet/lifecycle\u003c/code\u003e，其提供了接口用于 kubelet 上 pod的准入控制、同步、驱逐、运行前后执行函数功能。\u003c/p\u003e",
+      "inLanguage": "zh-cn",
+      "potentialAction": [
+        {
+          "@type": "ReadAction",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-lifecycle/"
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "isPartOf": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-lifecycle/#webpage"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-lifecycle/#webpage"
+      },
+      "headline": "kubernetes 源码分析之 kubelet pod lifecycle",
+      "datePublished": "2025-07-27T22:44:45+08:00",
+      "dateModified": "2025-07-27T22:44:45+08:00",
+      "publisher": {
+        "@id": "https://www.zhangzewen.net/#author"
+      },
+      "keywords": [
+        "源码分析",
+        "Kubernetes"
+      ],
+      "articleSection": [
+      ],
+      "inLanguage": "zh-cn",
+      "author": {
+        "@type": "Person",
+        "name":  null 
+      },
+      "potentialAction": [
+        {
+          "@type": "CommentAction",
+          "name": "Comment",
+          "target": [
+            "https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-lifecycle/#comments"
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+
+
+  <link type="text/css" rel="stylesheet" href="/css/print.css" media="print">
+
+  <link type="text/css" rel="stylesheet" href="/css/poole.css">
+
+  <link type="text/css" rel="stylesheet" href="/css/hyde.css">
+
+  
+
+
+  
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700&display=swap">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+    integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/apple-touch-icon-144-precomposed.png">
+
+  <link rel="shortcut icon" href="/favicon.png">
+
+  
+  </head>
+
+<body>
+  <aside class="toc">
+  
+  
+  <h3>目录</h3>
+  <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#pod-准入控制">Pod 准入控制</a></li>
+        <li><a href="#pod-同步">Pod 同步</a></li>
+        <li><a href="#pod-驱逐">Pod 驱逐</a></li>
+        <li><a href="#pod-运行前后执行钩子函数">Pod 运行前后执行钩子函数</a></li>
+        <li><a href="#lifecycle-的初始化">lifecycle 的初始化</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  
+  
+</aside>
+
+  <aside class="sidebar">
+  <div class="container">
+    <div class="sidebar-about">
+      
+        
+        <div class="author-image">
+          <a href="https://www.zhangzewen.net/">
+            <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
+          </a>
+        </div>
+        
+      
+
+      <h1>What a Life!</h1>
+
+      
+      <p class="lead">Software Engineer</p>
+      
+    </div>
+
+    <nav>
+      <ul class="sidebar-nav">
+        <li>
+          <a href="https://www.zhangzewen.net/">Home</a>
+        </li>
+        <li>
+          <a href="/tags/">Tags</a>
+        </li><li>
+          <a href="/archive/">Archives</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section class="social-icons">
+      
+    </section>
+  </div>
+</aside>
+
+
+  <main class="content container">
+    <div class="post">
+  <h1 class="title">kubernetes 源码分析之 kubelet pod lifecycle</h1>
+  
+  
+
+  <div class="post-date">
+    <time datetime=" 2025-07-27T22:44:45&#43;0800">Created: Jul 27, 2025</time>
+    <span class="readtime">&middot; 6 min read</span>
+  </div>
+
+  <div>
+    <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>kubelet pod liefcycle 的源码在 <code>k8s.io/kubernetes/pkg/kubelet/lifecycle</code>，其提供了接口用于 kubelet 上 pod的准入控制、同步、驱逐、运行前后执行函数功能。</p>
+<p><img src="/images/kubernetes/kubelet/kubelet_pod_lifecycle.png" alt="kubelet_pod_lifecycle.svg"></p>
+<h2 id="pod-准入控制">Pod 准入控制</h2>
+<p>Pod 准入控制接口 PodAdmitHandler 的定义如下，其提供的 Admit 判断 Pod 是不是可以在 kubelet 所在的宿主节点上运行：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> PodAdmitHandler <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Admit</span>(attrs <span style="color:#fe8019">*</span>PodAdmitAttributes) PodAdmitResult
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>下面主要讲解 其实现之一的 predicateAdmitHandler， eviction manager 也实现了该接口，具体请参考<a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/eviction-manager/">kubernetes 源码分析之 kubelet eviction manager</a>。</p>
+<p>结构体 predicateAdmitHandler 实现了根据资源消耗来来判断 pod 能否在节点上运行：</p>
+<ul>
+<li>getNodeAnyWayFunc： 获取 node 节点的钩子函数。</li>
+<li>pluginResourceUpdateFunc： 更新节点的 plugin resource 的钩子函数。</li>
+<li>admissionFailureHandler： 其数据类型是一个接口，该接口提供了准入失败后处理失败的处理 handler，在这里会有抢占的逻辑，详细看<a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-preemption/">kubernetes 源码分析之 kubelet pod preemption</a>。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#8ec07c">//k8s.io/kubernetes/pkg/kubelet/lifecycle/predicate.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> predicateAdmitHandler <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>	getNodeAnyWayFunc        getNodeAnyWayFuncType
+</span></span><span style="display:flex;"><span>	pluginResourceUpdateFunc pluginResourceUpdateFuncType
+</span></span><span style="display:flex;"><span>	admissionFailureHandler  AdmissionFailureHandler
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>其在创建结构体 Kubelet 实例时被调用：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//  k8s.io/kubernetes/pkg/kubelet/kubelet.go#NewMainKubelet</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewMainKubelet</span>(<span style="color:#928374;font-style:italic">/*...*/</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>	klet.admitHandlers.<span style="color:#fabd2f">AddPodAdmitHandler</span>(lifecycle.<span style="color:#fabd2f">NewPredicateAdmitHandler</span>(klet.getNodeAnyWay, criticalPodAdmissionHandler, klet.containerManager.UpdatePluginResources))
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>方法 Admit 的流程如下：</p>
+<ul>
+<li>检查对应的资源是否满足分配请求，同时会记录缺少的资源。</li>
+<li>如果是 Critical Pod 则会按照 QOS 等级来进行资源的抢占，具体可以查看<a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-preemption/">kubernetes 源码分析之 kubelet pod preemption</a>。</li>
+</ul>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (w <span style="color:#fe8019">*</span>predicateAdmitHandler) <span style="color:#fabd2f">Admit</span>(attrs <span style="color:#fe8019">*</span>PodAdmitAttributes) PodAdmitResult {
+</span></span><span style="display:flex;"><span>	node, err <span style="color:#fe8019">:=</span> w.<span style="color:#fabd2f">getNodeAnyWayFunc</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Cannot get Node info&#34;</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> PodAdmitResult{
+</span></span><span style="display:flex;"><span>			Admit:   <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>			Reason:  <span style="color:#b8bb26">&#34;InvalidNodeInfo&#34;</span>,
+</span></span><span style="display:flex;"><span>			Message: <span style="color:#b8bb26">&#34;Kubelet cannot get node info.&#34;</span>,
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	admitPod <span style="color:#fe8019">:=</span> attrs.Pod
+</span></span><span style="display:flex;"><span>	pods <span style="color:#fe8019">:=</span> attrs.OtherPods
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 根据pods来计算nodeinfo</span>
+</span></span><span style="display:flex;"><span>	nodeInfo <span style="color:#fe8019">:=</span> schedulerframework.<span style="color:#fabd2f">NewNodeInfo</span>(pods<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	nodeInfo.<span style="color:#fabd2f">SetNode</span>(node)
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// ensure the node has enough plugin resources for that required in pods</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err = w.<span style="color:#fabd2f">pluginResourceUpdateFunc</span>(nodeInfo, attrs); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		message <span style="color:#fe8019">:=</span> fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;Update plugin resources failed due to %v, which is unexpected.&#34;</span>, err)
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Failed to admit pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(admitPod), <span style="color:#b8bb26">&#34;message&#34;</span>, message)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> PodAdmitResult{
+</span></span><span style="display:flex;"><span>			Admit:   <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>			Reason:  <span style="color:#b8bb26">&#34;UnexpectedAdmissionError&#34;</span>,
+</span></span><span style="display:flex;"><span>			Message: message,
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	podWithoutMissingExtendedResources <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">removeMissingExtendedResources</span>(admitPod, nodeInfo)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// 资源/亲和性/端口检测/.pod.spec.nodeName检测来判断该node是否合适该节点调度到其上面去</span>
+</span></span><span style="display:flex;"><span>	reasons <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">generalFilter</span>(podWithoutMissingExtendedResources, nodeInfo)
+</span></span><span style="display:flex;"><span>	fit <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">len</span>(reasons) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !fit {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 这里是对Critical pod的再一次判断，涉及到抢占的逻辑</span>
+</span></span><span style="display:flex;"><span>		reasons, err = w.admissionFailureHandler.<span style="color:#fabd2f">HandleAdmissionFailure</span>(admitPod, reasons)
+</span></span><span style="display:flex;"><span>		fit = <span style="color:#fabd2f">len</span>(reasons) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> <span style="color:#fe8019">&amp;&amp;</span> err <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			message <span style="color:#fe8019">:=</span> fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;Unexpected error while attempting to recover from admission failure: %v&#34;</span>, err)
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Failed to admit pod, unexpected error while attempting to recover from admission failure&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(admitPod), <span style="color:#b8bb26">&#34;err&#34;</span>, err)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> PodAdmitResult{
+</span></span><span style="display:flex;"><span>				Admit:   fit,
+</span></span><span style="display:flex;"><span>				Reason:  <span style="color:#b8bb26">&#34;UnexpectedAdmissionError&#34;</span>,
+</span></span><span style="display:flex;"><span>				Message: message,
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !fit {
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 对admissionFailureHandler处理的结果进行逻辑处理</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">var</span> reason <span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">var</span> message <span style="color:#fabd2f">string</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> <span style="color:#fabd2f">len</span>(reasons) <span style="color:#fe8019">==</span> <span style="color:#d3869b">0</span> { <span style="color:#928374;font-style:italic">// 没有 reason</span>
+</span></span><span style="display:flex;"><span>			message = fmt.<span style="color:#fabd2f">Sprint</span>(<span style="color:#b8bb26">&#34;GeneralPredicates failed due to unknown reason, which is unexpected.&#34;</span>)
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Failed to admit pod: GeneralPredicates failed due to unknown reason, which is unexpected&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(admitPod))
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> PodAdmitResult{
+</span></span><span style="display:flex;"><span>				Admit:   fit,
+</span></span><span style="display:flex;"><span>				Reason:  <span style="color:#b8bb26">&#34;UnknownReason&#34;</span>,
+</span></span><span style="display:flex;"><span>				Message: message,
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 如果reason不止一条，以第一条为准返回</span>
+</span></span><span style="display:flex;"><span>		r <span style="color:#fe8019">:=</span> reasons[<span style="color:#d3869b">0</span>]
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">switch</span> re <span style="color:#fe8019">:=</span> r.(<span style="color:#fe8019">type</span>) {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> <span style="color:#fe8019">*</span>PredicateFailureError:
+</span></span><span style="display:flex;"><span>			reason = re.PredicateName
+</span></span><span style="display:flex;"><span>			message = re.<span style="color:#fabd2f">Error</span>()
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Predicate failed on Pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(admitPod), <span style="color:#b8bb26">&#34;err&#34;</span>, message)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">case</span> <span style="color:#fe8019">*</span>InsufficientResourceError:
+</span></span><span style="display:flex;"><span>			reason = fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;OutOf%s&#34;</span>, re.ResourceName)
+</span></span><span style="display:flex;"><span>			message = re.<span style="color:#fabd2f">Error</span>()
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Predicate failed on Pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(admitPod), <span style="color:#b8bb26">&#34;err&#34;</span>, message)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">default</span>:
+</span></span><span style="display:flex;"><span>			reason = <span style="color:#b8bb26">&#34;UnexpectedPredicateFailureType&#34;</span>
+</span></span><span style="display:flex;"><span>			message = fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;GeneralPredicates failed due to %v, which is unexpected.&#34;</span>, r)
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Failed to admit pod&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(admitPod), <span style="color:#b8bb26">&#34;err&#34;</span>, message)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> PodAdmitResult{
+</span></span><span style="display:flex;"><span>			Admit:   fit,
+</span></span><span style="display:flex;"><span>			Reason:  reason,
+</span></span><span style="display:flex;"><span>			Message: message,
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">rejectPodAdmissionBasedOnOSSelector</span>(admitPod, node) {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> PodAdmitResult{
+</span></span><span style="display:flex;"><span>			Admit:   <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>			Reason:  <span style="color:#b8bb26">&#34;PodOSSelectorNodeLabelDoesNotMatch&#34;</span>,
+</span></span><span style="display:flex;"><span>			Message: <span style="color:#b8bb26">&#34;Failed to admit pod as the `kubernetes.io/os` label doesn&#39;t match node label&#34;</span>,
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// By this time, node labels should have been synced, this helps in identifying the pod with the usage.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> <span style="color:#fabd2f">rejectPodAdmissionBasedOnOSField</span>(admitPod) {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> PodAdmitResult{
+</span></span><span style="display:flex;"><span>			Admit:   <span style="color:#fe8019">false</span>,
+</span></span><span style="display:flex;"><span>			Reason:  <span style="color:#b8bb26">&#34;PodOSNotSupported&#34;</span>,
+</span></span><span style="display:flex;"><span>			Message: <span style="color:#b8bb26">&#34;Failed to admit pod as the OS field doesn&#39;t match node OS&#34;</span>,
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 剩余的情况就是准入控制允许该pod调度到该node上了</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> PodAdmitResult{
+</span></span><span style="display:flex;"><span>		Admit: <span style="color:#fe8019">true</span>,
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+<h2 id="pod-同步">Pod 同步</h2>
+<p>Pod 同步接口 PodSyncLoopHandler 的定义如下，其提供的 ShouldSync 会在 <code>Kubelet.syncLoopIteration</code> 中被调用，会判断 pod 是否需要进行同步操作，该方法在处理的过程中不能修改传入的 pod，且在每次处理的时候应该尽快返回：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> PodSyncLoopHandler <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">ShouldSync</span>(pod <span style="color:#fe8019">*</span>v1.Pod) <span style="color:#fabd2f">bool</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>结构体 activeDeadlineHandler 实现了该接口：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/active_deadline.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> activeDeadlineHandler <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>	clock clock.Clock
+</span></span><span style="display:flex;"><span>	podStatusProvider status.PodStatusProvider
+</span></span><span style="display:flex;"><span>	recorder record.EventRecorder
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>方法 ShouldSync 的流程如下：</p>
+<ul>
+<li>检查资源 spec 中是否存在 activeDeadlineSeconds ，不存在返回 false。</li>
+<li>存在 activeDeadlineSeconds，即 pod 可以运行的最长事件，超过该值后，pod 应该停止，是需要进行同步操作的。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/active_deadline.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>activeDeadlineHandler) <span style="color:#fabd2f">ShouldSync</span>(pod <span style="color:#fe8019">*</span>v1.Pod) <span style="color:#fabd2f">bool</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> m.<span style="color:#fabd2f">pastActiveDeadline</span>(pod)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>activeDeadlineHandler) <span style="color:#fabd2f">pastActiveDeadline</span>(pod <span style="color:#fe8019">*</span>v1.Pod) <span style="color:#fabd2f">bool</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// no active deadline was specified</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 没有设置，即不做限制 </span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> pod.Spec.ActiveDeadlineSeconds <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// get the latest status to determine if it was started</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 获取 pod status</span>
+</span></span><span style="display:flex;"><span>	podStatus, ok <span style="color:#fe8019">:=</span> m.podStatusProvider.<span style="color:#fabd2f">GetPodStatus</span>(pod.UID)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !ok {
+</span></span><span style="display:flex;"><span>		podStatus = pod.Status
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// we have no start time so just return</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// pod 还没有运行</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> podStatus.StartTime.<span style="color:#fabd2f">IsZero</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">false</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// determine if the deadline was exceeded</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">//  计算运行时间</span>
+</span></span><span style="display:flex;"><span>	start <span style="color:#fe8019">:=</span> podStatus.StartTime.Time
+</span></span><span style="display:flex;"><span>	duration <span style="color:#fe8019">:=</span> m.clock.<span style="color:#fabd2f">Since</span>(start)
+</span></span><span style="display:flex;"><span>	allowedDuration <span style="color:#fe8019">:=</span> time.<span style="color:#fabd2f">Duration</span>(<span style="color:#fe8019">*</span>pod.Spec.ActiveDeadlineSeconds) <span style="color:#fe8019">*</span> time.Second
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 判断运行时间是否超过 .spec.ActiveDeadlineSeconds 配置的时间</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> duration <span style="color:#fe8019">&gt;=</span> allowedDuration
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="pod-驱逐">Pod 驱逐</h2>
+<p>Pod 驱逐接口 PodSyncHandler 的定义如下，其提供的 ShouldEvict 判断 pod 在同步的过程中应不应该被驱逐：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> PodSyncHandler <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">ShouldEvict</span>(pod <span style="color:#fe8019">*</span>v1.Pod) ShouldEvictResponse
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>结构体 activeDeadlineHandler 实现了该接口，可以回看上一小节。</p>
+<h2 id="pod-运行前后执行钩子函数">Pod 运行前后执行钩子函数</h2>
+<p>kubernetes 支持 pod 在运行前后执行钩子函数：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#fb4934">apiVersion</span>: v1
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">kind</span>: Pod
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">metadata</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#fb4934">name</span>: lifecycle-demo
+</span></span><span style="display:flex;"><span><span style="color:#fb4934">spec</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#fb4934">containers</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#fb4934">name</span>: lifecycle-demo-container
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">image</span>: nginx
+</span></span><span style="display:flex;"><span>    <span style="color:#fb4934">lifecycle</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#fb4934">postStart</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#fb4934">exec</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#fb4934">command</span>: [<span style="color:#b8bb26">&#34;/bin/sh&#34;</span>, <span style="color:#b8bb26">&#34;-c&#34;</span>, <span style="color:#b8bb26">&#34;echo Hello from the postStart handler &gt; /usr/share/message&#34;</span>]
+</span></span><span style="display:flex;"><span>      <span style="color:#fb4934">preStop</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#fb4934">exec</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#fb4934">command</span>: [<span style="color:#b8bb26">&#34;/bin/sh&#34;</span>, <span style="color:#b8bb26">&#34;-c&#34;</span>, <span style="color:#b8bb26">&#34;nginx -s quit; while killall -0 nginx; do sleep 1; done&#34;</span>]
+</span></span></code></pre></div><p>结构体 handlerRunner 实现了接口 HandlerRunner：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/container/helpers.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> HandlerRunner <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Run</span>(containerID ContainerID, pod <span style="color:#fe8019">*</span>v1.Pod, container <span style="color:#fe8019">*</span>v1.Container, handler <span style="color:#fe8019">*</span>v1.LifecycleHandler) (<span style="color:#fabd2f">string</span>, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>方法 Run 中的 handler 是一个接口类型：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/staging/src/k8s.io/api/core/v1/types.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> LifecycleHandler <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>	Exec <span style="color:#fe8019">*</span>ExecAction <span style="color:#b8bb26">`json:&#34;exec,omitempty&#34; protobuf:&#34;bytes,1,opt,name=exec&#34;`</span>
+</span></span><span style="display:flex;"><span>	HTTPGet <span style="color:#fe8019">*</span>HTTPGetAction <span style="color:#b8bb26">`json:&#34;httpGet,omitempty&#34; protobuf:&#34;bytes,2,opt,name=httpGet&#34;`</span>
+</span></span><span style="display:flex;"><span>	TCPSocket <span style="color:#fe8019">*</span>TCPSocketAction <span style="color:#b8bb26">`json:&#34;tcpSocket,omitempty&#34; protobuf:&#34;bytes,3,opt,name=tcpSocket&#34;`</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>handlerRunner 的实现逻辑清晰明了，请自行查看。其在容器启动和停止之后会被调用：
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/kuberuntime/kuberuntime_manager.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewKubeGenericRuntimeManager</span>(<span style="color:#928374;font-style:italic">/*...*/</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>	kubeRuntimeManager.runner = lifecycle.<span style="color:#fabd2f">NewHandlerRunner</span>(httpClient, kubeRuntimeManager, kubeRuntimeManager)
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>kubeGenericRuntimeManager) <span style="color:#fabd2f">startContainer</span>(podSandboxID <span style="color:#fabd2f">string</span>, podSandboxConfig <span style="color:#fe8019">*</span>runtimeapi.PodSandboxConfig, spec <span style="color:#fe8019">*</span>startSpec, pod <span style="color:#fe8019">*</span>v1.Pod, podStatus <span style="color:#fe8019">*</span>kubecontainer.PodStatus, pullSecrets []v1.Secret, podIP <span style="color:#fabd2f">string</span>, podIPs []<span style="color:#fabd2f">string</span>) (<span style="color:#fabd2f">string</span>, <span style="color:#fabd2f">error</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Step 4: execute the post start hook.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> container.Lifecycle <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> <span style="color:#fe8019">&amp;&amp;</span> container.Lifecycle.PostStart <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		kubeContainerID <span style="color:#fe8019">:=</span> kubecontainer.ContainerID{
+</span></span><span style="display:flex;"><span>			Type: m.runtimeName,
+</span></span><span style="display:flex;"><span>			ID:   containerID,
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		msg, handlerErr <span style="color:#fe8019">:=</span> m.runner.<span style="color:#fabd2f">Run</span>(kubeContainerID, pod, container, container.Lifecycle.PostStart)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> handlerErr <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">ErrorS</span>(handlerErr, <span style="color:#b8bb26">&#34;Failed to execute PostStartHook&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod),
+</span></span><span style="display:flex;"><span>				<span style="color:#b8bb26">&#34;podUID&#34;</span>, pod.UID, <span style="color:#b8bb26">&#34;containerName&#34;</span>, container.Name, <span style="color:#b8bb26">&#34;containerID&#34;</span>, kubeContainerID.<span style="color:#fabd2f">String</span>())
+</span></span><span style="display:flex;"><span>			m.<span style="color:#fabd2f">recordContainerEvent</span>(pod, container, kubeContainerID.ID, v1.EventTypeWarning, events.FailedPostStartHook, msg)
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> err <span style="color:#fe8019">:=</span> m.<span style="color:#fabd2f">killContainer</span>(pod, kubeContainerID, container.Name, <span style="color:#b8bb26">&#34;FailedPostStartHook&#34;</span>, reasonFailedPostStartHook, <span style="color:#fe8019">nil</span>); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;Failed to kill container&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod),
+</span></span><span style="display:flex;"><span>					<span style="color:#b8bb26">&#34;podUID&#34;</span>, pod.UID, <span style="color:#b8bb26">&#34;containerName&#34;</span>, container.Name, <span style="color:#b8bb26">&#34;containerID&#34;</span>, kubeContainerID.<span style="color:#fabd2f">String</span>())
+</span></span><span style="display:flex;"><span>			}
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> msg, ErrPostStartHook
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> (m <span style="color:#fe8019">*</span>kubeGenericRuntimeManager) <span style="color:#fabd2f">executePreStopHook</span>(pod <span style="color:#fe8019">*</span>v1.Pod, containerID kubecontainer.ContainerID, containerSpec <span style="color:#fe8019">*</span>v1.Container, gracePeriod <span style="color:#fabd2f">int64</span>) <span style="color:#fabd2f">int64</span> {
+</span></span><span style="display:flex;"><span>	klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;Running preStop hook&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;podUID&#34;</span>, pod.UID, <span style="color:#b8bb26">&#34;containerName&#34;</span>, containerSpec.Name, <span style="color:#b8bb26">&#34;containerID&#34;</span>, containerID.<span style="color:#fabd2f">String</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	start <span style="color:#fe8019">:=</span> metav1.<span style="color:#fabd2f">Now</span>()
+</span></span><span style="display:flex;"><span>	done <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{})
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">go</span> <span style="color:#fe8019">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">defer</span> <span style="color:#fabd2f">close</span>(done)
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">defer</span> utilruntime.<span style="color:#fabd2f">HandleCrash</span>()
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> msg, err <span style="color:#fe8019">:=</span> m.runner.<span style="color:#fabd2f">Run</span>(containerID, pod, containerSpec, containerSpec.Lifecycle.PreStop); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">ErrorS</span>(err, <span style="color:#b8bb26">&#34;PreStop hook failed&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;podUID&#34;</span>, pod.UID,
+</span></span><span style="display:flex;"><span>				<span style="color:#b8bb26">&#34;containerName&#34;</span>, containerSpec.Name, <span style="color:#b8bb26">&#34;containerID&#34;</span>, containerID.<span style="color:#fabd2f">String</span>())
+</span></span><span style="display:flex;"><span>			m.<span style="color:#fabd2f">recordContainerEvent</span>(pod, containerSpec, containerID.ID, v1.EventTypeWarning, events.FailedPreStopHook, msg)
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">select</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>time.<span style="color:#fabd2f">After</span>(time.<span style="color:#fabd2f">Duration</span>(gracePeriod) <span style="color:#fe8019">*</span> time.Second):
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;PreStop hook not completed in grace period&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;podUID&#34;</span>, pod.UID,
+</span></span><span style="display:flex;"><span>			<span style="color:#b8bb26">&#34;containerName&#34;</span>, containerSpec.Name, <span style="color:#b8bb26">&#34;containerID&#34;</span>, containerID.<span style="color:#fabd2f">String</span>(), <span style="color:#b8bb26">&#34;gracePeriod&#34;</span>, gracePeriod)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">case</span> <span style="color:#fe8019">&lt;-</span>done:
+</span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">3</span>).<span style="color:#fabd2f">InfoS</span>(<span style="color:#b8bb26">&#34;PreStop hook completed&#34;</span>, <span style="color:#b8bb26">&#34;pod&#34;</span>, klog.<span style="color:#fabd2f">KObj</span>(pod), <span style="color:#b8bb26">&#34;podUID&#34;</span>, pod.UID,
+</span></span><span style="display:flex;"><span>			<span style="color:#b8bb26">&#34;containerName&#34;</span>, containerSpec.Name, <span style="color:#b8bb26">&#34;containerID&#34;</span>, containerID.<span style="color:#fabd2f">String</span>())
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">return</span> <span style="color:#fabd2f">int64</span>(metav1.<span style="color:#fabd2f">Now</span>().<span style="color:#fabd2f">Sub</span>(start.Time).<span style="color:#fabd2f">Seconds</span>())
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+</p>
+<h2 id="lifecycle-的初始化">lifecycle 的初始化</h2>
+<p>结构体 Kubelet 中定义 pod lifecycle 相关的字段：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> Kubelet <span style="color:#fe8019">struct</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>    admitHandlers lifecycle.PodAdmitHandlers
+</span></span><span style="display:flex;"><span>    softAdmitHandlers lifecycle.PodAdmitHandlers
+</span></span><span style="display:flex;"><span>    lifecycle.PodSyncLoopHandlers
+</span></span><span style="display:flex;"><span>    lifecycle.PodSyncHandlers
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// ...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>这些字段的初始化是在 NewMainKubelet 中完成：</p>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet.go</span>
+</span></span><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewMainKubelet</span>(<span style="color:#928374;font-style:italic">/*...*/</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#8ec07c">//...</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 构建 eviction manager</span>
+</span></span><span style="display:flex;"><span>	evictionManager, evictionAdmitHandler <span style="color:#fe8019">:=</span> eviction.<span style="color:#fabd2f">NewManager</span>(klet.resourceAnalyzer, evictionConfig,
+</span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">killPodNow</span>(klet.podWorkers, kubeDeps.Recorder), klet.podManager.GetMirrorPodByPod, klet.imageManager, klet.containerGC, kubeDeps.Recorder, nodeRef, klet.clock, kubeCfg.LocalStorageCapacityIsolation)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	klet.evictionManager = evictionManager
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">//  注册admit handler</span>
+</span></span><span style="display:flex;"><span>	klet.admitHandlers.<span style="color:#fabd2f">AddPodAdmitHandler</span>(evictionAdmitHandler)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Safe, allowed sysctls can always be used as unsafe sysctls in the spec.</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// Hence, we concatenate those two lists.</span>
+</span></span><span style="display:flex;"><span>	safeAndUnsafeSysctls <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">append</span>(sysctl.<span style="color:#fabd2f">SafeSysctlAllowlist</span>(), allowedUnsafeSysctls<span style="color:#fe8019">...</span>)
+</span></span><span style="display:flex;"><span>	sysctlsAllowlist, err <span style="color:#fe8019">:=</span> sysctl.<span style="color:#fabd2f">NewAllowlist</span>(safeAndUnsafeSysctls)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	klet.admitHandlers.<span style="color:#fabd2f">AddPodAdmitHandler</span>(sysctlsAllowlist)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// enable active deadline handler</span>
+</span></span><span style="display:flex;"><span>	activeDeadlineHandler, err <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">newActiveDeadlineHandler</span>(klet.statusManager, kubeDeps.Recorder, klet.clock)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	klet.<span style="color:#fabd2f">AddPodSyncLoopHandler</span>(activeDeadlineHandler)
+</span></span><span style="display:flex;"><span>	klet.<span style="color:#fabd2f">AddPodSyncHandler</span>(activeDeadlineHandler)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	klet.admitHandlers.<span style="color:#fabd2f">AddPodAdmitHandler</span>(klet.containerManager.<span style="color:#fabd2f">GetAllocateResourcesPodAdmitHandler</span>())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	criticalPodAdmissionHandler <span style="color:#fe8019">:=</span> preemption.<span style="color:#fabd2f">NewCriticalPodAdmissionHandler</span>(klet.GetActivePods, <span style="color:#fabd2f">killPodNow</span>(klet.podWorkers, kubeDeps.Recorder), kubeDeps.Recorder)
+</span></span><span style="display:flex;"><span>	klet.admitHandlers.<span style="color:#fabd2f">AddPodAdmitHandler</span>(lifecycle.<span style="color:#fabd2f">NewPredicateAdmitHandler</span>(klet.getNodeAnyWay, criticalPodAdmissionHandler, klet.containerManager.UpdatePluginResources))
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// apply functional Option&#39;s</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">for</span> _, opt <span style="color:#fe8019">:=</span> <span style="color:#fe8019">range</span> kubeDeps.Options {
+</span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">opt</span>(klet)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> sysruntime.GOOS <span style="color:#fe8019">==</span> <span style="color:#b8bb26">&#34;linux&#34;</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// AppArmor is a Linux kernel security module and it does not support other operating systems.</span>
+</span></span><span style="display:flex;"><span>		klet.appArmorValidator = apparmor.<span style="color:#fabd2f">NewValidator</span>()
+</span></span><span style="display:flex;"><span>		klet.softAdmitHandlers.<span style="color:#fabd2f">AddPodAdmitHandler</span>(lifecycle.<span style="color:#fabd2f">NewAppArmorAdmitHandler</span>(klet.appArmorValidator))
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	leaseDuration <span style="color:#fe8019">:=</span> time.<span style="color:#fabd2f">Duration</span>(kubeCfg.NodeLeaseDurationSeconds) <span style="color:#fe8019">*</span> time.Second
+</span></span><span style="display:flex;"><span>	renewInterval <span style="color:#fe8019">:=</span> time.<span style="color:#fabd2f">Duration</span>(<span style="color:#fabd2f">float64</span>(leaseDuration) <span style="color:#fe8019">*</span> nodeLeaseRenewIntervalFraction)
+</span></span><span style="display:flex;"><span>	klet.nodeLeaseController = lease.<span style="color:#fabd2f">NewController</span>(
+</span></span><span style="display:flex;"><span>		klet.clock,
+</span></span><span style="display:flex;"><span>		klet.heartbeatClient,
+</span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">string</span>(klet.nodeName),
+</span></span><span style="display:flex;"><span>		kubeCfg.NodeLeaseDurationSeconds,
+</span></span><span style="display:flex;"><span>		klet.onRepeatedHeartbeatFailure,
+</span></span><span style="display:flex;"><span>		renewInterval,
+</span></span><span style="display:flex;"><span>		v1.NamespaceNodeLease,
+</span></span><span style="display:flex;"><span>		util.<span style="color:#fabd2f">SetNodeOwnerFunc</span>(klet.heartbeatClient, <span style="color:#fabd2f">string</span>(klet.nodeName)))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// setup node shutdown manager</span>
+</span></span><span style="display:flex;"><span>	shutdownManager, shutdownAdmitHandler <span style="color:#fe8019">:=</span> nodeshutdown.<span style="color:#fabd2f">NewManager</span>(<span style="color:#fe8019">&amp;</span>nodeshutdown.Config{
+</span></span><span style="display:flex;"><span>		Logger:                           logger,
+</span></span><span style="display:flex;"><span>		ProbeManager:                     klet.probeManager,
+</span></span><span style="display:flex;"><span>		Recorder:                         kubeDeps.Recorder,
+</span></span><span style="display:flex;"><span>		NodeRef:                          nodeRef,
+</span></span><span style="display:flex;"><span>		GetPodsFunc:                      klet.GetActivePods,
+</span></span><span style="display:flex;"><span>		KillPodFunc:                      <span style="color:#fabd2f">killPodNow</span>(klet.podWorkers, kubeDeps.Recorder),
+</span></span><span style="display:flex;"><span>		SyncNodeStatusFunc:               klet.syncNodeStatus,
+</span></span><span style="display:flex;"><span>		ShutdownGracePeriodRequested:     kubeCfg.ShutdownGracePeriod.Duration,
+</span></span><span style="display:flex;"><span>		ShutdownGracePeriodCriticalPods:  kubeCfg.ShutdownGracePeriodCriticalPods.Duration,
+</span></span><span style="display:flex;"><span>		ShutdownGracePeriodByPodPriority: kubeCfg.ShutdownGracePeriodByPodPriority,
+</span></span><span style="display:flex;"><span>		StateDirectory:                   rootDirectory,
+</span></span><span style="display:flex;"><span>	})
+</span></span><span style="display:flex;"><span>	klet.shutdownManager = shutdownManager
+</span></span><span style="display:flex;"><span>	klet.usernsManager, err = <span style="color:#fabd2f">MakeUserNsManager</span>(klet)
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>, err
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	klet.admitHandlers.<span style="color:#fabd2f">AddPodAdmitHandler</span>(shutdownAdmitHandler)
+</span></span><span style="display:flex;"><span>	<span style="color:#8ec07c">//...</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</details>
+
+
+  </div>
+
+
+  
+<div>
+  <ul class="tags">
+  <li>
+    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+  </li>
+  
+  <li>
+    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+  </li>
+  </ul>
+</div>
+
+
+
+  <div class="share-buttons">
+    
+  
+<script src="https://utteranc.es/client.js"
+        repo="zhangzewen/zhangzewen.github.io"
+        issue-term="pathname"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+</div>
+
+
+  
+</div>
+  </main>
+
+  <footer>
+  <div>
+    <p>
+      &copy; Zhang Zewen 2025
+
+      &middot; <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank">CC BY-SA 4.0</a>
+
+      
+    </p>
+  </div>
+</footer>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/js/all.min.js"
+    integrity="sha256-MAgcygDRahs+F/Nk5Vz387whB4kSK9NXlDN3w58LLq0=" crossorigin="anonymous"></script>
+
+
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/soho.js"></script>
+
+  
+
+  
+  
+  
+</body>
+
+</html>

@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.150.0">
+  <meta name="generator" content="Hugo 0.151.0">
 
   <title>What a Life!</title>
 
@@ -172,6 +172,69 @@
     <div class="posts">
       <article class="post">
         <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-webhook/">kubernetes 源码分析之 apiserver admission webhook</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-04-14T22:36:42&#43;0800">Apr 14, 2025</time> &middot; 9 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>在<a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-control/">kubernetes 源码分析之 apiserver admission</a> 中提到 apiserver 的准入控制是由一系列的插件组成，同时也提供了 webhook 机制支持第三方插件（apiserver admission webhook plugin）来进行扩展。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-webhook/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/">kubernetes 源码分析之 apiserver Authentication &amp; Authoriztion</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-04-14T22:36:42&#43;0800">Apr 14, 2025</time> &middot; 4 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客户端的访问请求，其对接口请求访问提供了3种安全权限控制，每个请求都需要经过认证，授权以及准入控制器才有权限操作资源对象。</p>
+<ul>
+<li>认证：针对请求的认证，确认是否具有访问 kubernetes 集群的权限。</li>
+<li>授权：针对资源的授权，确认是否对资源具有相关权限。</li>
+<li>准入控制器：在认证和授权之后，对象被持久化之前，拦截对 apiserver 的请求，拦截后的请求进入准入控制器中处理，对请求的资源对象进行自定义(校验，修改或者拒绝)等操作。</li>
+</ul>
+<p><img src="/images/kubernetes/apiserver/access_control_01.svg" alt="apiserver_access_control_01"></p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/nongorestfulmux/">kubernetes 源码分析之 apiserver NonGoRestfulMux</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-04-14T22:36:42&#43;0800">Apr 14, 2025</time> &middot; 2 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>在 kube-apiserver 的实现过程中，相对 go-restful 还有个 NonGoRestfulMux，其实现在 <code>k8s.io/apiserver/pkg/server/mux</code>：</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/nongorestfulmux/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
           <a href="https://www.zhangzewen.net/posts/life/nan_tai_hang/">三月份南太行穿越</a>
         </h1>
 
@@ -318,74 +381,6 @@
           <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/">Read More</a>
         </div>
       </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-03-09T15:03:00&#43;0800">Mar 9, 2025</time> &middot; 3 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>这是一个系列文章：</p>
-<ul>
-<li><a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></li>
-<li><a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/">[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</a></li>
-</ul>
-<p>原文: <strong><a href="https://blog.px.dev/ebpf-function-tracing/">Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></strong></p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/">[译] Lifetime of BPF objects</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-03-04T21:42:07&#43;0800">Mar 4, 2025</time> &middot; 1 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>原文链接: <a href="https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html">Lifetime of BPF objects</a></p></blockquote>
-<p>BPF验证器保证程序本身能够被内核安全地执行，但为了安全地且无意外地使用整个BPF，用户需要理解 BPF 程序和 Maps 的生命周期。本文深入介绍了这些细节。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/ebpf/translate-lifetime-of-bpf-objects/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://www.zhangzewen.net/posts/cpp/deep_dive_into_cpp_iterators/">C&#43;&#43; STL 迭代器</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-03-02T09:43:31&#43;0800">Mar 2, 2025</time> &middot; 2 min read
-        </div>
-
-        <div>
-          <h2 id="c-迭代器的种类">c++ 迭代器的种类</h2>
-<p>在STL中，迭代器的种类可以分为输入迭代器、输出迭代器、前向迭代器、双向迭代器、随机访问迭代器：</p>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> input_iterator_tag {};  <span style="color:#928374;font-style:italic">// 输入迭代器
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> output_iterator_tag {}; <span style="color:#928374;font-style:italic">// 输出迭代器
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> forward_iterator_tag <span style="color:#fe8019">:</span> <span style="color:#fe8019">public</span> input_iterator_tag {};  <span style="color:#928374;font-style:italic">// 向前迭代器
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> bidirectional_iterator_tag <span style="color:#fe8019">:</span> <span style="color:#fe8019">public</span> forward_iterator_tag {}; <span style="color:#928374;font-style:italic">// 双向迭代器
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fe8019">struct</span> random_access_iterator_tag <span style="color:#fe8019">:</span> <span style="color:#fe8019">public</span> bidirectional_iterator_tag {}; <span style="color:#928374;font-style:italic">// 随机访问迭代器
-</span></span></span></code></pre></div><p>输入迭代器指向的位置只能被顺序读取：</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://www.zhangzewen.net/posts/cpp/deep_dive_into_cpp_iterators/">Read More</a>
-        </div>
-      </article>
   </div>
 
   
@@ -415,7 +410,7 @@
         <a href="/page/5/" aria-label="Next" class="page-link" role="button"><span aria-hidden="true">&raquo;</span></a>
       </li>
       <li class="page-item">
-        <a href="/page/7/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
+        <a href="/page/8/" aria-label="Last" class="page-link" role="button"><span aria-hidden="true">&raquo;&raquo;</span></a>
       </li>
     </ul>
   </main>

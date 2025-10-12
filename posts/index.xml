@@ -65,6 +65,27 @@
       <description>&lt;p&gt;&lt;a href=&#34;https://github.com/kubernetes-sigs/sig-storage-lib-external-provisioner.git&#34;&gt;sig-storage-lib-external-provisioner&lt;/a&gt; 是用来开发的 external provisioners 的工具库，提供了一个通用的控制器，即根据提供的 Provisioner，然后监听 PVC/PV 资源的变化来实现创建/删除 PV。&lt;/p&gt;&#xA;&lt;h2 id=&#34;接口&#34;&gt;接口&lt;/h2&gt;&#xA;&lt;p&gt;sig-storage-lib-external-provisioner 中的接口 Provisioner 提供了 external provisioners 实现创建/删除 PV 的方法 Provision/Delete, 接口 BlockProvisioner 扩展了 Provisioner：能够判断 provisioner是否支持块设备。&lt;/p&gt;</description>
     </item>
     <item>
+      <title>kubernetes 源码分析之 kubelet pod lifecycle</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-lifecycle/</link>
+      <pubDate>Sun, 27 Jul 2025 22:44:45 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-lifecycle/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubelet pod liefcycle 的源码在 &lt;code&gt;k8s.io/kubernetes/pkg/kubelet/lifecycle&lt;/code&gt;，其提供了接口用于 kubelet 上 pod的准入控制、同步、驱逐、运行前后执行函数功能。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet pod preemption</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-preemption/</link>
+      <pubDate>Sun, 27 Jul 2025 22:44:45 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-preemption/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;当 pod 被调度到某个节点，因资源不满足出现抢占现象，会触发对低优先级的 pod 的驱逐，被调度的 pod 称为 Critical Pod：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet status manager</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/status-manager/</link>
+      <pubDate>Sun, 27 Jul 2025 22:44:45 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/status-manager/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;在 kubernetes 中将 Pod 调度到某一节点之后，后续的状态维护信息则是由节点上的 kubelet 进行维护，及时地把变更状态报告给 apiserver，status manager 需要根据当前 Pod 运行中的状态和 apiserver 存储的数据决定 Pod 的状态转换。&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>flannel 源码分析</title>
       <link>https://www.zhangzewen.net/posts/kubernetes/cni/flannel/</link>
       <pubDate>Mon, 21 Jul 2025 23:43:31 +0800</pubDate>
@@ -350,6 +371,20 @@
       <pubDate>Mon, 27 Jan 2025 23:16:45 +0800</pubDate>
       <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/pause/</guid>
       <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;Pod 是 kubernetes 里最小调度单元，一个 Pod 里面可以包含由多个容器。 这些容器之间通过 linux namespace 来共享资源以及和宿主节点环境隔离。Pod 里面最基础的容器是 pause 容器，它是 Pod 启动的时候，首先创建的容器，其他的业务容器都依赖该 pause 容器，毕竟它提供了可共享的 linux namspace。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet image manager</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/image-manager/</link>
+      <pubDate>Mon, 27 Jan 2025 22:44:45 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/image-manager/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;p&gt;kubelet 的镜像管理实现在 &lt;code&gt;k8s.io/kubernetes/pkg/kubelet/image&lt;/code&gt;目录下。镜像管理需要实现接口 ImageManager ：&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#928374;font-style:italic&#34;&gt;// k8s.io/kubernetes/pkg/kubelet/images/image_manager.go&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#fe8019&#34;&gt;type&lt;/span&gt; ImageManager &lt;span style=&#34;color:#fe8019&#34;&gt;interface&lt;/span&gt; {&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&#x9;&lt;span style=&#34;color:#fabd2f&#34;&gt;EnsureImageExists&lt;/span&gt;(pod &lt;span style=&#34;color:#fe8019&#34;&gt;*&lt;/span&gt;v1.Pod, container &lt;span style=&#34;color:#fe8019&#34;&gt;*&lt;/span&gt;v1.Container, pullSecrets []v1.Secret, podSandboxConfig &lt;span style=&#34;color:#fe8019&#34;&gt;*&lt;/span&gt;runtimeapi.PodSandboxConfig) (&lt;span style=&#34;color:#fabd2f&#34;&gt;string&lt;/span&gt;, &lt;span style=&#34;color:#fabd2f&#34;&gt;string&lt;/span&gt;, &lt;span style=&#34;color:#fabd2f&#34;&gt;error&lt;/span&gt;)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;该接口只有一个方法，即确保指定镜像存在，结构体 imageManager 实现了该接口：&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kubernetes 源码分析之 kubelet pod manager</title>
+      <link>https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-manager/</link>
+      <pubDate>Mon, 27 Jan 2025 22:44:45 +0800</pubDate>
+      <guid>https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-manager/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&lt;/blockquote&gt;&#xA;&lt;h2 id=&#34;基础-manager&#34;&gt;基础 Manager&lt;/h2&gt;&#xA;&lt;p&gt;在阅读 kubelet 的源码中，有诸多 Manager：configmap manager，secret manager， pod manager 等，这些 manager 都和 pod 息息相关，在 kublet 的代码中专门抽象出了最基础的接口 Manager ：&lt;/p&gt;</description>
     </item>
     <item>
       <title>kubernetes 源码分析之 kubelet 镜像回收和容器回收</title>

@@ -68,6 +68,15 @@
     <loc>https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/</loc>
     <lastmod>2025-08-02T00:43:31+08:00</lastmod>
   </url><url>
+    <loc>https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-lifecycle/</loc>
+    <lastmod>2025-07-27T22:44:45+08:00</lastmod>
+  </url><url>
+    <loc>https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-preemption/</loc>
+    <lastmod>2025-07-27T22:44:45+08:00</lastmod>
+  </url><url>
+    <loc>https://www.zhangzewen.net/posts/kubernetes/kubelet/status-manager/</loc>
+    <lastmod>2025-07-27T22:44:45+08:00</lastmod>
+  </url><url>
     <loc>https://www.zhangzewen.net/tags/cni/</loc>
     <lastmod>2025-07-21T23:43:31+08:00</lastmod>
   </url><url>
@@ -229,6 +238,12 @@
   </url><url>
     <loc>https://www.zhangzewen.net/posts/kubernetes/kubelet/pause/</loc>
     <lastmod>2025-01-27T23:16:45+08:00</lastmod>
+  </url><url>
+    <loc>https://www.zhangzewen.net/posts/kubernetes/kubelet/image-manager/</loc>
+    <lastmod>2025-01-27T22:44:45+08:00</lastmod>
+  </url><url>
+    <loc>https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-manager/</loc>
+    <lastmod>2025-01-27T22:44:45+08:00</lastmod>
   </url><url>
     <loc>https://www.zhangzewen.net/posts/kubernetes/kubelet/garbage_collection/</loc>
     <lastmod>2025-01-27T22:44:45+08:00</lastmod>
