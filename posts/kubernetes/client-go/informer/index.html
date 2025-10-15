@@ -18,19 +18,19 @@ processorListener 接口 processorListener 是用户对特定资源对象变更�
   <meta itemprop="datePublished" content="2024-08-13T23:42:19+08:00">
   <meta itemprop="dateModified" content="2024-08-13T23:42:19+08:00">
   <meta itemprop="wordCount" content="1468">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="client-go 源码分析之 informer">
   <meta name="twitter:description" content="本篇文章基于 client-go release-1.25 分支
 变更事件分发和消费 在讲解 Informer 机制之前，先来简单了解两个数据结构，这两个数据结构设计到变更事件的监听，事件分发，事件消费。
 processorListener 接口 processorListener 是用户对特定资源对象变更事件的回调处理逻辑接口 ResourceEventHandler 的封装，其监听变更事件以及调用用户注册的回调逻辑来消费这些变更事件:">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/client-go/informer/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/client-go/informer/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="client-go 源码分析之 informer">
   <meta property="og:description" content="本篇文章基于 client-go release-1.25 分支
@@ -43,7 +43,7 @@ processorListener 接口 processorListener 是用户对特定资源对象变更�
     <meta property="article:modified_time" content="2024-08-13T23:42:19+08:00">
     <meta property="article:tag" content="源码分析">
     <meta property="article:tag" content="Kubernetes">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -53,42 +53,42 @@ processorListener 接口 processorListener 是用户对特定资源对象变更�
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/informer/#webpage",
-      "url": "https://www.zhangzewen.net/posts/kubernetes/client-go/informer/",
+      "@id": "https://zhangzewen.github.io/posts/kubernetes/client-go/informer/#webpage",
+      "url": "https://zhangzewen.github.io/posts/kubernetes/client-go/informer/",
       "name": "client-go 源码分析之 informer",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2024-08-13T23:42:19+08:00",
       "dateModified": "2024-08-13T23:42:19+08:00",
@@ -98,7 +98,7 @@ processorListener 接口 processorListener 是用户对特定资源对象变更�
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/client-go/informer/"
+            "https://zhangzewen.github.io/posts/kubernetes/client-go/informer/"
           ]
         }
       ]
@@ -106,16 +106,16 @@ processorListener 接口 processorListener 是用户对特定资源对象变更�
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/informer/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/client-go/informer/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/informer/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/client-go/informer/#webpage"
       },
       "headline": "client-go 源码分析之 informer",
       "datePublished": "2024-08-13T23:42:19+08:00",
       "dateModified": "2024-08-13T23:42:19+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "源码分析",
@@ -133,7 +133,7 @@ processorListener 接口 processorListener 是用户对特定资源对象变更�
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/client-go/informer/#comments"
+            "https://zhangzewen.github.io/posts/kubernetes/client-go/informer/#comments"
           ]
         }
       ]
@@ -201,7 +201,7 @@ processorListener 接口 processorListener 是用户对特定资源对象变更�
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -218,7 +218,7 @@ processorListener 接口 processorListener 是用户对特定资源对象变更�
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -488,7 +488,7 @@ processorListener 接口 processorListener 是用户对特定资源对象变更�
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p><img src="/images/kubernetes/client-go/informer/processorListener_sharedProcessor.png" alt="processorListener_sharedProcessor"></p>
 <h2 id="informer">Informer</h2>
-<p>通过 newInformer 来构建一个简单的 informer， 注意其返回的 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/controller/">Controller</a>：</p>
+<p>通过 newInformer 来构建一个简单的 informer， 注意其返回的 <a href="https://zhangzewen.github.io/posts/kubernetes/client-go/controller/">Controller</a>：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> <span style="color:#fabd2f">NewIndexerInformer</span>(
 </span></span><span style="display:flex;"><span>	lw ListerWatcher,
 </span></span><span style="display:flex;"><span>	objType runtime.Object,
@@ -536,8 +536,8 @@ processorListener 接口 processorListener 是用户对特定资源对象变更�
 </span></span></code></pre></div><p>通过上面代码可知一个 informer 包含多个部分:</p>
 <ul>
 <li>Store: 一个额外的存储（local storage）, 本地缓存, 避免每次都需要从 apiserver 上拉取.</li>
-<li>一个 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/controller/">controller</a>.</li>
-<li>一个 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/">reflector</a> 之上的.</li>
+<li>一个 <a href="https://zhangzewen.github.io/posts/kubernetes/client-go/controller/">controller</a>.</li>
+<li>一个 <a href="https://zhangzewen.github.io/posts/kubernetes/client-go/reflector/">reflector</a> 之上的.</li>
 <li>DeltaFIFO: 资源的操作记录.</li>
 <li>ResourceEventHandler, 对应新增/更新/删除事件的用户回调函数.</li>
 </ul>
@@ -730,11 +730,11 @@ processorListener 接口 processorListener 是用户对特定资源对象变更�
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+    <a href="https://zhangzewen.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+    <a href="https://zhangzewen.github.io/tags/kubernetes/" class="tag-link">Kubernetes</a>
   </li>
   </ul>
 </div>

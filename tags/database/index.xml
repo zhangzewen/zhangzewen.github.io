@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Database on What a Life!</title>
-    <link>https://www.zhangzewen.net/tags/database/</link>
+    <link>https://zhangzewen.github.io/tags/database/</link>
     <description>Recent content in Database on What a Life!</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
     <lastBuildDate>Sat, 14 Jun 2025 22:36:42 +0800</lastBuildDate>
-    <atom:link href="https://www.zhangzewen.net/tags/database/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://zhangzewen.github.io/tags/database/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>2023年秋季 cmu15-445 公开课 实现踩坑不完全指北</title>
-      <link>https://www.zhangzewen.net/posts/database/cmu15445/2023fall/</link>
+      <link>https://zhangzewen.github.io/posts/database/cmu15445/2023fall/</link>
       <pubDate>Sat, 14 Jun 2025 22:36:42 +0800</pubDate>
-      <guid>https://www.zhangzewen.net/posts/database/cmu15445/2023fall/</guid>
-      <description>&lt;p&gt;赶在评分系统关闭前完成了这个很有挑战的 2023 年秋季 cmu15-445 公开课。&#xA;&lt;img src=&#34;https://www.zhangzewen.net/images/database/cmu15445/2023fall/gradescope_done.png&#34; alt=&#34;gradescope_done.png&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;根据此公开课的规定，不会提供任何代码。&lt;/p&gt;&#xA;&lt;h2 id=&#34;环境配置&#34;&gt;环境配置&lt;/h2&gt;&#xA;&lt;p&gt;mac 下没什么好说的，但是在 linux 下着实费了点功夫，&lt;code&gt;bits/c++-config.h&lt;/code&gt; 这个在lsp的插件上总是显示该文件无法找到，解决办法如下：&lt;/p&gt;</description>
+      <guid>https://zhangzewen.github.io/posts/database/cmu15445/2023fall/</guid>
+      <description>&lt;p&gt;赶在评分系统关闭前完成了这个很有挑战的 2023 年秋季 cmu15-445 公开课。&#xA;&lt;img src=&#34;https://zhangzewen.github.io/images/database/cmu15445/2023fall/gradescope_done.png&#34; alt=&#34;gradescope_done.png&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;根据此公开课的规定，不会提供任何代码。&lt;/p&gt;&#xA;&lt;h2 id=&#34;环境配置&#34;&gt;环境配置&lt;/h2&gt;&#xA;&lt;p&gt;mac 下没什么好说的，但是在 linux 下着实费了点功夫，&lt;code&gt;bits/c++-config.h&lt;/code&gt; 这个在lsp的插件上总是显示该文件无法找到，解决办法如下：&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

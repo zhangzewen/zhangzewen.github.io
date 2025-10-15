@@ -18,19 +18,19 @@ type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool Last
   <meta itemprop="datePublished" content="2024-08-29T23:48:15+08:00">
   <meta itemprop="dateModified" content="2024-08-29T23:48:15+08:00">
   <meta itemprop="wordCount" content="384">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="client-go 源码分析之 controller">
   <meta name="twitter:description" content="本篇文章基于 client-go release-1.25 分支
 Controller是一个接口，该接口的实例的主要作用是构建和启动 reflector。
 type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool LastSyncResourceVersion() string } type controller struct { config Config reflector *Reflector reflectorMutex sync.RWMutex clock clock.Clock } controller 实现了上述的 Controller，Config 存储的是配置信息， 通过调用 New 构造 controller 实例：">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/client-go/controller/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/client-go/controller/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="client-go 源码分析之 controller">
   <meta property="og:description" content="本篇文章基于 client-go release-1.25 分支
@@ -43,7 +43,7 @@ type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool Last
     <meta property="article:modified_time" content="2024-08-29T23:48:15+08:00">
     <meta property="article:tag" content="源码分析">
     <meta property="article:tag" content="Kubernetes">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -53,52 +53,52 @@ type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool Last
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/controller/#webpage",
-      "url": "https://www.zhangzewen.net/posts/kubernetes/client-go/controller/",
+      "@id": "https://zhangzewen.github.io/posts/kubernetes/client-go/controller/#webpage",
+      "url": "https://zhangzewen.github.io/posts/kubernetes/client-go/controller/",
       "name": "client-go 源码分析之 controller",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2024-08-29T23:48:15+08:00",
       "dateModified": "2024-08-29T23:48:15+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 client-go release-1.25 分支\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003e\u003ccode\u003eController\u003c/code\u003e是一个接口，该接口的实例的主要作用是构建和启动 \u003ca href=\"https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/\"\u003ereflector\u003c/a\u003e。\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-go\" data-lang=\"go\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#fe8019\"\u003etype\u003c/span\u003e Controller \u003cspan style=\"color:#fe8019\"\u003einterface\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  \u003cspan style=\"color:#fabd2f\"\u003eRun\u003c/span\u003e(stopCh \u003cspan style=\"color:#fe8019\"\u003e\u0026lt;-\u003c/span\u003e\u003cspan style=\"color:#fe8019\"\u003echan\u003c/span\u003e \u003cspan style=\"color:#fe8019\"\u003estruct\u003c/span\u003e{})\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  \u003cspan style=\"color:#fabd2f\"\u003eHasSynced\u003c/span\u003e() \u003cspan style=\"color:#fabd2f\"\u003ebool\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  \u003cspan style=\"color:#fabd2f\"\u003eLastSyncResourceVersion\u003c/span\u003e() \u003cspan style=\"color:#fabd2f\"\u003estring\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#fe8019\"\u003etype\u003c/span\u003e controller \u003cspan style=\"color:#fe8019\"\u003estruct\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  config         Config\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  reflector      \u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003eReflector\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  reflectorMutex sync.RWMutex\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  clock          clock.Clock\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003econtroller 实现了上述的 Controller，Config 存储的是配置信息， 通过调用 New 构造 controller 实例：\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 client-go release-1.25 分支\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003e\u003ccode\u003eController\u003c/code\u003e是一个接口，该接口的实例的主要作用是构建和启动 \u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/client-go/reflector/\"\u003ereflector\u003c/a\u003e。\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-go\" data-lang=\"go\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#fe8019\"\u003etype\u003c/span\u003e Controller \u003cspan style=\"color:#fe8019\"\u003einterface\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  \u003cspan style=\"color:#fabd2f\"\u003eRun\u003c/span\u003e(stopCh \u003cspan style=\"color:#fe8019\"\u003e\u0026lt;-\u003c/span\u003e\u003cspan style=\"color:#fe8019\"\u003echan\u003c/span\u003e \u003cspan style=\"color:#fe8019\"\u003estruct\u003c/span\u003e{})\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  \u003cspan style=\"color:#fabd2f\"\u003eHasSynced\u003c/span\u003e() \u003cspan style=\"color:#fabd2f\"\u003ebool\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  \u003cspan style=\"color:#fabd2f\"\u003eLastSyncResourceVersion\u003c/span\u003e() \u003cspan style=\"color:#fabd2f\"\u003estring\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#fe8019\"\u003etype\u003c/span\u003e controller \u003cspan style=\"color:#fe8019\"\u003estruct\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  config         Config\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  reflector      \u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003eReflector\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  reflectorMutex sync.RWMutex\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e  clock          clock.Clock\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003econtroller 实现了上述的 Controller，Config 存储的是配置信息， 通过调用 New 构造 controller 实例：\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/client-go/controller/"
+            "https://zhangzewen.github.io/posts/kubernetes/client-go/controller/"
           ]
         }
       ]
@@ -106,16 +106,16 @@ type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool Last
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/controller/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/client-go/controller/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/controller/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/client-go/controller/#webpage"
       },
       "headline": "client-go 源码分析之 controller",
       "datePublished": "2024-08-29T23:48:15+08:00",
       "dateModified": "2024-08-29T23:48:15+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "源码分析",
@@ -133,7 +133,7 @@ type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool Last
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/client-go/controller/#comments"
+            "https://zhangzewen.github.io/posts/kubernetes/client-go/controller/#comments"
           ]
         }
       ]
@@ -183,7 +183,7 @@ type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool Last
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -200,7 +200,7 @@ type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool Last
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -231,7 +231,7 @@ type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool Last
   <div>
     <blockquote>
 <p>本篇文章基于 client-go release-1.25 分支</p></blockquote>
-<p><code>Controller</code>是一个接口，该接口的实例的主要作用是构建和启动 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/">reflector</a>。</p>
+<p><code>Controller</code>是一个接口，该接口的实例的主要作用是构建和启动 <a href="https://zhangzewen.github.io/posts/kubernetes/client-go/reflector/">reflector</a>。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> Controller <span style="color:#fe8019">interface</span> {
 </span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">Run</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{})
@@ -255,7 +255,7 @@ type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool Last
 </span></span><span style="display:flex;"><span>  }
 </span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> ctlr
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>在实例化接口 Controller 后，通过 <code>Run</code> 来启动实例， 这里可以看到传入的 Config 配置信息会构造 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/">reflector</a>。</p>
+</span></span></code></pre></div><p>在实例化接口 Controller 后，通过 <code>Run</code> 来启动实例， 这里可以看到传入的 Config 配置信息会构造 <a href="https://zhangzewen.github.io/posts/kubernetes/client-go/reflector/">reflector</a>。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (c <span style="color:#fe8019">*</span>controller) <span style="color:#fabd2f">Run</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}) {
 </span></span><span style="display:flex;"><span>  <span style="color:#fe8019">defer</span> utilruntime.<span style="color:#fabd2f">HandleCrash</span>()
 </span></span><span style="display:flex;"><span>  <span style="color:#fe8019">go</span> <span style="color:#fe8019">func</span>() {
@@ -383,11 +383,11 @@ type Controller interface { Run(stopCh &lt;-chan struct{}) HasSynced() bool Last
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+    <a href="https://zhangzewen.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+    <a href="https://zhangzewen.github.io/tags/kubernetes/" class="tag-link">Kubernetes</a>
   </li>
   </ul>
 </div>

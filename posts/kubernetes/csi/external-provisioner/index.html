@@ -16,17 +16,17 @@
   <meta itemprop="datePublished" content="2025-08-02T00:43:31+08:00">
   <meta itemprop="dateModified" content="2025-08-02T00:43:31+08:00">
   <meta itemprop="wordCount" content="266">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes,Csi">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="kubernetes csi 之 external-provisioner">
   <meta name="twitter:description" content="前言 external-provisioner 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 sig-storage-lib-external-provisioner 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 PV Controller 的工作。">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/csi/external-provisioner/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes csi 之 external-provisioner">
   <meta property="og:description" content="前言 external-provisioner 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 sig-storage-lib-external-provisioner 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 PV Controller 的工作。">
@@ -38,7 +38,7 @@
     <meta property="article:tag" content="源码分析">
     <meta property="article:tag" content="Kubernetes">
     <meta property="article:tag" content="Csi">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -48,52 +48,52 @@
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/#webpage",
-      "url": "https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/",
+      "@id": "https://zhangzewen.github.io/posts/kubernetes/csi/external-provisioner/#webpage",
+      "url": "https://zhangzewen.github.io/posts/kubernetes/csi/external-provisioner/",
       "name": "kubernetes csi 之 external-provisioner",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-08-02T00:43:31+08:00",
       "dateModified": "2025-08-02T00:43:31+08:00",
-      "description": "\u003ch2 id=\"前言\"\u003e前言\u003c/h2\u003e\n\u003cp\u003e\u003ca href=\"https://github.com/kubernetes-csi/external-provisioner.git\"\u003eexternal-provisioner\u003c/a\u003e 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 \u003ca href=\"https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/\"\u003esig-storage-lib-external-provisioner\u003c/a\u003e 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 \u003ca href=\"https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/\"\u003ePV Controller\u003c/a\u003e 的工作。\u003c/p\u003e",
+      "description": "\u003ch2 id=\"前言\"\u003e前言\u003c/h2\u003e\n\u003cp\u003e\u003ca href=\"https://github.com/kubernetes-csi/external-provisioner.git\"\u003eexternal-provisioner\u003c/a\u003e 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 \u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/csi/sig-storage-lib-external-provisioner/\"\u003esig-storage-lib-external-provisioner\u003c/a\u003e 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 \u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/controllers/volume_pv_controller/\"\u003ePV Controller\u003c/a\u003e 的工作。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/"
+            "https://zhangzewen.github.io/posts/kubernetes/csi/external-provisioner/"
           ]
         }
       ]
@@ -101,16 +101,16 @@
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/csi/external-provisioner/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/csi/external-provisioner/#webpage"
       },
       "headline": "kubernetes csi 之 external-provisioner",
       "datePublished": "2025-08-02T00:43:31+08:00",
       "dateModified": "2025-08-02T00:43:31+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "源码分析",
@@ -129,7 +129,7 @@
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/csi/external-provisioner/#comments"
+            "https://zhangzewen.github.io/posts/kubernetes/csi/external-provisioner/#comments"
           ]
         }
       ]
@@ -193,7 +193,7 @@
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -210,7 +210,7 @@
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -240,7 +240,7 @@
 
   <div>
     <h2 id="前言">前言</h2>
-<p><a href="https://github.com/kubernetes-csi/external-provisioner.git">external-provisioner</a> 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 <a href="https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/">sig-storage-lib-external-provisioner</a> 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 <a href="https://www.zhangzewen.net/posts/kubernetes/controllers/volume_pv_controller/">PV Controller</a> 的工作。</p>
+<p><a href="https://github.com/kubernetes-csi/external-provisioner.git">external-provisioner</a> 是一个控制器，通过监控 PVC/PV 资源的变化来创建和删除 PV。 其主要逻辑已由 <a href="https://zhangzewen.github.io/posts/kubernetes/csi/sig-storage-lib-external-provisioner/">sig-storage-lib-external-provisioner</a> 实现。唯一需要做的是实现接口 Provisioner 来提供 Volume 的创建和删除，因为 PVC 和 PV 的绑定是 <a href="https://zhangzewen.github.io/posts/kubernetes/controllers/volume_pv_controller/">PV Controller</a> 的工作。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Provisioner <span style="color:#fe8019">interface</span> {
 </span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Provision</span>(context.Context, ProvisionOptions) (<span style="color:#fe8019">*</span>v1.PersistentVolume, ProvisioningState, <span style="color:#fabd2f">error</span>)
 </span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Delete</span>(context.Context, <span style="color:#fe8019">*</span>v1.PersistentVolume) <span style="color:#fabd2f">error</span>
@@ -251,7 +251,7 @@
 <ul>
 <li>通过 <a href="https://github.com/container-storage-interface/spec.git">CSI 接口</a> 提供的 Controller Service 和 CSI plugin 通信（调用CreateVolume）来创建 Volume。</li>
 <li>CSI plugin 创建 volume 成功返回后，构建 PV 资源对象。</li>
-<li>把PV 资源对象 交给 <a href="https://www.zhangzewen.net/posts/kubernetes/csi/sig-storage-lib-external-provisioner/">sig-storage-lib-external-provisioner</a> 处理。</li>
+<li>把PV 资源对象 交给 <a href="https://zhangzewen.github.io/posts/kubernetes/csi/sig-storage-lib-external-provisioner/">sig-storage-lib-external-provisioner</a> 处理。</li>
 </ul>
 <details>
     <summary>CLICK ME</summary>
@@ -320,15 +320,15 @@
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+    <a href="https://zhangzewen.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+    <a href="https://zhangzewen.github.io/tags/kubernetes/" class="tag-link">Kubernetes</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/csi/" class="tag-link">Csi</a>
+    <a href="https://zhangzewen.github.io/tags/csi/" class="tag-link">Csi</a>
   </li>
   </ul>
 </div>

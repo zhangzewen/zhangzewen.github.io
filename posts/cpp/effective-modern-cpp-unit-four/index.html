@@ -17,18 +17,18 @@ class A { public: A() {std::cout &lt;&lt; &#34;Call A::A()&#34; &lt;&lt; std::en
   <meta itemprop="datePublished" content="2025-02-17T18:34:42+08:00">
   <meta itemprop="dateModified" content="2025-02-17T18:34:42+08:00">
   <meta itemprop="wordCount" content="450">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="C&#43;&#43;,读书笔记">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="Effective Modern C&#43;&#43; 读书笔记之第四章">
   <meta name="twitter:description" content="Item 18: std::unique_ptr管理独占资源 std::unique_ptr有着几乎和指针几乎相同的性能，大小几乎差不多，且std::unique_ptr不能被赋值，它只有移动语义。对于管理独占资源，std::unique_ptr是一个不错的选择，在工厂模式下，它可以管理生成的对象。 当std::unique_ptr对象是释放的时候，它会释放它所管理的资源，这是它的默认行为。可以为其制定释放它所管理资源的方法，需要实现一个deleter：
 class A { public: A() {std::cout &lt;&lt; &#34;Call A::A()&#34; &lt;&lt; std::endl;} ~() {std::cout &lt;&lt; &#34;Call A::~A()&#34; &lt;&lt; std::endl;} }; auto DeleterOfA = [](A* a) {if (a != nullptr){delete a;}}; std::unique_ptr&lt;A, DeleterOfA&gt; ptrA(new a()); } 需要注意的是，在使用自定义的deleter的时候，如果deleter是普通的函数的话，那么std::unique_ptr&lt;T, deleter&gt;的大小就是双倍的原始指针的大小(raw pointer，一个指针的大小通常是一个word的大小)。如果是函数对象，没有状态的函数对象，如不捕获任何变量的lambda表达式，std::unique_ptr的大小不变的。但是如果delete是函数的时候，std::unique_ptr增加的一个函数指针的大小，所以在delete的使用上，更推荐使用lambda表达式。">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-four/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="Effective Modern C&#43;&#43; 读书笔记之第四章">
   <meta property="og:description" content="Item 18: std::unique_ptr管理独占资源 std::unique_ptr有着几乎和指针几乎相同的性能，大小几乎差不多，且std::unique_ptr不能被赋值，它只有移动语义。对于管理独占资源，std::unique_ptr是一个不错的选择，在工厂模式下，它可以管理生成的对象。 当std::unique_ptr对象是释放的时候，它会释放它所管理的资源，这是它的默认行为。可以为其制定释放它所管理资源的方法，需要实现一个deleter：
@@ -40,7 +40,7 @@ class A { public: A() {std::cout &lt;&lt; &#34;Call A::A()&#34; &lt;&lt; std::en
     <meta property="article:modified_time" content="2025-02-17T18:34:42+08:00">
     <meta property="article:tag" content="C&#43;&#43;">
     <meta property="article:tag" content="读书笔记">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -50,42 +50,42 @@ class A { public: A() {std::cout &lt;&lt; &#34;Call A::A()&#34; &lt;&lt; std::en
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/#webpage",
-      "url": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/",
+      "@id": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-four/#webpage",
+      "url": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-four/",
       "name": "Effective Modern C++ 读书笔记之第四章",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-02-17T18:34:42+08:00",
       "dateModified": "2025-02-17T18:34:42+08:00",
@@ -95,7 +95,7 @@ class A { public: A() {std::cout &lt;&lt; &#34;Call A::A()&#34; &lt;&lt; std::en
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/"
+            "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-four/"
           ]
         }
       ]
@@ -103,16 +103,16 @@ class A { public: A() {std::cout &lt;&lt; &#34;Call A::A()&#34; &lt;&lt; std::en
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-four/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-four/#webpage"
       },
       "headline": "Effective Modern C++ 读书笔记之第四章",
       "datePublished": "2025-02-17T18:34:42+08:00",
       "dateModified": "2025-02-17T18:34:42+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "C++",
@@ -130,7 +130,7 @@ class A { public: A() {std::cout &lt;&lt; &#34;Call A::A()&#34; &lt;&lt; std::en
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-four/#comments"
+            "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-four/#comments"
           ]
         }
       ]
@@ -192,7 +192,7 @@ class A { public: A() {std::cout &lt;&lt; &#34;Call A::A()&#34; &lt;&lt; std::en
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -209,7 +209,7 @@ class A { public: A() {std::cout &lt;&lt; &#34;Call A::A()&#34; &lt;&lt; std::en
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -389,11 +389,11 @@ class A { public: A() {std::cout &lt;&lt; &#34;Call A::A()&#34; &lt;&lt; std::en
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/c&#43;&#43;/" class="tag-link">C&#43;&#43;</a>
+    <a href="https://zhangzewen.github.io/tags/c&#43;&#43;/" class="tag-link">C&#43;&#43;</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="tag-link">读书笔记</a>
+    <a href="https://zhangzewen.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="tag-link">读书笔记</a>
   </li>
   </ul>
 </div>

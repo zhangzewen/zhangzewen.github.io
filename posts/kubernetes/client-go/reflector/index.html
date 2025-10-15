@@ -17,18 +17,18 @@ reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取�
   <meta itemprop="datePublished" content="2024-07-27T09:43:31+08:00">
   <meta itemprop="dateModified" content="2024-07-27T09:43:31+08:00">
   <meta itemprop="wordCount" content="1260">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="client-go 源码分析之 reflector">
   <meta name="twitter:description" content="本篇文章基于 client-go release-1.25 分支
 reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取目标资源数据，然后再监听目标资源的变更事件, 并将数据同步到本地缓存。下面来具体说细节之处。">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/client-go/reflector/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="client-go 源码分析之 reflector">
   <meta property="og:description" content="本篇文章基于 client-go release-1.25 分支
@@ -40,7 +40,7 @@ reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取�
     <meta property="article:modified_time" content="2024-07-27T09:43:31+08:00">
     <meta property="article:tag" content="源码分析">
     <meta property="article:tag" content="Kubernetes">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -50,42 +50,42 @@ reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取�
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/#webpage",
-      "url": "https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/",
+      "@id": "https://zhangzewen.github.io/posts/kubernetes/client-go/reflector/#webpage",
+      "url": "https://zhangzewen.github.io/posts/kubernetes/client-go/reflector/",
       "name": "client-go 源码分析之 reflector",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2024-07-27T09:43:31+08:00",
       "dateModified": "2024-07-27T09:43:31+08:00",
@@ -95,7 +95,7 @@ reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取�
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/"
+            "https://zhangzewen.github.io/posts/kubernetes/client-go/reflector/"
           ]
         }
       ]
@@ -103,16 +103,16 @@ reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取�
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/client-go/reflector/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/client-go/reflector/#webpage"
       },
       "headline": "client-go 源码分析之 reflector",
       "datePublished": "2024-07-27T09:43:31+08:00",
       "dateModified": "2024-07-27T09:43:31+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "源码分析",
@@ -130,7 +130,7 @@ reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取�
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/client-go/reflector/#comments"
+            "https://zhangzewen.github.io/posts/kubernetes/client-go/reflector/#comments"
           ]
         }
       ]
@@ -190,7 +190,7 @@ reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取�
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -207,7 +207,7 @@ reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取�
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -255,7 +255,7 @@ reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取�
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>这段代码中的 <code>wait.BackoffUntil</code> 是一个帮助函数，其作用是周期性地调用执行传入的 <code>Reflector.ListAndWatch</code>，如果 <code>Reflector.ListAndWatch</code> 错误返回的话，会等待通过 <code>Reflector.backoffManager</code> 选定下次运行的时间间隔，然后再次调用执行 <code>Reflector.ListAndWatch</code>，直到 stopCh 这个 channel 发来消息要 stop 了，才会停止， 这个 stopCh 作用在 <code>wait.BackoffUntil</code> 上是退出，<code>Reflector.ListAndWatch</code> 上是终止函数的执行。<code>Reflector.ListAndWatch</code> 是 Reflector 的核心逻辑，这个函数比较长，接下来把这个函数拆分成3个部分来讲。</p>
 <h2 id="list从-apiserver-获取目标资源">list：从 apiserver 获取目标资源</h2>
-<p>首先，通过调用传入的 ListerWatcher 实例的 List 方法从 apiserver 获取目标资源数据， 然后获取的 ResourceVersion, 并把数据存储到 <code>Reflector.store</code> 中，具体的可以看代码注释，这里面少说了很多细节，比如怎么拉取的以及怎么存储。这个可以看看 <code>k8s.io/client-go/tools/pager</code>。至于 <code>Reflector.store</code> 它其实是一个 DeltaFIFO，获取到的 ResourceVersion 和资源会更新替换到 DeltaFIFO 中。并更新最新的 ResouceVersion 记录，以供后面的监听资源变化事件使用。 关于 DeltaFIFO 可以看<a href="https://www.zhangzewen.net/posts/kubernetes/client-go/cache/#Indexer">clien-go 源码分析之 cache</a>。</p>
+<p>首先，通过调用传入的 ListerWatcher 实例的 List 方法从 apiserver 获取目标资源数据， 然后获取的 ResourceVersion, 并把数据存储到 <code>Reflector.store</code> 中，具体的可以看代码注释，这里面少说了很多细节，比如怎么拉取的以及怎么存储。这个可以看看 <code>k8s.io/client-go/tools/pager</code>。至于 <code>Reflector.store</code> 它其实是一个 DeltaFIFO，获取到的 ResourceVersion 和资源会更新替换到 DeltaFIFO 中。并更新最新的 ResouceVersion 记录，以供后面的监听资源变化事件使用。 关于 DeltaFIFO 可以看<a href="https://zhangzewen.github.io/posts/kubernetes/client-go/cache/#Indexer">clien-go 源码分析之 cache</a>。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (r <span style="color:#fe8019">*</span>Reflector) <span style="color:#fabd2f">list</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}) <span style="color:#fabd2f">error</span> {
 </span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// ...</span>
 </span></span><span style="display:flex;"><span>	options <span style="color:#fe8019">:=</span> metav1.ListOptions{ResourceVersion: r.<span style="color:#fabd2f">relistResourceVersion</span>()}
@@ -331,7 +331,7 @@ reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取�
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="resync本地缓存和全量数据之间的定时同步">resync：本地缓存和全量数据之间的定时同步</h2>
-<p>同步的话，也是单独启动了一个goroutine，主要执行的方法是是 <code>Reflector.store.Resync</code>，其主要作用是把全量的数据更新到 reflector 的本地存储 DeltaFIFO 中。 具体可以看<a href="https://www.zhangzewen.net/posts/kubernetes/client-go/informer/">client-go 源码分析之 informer</a>;</p>
+<p>同步的话，也是单独启动了一个goroutine，主要执行的方法是是 <code>Reflector.store.Resync</code>，其主要作用是把全量的数据更新到 reflector 的本地存储 DeltaFIFO 中。 具体可以看<a href="https://zhangzewen.github.io/posts/kubernetes/client-go/informer/">client-go 源码分析之 informer</a>;</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (r <span style="color:#fe8019">*</span>Reflector) <span style="color:#fabd2f">ListAndWatch</span>(stopCh <span style="color:#fe8019">&lt;-</span><span style="color:#fe8019">chan</span> <span style="color:#fe8019">struct</span>{}) <span style="color:#fabd2f">error</span> {
 </span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// ...</span>
 </span></span><span style="display:flex;"><span>	resyncerrc <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">make</span>(<span style="color:#fe8019">chan</span> <span style="color:#fabd2f">error</span>, <span style="color:#d3869b">1</span>)
@@ -541,11 +541,11 @@ reflector 用一句话来概括就是：从 kubernetes 的 apiserver 上拉取�
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+    <a href="https://zhangzewen.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+    <a href="https://zhangzewen.github.io/tags/kubernetes/" class="tag-link">Kubernetes</a>
   </li>
   </ul>
 </div>

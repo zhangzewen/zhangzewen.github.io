@@ -18,19 +18,19 @@ apiserver storage 的 cache 层的设计有利于快速响应请求并返回所�
   <meta itemprop="datePublished" content="2025-05-11T22:36:42+08:00">
   <meta itemprop="dateModified" content="2025-05-11T22:36:42+08:00">
   <meta itemprop="wordCount" content="1914">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="kubernetes 源码分析之apiserver storage 的 cache 层实现分析">
   <meta name="twitter:description" content="本篇文章基于 apiserver v0.25.1
 apiserver storage 的 cache 层的设计有利于快速响应请求并返回所需的数据。
 结构体 cacher 实现了 底层存储接口Interface。请参考kubernetes 源码分析之 apiserver storage etcd 层实现分析。">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-cache/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-cache/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes 源码分析之apiserver storage 的 cache 层实现分析">
   <meta property="og:description" content="本篇文章基于 apiserver v0.25.1
@@ -43,7 +43,7 @@ apiserver storage 的 cache 层的设计有利于快速响应请求并返回所�
     <meta property="article:modified_time" content="2025-05-11T22:36:42+08:00">
     <meta property="article:tag" content="源码分析">
     <meta property="article:tag" content="Kubernetes">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -53,52 +53,52 @@ apiserver storage 的 cache 层的设计有利于快速响应请求并返回所�
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-cache/#webpage",
-      "url": "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-cache/",
+      "@id": "https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-cache/#webpage",
+      "url": "https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-cache/",
       "name": "kubernetes 源码分析之apiserver storage 的 cache 层实现分析",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-05-11T22:36:42+08:00",
       "dateModified": "2025-05-11T22:36:42+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eapiserver storage 的 cache 层的设计有利于快速响应请求并返回所需的数据。\u003c/p\u003e\n\u003cp\u003e结构体 cacher 实现了 底层存储接口\u003ca href=\"https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/interfaces.go#L159\"\u003eInterface\u003c/a\u003e。请参考\u003ca href=\"https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/\"\u003ekubernetes 源码分析之 apiserver storage etcd 层实现分析\u003c/a\u003e。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eapiserver storage 的 cache 层的设计有利于快速响应请求并返回所需的数据。\u003c/p\u003e\n\u003cp\u003e结构体 cacher 实现了 底层存储接口\u003ca href=\"https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/interfaces.go#L159\"\u003eInterface\u003c/a\u003e。请参考\u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-etcd/\"\u003ekubernetes 源码分析之 apiserver storage etcd 层实现分析\u003c/a\u003e。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-cache/"
+            "https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-cache/"
           ]
         }
       ]
@@ -106,16 +106,16 @@ apiserver storage 的 cache 层的设计有利于快速响应请求并返回所�
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-cache/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-cache/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-cache/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-cache/#webpage"
       },
       "headline": "kubernetes 源码分析之apiserver storage 的 cache 层实现分析",
       "datePublished": "2025-05-11T22:36:42+08:00",
       "dateModified": "2025-05-11T22:36:42+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "源码分析",
@@ -133,7 +133,7 @@ apiserver storage 的 cache 层的设计有利于快速响应请求并返回所�
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-cache/#comments"
+            "https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-cache/#comments"
           ]
         }
       ]
@@ -196,7 +196,7 @@ apiserver storage 的 cache 层的设计有利于快速响应请求并返回所�
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -213,7 +213,7 @@ apiserver storage 的 cache 层的设计有利于快速响应请求并返回所�
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -245,7 +245,7 @@ apiserver storage 的 cache 层的设计有利于快速响应请求并返回所�
     <blockquote>
 <p>本篇文章基于 apiserver v0.25.1</p></blockquote>
 <p>apiserver storage 的 cache 层的设计有利于快速响应请求并返回所需的数据。</p>
-<p>结构体 cacher 实现了 底层存储接口<a href="https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/interfaces.go#L159">Interface</a>。请参考<a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/">kubernetes 源码分析之 apiserver storage etcd 层实现分析</a>。</p>
+<p>结构体 cacher 实现了 底层存储接口<a href="https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/interfaces.go#L159">Interface</a>。请参考<a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-etcd/">kubernetes 源码分析之 apiserver storage etcd 层实现分析</a>。</p>
 <h2 id="实现">实现</h2>
 <p>cacher 结构体中的字段很多，但是代码中给的注释也很详细，这里就不再列举出来一一说明，通过函数 NewCacherFromConfig 来构建 Cacher 实例：</p>
 <details>
@@ -765,11 +765,11 @@ apiserver storage 的 cache 层的设计有利于快速响应请求并返回所�
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+    <a href="https://zhangzewen.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+    <a href="https://zhangzewen.github.io/tags/kubernetes/" class="tag-link">Kubernetes</a>
   </li>
   </ul>
 </div>

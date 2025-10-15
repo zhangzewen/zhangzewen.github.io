@@ -17,18 +17,18 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
   <meta itemprop="datePublished" content="2025-02-07T18:34:41+08:00">
   <meta itemprop="dateModified" content="2025-02-07T18:34:41+08:00">
   <meta itemprop="wordCount" content="861">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="C&#43;&#43;,读书笔记">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="Effective Modern C&#43;&#43; 读书笔记之第三章">
   <meta name="twitter:description" content="Item 7: 区别()和{}在声明和初始化变量时的不同 在Effective Modern C&#43;&#43; 读书笔记之第一章关于auto的参数类型推导中，里面说到auto的类型推导中与模版参数类型推导唯一的不同之处：
 auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;11中有四种声明变量的方式：">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-three/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-three/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="Effective Modern C&#43;&#43; 读书笔记之第三章">
   <meta property="og:description" content="Item 7: 区别()和{}在声明和初始化变量时的不同 在Effective Modern C&#43;&#43; 读书笔记之第一章关于auto的参数类型推导中，里面说到auto的类型推导中与模版参数类型推导唯一的不同之处：
@@ -40,7 +40,7 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
     <meta property="article:modified_time" content="2025-02-07T18:34:41+08:00">
     <meta property="article:tag" content="C&#43;&#43;">
     <meta property="article:tag" content="读书笔记">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -50,52 +50,52 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-three/#webpage",
-      "url": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-three/",
+      "@id": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-three/#webpage",
+      "url": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-three/",
       "name": "Effective Modern C++ 读书笔记之第三章",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-02-07T18:34:41+08:00",
       "dateModified": "2025-02-07T18:34:41+08:00",
-      "description": "\u003ch2 id=\"item-7-区别和在声明和初始化变量时的不同\"\u003eItem 7: 区别()和{}在声明和初始化变量时的不同\u003c/h2\u003e\n\u003cp\u003e在\u003ca href=\"https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-one/\"\u003eEffective Modern C++ 读书笔记之第一章\u003c/a\u003e关于\u003ccode\u003eauto\u003c/code\u003e的参数类型推导中，里面说到\u003ccode\u003eauto\u003c/code\u003e的类型推导中与模版参数类型推导唯一的不同之处：\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-cpp\" data-lang=\"cpp\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#fe8019\"\u003eauto\u003c/span\u003e a \u003cspan style=\"color:#fe8019\"\u003e=\u003c/span\u003e {\u003cspan style=\"color:#d3869b\"\u003e1\u003c/span\u003e}; \u003cspan style=\"color:#928374;font-style:italic\"\u003e// a 的类型为 std::initializer_list\u0026lt;int\u0026gt;\n\u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003e在\u003ccode\u003eC++11\u003c/code\u003e中有四种声明变量的方式：\u003c/p\u003e",
+      "description": "\u003ch2 id=\"item-7-区别和在声明和初始化变量时的不同\"\u003eItem 7: 区别()和{}在声明和初始化变量时的不同\u003c/h2\u003e\n\u003cp\u003e在\u003ca href=\"https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-one/\"\u003eEffective Modern C++ 读书笔记之第一章\u003c/a\u003e关于\u003ccode\u003eauto\u003c/code\u003e的参数类型推导中，里面说到\u003ccode\u003eauto\u003c/code\u003e的类型推导中与模版参数类型推导唯一的不同之处：\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-cpp\" data-lang=\"cpp\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#fe8019\"\u003eauto\u003c/span\u003e a \u003cspan style=\"color:#fe8019\"\u003e=\u003c/span\u003e {\u003cspan style=\"color:#d3869b\"\u003e1\u003c/span\u003e}; \u003cspan style=\"color:#928374;font-style:italic\"\u003e// a 的类型为 std::initializer_list\u0026lt;int\u0026gt;\n\u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003e在\u003ccode\u003eC++11\u003c/code\u003e中有四种声明变量的方式：\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-three/"
+            "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-three/"
           ]
         }
       ]
@@ -103,16 +103,16 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-three/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-three/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-three/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-three/#webpage"
       },
       "headline": "Effective Modern C++ 读书笔记之第三章",
       "datePublished": "2025-02-07T18:34:41+08:00",
       "dateModified": "2025-02-07T18:34:41+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "C++",
@@ -130,7 +130,7 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-three/#comments"
+            "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-three/#comments"
           ]
         }
       ]
@@ -198,7 +198,7 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -215,7 +215,7 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -245,7 +245,7 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
 
   <div>
     <h2 id="item-7-区别和在声明和初始化变量时的不同">Item 7: 区别()和{}在声明和初始化变量时的不同</h2>
-<p>在<a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-one/">Effective Modern C++ 读书笔记之第一章</a>关于<code>auto</code>的参数类型推导中，里面说到<code>auto</code>的类型推导中与模版参数类型推导唯一的不同之处：</p>
+<p>在<a href="https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-one/">Effective Modern C++ 读书笔记之第一章</a>关于<code>auto</code>的参数类型推导中，里面说到<code>auto</code>的类型推导中与模版参数类型推导唯一的不同之处：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">auto</span> a <span style="color:#fe8019">=</span> {<span style="color:#d3869b">1</span>}; <span style="color:#928374;font-style:italic">// a 的类型为 std::initializer_list&lt;int&gt;
 </span></span></span></code></pre></div><p>在<code>C++11</code>中有四种声明变量的方式：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fabd2f">int</span> <span style="color:#fabd2f">x</span>(<span style="color:#d3869b">0</span>);
@@ -535,11 +535,11 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/c&#43;&#43;/" class="tag-link">C&#43;&#43;</a>
+    <a href="https://zhangzewen.github.io/tags/c&#43;&#43;/" class="tag-link">C&#43;&#43;</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="tag-link">读书笔记</a>
+    <a href="https://zhangzewen.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="tag-link">读书笔记</a>
   </li>
   </ul>
 </div>

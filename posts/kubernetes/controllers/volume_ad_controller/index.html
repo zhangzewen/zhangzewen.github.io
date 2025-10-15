@@ -17,18 +17,18 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
   <meta itemprop="datePublished" content="2025-08-29T02:43:31+08:00">
   <meta itemprop="dateModified" content="2025-08-29T02:43:31+08:00">
   <meta itemprop="wordCount" content="4324">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes,Csi">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="kubernetes 源码分析之 AttachDetach Controller ">
   <meta name="twitter:description" content="本篇文章基于 Kubernetes v1.25.1
 AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 k8s.io/kubernetes/pkg/controller/volume/attachdetach 下：">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/controllers/volume_ad_controller/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes 源码分析之 AttachDetach Controller ">
   <meta property="og:description" content="本篇文章基于 Kubernetes v1.25.1
@@ -41,7 +41,7 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
     <meta property="article:tag" content="源码分析">
     <meta property="article:tag" content="Kubernetes">
     <meta property="article:tag" content="Csi">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -51,42 +51,42 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/#webpage",
-      "url": "https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/",
+      "@id": "https://zhangzewen.github.io/posts/kubernetes/controllers/volume_ad_controller/#webpage",
+      "url": "https://zhangzewen.github.io/posts/kubernetes/controllers/volume_ad_controller/",
       "name": "kubernetes 源码分析之 AttachDetach Controller ",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-08-29T02:43:31+08:00",
       "dateModified": "2025-08-29T02:43:31+08:00",
@@ -96,7 +96,7 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/"
+            "https://zhangzewen.github.io/posts/kubernetes/controllers/volume_ad_controller/"
           ]
         }
       ]
@@ -104,16 +104,16 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/controllers/volume_ad_controller/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/controllers/volume_ad_controller/#webpage"
       },
       "headline": "kubernetes 源码分析之 AttachDetach Controller ",
       "datePublished": "2025-08-29T02:43:31+08:00",
       "dateModified": "2025-08-29T02:43:31+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "源码分析",
@@ -132,7 +132,7 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/controllers/volume_ad_controller/#comments"
+            "https://zhangzewen.github.io/posts/kubernetes/controllers/volume_ad_controller/#comments"
           ]
         }
       ]
@@ -219,7 +219,7 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -236,7 +236,7 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -736,7 +736,7 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 <li>reconcile 是从 ASW 到 DSW 靠拢，可能需要 detach 操作。</li>
 <li>attachDesiredVolumes 是从 DSW 到 ASW 靠拢，可能需要 attach 操作。</li>
 <li>不管是 reconcile 还是 attachDesiredVolumes 在操作之前需要判断的 attach/detach 操作是否有正在 pending 的操作，如果有，需要忽略本次操作，以及在每次操作完成后需要更新 <code>node.Status.AttachedVolumes</code> 的状态。</li>
-<li>需要知道的是 attach/detach 的操作，是由 <a href="https://www.zhangzewen.net/posts/kubernetes/kubelet/csi-volume-plugin/">csi volume plugin</a> 创建/删除 VolumeAttachment 资源来间接进行 attach/detach 操作。</li>
+<li>需要知道的是 attach/detach 的操作，是由 <a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/csi-volume-plugin/">csi volume plugin</a> 创建/删除 VolumeAttachment 资源来间接进行 attach/detach 操作。</li>
 </ul>
 <p>如下是 reconcile 的代码，有详细的注释：</p>
 <details>
@@ -1429,15 +1429,15 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+    <a href="https://zhangzewen.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+    <a href="https://zhangzewen.github.io/tags/kubernetes/" class="tag-link">Kubernetes</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/csi/" class="tag-link">Csi</a>
+    <a href="https://zhangzewen.github.io/tags/csi/" class="tag-link">Csi</a>
   </li>
   </ul>
 </div>

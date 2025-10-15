@@ -17,18 +17,18 @@ kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接�
   <meta itemprop="datePublished" content="2025-05-11T22:36:42+08:00">
   <meta itemprop="dateModified" content="2025-05-11T22:36:42+08:00">
   <meta itemprop="wordCount" content="1749">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="kubernetes 源码分析之 apiserver storage 通用实现">
   <meta name="twitter:description" content="本篇文章基于 apiserver v0.25.1
 kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-generic/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-generic/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes 源码分析之 apiserver storage 通用实现">
   <meta property="og:description" content="本篇文章基于 apiserver v0.25.1
@@ -40,7 +40,7 @@ kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接�
     <meta property="article:modified_time" content="2025-05-11T22:36:42+08:00">
     <meta property="article:tag" content="源码分析">
     <meta property="article:tag" content="Kubernetes">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -50,42 +50,42 @@ kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接�
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-generic/#webpage",
-      "url": "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-generic/",
+      "@id": "https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-generic/#webpage",
+      "url": "https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-generic/",
       "name": "kubernetes 源码分析之 apiserver storage 通用实现",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-05-11T22:36:42+08:00",
       "dateModified": "2025-05-11T22:36:42+08:00",
@@ -95,7 +95,7 @@ kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接�
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-generic/"
+            "https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-generic/"
           ]
         }
       ]
@@ -103,16 +103,16 @@ kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接�
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-generic/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-generic/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-generic/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-generic/#webpage"
       },
       "headline": "kubernetes 源码分析之 apiserver storage 通用实现",
       "datePublished": "2025-05-11T22:36:42+08:00",
       "dateModified": "2025-05-11T22:36:42+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "源码分析",
@@ -130,7 +130,7 @@ kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接�
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-generic/#comments"
+            "https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-generic/#comments"
           ]
         }
       ]
@@ -195,7 +195,7 @@ kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接�
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -212,7 +212,7 @@ kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接�
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -289,13 +289,13 @@ kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接�
 </span></span><span style="display:flex;"><span>	StorageVersioner runtime.GroupVersioner
 </span></span><span style="display:flex;"><span>	DestroyFunc <span style="color:#fe8019">func</span>()
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>结构体 Store 很重要，它是一个通用的存储中间层，其实现了接口 StandardStorage ，所以我们可以借助 RESTful api 对资源进行CRUD操作，可参考<a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/endpoint/">kubernetes 源码分析之apiserver endpoints</a>。</p>
+</span></span></code></pre></div><p>结构体 Store 很重要，它是一个通用的存储中间层，其实现了接口 StandardStorage ，所以我们可以借助 RESTful api 对资源进行CRUD操作，可参考<a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/endpoint/">kubernetes 源码分析之apiserver endpoints</a>。</p>
 <p>其字段 Storage 的类型是接口 DryRunnableStorage：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> DryRunnableStorage <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>	Storage storage.Interface
 </span></span><span style="display:flex;"><span>	Codec   runtime.Codec
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>即通过字段 Storage 调用存储后端实现真正的CRUD操作，可参考<a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/storage-etcd/">kubernetes 源码分析之 apiserver storage etcd 层实现分析</a>。 该结构体可以在所有的内置资源中找到其身影，以内置资源 Deployment 为例：</p>
+</span></span></code></pre></div><p>即通过字段 Storage 调用存储后端实现真正的CRUD操作，可参考<a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-etcd/">kubernetes 源码分析之 apiserver storage etcd 层实现分析</a>。 该结构体可以在所有的内置资源中找到其身影，以内置资源 Deployment 为例：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/registry/apps/deployment/storage/storage.go</span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> REST <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>	<span style="color:#fe8019">*</span>genericregistry.Store
@@ -710,11 +710,11 @@ kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接�
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+    <a href="https://zhangzewen.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+    <a href="https://zhangzewen.github.io/tags/kubernetes/" class="tag-link">Kubernetes</a>
   </li>
   </ul>
 </div>

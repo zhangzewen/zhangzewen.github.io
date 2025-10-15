@@ -18,19 +18,19 @@ apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客�
   <meta itemprop="datePublished" content="2025-04-14T22:36:42+08:00">
   <meta itemprop="dateModified" content="2025-04-14T22:36:42+08:00">
   <meta itemprop="wordCount" content="823">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="kubernetes 源码分析之 apiserver Authentication & Authoriztion">
   <meta name="twitter:description" content="本篇文章基于 apiserver v0.25.1
 apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客户端的访问请求，其对接口请求访问提供了3种安全权限控制，每个请求都需要经过认证，授权以及准入控制器才有权限操作资源对象。
 认证：针对请求的认证，确认是否具有访问 kubernetes 集群的权限。 授权：针对资源的授权，确认是否对资源具有相关权限。 准入控制器：在认证和授权之后，对象被持久化之前，拦截对 apiserver 的请求，拦截后的请求进入准入控制器中处理，对请求的资源对象进行自定义(校验，修改或者拒绝)等操作。">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/apiserver/access-control/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes 源码分析之 apiserver Authentication & Authoriztion">
   <meta property="og:description" content="本篇文章基于 apiserver v0.25.1
@@ -43,7 +43,7 @@ apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客�
     <meta property="article:modified_time" content="2025-04-14T22:36:42+08:00">
     <meta property="article:tag" content="源码分析">
     <meta property="article:tag" content="Kubernetes">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -53,42 +53,42 @@ apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客�
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/#webpage",
-      "url": "https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/",
+      "@id": "https://zhangzewen.github.io/posts/kubernetes/apiserver/access-control/#webpage",
+      "url": "https://zhangzewen.github.io/posts/kubernetes/apiserver/access-control/",
       "name": "kubernetes 源码分析之 apiserver Authentication \u0026 Authoriztion",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-04-14T22:36:42+08:00",
       "dateModified": "2025-04-14T22:36:42+08:00",
@@ -98,7 +98,7 @@ apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客�
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/"
+            "https://zhangzewen.github.io/posts/kubernetes/apiserver/access-control/"
           ]
         }
       ]
@@ -106,16 +106,16 @@ apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客�
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/apiserver/access-control/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/apiserver/access-control/#webpage"
       },
       "headline": "kubernetes 源码分析之 apiserver Authentication \u0026 Authoriztion",
       "datePublished": "2025-04-14T22:36:42+08:00",
       "dateModified": "2025-04-14T22:36:42+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "源码分析",
@@ -133,7 +133,7 @@ apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客�
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/apiserver/access-control/#comments"
+            "https://zhangzewen.github.io/posts/kubernetes/apiserver/access-control/#comments"
           ]
         }
       ]
@@ -208,7 +208,7 @@ apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客�
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -225,7 +225,7 @@ apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客�
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -263,7 +263,7 @@ apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客�
 <li>准入控制器：在认证和授权之后，对象被持久化之前，拦截对 apiserver 的请求，拦截后的请求进入准入控制器中处理，对请求的资源对象进行自定义(校验，修改或者拒绝)等操作。</li>
 </ul>
 <p><img src="/images/kubernetes/apiserver/access_control_01.svg" alt="apiserver_access_control_01"></p>
-<p>本片文章主要集中于认证和授权，准入控制请参考：<a href="https://www.zhangzewen.net/posts/kubernetes/apiserver/admission-control/">kubernetes 源码分析之 apiserver admission</a></p>
+<p>本片文章主要集中于认证和授权，准入控制请参考：<a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/admission-control/">kubernetes 源码分析之 apiserver admission</a></p>
 <h2 id="authentication-认证">Authentication: 认证</h2>
 <p>apiserver 支持多种认证机制，并支持同时开启多个认证功能。当客户端发起一个请求，经过认证阶段时，只要有一个认证器通过，则认证成功。如果认证成功，就进入到授权阶段做进一步的授权验证，而对于认证失败的请求则返回 HTTP 401 状态码。</p>
 <p>在实现中，认证器有2种动作，一个是基于 Token， 一个是基于 <code>http.Request</code> 请求认证,  这两种动作可以组合使用。</p>
@@ -523,11 +523,11 @@ apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客�
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+    <a href="https://zhangzewen.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+    <a href="https://zhangzewen.github.io/tags/kubernetes/" class="tag-link">Kubernetes</a>
   </li>
   </ul>
 </div>

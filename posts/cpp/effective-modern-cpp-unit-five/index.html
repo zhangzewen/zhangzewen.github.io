@@ -17,18 +17,18 @@ template&lt;typename T&gt; // in namespace std typename remove_reference&lt;T&gt
   <meta itemprop="datePublished" content="2025-02-18T18:34:43+08:00">
   <meta itemprop="dateModified" content="2025-02-18T18:34:43+08:00">
   <meta itemprop="wordCount" content="564">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="C&#43;&#43;,读书笔记">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="Effective Modern C&#43;&#43; 读书笔记之第五章">
   <meta name="twitter:description" content="Item 23: std::move 和 std::forward语义 Item23开篇就直接说明了std::move不移动任何变量，std::forward不转发任何变量，这两个语义仅仅做的是转换的工作(类似c/c&#43;&#43;的类型转换)，std::move无条件的把它的参数转换为一个右值，但是std::forward只有在满足一定条件下才会做转换工作。 书中为std::move的实现，写了一个伪码：
 template&lt;typename T&gt; // in namespace std typename remove_reference&lt;T&gt;::type&amp;&amp; move(T&amp;&amp; param) { using ReturnType = // alias declaration; typename remove_reference&lt;T&gt;::type&amp;&amp;; // see Item 9 return static_cast&lt;ReturnType&gt;(param); } 在这段代码中，返回值类型为typename remove_reference&lt;T&gt;::type&amp;&amp;说明 std::move返回的是一个右值引用。函数move的参数类型为T&amp;&amp;，具体来说这个一个universal reference(后面会说到),如果传入的参数T是一个左值引用的话，参数推导的结果仍然是一个左值引用，调用std::remove_reference剔除掉引用来确保右值引用作用在一个不是左值引用的类型上。然后就是’公理’右值引用坐作函数的返回值返回后是右值。 需要注意的是如果std::move的参数如果是a reference-to-const的话，虽然通过移动语义的作用，使其转换成了右值，但是const语义仍然保存了下来，这时候需要注意如果把其赋值给变量，这里用的就不是移动拷贝语义了，而是用的的赋值拷贝语义。">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-five/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-five/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="Effective Modern C&#43;&#43; 读书笔记之第五章">
   <meta property="og:description" content="Item 23: std::move 和 std::forward语义 Item23开篇就直接说明了std::move不移动任何变量，std::forward不转发任何变量，这两个语义仅仅做的是转换的工作(类似c/c&#43;&#43;的类型转换)，std::move无条件的把它的参数转换为一个右值，但是std::forward只有在满足一定条件下才会做转换工作。 书中为std::move的实现，写了一个伪码：
@@ -40,7 +40,7 @@ template&lt;typename T&gt; // in namespace std typename remove_reference&lt;T&gt
     <meta property="article:modified_time" content="2025-02-18T18:34:43+08:00">
     <meta property="article:tag" content="C&#43;&#43;">
     <meta property="article:tag" content="读书笔记">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -50,42 +50,42 @@ template&lt;typename T&gt; // in namespace std typename remove_reference&lt;T&gt
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-five/#webpage",
-      "url": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-five/",
+      "@id": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-five/#webpage",
+      "url": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-five/",
       "name": "Effective Modern C++ 读书笔记之第五章",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-02-18T18:34:43+08:00",
       "dateModified": "2025-02-18T18:34:43+08:00",
@@ -95,7 +95,7 @@ template&lt;typename T&gt; // in namespace std typename remove_reference&lt;T&gt
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-five/"
+            "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-five/"
           ]
         }
       ]
@@ -103,16 +103,16 @@ template&lt;typename T&gt; // in namespace std typename remove_reference&lt;T&gt
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-five/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-five/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-five/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-five/#webpage"
       },
       "headline": "Effective Modern C++ 读书笔记之第五章",
       "datePublished": "2025-02-18T18:34:43+08:00",
       "dateModified": "2025-02-18T18:34:43+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "C++",
@@ -130,7 +130,7 @@ template&lt;typename T&gt; // in namespace std typename remove_reference&lt;T&gt
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-five/#comments"
+            "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-five/#comments"
           ]
         }
       ]
@@ -195,7 +195,7 @@ template&lt;typename T&gt; // in namespace std typename remove_reference&lt;T&gt
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -212,7 +212,7 @@ template&lt;typename T&gt; // in namespace std typename remove_reference&lt;T&gt
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -421,7 +421,7 @@ template&lt;typename T&gt; // in namespace std typename remove_reference&lt;T&gt
 </span></span><span style="display:flex;"><span>        std<span style="color:#fe8019">::</span>remove_reference<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;::</span>type<span style="color:#fe8019">&amp;</span> param) {
 </span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span>  std<span style="color:#fe8019">::</span><span style="color:#fe8019">static_cast</span><span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&amp;&amp;&gt;</span>(param);
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>结合在<a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-one/">Effective Modern C++ 读书笔记之第一章</a>中的参数推导规则， 对于左值引用，<code>T</code>推导后的类型为左值引用，即</p>
+</span></span></code></pre></div><p>结合在<a href="https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-one/">Effective Modern C++ 读书笔记之第一章</a>中的参数推导规则， 对于左值引用，<code>T</code>推导后的类型为左值引用，即</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>Widget<span style="color:#fe8019">&amp;</span> <span style="color:#fe8019">&amp;&amp;</span> forward(<span style="color:#fe8019">typename</span> std<span style="color:#fe8019">::</span>remove_reference<span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&amp;&gt;::</span>type<span style="color:#fe8019">&amp;</span> param)
 </span></span><span style="display:flex;"><span>{ 
 </span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">static_cast</span><span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&amp;</span> <span style="color:#fe8019">&amp;&amp;&gt;</span>(param);
@@ -431,7 +431,7 @@ template&lt;typename T&gt; // in namespace std typename remove_reference&lt;T&gt
 </span></span><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">static_cast</span><span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&amp;&gt;</span>(param);
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>同样结合在<a href="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-one/">Effective Modern C++ 读书笔记之第一章</a>中的参数推导规则， 对于右值引用，<code>T</code>推导后的类型为具体的类型，即</p>
+</span></span></code></pre></div><p>同样结合在<a href="https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-one/">Effective Modern C++ 读书笔记之第一章</a>中的参数推导规则， 对于右值引用，<code>T</code>推导后的类型为具体的类型，即</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>Widget<span style="color:#fe8019">&amp;&amp;</span> forward(<span style="color:#fe8019">typename</span> std<span style="color:#fe8019">::</span>remove_reference<span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&gt;::</span>type<span style="color:#fe8019">&amp;</span> param)
 </span></span><span style="display:flex;"><span>{ 
 </span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">static_cast</span><span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&amp;&amp;&gt;</span>(param);
@@ -452,11 +452,11 @@ template&lt;typename T&gt; // in namespace std typename remove_reference&lt;T&gt
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/c&#43;&#43;/" class="tag-link">C&#43;&#43;</a>
+    <a href="https://zhangzewen.github.io/tags/c&#43;&#43;/" class="tag-link">C&#43;&#43;</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="tag-link">读书笔记</a>
+    <a href="https://zhangzewen.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="tag-link">读书笔记</a>
   </li>
   </ul>
 </div>

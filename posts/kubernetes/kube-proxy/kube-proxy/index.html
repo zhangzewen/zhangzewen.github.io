@@ -17,18 +17,18 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
   <meta itemprop="datePublished" content="2024-10-06T00:27:07+08:00">
   <meta itemprop="dateModified" content="2024-10-06T00:27:07+08:00">
   <meta itemprop="wordCount" content="1131">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="kubernetes 源码分析之 kube-proxy">
   <meta name="twitter:description" content="本篇文章基于 Kubernetes v1.25.1
 kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部署在集群的每个节点之上，负责在其宿主节点上配置 iptables，ipvs等规则。">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes 源码分析之 kube-proxy">
   <meta property="og:description" content="本篇文章基于 Kubernetes v1.25.1
@@ -40,7 +40,7 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
     <meta property="article:modified_time" content="2024-10-06T00:27:07+08:00">
     <meta property="article:tag" content="源码分析">
     <meta property="article:tag" content="Kubernetes">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -50,42 +50,42 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/#webpage",
-      "url": "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/",
+      "@id": "https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/#webpage",
+      "url": "https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/",
       "name": "kubernetes 源码分析之 kube-proxy",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2024-10-06T00:27:07+08:00",
       "dateModified": "2024-10-06T00:27:07+08:00",
@@ -95,7 +95,7 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/"
+            "https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/"
           ]
         }
       ]
@@ -103,16 +103,16 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/#webpage"
       },
       "headline": "kubernetes 源码分析之 kube-proxy",
       "datePublished": "2024-10-06T00:27:07+08:00",
       "dateModified": "2024-10-06T00:27:07+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "源码分析",
@@ -130,7 +130,7 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/kube-proxy/kube-proxy/#comments"
+            "https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/#comments"
           ]
         }
       ]
@@ -190,7 +190,7 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -207,7 +207,7 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -514,7 +514,7 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
 </details>
 
 <h2 id="事件的监听">事件的监听</h2>
-<p>kube-proxy 通过 ServiceConfig 封装了 services 资源的新增/删除/更新事件注册到 <a href="https://www.zhangzewen.net/posts/kubernetes/client-go/informer/">informer</a> 的逻辑，真正的资源新增/删除/更新事件的回调函数由 proxier 提供，而且 proxier 会被加入到 ServiceConfig 的回调句柄列表中：</p>
+<p>kube-proxy 通过 ServiceConfig 封装了 services 资源的新增/删除/更新事件注册到 <a href="https://zhangzewen.github.io/posts/kubernetes/client-go/informer/">informer</a> 的逻辑，真正的资源新增/删除/更新事件的回调函数由 proxier 提供，而且 proxier 会被加入到 ServiceConfig 的回调句柄列表中：</p>
 <details>
     <summary>CLICK ME</summary>
     <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/proxy/config/config.go</span>
@@ -633,8 +633,8 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
 </span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">SyncLoop</span>()
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>由于篇幅有限，<code>iptables</code> 和 <code>ipvs</code> 的解析请查看如下文章：</p>
-<p><a href="https://www.zhangzewen.net/posts/kubernetes/kube-proxy/iptables/">kube-proxy iptables 模式</a></p>
-<p><a href="https://www.zhangzewen.net/posts/kubernetes/kube-proxy/ipvs/">kube-proxy ipvs 模式</a></p>
+<p><a href="https://zhangzewen.github.io/posts/kubernetes/kube-proxy/iptables/">kube-proxy iptables 模式</a></p>
+<p><a href="https://zhangzewen.github.io/posts/kubernetes/kube-proxy/ipvs/">kube-proxy ipvs 模式</a></p>
 
   </div>
 
@@ -643,11 +643,11 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+    <a href="https://zhangzewen.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+    <a href="https://zhangzewen.github.io/tags/kubernetes/" class="tag-link">Kubernetes</a>
   </li>
   </ul>
 </div>

@@ -18,19 +18,19 @@
   <meta itemprop="datePublished" content="2025-03-21T15:03:02+08:00">
   <meta itemprop="dateModified" content="2025-03-21T15:03:02+08:00">
   <meta itemprop="wordCount" content="743">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="EBPF,Linux,Kernel,Tracing,Debug,Go,翻译">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections">
   <meta name="twitter:description" content="介于能力有限，翻译有不当之处，不吝赐教
 这是一个系列文章：
 [译]Debugging with eBPF Part 1: Tracing Go function arguments in prod [译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses 原文：Debugging with eBPF Part 3: Tracing SSL/TLS connections">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections">
   <meta property="og:description" content="介于能力有限，翻译有不当之处，不吝赐教
@@ -47,7 +47,7 @@
     <meta property="article:tag" content="Tracing">
     <meta property="article:tag" content="Debug">
     <meta property="article:tag" content="Go">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -57,52 +57,52 @@
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/#webpage",
-      "url": "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/",
+      "@id": "https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/#webpage",
+      "url": "https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/",
       "name": "[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-03-21T15:03:02+08:00",
       "dateModified": "2025-03-21T15:03:02+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e这是一个系列文章：\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e\u003ca href=\"https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/\"\u003e[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003e\u003ca href=\"https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/\"\u003e[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses\u003c/a\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003e\u003cstrong\u003e原文：\u003ca href=\"https://blog.px.dev/ebpf-openssl-tracing/\"\u003eDebugging with eBPF Part 3: Tracing SSL/TLS connections\u003c/a\u003e\u003c/strong\u003e\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e这是一个系列文章：\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e\u003ca href=\"https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/\"\u003e[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod\u003c/a\u003e\u003c/li\u003e\n\u003cli\u003e\u003ca href=\"https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/\"\u003e[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses\u003c/a\u003e\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003e\u003cstrong\u003e原文：\u003ca href=\"https://blog.px.dev/ebpf-openssl-tracing/\"\u003eDebugging with eBPF Part 3: Tracing SSL/TLS connections\u003c/a\u003e\u003c/strong\u003e\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/"
+            "https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/"
           ]
         }
       ]
@@ -110,16 +110,16 @@
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/#webpage"
       },
       "headline": "[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections",
       "datePublished": "2025-03-21T15:03:02+08:00",
       "dateModified": "2025-03-21T15:03:02+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "EBPF",
@@ -142,7 +142,7 @@
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/#comments"
+            "https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/#comments"
           ]
         }
       ]
@@ -209,7 +209,7 @@
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -226,7 +226,7 @@
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -259,15 +259,15 @@
 <p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
 <p>这是一个系列文章：</p>
 <ul>
-<li><a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></li>
-<li><a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></li>
+<li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></li>
+<li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></li>
 </ul>
 <p><strong>原文：<a href="https://blog.px.dev/ebpf-openssl-tracing/">Debugging with eBPF Part 3: Tracing SSL/TLS connections</a></strong></p></blockquote>
 <p>本文将演示如何使用eBPF跟踪通过TLS（或其前身SSL）运行的加密连接。TLS已成为保护微服务通信的标准，因此任何可用于生产环境的跟踪工具都应该能够处理加密连接。</p>
 <p>这篇文章是我们持续分享的系列之一，介绍如何使用eBPF在不重新编译或重新部署应用程序的情况下进行调试。如要更进一步了解eBPF，请查看：</p>
 <ul>
-<li><a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></li>
-<li><a href="https://www.zhangzewen.net/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></li>
+<li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></li>
+<li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></li>
 </ul>
 <h2 id="使用bpf进行跟踪">使用BPF进行跟踪</h2>
 <p><a href="https://www.brendangregg.com/ebpf.html">BPF</a>就像使用调试器在应用程序中设置断点那样几乎可以在任何时候中断程序的执行。</p>
@@ -549,31 +549,31 @@
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/ebpf/" class="tag-link">EBPF</a>
+    <a href="https://zhangzewen.github.io/tags/ebpf/" class="tag-link">EBPF</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/linux/" class="tag-link">Linux</a>
+    <a href="https://zhangzewen.github.io/tags/linux/" class="tag-link">Linux</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kernel/" class="tag-link">Kernel</a>
+    <a href="https://zhangzewen.github.io/tags/kernel/" class="tag-link">Kernel</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/tracing/" class="tag-link">Tracing</a>
+    <a href="https://zhangzewen.github.io/tags/tracing/" class="tag-link">Tracing</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/debug/" class="tag-link">Debug</a>
+    <a href="https://zhangzewen.github.io/tags/debug/" class="tag-link">Debug</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/go/" class="tag-link">Go</a>
+    <a href="https://zhangzewen.github.io/tags/go/" class="tag-link">Go</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E7%BF%BB%E8%AF%91/" class="tag-link">翻译</a>
+    <a href="https://zhangzewen.github.io/tags/%E7%BF%BB%E8%AF%91/" class="tag-link">翻译</a>
   </li>
   </ul>
 </div>

@@ -2,31 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>操作系统 on What a Life!</title>
-    <link>https://www.zhangzewen.net/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</link>
+    <link>https://zhangzewen.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</link>
     <description>Recent content in 操作系统 on What a Life!</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
     <lastBuildDate>Tue, 05 Aug 2025 09:43:31 +0800</lastBuildDate>
-    <atom:link href="https://www.zhangzewen.net/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://zhangzewen.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>MIT 公开课 6.S081 实现总结</title>
-      <link>https://www.zhangzewen.net/posts/os/xv6/6.s081_summary/</link>
+      <link>https://zhangzewen.github.io/posts/os/xv6/6.s081_summary/</link>
       <pubDate>Tue, 05 Aug 2025 09:43:31 +0800</pubDate>
-      <guid>https://www.zhangzewen.net/posts/os/xv6/6.s081_summary/</guid>
+      <guid>https://zhangzewen.github.io/posts/os/xv6/6.s081_summary/</guid>
       <description>&lt;p&gt;&lt;strong&gt;6.S081&lt;/strong&gt; 是非常著名的 MIT 操作系统课程。该公开课链接的年份后缀的是可以更改的，这个课程提供的可编程 lab 每年都稍微有些不同，每个 lab 的自评测中的 answers-*.txt 和 time.txt 需要自行填写。 本篇文章对应的是&lt;a href=&#34;https://pdos.csail.mit.edu/6.828/2024/&#34;&gt; 2024 年度课程&lt;/a&gt;的实现总结。&lt;/p&gt;</description>
     </item>
     <item>
       <title>xv6 总结</title>
-      <link>https://www.zhangzewen.net/posts/os/xv6/xv6_summary/</link>
+      <link>https://zhangzewen.github.io/posts/os/xv6/xv6_summary/</link>
       <pubDate>Tue, 05 Aug 2025 09:43:31 +0800</pubDate>
-      <guid>https://www.zhangzewen.net/posts/os/xv6/xv6_summary/</guid>
-      <description>&lt;p&gt;本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃和不连贯，请见谅。&lt;/p&gt;&#xA;&lt;h2 id=&#34;内存管理&#34;&gt;内存管理&lt;/h2&gt;&#xA;&lt;h3 id=&#34;xv6-page-table&#34;&gt;xv6 page table&lt;/h3&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://www.zhangzewen.net/images/os/xv6/risc-v-pagetable.png&#34; alt=&#34;risc-v page table&#34;&gt;&lt;/p&gt;</description>
+      <guid>https://zhangzewen.github.io/posts/os/xv6/xv6_summary/</guid>
+      <description>&lt;p&gt;本篇文章是对学习 xv6 系统的理解和总结，权当笔记，以便日后翻阅，如果阅读起来很跳跃和不连贯，请见谅。&lt;/p&gt;&#xA;&lt;h2 id=&#34;内存管理&#34;&gt;内存管理&lt;/h2&gt;&#xA;&lt;h3 id=&#34;xv6-page-table&#34;&gt;xv6 page table&lt;/h3&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://zhangzewen.github.io/images/os/xv6/risc-v-pagetable.png&#34; alt=&#34;risc-v page table&#34;&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>gdb init script</title>
-      <link>https://www.zhangzewen.net/posts/linux/gdb_init_script/</link>
+      <link>https://zhangzewen.github.io/posts/linux/gdb_init_script/</link>
       <pubDate>Tue, 25 Feb 2025 09:43:31 +0800</pubDate>
-      <guid>https://www.zhangzewen.net/posts/linux/gdb_init_script/</guid>
+      <guid>https://zhangzewen.github.io/posts/linux/gdb_init_script/</guid>
       <description>&lt;p&gt;.gdbinit 能够将gdb基本命令添加到文件中以避免每次启动gdb 进行 debug 时候输入他们，例如&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;b main&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;r&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;b main.c:56&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;c&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;这样就可以避免重复性的劳动。&lt;/p&gt;</description>
     </item>
   </channel>

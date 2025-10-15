@@ -17,18 +17,18 @@
   <meta itemprop="datePublished" content="2025-02-27T18:34:44+08:00">
   <meta itemprop="dateModified" content="2025-02-27T18:34:44+08:00">
   <meta itemprop="wordCount" content="308">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="C&#43;&#43;,读书笔记">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="Effective Modern C&#43;&#43; 读书笔记之第六章">
   <meta name="twitter:description" content="Item 31 避免使用默认的变量捕获方式 c&#43;&#43;11的lambda表达式有两种变量的捕获方式：按值(复制)捕获和引用捕获(默认模式)。在采用引用模式(默认[&amp;]会捕获定义lambda表达式作用域下的所有变量, [&amp;params]为显示捕获定义lambda表达式作用域下特定的变量)下，如果不加注意的话,lambda表达式很容易走出引用变量的作用域范围，造成悬空引用，会产生未定义的错误。
 #include &lt;iostream&gt; #include &lt;functional&gt; #include &lt;string&gt; class A { public: A() : name_(&#34;default&#34;){} void Print() const { std::cout &lt;&lt; &#34;A::Print: &#34; &lt;&lt; name_ &lt;&lt; std::endl; } private: std::string name_; }; typedef std::function&lt;void()&gt; func; int main(int argc, char** argv) { func target; { A a; auto f = [&amp;](){ a.Print();}; //auto f = [&amp;a](){ a.Print();}; target = f; } target(); return 0; } 在我自己机器下的测试结果为">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-six/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-six/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="Effective Modern C&#43;&#43; 读书笔记之第六章">
   <meta property="og:description" content="Item 31 避免使用默认的变量捕获方式 c&#43;&#43;11的lambda表达式有两种变量的捕获方式：按值(复制)捕获和引用捕获(默认模式)。在采用引用模式(默认[&amp;]会捕获定义lambda表达式作用域下的所有变量, [&amp;params]为显示捕获定义lambda表达式作用域下特定的变量)下，如果不加注意的话,lambda表达式很容易走出引用变量的作用域范围，造成悬空引用，会产生未定义的错误。
@@ -40,7 +40,7 @@
     <meta property="article:modified_time" content="2025-02-27T18:34:44+08:00">
     <meta property="article:tag" content="C&#43;&#43;">
     <meta property="article:tag" content="读书笔记">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -50,42 +50,42 @@
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-six/#webpage",
-      "url": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-six/",
+      "@id": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-six/#webpage",
+      "url": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-six/",
       "name": "Effective Modern C++ 读书笔记之第六章",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-02-27T18:34:44+08:00",
       "dateModified": "2025-02-27T18:34:44+08:00",
@@ -95,7 +95,7 @@
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-six/"
+            "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-six/"
           ]
         }
       ]
@@ -103,16 +103,16 @@
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-six/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-six/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-six/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-six/#webpage"
       },
       "headline": "Effective Modern C++ 读书笔记之第六章",
       "datePublished": "2025-02-27T18:34:44+08:00",
       "dateModified": "2025-02-27T18:34:44+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "C++",
@@ -130,7 +130,7 @@
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/cpp/effective-modern-cpp-unit-six/#comments"
+            "https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-six/#comments"
           ]
         }
       ]
@@ -191,7 +191,7 @@
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -208,7 +208,7 @@
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -379,11 +379,11 @@
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/c&#43;&#43;/" class="tag-link">C&#43;&#43;</a>
+    <a href="https://zhangzewen.github.io/tags/c&#43;&#43;/" class="tag-link">C&#43;&#43;</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="tag-link">读书笔记</a>
+    <a href="https://zhangzewen.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" class="tag-link">读书笔记</a>
   </li>
   </ul>
 </div>

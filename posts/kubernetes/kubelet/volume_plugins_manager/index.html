@@ -17,18 +17,18 @@
   <meta itemprop="datePublished" content="2025-06-18T09:43:31+08:00">
   <meta itemprop="dateModified" content="2025-06-18T09:43:31+08:00">
   <meta itemprop="wordCount" content="542">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes,Csi">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="kubernetes 源码分析之 kubelet volume plugins manager">
   <meta name="twitter:description" content="本篇文章基于 Kubernetes v1.25.1
 在 kubernetes 中存储以插件的形似存在，kubernetes 提供了接口 Volume 极其扩展接口来表示存储卷，使用 VolumePlugin 接口来表示一个存储卷插件。像常用的 empty/hostpath/configmap/secert/csi 等都是以插件形式存在的存储卷（这里的 csi 是让 kubernetes 可以使用第三方提供的存储功能），kubelet 使用 volume plugins manager 来管理它们。">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/kubelet/volume_plugins_manager/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/kubelet/volume_plugins_manager/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes 源码分析之 kubelet volume plugins manager">
   <meta property="og:description" content="本篇文章基于 Kubernetes v1.25.1
@@ -41,7 +41,7 @@
     <meta property="article:tag" content="源码分析">
     <meta property="article:tag" content="Kubernetes">
     <meta property="article:tag" content="Csi">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -51,42 +51,42 @@
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/volume_plugins_manager/#webpage",
-      "url": "https://www.zhangzewen.net/posts/kubernetes/kubelet/volume_plugins_manager/",
+      "@id": "https://zhangzewen.github.io/posts/kubernetes/kubelet/volume_plugins_manager/#webpage",
+      "url": "https://zhangzewen.github.io/posts/kubernetes/kubelet/volume_plugins_manager/",
       "name": "kubernetes 源码分析之 kubelet volume plugins manager",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-06-18T09:43:31+08:00",
       "dateModified": "2025-06-18T09:43:31+08:00",
@@ -96,7 +96,7 @@
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/kubelet/volume_plugins_manager/"
+            "https://zhangzewen.github.io/posts/kubernetes/kubelet/volume_plugins_manager/"
           ]
         }
       ]
@@ -104,16 +104,16 @@
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/volume_plugins_manager/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/kubelet/volume_plugins_manager/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/volume_plugins_manager/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/kubelet/volume_plugins_manager/#webpage"
       },
       "headline": "kubernetes 源码分析之 kubelet volume plugins manager",
       "datePublished": "2025-06-18T09:43:31+08:00",
       "dateModified": "2025-06-18T09:43:31+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "源码分析",
@@ -132,7 +132,7 @@
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/kubelet/volume_plugins_manager/#comments"
+            "https://zhangzewen.github.io/posts/kubernetes/kubelet/volume_plugins_manager/#comments"
           ]
         }
       ]
@@ -192,7 +192,7 @@
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -209,7 +209,7 @@
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -411,15 +411,15 @@
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+    <a href="https://zhangzewen.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+    <a href="https://zhangzewen.github.io/tags/kubernetes/" class="tag-link">Kubernetes</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/csi/" class="tag-link">Csi</a>
+    <a href="https://zhangzewen.github.io/tags/csi/" class="tag-link">Csi</a>
   </li>
   </ul>
 </div>

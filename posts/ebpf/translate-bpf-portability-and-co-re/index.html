@@ -18,19 +18,19 @@ BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一
   <meta itemprop="datePublished" content="2025-02-17T08:13:34+08:00">
   <meta itemprop="dateModified" content="2025-02-17T08:13:34+08:00">
   <meta itemprop="wordCount" content="551">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="EBPF,Linux,翻译,Kernel">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="[译]BPF CO-RE (Compile Once – Run Everywhere)">
   <meta name="twitter:description" content="介于能力有限，翻译有不当之处，不吝赐教
 原文：BPF CO-RE (Compile Once – Run Everywhere)
 BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一次 - 到处运行（CO-RE）**的情况下实现这一点实际上很困难？在这篇文章中，我们将探讨编写可以在多个内核版本上运行的BPF程序的挑战，以及BPF CO-RE如何帮助解决这个问题。">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/ebpf/translate-bpf-portability-and-co-re/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="[译]BPF CO-RE (Compile Once – Run Everywhere)">
   <meta property="og:description" content="介于能力有限，翻译有不当之处，不吝赐教
@@ -45,7 +45,7 @@ BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一
     <meta property="article:tag" content="Linux">
     <meta property="article:tag" content="翻译">
     <meta property="article:tag" content="Kernel">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -55,42 +55,42 @@ BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/#webpage",
-      "url": "https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/",
+      "@id": "https://zhangzewen.github.io/posts/ebpf/translate-bpf-portability-and-co-re/#webpage",
+      "url": "https://zhangzewen.github.io/posts/ebpf/translate-bpf-portability-and-co-re/",
       "name": "[译]BPF CO-RE (Compile Once – Run Everywhere)",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-02-17T08:13:34+08:00",
       "dateModified": "2025-02-17T08:13:34+08:00",
@@ -100,7 +100,7 @@ BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/"
+            "https://zhangzewen.github.io/posts/ebpf/translate-bpf-portability-and-co-re/"
           ]
         }
       ]
@@ -108,16 +108,16 @@ BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/ebpf/translate-bpf-portability-and-co-re/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/ebpf/translate-bpf-portability-and-co-re/#webpage"
       },
       "headline": "[译]BPF CO-RE (Compile Once – Run Everywhere)",
       "datePublished": "2025-02-17T08:13:34+08:00",
       "dateModified": "2025-02-17T08:13:34+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "EBPF",
@@ -137,7 +137,7 @@ BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/ebpf/translate-bpf-portability-and-co-re/#comments"
+            "https://zhangzewen.github.io/posts/ebpf/translate-bpf-portability-and-co-re/#comments"
           ]
         }
       ]
@@ -215,7 +215,7 @@ BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -232,7 +232,7 @@ BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -453,19 +453,19 @@ BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/ebpf/" class="tag-link">EBPF</a>
+    <a href="https://zhangzewen.github.io/tags/ebpf/" class="tag-link">EBPF</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/linux/" class="tag-link">Linux</a>
+    <a href="https://zhangzewen.github.io/tags/linux/" class="tag-link">Linux</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E7%BF%BB%E8%AF%91/" class="tag-link">翻译</a>
+    <a href="https://zhangzewen.github.io/tags/%E7%BF%BB%E8%AF%91/" class="tag-link">翻译</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kernel/" class="tag-link">Kernel</a>
+    <a href="https://zhangzewen.github.io/tags/kernel/" class="tag-link">Kernel</a>
   </li>
   </ul>
 </div>

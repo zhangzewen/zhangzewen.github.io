@@ -17,18 +17,18 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
   <meta itemprop="datePublished" content="2025-05-25T16:33:16+08:00">
   <meta itemprop="dateModified" content="2025-05-25T16:33:16+08:00">
   <meta itemprop="wordCount" content="2865">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="kubernetes 源码分析之 kubelet pod 的创建和启动">
   <meta name="twitter:description" content="接口 SyncHandler 定义了一系列管理 Pod 的方法：
 type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更新 HandlePodUpdates(pods []*v1.Pod) // 删除 HandlePodRemoves(pods []*v1.Pod) // 协调 HandlePodReconcile(pods []*v1.Pod) // 同步 HandlePodSyncs(pods []*v1.Pod) // 清理 HandlePodCleanups() error } 结构体 Kubelet 实现了该方法。Kubelet.HandlePodAdditions 的流程如下：">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-create-and-start/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/kubelet/pod-create-and-start/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes 源码分析之 kubelet pod 的创建和启动">
   <meta property="og:description" content="接口 SyncHandler 定义了一系列管理 Pod 的方法：
@@ -40,7 +40,7 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
     <meta property="article:modified_time" content="2025-05-25T16:33:16+08:00">
     <meta property="article:tag" content="源码分析">
     <meta property="article:tag" content="Kubernetes">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -50,42 +50,42 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-create-and-start/#webpage",
-      "url": "https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-create-and-start/",
+      "@id": "https://zhangzewen.github.io/posts/kubernetes/kubelet/pod-create-and-start/#webpage",
+      "url": "https://zhangzewen.github.io/posts/kubernetes/kubelet/pod-create-and-start/",
       "name": "kubernetes 源码分析之 kubelet pod 的创建和启动",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-05-25T16:33:16+08:00",
       "dateModified": "2025-05-25T16:33:16+08:00",
@@ -95,7 +95,7 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-create-and-start/"
+            "https://zhangzewen.github.io/posts/kubernetes/kubelet/pod-create-and-start/"
           ]
         }
       ]
@@ -103,16 +103,16 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-create-and-start/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/kubelet/pod-create-and-start/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-create-and-start/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/kubelet/pod-create-and-start/#webpage"
       },
       "headline": "kubernetes 源码分析之 kubelet pod 的创建和启动",
       "datePublished": "2025-05-25T16:33:16+08:00",
       "dateModified": "2025-05-25T16:33:16+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "源码分析",
@@ -130,7 +130,7 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/kubelet/pod-create-and-start/#comments"
+            "https://zhangzewen.github.io/posts/kubernetes/kubelet/pod-create-and-start/#comments"
           ]
         }
       ]
@@ -193,7 +193,7 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -210,7 +210,7 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -964,11 +964,11 @@ type SyncHandler interface { // 新增 HandlePodAdditions(pods []*v1.Pod) // 更
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+    <a href="https://zhangzewen.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+    <a href="https://zhangzewen.github.io/tags/kubernetes/" class="tag-link">Kubernetes</a>
   </li>
   </ul>
 </div>

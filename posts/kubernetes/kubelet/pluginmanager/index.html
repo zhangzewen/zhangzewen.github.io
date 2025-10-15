@@ -17,18 +17,18 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
   <meta itemprop="datePublished" content="2025-03-11T00:43:31+08:00">
   <meta itemprop="dateModified" content="2025-03-11T00:43:31+08:00">
   <meta itemprop="wordCount" content="1362">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="kubernetes 源码分析之 kubelet plugin manager">
   <meta name="twitter:description" content="本篇文章基于 Kubernetes v1.25.1
 kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 的能力: CSI 和 Device。得益于 gRPC 和 Linux 的 inotify 实现了插件的动态管理。本片文章将详细讲解 kubelet 管理插件的逻辑，至于 CSI 和 Device 这两种类型的插件的详细内容，不在本片文章讨论范围之内，本片文章会在需要的地方提及一下，不会对理解本片文章造成困难。">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/kubelet/pluginmanager/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes 源码分析之 kubelet plugin manager">
   <meta property="og:description" content="本篇文章基于 Kubernetes v1.25.1
@@ -40,7 +40,7 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
     <meta property="article:modified_time" content="2025-03-11T00:43:31+08:00">
     <meta property="article:tag" content="源码分析">
     <meta property="article:tag" content="Kubernetes">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -50,42 +50,42 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/#webpage",
-      "url": "https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/",
+      "@id": "https://zhangzewen.github.io/posts/kubernetes/kubelet/pluginmanager/#webpage",
+      "url": "https://zhangzewen.github.io/posts/kubernetes/kubelet/pluginmanager/",
       "name": "kubernetes 源码分析之 kubelet plugin manager",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-03-11T00:43:31+08:00",
       "dateModified": "2025-03-11T00:43:31+08:00",
@@ -95,7 +95,7 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/"
+            "https://zhangzewen.github.io/posts/kubernetes/kubelet/pluginmanager/"
           ]
         }
       ]
@@ -103,16 +103,16 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/kubelet/pluginmanager/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/kubelet/pluginmanager/#webpage"
       },
       "headline": "kubernetes 源码分析之 kubelet plugin manager",
       "datePublished": "2025-03-11T00:43:31+08:00",
       "dateModified": "2025-03-11T00:43:31+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "源码分析",
@@ -130,7 +130,7 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/kubelet/pluginmanager/#comments"
+            "https://zhangzewen.github.io/posts/kubernetes/kubelet/pluginmanager/#comments"
           ]
         }
       ]
@@ -214,7 +214,7 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -231,7 +231,7 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -686,11 +686,11 @@ kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+    <a href="https://zhangzewen.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+    <a href="https://zhangzewen.github.io/tags/kubernetes/" class="tag-link">Kubernetes</a>
   </li>
   </ul>
 </div>

@@ -17,18 +17,18 @@
   <meta itemprop="datePublished" content="2025-05-11T22:36:42+08:00">
   <meta itemprop="dateModified" content="2025-05-11T22:36:42+08:00">
   <meta itemprop="wordCount" content="1444">
-  <meta itemprop="image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes">
 
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://www.zhangzewen.net/images/profile.png">
+  <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="kubernetes 源码分析之apiserver endpoints">
   <meta name="twitter:description" content="本篇文章基于 apiserver v0.25.1
 在 kubernetes 中，所有的资源访问都是通过 RESTful api 来完成的，这些 RESTful api 是程序生成的。本片文章将详细分析其逻辑实现。">
 
 
-<meta property="og:url" content="https://www.zhangzewen.net/posts/kubernetes/apiserver/endpoint/">
+<meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/apiserver/endpoint/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes 源码分析之apiserver endpoints">
   <meta property="og:description" content="本篇文章基于 apiserver v0.25.1
@@ -40,7 +40,7 @@
     <meta property="article:modified_time" content="2025-05-11T22:36:42+08:00">
     <meta property="article:tag" content="源码分析">
     <meta property="article:tag" content="Kubernetes">
-    <meta property="og:image" content="https://www.zhangzewen.net/images/profile.png">
+    <meta property="og:image" content="https://zhangzewen.github.io/images/profile.png">
 
 
 
@@ -50,42 +50,42 @@
   "@graph": [
     {
       "@type":"Person",
-      "@id": "https://www.zhangzewen.net/#author",
+      "@id": "https://zhangzewen.github.io/#author",
       "name": "Zhang Zewen",
       "image": {
         "@type":"ImageObject",
         
-        "url": "https://www.zhangzewen.net/images/android-chrome-512x512.png"
+        "url": "https://zhangzewen.github.io/images/android-chrome-512x512.png"
         
       },
       "description": "Software Engineer"
     },
     {
       "@type": "WebSite",
-      "@id": "https://www.zhangzewen.net/#website",
-      "url": "https://www.zhangzewen.net/",
+      "@id": "https://zhangzewen.github.io/#website",
+      "url": "https://zhangzewen.github.io/",
       "name": "What a Life!",
       "description": "Software Engineer",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "inLanguage": "zh-cn"
     },
     {
       "@type": "ImageObject",
-      "url": "https://www.zhangzewen.net/images/profile.png",
+      "url": "https://zhangzewen.github.io/images/profile.png",
       "caption": "What a Life!"
     },
     {
       "@type": "WebPage",
-      "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/endpoint/#webpage",
-      "url": "https://www.zhangzewen.net/posts/kubernetes/apiserver/endpoint/",
+      "@id": "https://zhangzewen.github.io/posts/kubernetes/apiserver/endpoint/#webpage",
+      "url": "https://zhangzewen.github.io/posts/kubernetes/apiserver/endpoint/",
       "name": "kubernetes 源码分析之apiserver endpoints",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/#website"
+        "@id": "https://zhangzewen.github.io/#website"
       },
       "about": {
-         "@id": "https://www.zhangzewen.net/#author"
+         "@id": "https://zhangzewen.github.io/#author"
       },
       "datePublished": "2025-05-11T22:36:42+08:00",
       "dateModified": "2025-05-11T22:36:42+08:00",
@@ -95,7 +95,7 @@
         {
           "@type": "ReadAction",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/apiserver/endpoint/"
+            "https://zhangzewen.github.io/posts/kubernetes/apiserver/endpoint/"
           ]
         }
       ]
@@ -103,16 +103,16 @@
     {
       "@type": "Article",
       "isPartOf": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/endpoint/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/apiserver/endpoint/#webpage"
       },
       "mainEntityOfPage": {
-        "@id": "https://www.zhangzewen.net/posts/kubernetes/apiserver/endpoint/#webpage"
+        "@id": "https://zhangzewen.github.io/posts/kubernetes/apiserver/endpoint/#webpage"
       },
       "headline": "kubernetes 源码分析之apiserver endpoints",
       "datePublished": "2025-05-11T22:36:42+08:00",
       "dateModified": "2025-05-11T22:36:42+08:00",
       "publisher": {
-        "@id": "https://www.zhangzewen.net/#author"
+        "@id": "https://zhangzewen.github.io/#author"
       },
       "keywords": [
         "源码分析",
@@ -130,7 +130,7 @@
           "@type": "CommentAction",
           "name": "Comment",
           "target": [
-            "https://www.zhangzewen.net/posts/kubernetes/apiserver/endpoint/#comments"
+            "https://zhangzewen.github.io/posts/kubernetes/apiserver/endpoint/#comments"
           ]
         }
       ]
@@ -189,7 +189,7 @@
       
         
         <div class="author-image">
-          <a href="https://www.zhangzewen.net/">
+          <a href="https://zhangzewen.github.io/">
             <img src="/images/android-chrome-512x512.png" class="img-circle img-headshot center" alt="Profile Picture">
           </a>
         </div>
@@ -206,7 +206,7 @@
     <nav>
       <ul class="sidebar-nav">
         <li>
-          <a href="https://www.zhangzewen.net/">Home</a>
+          <a href="https://zhangzewen.github.io/">Home</a>
         </li>
         <li>
           <a href="/tags/">Tags</a>
@@ -657,11 +657,11 @@
 <div>
   <ul class="tags">
   <li>
-    <a href="https://www.zhangzewen.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
+    <a href="https://zhangzewen.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="tag-link">源码分析</a>
   </li>
   
   <li>
-    <a href="https://www.zhangzewen.net/tags/kubernetes/" class="tag-link">Kubernetes</a>
+    <a href="https://zhangzewen.github.io/tags/kubernetes/" class="tag-link">Kubernetes</a>
   </li>
   </ul>
 </div>
