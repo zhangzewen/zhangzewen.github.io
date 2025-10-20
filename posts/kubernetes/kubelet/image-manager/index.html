@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 kubelet image manager &middot; What a Life!</title>
 
@@ -92,7 +92,7 @@ kubelet 的镜像管理实现在 k8s.io/kubernetes/pkg/kubelet/image目录下。
       },
       "datePublished": "2025-01-27T22:44:45+08:00",
       "dateModified": "2025-01-27T22:44:45+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ekubelet 的镜像管理实现在 \u003ccode\u003ek8s.io/kubernetes/pkg/kubelet/image\u003c/code\u003e目录下。镜像管理需要实现接口 ImageManager ：\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-go\" data-lang=\"go\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#928374;font-style:italic\"\u003e// k8s.io/kubernetes/pkg/kubelet/images/image_manager.go\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#fe8019\"\u003etype\u003c/span\u003e ImageManager \u003cspan style=\"color:#fe8019\"\u003einterface\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eEnsureImageExists\u003c/span\u003e(pod \u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003ev1.Pod, container \u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003ev1.Container, pullSecrets []v1.Secret, podSandboxConfig \u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003eruntimeapi.PodSandboxConfig) (\u003cspan style=\"color:#fabd2f\"\u003estring\u003c/span\u003e, \u003cspan style=\"color:#fabd2f\"\u003estring\u003c/span\u003e, \u003cspan style=\"color:#fabd2f\"\u003eerror\u003c/span\u003e)\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003e该接口只有一个方法，即确保指定镜像存在，结构体 imageManager 实现了该接口：\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003ekubelet 的镜像管理实现在 \u003ccode\u003ek8s.io/kubernetes/pkg/kubelet/image\u003c/code\u003e目录下。镜像管理需要实现接口 ImageManager ：\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-go\" data-lang=\"go\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#928374;font-style:italic\"\u003e// k8s.io/kubernetes/pkg/kubelet/images/image_manager.go\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#fe8019\"\u003etype\u003c/span\u003e ImageManager \u003cspan style=\"color:#fe8019\"\u003einterface\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eEnsureImageExists\u003c/span\u003e(pod \u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003ev1.Pod, container \u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003ev1.Container, pullSecrets []v1.Secret, podSandboxConfig \u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003eruntimeapi.PodSandboxConfig) (\u003cspan style=\"color:#fabd2f\"\u003estring\u003c/span\u003e, \u003cspan style=\"color:#fabd2f\"\u003estring\u003c/span\u003e, \u003cspan style=\"color:#fabd2f\"\u003eerror\u003c/span\u003e)\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003e该接口只有一个方法，即确保指定镜像存在，结构体 imageManager 实现了该接口：\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -227,7 +227,8 @@ kubelet 的镜像管理实现在 k8s.io/kubernetes/pkg/kubelet/image目录下。
 
   <div>
     <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>kubelet 的镜像管理实现在 <code>k8s.io/kubernetes/pkg/kubelet/image</code>目录下。镜像管理需要实现接口 ImageManager ：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/images/image_manager.go</span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> ImageManager <span style="color:#fe8019">interface</span> {

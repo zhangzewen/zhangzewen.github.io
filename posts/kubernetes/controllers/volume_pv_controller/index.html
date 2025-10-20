@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 PV Controller &middot; What a Life!</title>
 
@@ -90,7 +90,7 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
       },
       "datePublished": "2025-08-29T02:43:31+08:00",
       "dateModified": "2025-08-29T02:43:31+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ePV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建 PersistentVolumeController，NewController 的流程如下：\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003ePV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建 PersistentVolumeController，NewController 的流程如下：\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -260,7 +260,8 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 
   <div>
     <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建 PersistentVolumeController，NewController 的流程如下：</p>
 <ul>
 <li>初始化 eventRecorder， 创建 PersistentVolumeController 实例</li>

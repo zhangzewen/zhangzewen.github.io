@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 kube-proxy iptables 模式 &middot; What a Life!</title>
 
@@ -89,7 +89,7 @@
       },
       "datePublished": "2024-11-23T16:31:39+08:00",
       "dateModified": "2024-11-23T16:31:39+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003e\u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/\"\u003e上一篇文章\u003c/a\u003e 分析了 kube-proxy 的主流程逻辑实现，本片文章来分析 kube-proxy 的 iptables 模式实现。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003e\u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/\"\u003e上一篇文章\u003c/a\u003e 分析了 kube-proxy 的主流程逻辑实现，本片文章来分析 kube-proxy 的 iptables 模式实现。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -245,7 +245,8 @@
 
   <div>
     <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p><a href="https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/">上一篇文章</a> 分析了 kube-proxy 的主流程逻辑实现，本片文章来分析 kube-proxy 的 iptables 模式实现。</p>
 <p>iptables 模式的实现是围绕 <code>iptables-save/iptables-restore</code> 展开的，syncProxyRules 函数会刷新 iptables 规则链，这个函数很大，拆分来讲。</p>
 <h2 id="实现">实现</h2>

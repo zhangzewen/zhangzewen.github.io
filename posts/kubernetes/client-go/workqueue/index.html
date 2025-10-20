@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>client-go 源码分析之 workqueue &middot; What a Life!</title>
 
@@ -92,7 +92,7 @@ client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑�
       },
       "datePublished": "2024-07-03T21:43:31+08:00",
       "dateModified": "2024-07-03T21:43:31+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 client-go release-1.25 分支\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eclient-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑实现在\u003ccode\u003ek8s.io/client-go/util/workqueue\u003c/code\u003e 目录下。\u003c/p\u003e\n\u003ch2 id=\"基础去重队列\"\u003e基础：去重队列\u003c/h2\u003e\n\u003cp\u003e基础队列接口 Interface 的定义如下：\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 client-go release-1.25 分支\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003eclient-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑实现在\u003ccode\u003ek8s.io/client-go/util/workqueue\u003c/code\u003e 目录下。\u003c/p\u003e\n\u003ch2 id=\"基础去重队列\"\u003e基础：去重队列\u003c/h2\u003e\n\u003cp\u003e基础队列接口 Interface 的定义如下：\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -240,7 +240,8 @@ client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑�
 
   <div>
     <blockquote>
-<p>本篇文章基于 client-go release-1.25 分支</p></blockquote>
+<p>本篇文章基于 client-go release-1.25 分支</p>
+</blockquote>
 <p>client-go 根据去重、延迟、限频实现了不同的workqueue，其逻辑实现在<code>k8s.io/client-go/util/workqueue</code> 目录下。</p>
 <h2 id="基础去重队列">基础：去重队列</h2>
 <p>基础队列接口 Interface 的定义如下：</p>

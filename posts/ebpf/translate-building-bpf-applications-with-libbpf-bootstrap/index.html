@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>[译]Building BPF applications with libbpf-bootstrap &middot; What a Life!</title>
 
@@ -94,7 +94,7 @@ libbpf-bootstrap脚手架能快速轻松地让您构建自己的BPF应用程序�
       },
       "datePublished": "2025-05-10T08:13:34+08:00",
       "dateModified": "2025-05-10T08:13:34+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e原文: \u003cstrong\u003e\u003ca href=\"https://nakryiko.com/posts/libbpf-bootstrap/\"\u003eBuilding BPF applications with libbpf-bootstrap\u003c/a\u003e\u003c/strong\u003e\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003e\u003ca href=\"https://github.com/libbpf/libbpf-bootstrap\"\u003elibbpf-bootstrap\u003c/a\u003e脚手架能快速轻松地让您构建自己的BPF应用程序，该脚手架负责所有让人乏味的设置步骤，并最大限度地减少必要的样板，让您直接沉浸在 BPF 的乐趣中。我们将看看 libbpf-bootstrap 提供了什么，以及所有内容是如何联系在一起的。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e原文: \u003cstrong\u003e\u003ca href=\"https://nakryiko.com/posts/libbpf-bootstrap/\"\u003eBuilding BPF applications with libbpf-bootstrap\u003c/a\u003e\u003c/strong\u003e\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003e\u003ca href=\"https://github.com/libbpf/libbpf-bootstrap\"\u003elibbpf-bootstrap\u003c/a\u003e脚手架能快速轻松地让您构建自己的BPF应用程序，该脚手架负责所有让人乏味的设置步骤，并最大限度地减少必要的样板，让您直接沉浸在 BPF 的乐趣中。我们将看看 libbpf-bootstrap 提供了什么，以及所有内容是如何联系在一起的。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -262,7 +262,8 @@ libbpf-bootstrap脚手架能快速轻松地让您构建自己的BPF应用程序�
   <div>
     <blockquote>
 <p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>原文: <strong><a href="https://nakryiko.com/posts/libbpf-bootstrap/">Building BPF applications with libbpf-bootstrap</a></strong></p></blockquote>
+<p>原文: <strong><a href="https://nakryiko.com/posts/libbpf-bootstrap/">Building BPF applications with libbpf-bootstrap</a></strong></p>
+</blockquote>
 <p><a href="https://github.com/libbpf/libbpf-bootstrap">libbpf-bootstrap</a>脚手架能快速轻松地让您构建自己的BPF应用程序，该脚手架负责所有让人乏味的设置步骤，并最大限度地减少必要的样板，让您直接沉浸在 BPF 的乐趣中。我们将看看 libbpf-bootstrap 提供了什么，以及所有内容是如何联系在一起的。</p>
 <h2 id="为什么选择libbpf-bootstrap">为什么选择libbpf-bootstrap？</h2>
 <p>BPF是一项令人惊奇的内核技术，允许任何人在不需要深入的内核开发经验和不需要花费大量时间为内核开发做设置的情况下，查看内核函数的运行方式。BPF 还消除了在执行操作时导致操作系统崩溃的风险。一旦你掌握了BPF，它就会充满乐趣和力量。</p>
@@ -345,7 +346,8 @@ libbpf-bootstrap脚手架能快速轻松地让您构建自己的BPF应用程序�
 background-color:: green
 <code>SEC(&quot;tp/syscalls/sys_enter_write&quot;) int handle_tp(void *ctx) { ... }</code>定义了将加载到内核中的 BPF 程序。它表示了一个普通的 C 函数在一个特殊命名的section（使用 <code>SEC()</code>宏）中。Section 名称定义了 libbpf 应该创建哪种类型的 BPF 程序，以及如何在内核中以及在内核那个地方挂载它。在本例中，我们定义了一个跟踪点 BPF 程序，每次任何用户态应用程序调用 <code>write()</code>系统调用时，都会调用该程序。</p>
 <blockquote>
-<p>在同一个 BPF C 代码文件中可能定义了许多 BPF 程序。它们可以有不同的section（即 <code>SEC()</code>注解）。例如，您可以有几个不同的 BPF 程序，每个程序用于不同的跟踪点或其他一些内核事件（例如，正在处理的网络数据包等）。您还可以使用相同的 <code>SEC()</code> 属性定义多个 BPF 程序：<code>libbpf</code> 可以很好地处理它。在同一个 BPF C 代码文件中定义的所有 BPF 程序共享所有全局状态（如变量<code>my_pid</code>，以及任何 BPF 映射（如果使用)）。这经常用于协调一些协作的 BPF 程序。</p></blockquote>
+<p>在同一个 BPF C 代码文件中可能定义了许多 BPF 程序。它们可以有不同的section（即 <code>SEC()</code>注解）。例如，您可以有几个不同的 BPF 程序，每个程序用于不同的跟踪点或其他一些内核事件（例如，正在处理的网络数据包等）。您还可以使用相同的 <code>SEC()</code> 属性定义多个 BPF 程序：<code>libbpf</code> 可以很好地处理它。在同一个 BPF C 代码文件中定义的所有 BPF 程序共享所有全局状态（如变量<code>my_pid</code>，以及任何 BPF 映射（如果使用)）。这经常用于协调一些协作的 BPF 程序。</p>
+</blockquote>
 <p>现在让我们看看 <code>handle_tp</code> BPF程序在做什么：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> pid <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bpf_get_current_pid_tgid</span>() <span style="color:#fe8019">&gt;&gt;</span> <span style="color:#d3869b">32</span>;
 </span></span><span style="display:flex;"><span>  <span style="color:#fe8019">if</span> (pid <span style="color:#fe8019">!=</span> my_pid)
@@ -363,7 +365,8 @@ background-color:: green
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&#34;minimal.skel.h&#34;</span><span style="color:#8ec07c">
 </span></span></span></code></pre></div><p>这包括了<code>minimal.bpf.c</code>中BPF代码的 skeleton。它是由Makefile中的一个步骤中的bpftool自动生成的，并反映了<code>minimal.bpf.c</code>的高级结构。它还通过将编译后的BPF对象代码的内容嵌入到头文件中，从而简化了BPF代码部署的流程，该头文件会在用户态代码中被包含。无需在应用程序二进制文件中部署额外的文件，只需包含头文件即可。</p>
 <blockquote>
-<p>BPF skeleton 纯粹是一个libbpf 结构，内核对它一无所知。但这对BPF开发过程来说是一个巨大的生活质量提升，所以考虑熟悉一下它。查看<a href="https://nakryiko.com/posts/bcc-to-libbpf-howto-guide/#bpf-skeleton-and-bpf-app-lifecycle">博客文章</a>以获取有关BPFskeleton 的更多详细信息。</p></blockquote>
+<p>BPF skeleton 纯粹是一个libbpf 结构，内核对它一无所知。但这对BPF开发过程来说是一个巨大的生活质量提升，所以考虑熟悉一下它。查看<a href="https://nakryiko.com/posts/bcc-to-libbpf-howto-guide/#bpf-skeleton-and-bpf-app-lifecycle">博客文章</a>以获取有关BPFskeleton 的更多详细信息。</p>
+</blockquote>
 <p>libbpf-bootstrap 生成的BPF skeletons 存储在<code>src/.output/&lt;app&gt;.skel.h</code>中，在成功执行<code>make</code>命令后。为了更好地了解它，下面是<code>minimal.bpf.c</code>的 skeleton 的高级概述：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">/* SPDX-License-Identifier: (LGPL-2.1 OR BSD-2-Clause) */</span>
 </span></span><span style="display:flex;"><span>  
@@ -411,7 +414,8 @@ background-color:: green
 </span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">libbpf_set_print</span>(libbpf_print_fn);
 </span></span></code></pre></div><p><code>libbpf_set_print()</code> 提供了一个自定义回调，用于捕获所有libbpf的日志。这非常有用，尤其是在开发期间，因为它允许捕获有用的libbpf调试日志。默认情况下，如果出现问题，libbpf只会记录错误级别的消息。然而，调试日志有助于获取额外的上下文信息，以更快地调试问题。</p>
 <blockquote>
-<p>如果你需要报告有关libbpf和/或基于libbpf的应用程序的某些问题（例如，通过发送电子邮件到 <a href="mailto:bpf@vger.kernel.org">bpf@vger.kernel.org</a> 邮件列表），请始终包括来自libbpf的完整调试日志。</p></blockquote>
+<p>如果你需要报告有关libbpf和/或基于libbpf的应用程序的某些问题（例如，通过发送电子邮件到 <a href="mailto:bpf@vger.kernel.org">bpf@vger.kernel.org</a> 邮件列表），请始终包括来自libbpf的完整调试日志。</p>
+</blockquote>
 <p>在<code>minimal</code>的示例中，<code>libbpf_print_fn()</code> 将所有内容都输出到标准输出。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/* Bump RLIMIT_MEMLOCK to allow BPF sub-system to do anything */</span>
 </span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">bump_memlock_rlimit</span>();
@@ -436,7 +440,8 @@ background-color:: green
 </span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">printf</span>(<span style="color:#b8bb26">&#34;Successfully started!</span><span style="color:#b8bb26">\n</span><span style="color:#b8bb26">&#34;</span>);
 </span></span></code></pre></div><p>我们终于可以将<code>handle_tp</code> BPF 程序附加到相应的内核跟踪点，它现在已经在内核中准备就绪。这会“激活”BPF程序，每次<code>write()</code>系统调用被调用时，就会在内核上下文中执行我们自定义的BPF代码！</p>
 <blockquote>
-<p>通过查看其特殊的<code>SEC()</code>注解，libbpf能够自动确定在哪里挂载BPF程序。这并不适用于所有可能的BPF程序类型，但它适用于很多：tracepoint、kprobes，以及其他相当多的类型。此外，libbpf还提供了额外的API来以编程方式进行挂载。</p></blockquote>
+<p>通过查看其特殊的<code>SEC()</code>注解，libbpf能够自动确定在哪里挂载BPF程序。这并不适用于所有可能的BPF程序类型，但它适用于很多：tracepoint、kprobes，以及其他相当多的类型。此外，libbpf还提供了额外的API来以编程方式进行挂载。</p>
+</blockquote>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#fe8019">for</span> (;;) {
 </span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">/* trigger our BPF program */</span>
 </span></span><span style="display:flex;"><span>		<span style="color:#fabd2f">fprintf</span>(stderr, <span style="color:#b8bb26">&#34;.&#34;</span>);
@@ -475,7 +480,8 @@ background-color:: green
 </span></span><span style="display:flex;"><span>	<span style="color:#fe8019">$(</span>Q<span style="color:#fe8019">)$(</span>LLVM_STRIP<span style="color:#fe8019">)</span> -g $@ *# strip useless DWARF info
 </span></span></code></pre></div><p>我们使用Clang来执行此操作。<code>-g</code>是强制的，以使Clang发出BTF信息。<code>-O2</code>对于BPF编译也是必需的。<code>-D__TARGET_ARCH_$(ARCH)</code>定义了<code>bpf_tracing.h</code>头文件所需的宏用于处理低级别<code>struct pt_regs</code>宏。如果你不处理kprobes和<code>struct pt_regs</code>，你可以忽略这个。最后，我们从生成的<code>.o</code>文件中剔除DWARF信息，因为它从未被使用，并且主要只是Clang的编译产物。</p>
 <blockquote>
-<p>BTF是BPF功能所需的唯一信息，这一点在剥离过程中得以保留。减小<code>.bpf.o</code>文件的大小很重要，因为它将通过BPF skeleton 嵌入到最终的应用程序二进制文件中，所以没有必要用不需要的DWARF数据增加其大小。</p></blockquote>
+<p>BTF是BPF功能所需的唯一信息，这一点在剥离过程中得以保留。减小<code>.bpf.o</code>文件的大小很重要，因为它将通过BPF skeleton 嵌入到最终的应用程序二进制文件中，所以没有必要用不需要的DWARF数据增加其大小。</p>
+</blockquote>
 <p>现在我们已经生成了<code>.bpf.o</code>文件，<code>bpftool</code>用于通过<code>bpftool gen skeleton</code>命令生成相应的BPF骨架头文件（<code>.skel.h</code>）：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-makefile" data-lang="makefile"><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># Generate BPF skeletons
 </span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fabd2f">$(OUTPUT)/%.skel.h</span><span style="color:#fe8019">:</span> <span style="color:#fe8019">$(</span>OUTPUT<span style="color:#fe8019">)</span>/%.bpf.o | <span style="color:#fe8019">$(</span>OUTPUT<span style="color:#fe8019">)</span>
@@ -507,13 +513,15 @@ background-color:: green
 </span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span> <span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&#34;bootstrap.h&#34;</span><span style="color:#8ec07c">
 </span></span></span></code></pre></div><p>这与 <code>minimal.bpf.c</code> 的不同之处在于，我们现在使用 <code>vmlinux.h</code> 头文件，该文件将 Linux 内核中的所有类型都包含在一个文件中。libbpf-bootstrap 中的是 <a href="https://raw.githubusercontent.com/libbpf/libbpf-bootstrap/master/src/vmlinux_508.h">预生成</a>的，但您也可以使用 <code>bpftool</code> 生成自定义的头文件（参见 <a href="https://github.com/libbpf/libbpf-bootstrap/blob/master/tools/gen_vmlinux_h.sh">gen_vmlinux_h.sh</a>）。</p>
 <blockquote>
-<p><code>vmlinux.h</code> 中的所有类型都额外应用了 <code>__attribute__((preserve_access_index))</code>，这使得 Clang 生成 <a href="https://nakryiko.com/posts/bpf-portability-and-co-re/#reading-kernel-structure-s-fields">BPF CO-RE 重定位</a>，从而允许 libbpf 根据主机内核的特定内存布局来调整您的 BPF 代码，即使它与最初生成 <code>vmlinux.h</code> 的布局不同。这是构建可移植的预编译 BPF 应用程序的关键方面，不需要整个 Clang/LLVM 工具链与目标系统一起部署。另一种方法是使用 BCC 在运行时编译 BPF 代码，<a href="https://nakryiko.com/posts/bcc-to-libbpf-howto-guide/#why-libbpf-and-bpf-co-re">但这有一系列的缺点</a>。</p></blockquote>
+<p><code>vmlinux.h</code> 中的所有类型都额外应用了 <code>__attribute__((preserve_access_index))</code>，这使得 Clang 生成 <a href="https://nakryiko.com/posts/bpf-portability-and-co-re/#reading-kernel-structure-s-fields">BPF CO-RE 重定位</a>，从而允许 libbpf 根据主机内核的特定内存布局来调整您的 BPF 代码，即使它与最初生成 <code>vmlinux.h</code> 的布局不同。这是构建可移植的预编译 BPF 应用程序的关键方面，不需要整个 Clang/LLVM 工具链与目标系统一起部署。另一种方法是使用 BCC 在运行时编译 BPF 代码，<a href="https://nakryiko.com/posts/bcc-to-libbpf-howto-guide/#why-libbpf-and-bpf-co-re">但这有一系列的缺点</a>。</p>
+</blockquote>
 <p>请记住，<code>vmlinux.h</code> 不能与其他系统范围的内核头文件结合使用，否则您将不可避免地遇到类型重新定义和冲突。因此，请坚持仅使用 <code>vmlinux.h</code>、由 libbpf 提供的头文件，以及您应用程序的自定义头文件，以避免不必要的麻烦。</p>
 <p>除了 <code>bpf_helpers.h</code>，我们还使用了一些由 libbpf 提供的额外头文件，如 <code>bpf_tracing.h</code> 和 <code>bpf_core_read.h</code>，这些头文件为编写基于 BPF CO-RE 的跟踪 BPF 应用程序提供了一些额外的宏。</p>
 <p>最后，<code>bootstrap.h</code> 包含 BPF 和 <code>bootstrap</code> 应用程序用户态代码之间共享的常见类型定义（有关 BPF ring buffer，请参见下文）。</p>
 <h3 id="bpf-maps">BPF Maps</h3>
 <blockquote>
-<p><code>bootstrap</code> 演示了 BPF maps 的使用，这是一个用于抽象数据容器的 BPF 概念。许多不同的事情都被建模为 BPF maps：从简单的数组和哈希图到每个套接字和每个任务的局部存储，BPF 性能和环形缓冲区，甚至还有一些更为奇特的用途。重要的是，大多数 BPF maps 允许通过某个键查找、更新和删除其元素。一些 BPF maps 允许额外（或可选）的操作，比如 BPF ring buffer，它允许将数据加入队列，但从 BPF 方面来说，它永远不会删除它。BPF maps 是在（潜在地多个）BPF 程序和用户空间之间共享状态的手段。另一个（更高效并且方便存储简单纯数据的）是 BPF 全局变量（其底层仍然使用 BPF maps）。</p></blockquote>
+<p><code>bootstrap</code> 演示了 BPF maps 的使用，这是一个用于抽象数据容器的 BPF 概念。许多不同的事情都被建模为 BPF maps：从简单的数组和哈希图到每个套接字和每个任务的局部存储，BPF 性能和环形缓冲区，甚至还有一些更为奇特的用途。重要的是，大多数 BPF maps 允许通过某个键查找、更新和删除其元素。一些 BPF maps 允许额外（或可选）的操作，比如 BPF ring buffer，它允许将数据加入队列，但从 BPF 方面来说，它永远不会删除它。BPF maps 是在（潜在地多个）BPF 程序和用户空间之间共享状态的手段。另一个（更高效并且方便存储简单纯数据的）是 BPF 全局变量（其底层仍然使用 BPF maps）。</p>
+</blockquote>
 <p>在 <code>bootstrap</code> 这个示例中，我们定义了一个名为 <code>exec_start</code> 的 BPF map，类型为 <code>BPF_MAP_TYPE_HASH</code>（一个哈希表），最大大小为 8192 个条目，键是 <code>pid_t</code> 类型，值是一个 64 位无符号整数，存储进程 exec 事件的纳秒级时间戳。这是一个所谓的 BTF 定义的 map。<code>SEC(&quot;.maps&quot;)</code> 注解是强制性的，以让 libbpf 知道它需要在内核中创建相应的 BPF map，并在 BPF 代码中正确地链接所有内容：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> {
 </span></span><span style="display:flex;"><span>  	<span style="color:#fabd2f">__uint</span>(type, BPF_MAP_TYPE_HASH);
@@ -545,7 +553,8 @@ background-color:: green
 </span></span></code></pre></div><p><code>const volatile</code> 部分很重要，它将该变量标记为 BPF 代码和用户态代码的只读变量。作为交换，它在 BPF 程序验证期间让 BPF 验证器知道 <code>min_duration_ns</code> 变量的特定值。这（由于有更详细的了解）允许 BPF 验证器去掉死代码，如果只读值证明省略了一些代码路径。这种特性通常用于一些更高级的用例，比如处理各种兼容性检查和额外配置。</p>
 <blockquote>
 <p><code>volatile</code> 是必需的，以确保 Clang 不会完全优化掉这个变量，忽略用户态提供的值。没有它，Clang 可以自由地假设值为 0 并<strong>完全移除该变量</strong>，这完全不是我们想要的。
-从用户态部分（在 <a href="https://github.com/libbpf/libbpf-bootstrap/blob/master/src/bootstrap.c">bootstrap.c</a> 中），初始化这种只读全局变量有一点不同。在 BPF skeleton加载到内核之前，它们需要被设置。因此，不能使用<code>bootstrap_bpf__open_and_load()</code>一步到位，我们需要先单独调用 <code>bootstrap_bpf__open()</code> 来读取skeleton ，设置只读变量值，然后才能 <code>bootstrap_bpf__load()</code> 装载 skeleton 进入内核：</p></blockquote>
+从用户态部分（在 <a href="https://github.com/libbpf/libbpf-bootstrap/blob/master/src/bootstrap.c">bootstrap.c</a> 中），初始化这种只读全局变量有一点不同。在 BPF skeleton加载到内核之前，它们需要被设置。因此，不能使用<code>bootstrap_bpf__open_and_load()</code>一步到位，我们需要先单独调用 <code>bootstrap_bpf__open()</code> 来读取skeleton ，设置只读变量值，然后才能 <code>bootstrap_bpf__load()</code> 装载 skeleton 进入内核：</p>
+</blockquote>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">/* Load and verify BPF application */</span>
 </span></span><span style="display:flex;"><span>	skel <span style="color:#fe8019">=</span> <span style="color:#fabd2f">bootstrap_bpf__open</span>();
 </span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> (<span style="color:#fe8019">!</span>skel) {

@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 apiserver admission webhook &middot; What a Life!</title>
 
@@ -89,7 +89,7 @@
       },
       "datePublished": "2025-04-14T22:36:42+08:00",
       "dateModified": "2025-04-14T22:36:42+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003e在\u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/apiserver/admission-control/\"\u003ekubernetes 源码分析之 apiserver admission\u003c/a\u003e 中提到 apiserver 的准入控制是由一系列的插件组成，同时也提供了 webhook 机制支持第三方插件（apiserver admission webhook plugin）来进行扩展。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003e在\u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/apiserver/admission-control/\"\u003ekubernetes 源码分析之 apiserver admission\u003c/a\u003e 中提到 apiserver 的准入控制是由一系列的插件组成，同时也提供了 webhook 机制支持第三方插件（apiserver admission webhook plugin）来进行扩展。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -245,7 +245,8 @@
 
   <div>
     <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>在<a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/admission-control/">kubernetes 源码分析之 apiserver admission</a> 中提到 apiserver 的准入控制是由一系列的插件组成，同时也提供了 webhook 机制支持第三方插件（apiserver admission webhook plugin）来进行扩展。</p>
 <h2 id="webhook-框架">webhook 框架</h2>
 <p>这里说的 webhook 机制是一个通用的框架，同时它也是一个 apiserver admission plugin，即其实现了接口 Interface：</p>

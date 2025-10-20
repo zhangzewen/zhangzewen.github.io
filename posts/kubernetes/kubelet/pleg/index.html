@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 kubelet pleg &middot; What a Life!</title>
 
@@ -89,7 +89,7 @@ PLEG 是 “Pod Lifecycle Event Generator” 的缩写，监控运行在集群�
       },
       "datePublished": "2025-05-06T01:27:07+08:00",
       "dateModified": "2025-05-06T01:27:07+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ePLEG 是 \u0026ldquo;Pod Lifecycle Event Generator\u0026rdquo; 的缩写，监控运行在集群各个节点上的容器状态变化，并将这些变化事件推送给 kubelet，kubelet 处理后同步到 apiserver。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003ePLEG 是 \u0026ldquo;Pod Lifecycle Event Generator\u0026rdquo; 的缩写，监控运行在集群各个节点上的容器状态变化，并将这些变化事件推送给 kubelet，kubelet 处理后同步到 apiserver。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -247,7 +247,8 @@ PLEG 是 “Pod Lifecycle Event Generator” 的缩写，监控运行在集群�
 
   <div>
     <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>PLEG 是 &ldquo;Pod Lifecycle Event Generator&rdquo; 的缩写，监控运行在集群各个节点上的容器状态变化，并将这些变化事件推送给 kubelet，kubelet 处理后同步到 apiserver。</p>
 <p><img src="/images/kubernetes/kubelet/pleg/pleg.png" alt="pleg"></p>
 <h2 id="接口">接口</h2>

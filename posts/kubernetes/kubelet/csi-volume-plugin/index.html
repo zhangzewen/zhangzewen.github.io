@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 CSI Volume Plugin &middot; What a Life!</title>
 
@@ -90,7 +90,7 @@
       },
       "datePublished": "2025-06-27T09:43:31+08:00",
       "dateModified": "2025-06-27T09:43:31+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003e在 kubernetes 中，第三方 CSI Plugin 注册到 kubelet 是通过 CSI Volume Plugin 来完成的。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003e在 kubernetes 中，第三方 CSI Plugin 注册到 kubelet 是通过 CSI Volume Plugin 来完成的。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -243,7 +243,8 @@
 
   <div>
     <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>在 kubernetes 中，第三方 CSI Plugin 注册到 kubelet 是通过 CSI Volume Plugin 来完成的。</p>
 <h2 id="插件注册管理">插件注册管理</h2>
 <p>CSI Volume Plugin 其实现了接口 PluginHandler：</p>

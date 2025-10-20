@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>What a Life!</title>
 
@@ -181,7 +181,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>在<a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/admission-control/">kubernetes 源码分析之 apiserver admission</a> 中提到 apiserver 的准入控制是由一系列的插件组成，同时也提供了 webhook 机制支持第三方插件（apiserver admission webhook plugin）来进行扩展。</p>
         </div>
 
@@ -200,7 +201,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客户端的访问请求，其对接口请求访问提供了3种安全权限控制，每个请求都需要经过认证，授权以及准入控制器才有权限操作资源对象。</p>
 <ul>
 <li>认证：针对请求的认证，确认是否具有访问 kubernetes 集群的权限。</li>
@@ -225,7 +227,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>在 kube-apiserver 的实现过程中，相对 go-restful 还有个 NonGoRestfulMux，其实现在 <code>k8s.io/apiserver/pkg/server/mux</code>：</p>
         </div>
 
@@ -287,7 +290,8 @@
         <div>
           <blockquote>
 <p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>原文: <strong><a href="https://nakryiko.com/posts/bpf-ringbuf/">BPF ring buffer</a></strong></p></blockquote>
+<p>原文: <strong><a href="https://nakryiko.com/posts/bpf-ringbuf/">BPF ring buffer</a></strong></p>
+</blockquote>
 <p>BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲区（当前用于从内核向用户态发送数据的标准）的内存效率和事件重新排序问题，同时达到或超过了其性能。它提供了perfbuf兼容性以便于轻松迁移，但也有新的reserve/submit API，具有更好的可用性。此外，合成和实际基准测试都表明，在几乎所有情况下，考虑将其作为从BPF程序发送数据到用户态的默认选择。</p>
         </div>
 
@@ -373,7 +377,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 的能力: CSI 和 Device。得益于 gRPC 和 Linux 的 inotify 实现了插件的动态管理。本片文章将详细讲解 kubelet 管理插件的逻辑，至于 CSI 和 Device 这两种类型的插件的详细内容，不在本片文章讨论范围之内，本片文章会在需要的地方提及一下，不会对理解本片文章造成困难。</p>
         </div>
 

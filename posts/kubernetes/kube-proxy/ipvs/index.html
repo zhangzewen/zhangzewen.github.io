@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 kube-proxy ipvs 模式 &middot; What a Life!</title>
 
@@ -89,7 +89,7 @@
       },
       "datePublished": "2025-01-21T21:39:37+08:00",
       "dateModified": "2025-01-21T21:39:37+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003e\u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/\"\u003e上一篇文章\u003c/a\u003e 分析了 kube-proxy 的主流程逻辑实现，本篇文章通过分析核心方法 syncProxyRules 来分析 kube-proxy 的 ipvs 模式的实现。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003e\u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/\"\u003e上一篇文章\u003c/a\u003e 分析了 kube-proxy 的主流程逻辑实现，本篇文章通过分析核心方法 syncProxyRules 来分析 kube-proxy 的 ipvs 模式的实现。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -251,7 +251,8 @@
 
   <div>
     <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p><a href="https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/">上一篇文章</a> 分析了 kube-proxy 的主流程逻辑实现，本篇文章通过分析核心方法 syncProxyRules 来分析 kube-proxy 的 ipvs 模式的实现。</p>
 <h2 id="实现">实现</h2>
 <h3 id="前置操作">前置操作</h3>

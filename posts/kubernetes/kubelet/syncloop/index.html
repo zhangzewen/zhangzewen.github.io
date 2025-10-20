@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 kubelet syncLoop &middot; What a Life!</title>
 
@@ -92,7 +92,7 @@ kubelet 是由多个生产者和多个消费者组成的后台服务，其内部
       },
       "datePublished": "2025-05-25T16:31:39+08:00",
       "dateModified": "2025-05-25T16:31:39+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ekubelet 是由多个生产者和多个消费者组成的后台服务，其内部实现是一个控制循环，由事件驱动着控制循环的运行，如下图所示：\u003c/p\u003e\n\u003cp\u003e\u003cimg src=\"/images/kubernetes/kubelet/syncLoop.png\" alt=\"syncLoop\"\u003e\u003c/p\u003e\n\u003cp\u003e这个图片是展示的组件和本篇分析所使用的kubernetes 版本已经有所不同，但是其设计理念没有变法，依旧是 syncLoop 驱动着整个控制循环的运行。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003ekubelet 是由多个生产者和多个消费者组成的后台服务，其内部实现是一个控制循环，由事件驱动着控制循环的运行，如下图所示：\u003c/p\u003e\n\u003cp\u003e\u003cimg src=\"/images/kubernetes/kubelet/syncLoop.png\" alt=\"syncLoop\"\u003e\u003c/p\u003e\n\u003cp\u003e这个图片是展示的组件和本篇分析所使用的kubernetes 版本已经有所不同，但是其设计理念没有变法，依旧是 syncLoop 驱动着整个控制循环的运行。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -244,7 +244,8 @@ kubelet 是由多个生产者和多个消费者组成的后台服务，其内部
 
   <div>
     <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>kubelet 是由多个生产者和多个消费者组成的后台服务，其内部实现是一个控制循环，由事件驱动着控制循环的运行，如下图所示：</p>
 <p><img src="/images/kubernetes/kubelet/syncLoop.png" alt="syncLoop"></p>
 <p>这个图片是展示的组件和本篇分析所使用的kubernetes 版本已经有所不同，但是其设计理念没有变法，依旧是 syncLoop 驱动着整个控制循环的运行。</p>

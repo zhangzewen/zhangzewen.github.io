@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>2023年秋季 cmu15-445 公开课 实现踩坑不完全指北 &middot; What a Life!</title>
 
@@ -378,7 +378,8 @@
 <h3 id="踩坑-1">踩坑</h3>
 <p>把 NestedLoopJoin 优化为 HashJoin，根据文档的描述：</p>
 <blockquote>
-<p><em>the hash join algorithm can be used when a join predicate is a conjunction of several equi-conditions between two columns. For this project, you should be able to handle a varying number of equi-conditions connected by <code>AND</code>.</em></p></blockquote>
+<p><em>the hash join algorithm can be used when a join predicate is a conjunction of several equi-conditions between two columns. For this project, you should be able to handle a varying number of equi-conditions connected by <code>AND</code>.</em></p>
+</blockquote>
 <p>刚开始我以为是必须至少有一个<code>AND</code>， 测试一直不过，然后索性去掉这个条件，测试就通过了。</p>
 <p>在实现 window function 的时候，在执行 文档中的</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#fe8019">SELECT</span> user_name, dept_name, <span style="color:#fe8019">AVG</span>(salary) OVER (PARTITION <span style="color:#fe8019">BY</span> dept_name <span style="color:#fe8019">ORDER</span> <span style="color:#fe8019">BY</span> user_name) <span style="color:#fe8019">FROM</span> t;

@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>client-go 源码分析之 informer &middot; What a Life!</title>
 
@@ -92,7 +92,7 @@ processorListener 接口 processorListener 是用户对特定资源对象变更�
       },
       "datePublished": "2024-08-13T23:42:19+08:00",
       "dateModified": "2024-08-13T23:42:19+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 client-go release-1.25 分支\u003c/p\u003e\u003c/blockquote\u003e\n\u003ch2 id=\"变更事件分发和消费\"\u003e变更事件分发和消费\u003c/h2\u003e\n\u003cp\u003e在讲解 Informer 机制之前，先来简单了解两个数据结构，这两个数据结构设计到变更事件的监听，事件分发，事件消费。\u003c/p\u003e\n\u003ch3 id=\"processorlistener\"\u003eprocessorListener\u003c/h3\u003e\n\u003cp\u003e接口 processorListener 是用户对特定资源对象变更事件的回调处理逻辑接口 ResourceEventHandler 的封装，其监听变更事件以及调用用户注册的回调逻辑来消费这些变更事件:\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 client-go release-1.25 分支\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003ch2 id=\"变更事件分发和消费\"\u003e变更事件分发和消费\u003c/h2\u003e\n\u003cp\u003e在讲解 Informer 机制之前，先来简单了解两个数据结构，这两个数据结构设计到变更事件的监听，事件分发，事件消费。\u003c/p\u003e\n\u003ch3 id=\"processorlistener\"\u003eprocessorListener\u003c/h3\u003e\n\u003cp\u003e接口 processorListener 是用户对特定资源对象变更事件的回调处理逻辑接口 ResourceEventHandler 的封装，其监听变更事件以及调用用户注册的回调逻辑来消费这些变更事件:\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -248,7 +248,8 @@ processorListener 接口 processorListener 是用户对特定资源对象变更�
 
   <div>
     <blockquote>
-<p>本篇文章基于 client-go release-1.25 分支</p></blockquote>
+<p>本篇文章基于 client-go release-1.25 分支</p>
+</blockquote>
 <h2 id="变更事件分发和消费">变更事件分发和消费</h2>
 <p>在讲解 Informer 机制之前，先来简单了解两个数据结构，这两个数据结构设计到变更事件的监听，事件分发，事件消费。</p>
 <h3 id="processorlistener">processorListener</h3>

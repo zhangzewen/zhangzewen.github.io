@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 AttachDetach Controller  &middot; What a Life!</title>
 
@@ -90,7 +90,7 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
       },
       "datePublished": "2025-08-29T02:43:31+08:00",
       "dateModified": "2025-08-29T02:43:31+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eAttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 \u003ccode\u003ek8s.io/kubernetes/pkg/controller/volume/attachdetach\u003c/code\u003e 下：\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003eAttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 \u003ccode\u003ek8s.io/kubernetes/pkg/controller/volume/attachdetach\u003c/code\u003e 下：\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -266,7 +266,8 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 
   <div>
     <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 <code>k8s.io/kubernetes/pkg/controller/volume/attachdetach</code> 下：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>$ tree  .  -L  <span style="color:#d3869b">1</span>
 </span></span><span style="display:flex;"><span>.
@@ -283,7 +284,8 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 </span></span><span style="display:flex;"><span>└── utilshell
 </span></span></code></pre></div><p>AttachDetach Controller 维护着2份 Cache，一份是<a href="#%E6%9C%9F%E6%9C%9B%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">期望状态的Cache</a>, 其维护了 <code>node-&gt;volume-&gt;pod</code> 的信息。一份是<a href="#%E5%AE%9E%E9%99%85%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">实际状态Cache</a>，其维护着是 volume-&gt;node 的 attached 状态信息，以及是否 mount 的信息。</p>
 <blockquote>
-<p>本片文章中的 期望状态即 DSW，际状态即 ASW。</p></blockquote>
+<p>本片文章中的 期望状态即 DSW，际状态即 ASW。</p>
+</blockquote>
 <h2 id="期望状态管理">期望状态管理</h2>
 <p>接口 DesiredStateOfWorld 描述了期望状态缓存提供的修改和查询方法：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> DesiredStateOfWorld <span style="color:#fe8019">interface</span> {

@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>[译]BPF CO-RE reference guide &middot; What a Life!</title>
 
@@ -94,7 +94,7 @@
       },
       "datePublished": "2025-08-17T08:13:34+08:00",
       "dateModified": "2025-08-17T08:13:34+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e原文：\u003ca href=\"https://nakryiko.com/posts/bpf-core-reference-guide/\"\u003eBPF CO-RE reference guide\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\n\u003ch2 id=\"缺失的手册\"\u003e缺失的手册\u003c/h2\u003e\n\u003cp\u003eBPF CO-RE（编译一次-到处运行）是编写可移植BPF应用程序的现代方法，应用程序可以在不同的内核版本和配置上运行，而无需在目标机器上修改和编译运行时源代码。这与\u003ca href=\"https://github.com/iovisor/bcc\"\u003eBCC\u003c/a\u003e框架提供的更传统的方法有很大的区别，在BCC框架中，BPF应用程序源代码编译被延迟到目标主机上，其携带了一个重量级的编译器工具链来实现这一点。请阅读\u003ca href=\"https://zhangzewen.github.io/posts/ebpf/translate-bpf-portability-and-co-re/\"\u003e[译]BPF CO-RE (Compile Once – Run Everywhere)\u003c/a\u003e这篇文章，该文章介绍了 BPF CO-RE 的概念，并解释了为什么 BPF CO-RE对这些现实世界的 BPF 应用程序来说都是重要且必要的，以及在没有\u003ca href=\"https://nakryiko.com/posts/btf-dedup/\"\u003e内核BTF\u003c/a\u003e的情况下变得困难的原因。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e原文：\u003ca href=\"https://nakryiko.com/posts/bpf-core-reference-guide/\"\u003eBPF CO-RE reference guide\u003c/a\u003e\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003ch2 id=\"缺失的手册\"\u003e缺失的手册\u003c/h2\u003e\n\u003cp\u003eBPF CO-RE（编译一次-到处运行）是编写可移植BPF应用程序的现代方法，应用程序可以在不同的内核版本和配置上运行，而无需在目标机器上修改和编译运行时源代码。这与\u003ca href=\"https://github.com/iovisor/bcc\"\u003eBCC\u003c/a\u003e框架提供的更传统的方法有很大的区别，在BCC框架中，BPF应用程序源代码编译被延迟到目标主机上，其携带了一个重量级的编译器工具链来实现这一点。请阅读\u003ca href=\"https://zhangzewen.github.io/posts/ebpf/translate-bpf-portability-and-co-re/\"\u003e[译]BPF CO-RE (Compile Once – Run Everywhere)\u003c/a\u003e这篇文章，该文章介绍了 BPF CO-RE 的概念，并解释了为什么 BPF CO-RE对这些现实世界的 BPF 应用程序来说都是重要且必要的，以及在没有\u003ca href=\"https://nakryiko.com/posts/btf-dedup/\"\u003e内核BTF\u003c/a\u003e的情况下变得困难的原因。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -275,7 +275,8 @@
   <div>
     <blockquote>
 <p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>原文：<a href="https://nakryiko.com/posts/bpf-core-reference-guide/">BPF CO-RE reference guide</a></p></blockquote>
+<p>原文：<a href="https://nakryiko.com/posts/bpf-core-reference-guide/">BPF CO-RE reference guide</a></p>
+</blockquote>
 <h2 id="缺失的手册">缺失的手册</h2>
 <p>BPF CO-RE（编译一次-到处运行）是编写可移植BPF应用程序的现代方法，应用程序可以在不同的内核版本和配置上运行，而无需在目标机器上修改和编译运行时源代码。这与<a href="https://github.com/iovisor/bcc">BCC</a>框架提供的更传统的方法有很大的区别，在BCC框架中，BPF应用程序源代码编译被延迟到目标主机上，其携带了一个重量级的编译器工具链来实现这一点。请阅读<a href="https://zhangzewen.github.io/posts/ebpf/translate-bpf-portability-and-co-re/">[译]BPF CO-RE (Compile Once – Run Everywhere)</a>这篇文章，该文章介绍了 BPF CO-RE 的概念，并解释了为什么 BPF CO-RE对这些现实世界的 BPF 应用程序来说都是重要且必要的，以及在没有<a href="https://nakryiko.com/posts/btf-dedup/">内核BTF</a>的情况下变得困难的原因。</p>
 <p>随着BPF CO-RE作为一种方法越来越成熟，关于其所有功能以及如何在实践中使用它们的一些实用指南严重缺失。在这篇博文中，我将尝试填补这一空白，并将介绍 BPF CO-RE（以及作为它的规范实现 <a href="https://github.com/libbpf/libbpf">libbpf</a> ）提供的所有不同功能。如果您以前编写过 BPF CO-RE 应用程序，那么您很可能至少使用过一些描述的功能。但不幸的是，其中一些仍然鲜为人知。然而，这些鲜为人知的 BPF CO-RE 秘密恰恰是有时使现实世界的 BPF 应用程序变得可行、简单、易于实现和支持的原因，避免了在主机上编译或预编译同一 BPF 应用程序的多个变体（风格）的复杂性应用程序，且每个变体针对不同的内核。</p>

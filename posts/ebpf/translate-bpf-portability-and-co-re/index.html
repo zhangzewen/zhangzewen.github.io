@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>[译]BPF CO-RE (Compile Once – Run Everywhere) &middot; What a Life!</title>
 
@@ -94,7 +94,7 @@ BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一
       },
       "datePublished": "2025-02-17T08:13:34+08:00",
       "dateModified": "2025-02-17T08:13:34+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e原文：\u003ca href=\"https://nakryiko.com/posts/bpf-portability-and-co-re/\"\u003eBPF CO-RE (Compile Once – Run Everywhere)\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eBPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一次 - 到处运行（CO-RE）**的情况下实现这一点实际上很困难？在这篇文章中，我们将探讨编写可以在多个内核版本上运行的BPF程序的挑战，以及BPF CO-RE如何帮助解决这个问题。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e原文：\u003ca href=\"https://nakryiko.com/posts/bpf-portability-and-co-re/\"\u003eBPF CO-RE (Compile Once – Run Everywhere)\u003c/a\u003e\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003eBPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一次 - 到处运行（CO-RE）**的情况下实现这一点实际上很困难？在这篇文章中，我们将探讨编写可以在多个内核版本上运行的BPF程序的挑战，以及BPF CO-RE如何帮助解决这个问题。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -263,7 +263,8 @@ BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一
   <div>
     <blockquote>
 <p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>原文：<a href="https://nakryiko.com/posts/bpf-portability-and-co-re/">BPF CO-RE (Compile Once – Run Everywhere)</a></p></blockquote>
+<p>原文：<a href="https://nakryiko.com/posts/bpf-portability-and-co-re/">BPF CO-RE (Compile Once – Run Everywhere)</a></p>
+</blockquote>
 <p>BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一次 - 到处运行（CO-RE）**的情况下实现这一点实际上很困难？在这篇文章中，我们将探讨编写可以在多个内核版本上运行的BPF程序的挑战，以及BPF CO-RE如何帮助解决这个问题。</p>
 <p>这边文章最初发布在Facebook的<a href="https://facebookmicrosites.github.io/bpf/blog/2020/02/19/bpf-portability-and-co-re.html">BPF blog</a>上。如果你对自BPF CO-RE首次引入以来发生的一些新事物感到好奇，请参见下面的 ((641e376c-f6c9-46c8-9c25-d552130493f4)) 部分。还有 [[[译]BPF CO-RE reference guide]] ，其中包含了许多在实际BPF应用中使用BPF CO-RE功能的实用技巧。</p>
 <h2 id="bpf最先进的技术">BPF：最先进的技术</h2>

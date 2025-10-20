@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>What a Life!</title>
 
@@ -181,7 +181,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>kubelet 是由多个生产者和多个消费者组成的后台服务，其内部实现是一个控制循环，由事件驱动着控制循环的运行，如下图所示：</p>
 <p><img src="/images/kubernetes/kubelet/syncLoop.png" alt="syncLoop"></p>
 <p>这个图片是展示的组件和本篇分析所使用的kubernetes 版本已经有所不同，但是其设计理念没有变法，依旧是 syncLoop 驱动着整个控制循环的运行。</p>
@@ -221,8 +222,34 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：</p>
+<ul>
+<li>Versioner： 资源对象的 metadata 操作（更新 resourceversion 和 selflink ）接口，结构体 <a href="https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/api_object_versioner.go#L30">APIObjectVersioner</a> 实现了该接口。</li>
+<li>Create 创建资源对象的方法。</li>
+<li>Delete 删除资源对象的方法。</li>
+<li>Watch 通过Watch机制监控资源对象变化方法。</li>
+<li>Get 获取资源对象的方法。</li>
+<li>GetList 获取资源对象的方法，以列表的形式返回。</li>
+<li>GuaranteedUpdate： 保证传入的tryUpdate函数运行成功。</li>
+<li>Count： 获取指定key下的条目数量。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Interface <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Versioner</span>() Versioner
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Create</span>(ctx context.Context, key <span style="color:#fabd2f">string</span>, obj, out runtime.Object, ttl <span style="color:#fabd2f">uint64</span>) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Delete</span>(
+</span></span><span style="display:flex;"><span>		ctx context.Context, key <span style="color:#fabd2f">string</span>, out runtime.Object, preconditions <span style="color:#fe8019">*</span>Preconditions,
+</span></span><span style="display:flex;"><span>		validateDeletion ValidateObjectFunc, cachedExistingObject runtime.Object) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Watch</span>(ctx context.Context, key <span style="color:#fabd2f">string</span>, opts ListOptions) (watch.Interface, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Get</span>(ctx context.Context, key <span style="color:#fabd2f">string</span>, opts GetOptions, objPtr runtime.Object) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GetList</span>(ctx context.Context, key <span style="color:#fabd2f">string</span>, opts ListOptions, listObj runtime.Object) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">GuaranteedUpdate</span>(
+</span></span><span style="display:flex;"><span>		ctx context.Context, key <span style="color:#fabd2f">string</span>, destination runtime.Object, ignoreNotFound <span style="color:#fabd2f">bool</span>,
+</span></span><span style="display:flex;"><span>		preconditions <span style="color:#fe8019">*</span>Preconditions, tryUpdate UpdateFunc, cachedExistingObject runtime.Object) <span style="color:#fabd2f">error</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Count</span>(key <span style="color:#fabd2f">string</span>) (<span style="color:#fabd2f">int64</span>, <span style="color:#fabd2f">error</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>在目录 <code>k8s.io/apiserver/pkg/storage/etcd3</code> 中的代码对 etcd 官方库进行了封装， 结构体 store 实现了该接口，以 Get 为例：</p>
         </div>
 
         <div class="read-more-link">
@@ -240,8 +267,14 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：</p>
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Storage <span style="color:#fe8019">interface</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">New</span>() runtime.Object
+</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Destroy</span>()
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>根据操作资源的动作，如创建/删除/检索/监听等，又提供了一系列的接口如 Getter/Lister/Watcher 等。这些接口的定义可以在 <code>/k8s.io/apiserver/pkg/registry/rest/rest.go</code> 下找到。</p>
         </div>
 
         <div class="read-more-link">
@@ -259,7 +292,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>在 kubernetes 中，所有的资源访问都是通过 RESTful api 来完成的，这些 RESTful api 是程序生成的。本片文章将详细分析其逻辑实现。</p>
         </div>
 
@@ -278,7 +312,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>apiserver storage 的 cache 层的设计有利于快速响应请求并返回所需的数据。</p>
 <p>结构体 cacher 实现了 底层存储接口<a href="https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/interfaces.go#L159">Interface</a>。请参考<a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-etcd/">kubernetes 源码分析之 apiserver storage etcd 层实现分析</a>。</p>
         </div>
@@ -299,7 +334,8 @@
         <div>
           <blockquote>
 <p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>原文: <strong><a href="https://nakryiko.com/posts/libbpf-bootstrap/">Building BPF applications with libbpf-bootstrap</a></strong></p></blockquote>
+<p>原文: <strong><a href="https://nakryiko.com/posts/libbpf-bootstrap/">Building BPF applications with libbpf-bootstrap</a></strong></p>
+</blockquote>
 <p><a href="https://github.com/libbpf/libbpf-bootstrap">libbpf-bootstrap</a>脚手架能快速轻松地让您构建自己的BPF应用程序，该脚手架负责所有让人乏味的设置步骤，并最大限度地减少必要的样板，让您直接沉浸在 BPF 的乐趣中。我们将看看 libbpf-bootstrap 提供了什么，以及所有内容是如何联系在一起的。</p>
         </div>
 
@@ -318,7 +354,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>PLEG 是 &ldquo;Pod Lifecycle Event Generator&rdquo; 的缩写，监控运行在集群各个节点上的容器状态变化，并将这些变化事件推送给 kubelet，kubelet 处理后同步到 apiserver。</p>
         </div>
 
@@ -337,7 +374,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>kubernetes 支持三种 container 探针：startupProbe、readinessProbe、livenessProbe。 livenessProbe 决定是否要重启容器，readinessProbe 确认是服务是否可用，startupProbe 是为了避免 container 启动时间过长使得 liveness 失败而造成无限重启的场景。</p>
         </div>
 
@@ -356,7 +394,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>准入控制（ admission control ）会在请求经过<a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/access-control/">认证和授权</a>前置检查后，资源对象被持久化（存储到 etcd ）前的最后一道防线，准入控制会对资源对象进行修改或者验证。apiserver 准入控制由一系列的插件组成，同时也提供了 webhook 准入控制插件支持用户自定义的准入控制插件来进行扩展。</p>
         </div>
 

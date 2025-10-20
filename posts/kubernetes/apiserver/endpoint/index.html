@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之apiserver endpoints &middot; What a Life!</title>
 
@@ -89,7 +89,7 @@
       },
       "datePublished": "2025-05-11T22:36:42+08:00",
       "dateModified": "2025-05-11T22:36:42+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003e在 kubernetes 中，所有的资源访问都是通过 RESTful api 来完成的，这些 RESTful api 是程序生成的。本片文章将详细分析其逻辑实现。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003e在 kubernetes 中，所有的资源访问都是通过 RESTful api 来完成的，这些 RESTful api 是程序生成的。本片文章将详细分析其逻辑实现。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -236,7 +236,8 @@
 
   <div>
     <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>在 kubernetes 中，所有的资源访问都是通过 RESTful api 来完成的，这些 RESTful api 是程序生成的。本片文章将详细分析其逻辑实现。</p>
 <h2 id="接口">接口</h2>
 <p>kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：</p>

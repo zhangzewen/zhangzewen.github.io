@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>[译] Lifetime of BPF objects &middot; What a Life!</title>
 
@@ -94,7 +94,7 @@ BPF验证器保证程序本身能够被内核安全地执行，但为了安全�
       },
       "datePublished": "2025-03-04T21:42:07+08:00",
       "dateModified": "2025-03-04T21:42:07+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e原文链接: \u003ca href=\"https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html\"\u003eLifetime of BPF objects\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eBPF验证器保证程序本身能够被内核安全地执行，但为了安全地且无意外地使用整个BPF，用户需要理解 BPF 程序和 Maps 的生命周期。本文深入介绍了这些细节。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e原文链接: \u003ca href=\"https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html\"\u003eLifetime of BPF objects\u003c/a\u003e\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003eBPF验证器保证程序本身能够被内核安全地执行，但为了安全地且无意外地使用整个BPF，用户需要理解 BPF 程序和 Maps 的生命周期。本文深入介绍了这些细节。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -245,7 +245,8 @@ BPF验证器保证程序本身能够被内核安全地执行，但为了安全�
   <div>
     <blockquote>
 <p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>原文链接: <a href="https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html">Lifetime of BPF objects</a></p></blockquote>
+<p>原文链接: <a href="https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html">Lifetime of BPF objects</a></p>
+</blockquote>
 <p>BPF验证器保证程序本身能够被内核安全地执行，但为了安全地且无意外地使用整个BPF，用户需要理解 BPF 程序和 Maps 的生命周期。本文深入介绍了这些细节。</p>
 <h2 id="文件描述符和引用计数">文件描述符和引用计数</h2>
 <p>BPF对象（程序、Maps 和调试信息）通过文件描述符（FD）由用户空间访问，每个对象都有一个引用计数器。例如，当使用<code>bpf_create_map()</code>调用创建 Map 时，内核会分配一个<code>struct bpf_map</code>对象。然后内核将其refcnt初始化为1，并返回文件描述符给用户空间进程。如果该进程退出或崩溃，则关联的文件描述符(FD) 会被关闭释放，则bpf map对象的refcnt将被减少。当refcnt降为零时，将在RCU宽限期过后触发内存释放。</p>

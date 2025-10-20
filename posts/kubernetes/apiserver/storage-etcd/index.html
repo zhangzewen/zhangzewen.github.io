@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 apiserver storage etcd 层实现分析 &middot; What a Life!</title>
 
@@ -13,7 +13,8 @@
   
   <meta itemprop="name" content="kubernetes 源码分析之 apiserver storage etcd 层实现分析">
   <meta itemprop="description" content="本篇文章基于 apiserver v0.25.1
-kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：">
+kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：
+Versioner： 资源对象的 metadata 操作（更新 resourceversion 和 selflink ）接口，结构体 APIObjectVersioner 实现了该接口。 Create 创建资源对象的方法。 Delete 删除资源对象的方法。 Watch 通过Watch机制监控资源对象变化方法。 Get 获取资源对象的方法。 GetList 获取资源对象的方法，以列表的形式返回。 GuaranteedUpdate： 保证传入的tryUpdate函数运行成功。 Count： 获取指定key下的条目数量。 type Interface interface { Versioner() Versioner Create(ctx context.Context, key string, obj, out runtime.Object, ttl uint64) error Delete( ctx context.Context, key string, out runtime.Object, preconditions *Preconditions, validateDeletion ValidateObjectFunc, cachedExistingObject runtime.Object) error Watch(ctx context.Context, key string, opts ListOptions) (watch.Interface, error) Get(ctx context.Context, key string, opts GetOptions, objPtr runtime.Object) error GetList(ctx context.Context, key string, opts ListOptions, listObj runtime.Object) error GuaranteedUpdate( ctx context.Context, key string, destination runtime.Object, ignoreNotFound bool, preconditions *Preconditions, tryUpdate UpdateFunc, cachedExistingObject runtime.Object) error Count(key string) (int64, error) } 在目录 k8s.io/apiserver/pkg/storage/etcd3 中的代码对 etcd 官方库进行了封装， 结构体 store 实现了该接口，以 Get 为例：">
   <meta itemprop="datePublished" content="2025-05-11T22:36:42+08:00">
   <meta itemprop="dateModified" content="2025-05-11T22:36:42+08:00">
   <meta itemprop="wordCount" content="941">
@@ -25,14 +26,16 @@ kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都
   <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="kubernetes 源码分析之 apiserver storage etcd 层实现分析">
   <meta name="twitter:description" content="本篇文章基于 apiserver v0.25.1
-kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：">
+kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：
+Versioner： 资源对象的 metadata 操作（更新 resourceversion 和 selflink ）接口，结构体 APIObjectVersioner 实现了该接口。 Create 创建资源对象的方法。 Delete 删除资源对象的方法。 Watch 通过Watch机制监控资源对象变化方法。 Get 获取资源对象的方法。 GetList 获取资源对象的方法，以列表的形式返回。 GuaranteedUpdate： 保证传入的tryUpdate函数运行成功。 Count： 获取指定key下的条目数量。 type Interface interface { Versioner() Versioner Create(ctx context.Context, key string, obj, out runtime.Object, ttl uint64) error Delete( ctx context.Context, key string, out runtime.Object, preconditions *Preconditions, validateDeletion ValidateObjectFunc, cachedExistingObject runtime.Object) error Watch(ctx context.Context, key string, opts ListOptions) (watch.Interface, error) Get(ctx context.Context, key string, opts GetOptions, objPtr runtime.Object) error GetList(ctx context.Context, key string, opts ListOptions, listObj runtime.Object) error GuaranteedUpdate( ctx context.Context, key string, destination runtime.Object, ignoreNotFound bool, preconditions *Preconditions, tryUpdate UpdateFunc, cachedExistingObject runtime.Object) error Count(key string) (int64, error) } 在目录 k8s.io/apiserver/pkg/storage/etcd3 中的代码对 etcd 官方库进行了封装， 结构体 store 实现了该接口，以 Get 为例：">
 
 
 <meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-etcd/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes 源码分析之 apiserver storage etcd 层实现分析">
   <meta property="og:description" content="本篇文章基于 apiserver v0.25.1
-kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：">
+kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：
+Versioner： 资源对象的 metadata 操作（更新 resourceversion 和 selflink ）接口，结构体 APIObjectVersioner 实现了该接口。 Create 创建资源对象的方法。 Delete 删除资源对象的方法。 Watch 通过Watch机制监控资源对象变化方法。 Get 获取资源对象的方法。 GetList 获取资源对象的方法，以列表的形式返回。 GuaranteedUpdate： 保证传入的tryUpdate函数运行成功。 Count： 获取指定key下的条目数量。 type Interface interface { Versioner() Versioner Create(ctx context.Context, key string, obj, out runtime.Object, ttl uint64) error Delete( ctx context.Context, key string, out runtime.Object, preconditions *Preconditions, validateDeletion ValidateObjectFunc, cachedExistingObject runtime.Object) error Watch(ctx context.Context, key string, opts ListOptions) (watch.Interface, error) Get(ctx context.Context, key string, opts GetOptions, objPtr runtime.Object) error GetList(ctx context.Context, key string, opts ListOptions, listObj runtime.Object) error GuaranteedUpdate( ctx context.Context, key string, destination runtime.Object, ignoreNotFound bool, preconditions *Preconditions, tryUpdate UpdateFunc, cachedExistingObject runtime.Object) error Count(key string) (int64, error) } 在目录 k8s.io/apiserver/pkg/storage/etcd3 中的代码对 etcd 官方库进行了封装， 结构体 store 实现了该接口，以 Get 为例：">
   <meta property="og:locale" content="zh_cn">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -89,7 +92,7 @@ kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都
       },
       "datePublished": "2025-05-11T22:36:42+08:00",
       "dateModified": "2025-05-11T22:36:42+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ekubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003ekubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003eVersioner： 资源对象的 metadata 操作（更新 resourceversion 和 selflink ）接口，结构体 \u003ca href=\"https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/api_object_versioner.go#L30\"\u003eAPIObjectVersioner\u003c/a\u003e 实现了该接口。\u003c/li\u003e\n\u003cli\u003eCreate 创建资源对象的方法。\u003c/li\u003e\n\u003cli\u003eDelete 删除资源对象的方法。\u003c/li\u003e\n\u003cli\u003eWatch 通过Watch机制监控资源对象变化方法。\u003c/li\u003e\n\u003cli\u003eGet 获取资源对象的方法。\u003c/li\u003e\n\u003cli\u003eGetList 获取资源对象的方法，以列表的形式返回。\u003c/li\u003e\n\u003cli\u003eGuaranteedUpdate： 保证传入的tryUpdate函数运行成功。\u003c/li\u003e\n\u003cli\u003eCount： 获取指定key下的条目数量。\u003c/li\u003e\n\u003c/ul\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-go\" data-lang=\"go\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#fe8019\"\u003etype\u003c/span\u003e Interface \u003cspan style=\"color:#fe8019\"\u003einterface\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eVersioner\u003c/span\u003e() Versioner\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eCreate\u003c/span\u003e(ctx context.Context, key \u003cspan style=\"color:#fabd2f\"\u003estring\u003c/span\u003e, obj, out runtime.Object, ttl \u003cspan style=\"color:#fabd2f\"\u003euint64\u003c/span\u003e) \u003cspan style=\"color:#fabd2f\"\u003eerror\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eDelete\u003c/span\u003e(\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\tctx context.Context, key \u003cspan style=\"color:#fabd2f\"\u003estring\u003c/span\u003e, out runtime.Object, preconditions \u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003ePreconditions,\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\tvalidateDeletion ValidateObjectFunc, cachedExistingObject runtime.Object) \u003cspan style=\"color:#fabd2f\"\u003eerror\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eWatch\u003c/span\u003e(ctx context.Context, key \u003cspan style=\"color:#fabd2f\"\u003estring\u003c/span\u003e, opts ListOptions) (watch.Interface, \u003cspan style=\"color:#fabd2f\"\u003eerror\u003c/span\u003e)\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eGet\u003c/span\u003e(ctx context.Context, key \u003cspan style=\"color:#fabd2f\"\u003estring\u003c/span\u003e, opts GetOptions, objPtr runtime.Object) \u003cspan style=\"color:#fabd2f\"\u003eerror\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eGetList\u003c/span\u003e(ctx context.Context, key \u003cspan style=\"color:#fabd2f\"\u003estring\u003c/span\u003e, opts ListOptions, listObj runtime.Object) \u003cspan style=\"color:#fabd2f\"\u003eerror\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eGuaranteedUpdate\u003c/span\u003e(\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\tctx context.Context, key \u003cspan style=\"color:#fabd2f\"\u003estring\u003c/span\u003e, destination runtime.Object, ignoreNotFound \u003cspan style=\"color:#fabd2f\"\u003ebool\u003c/span\u003e,\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\tpreconditions \u003cspan style=\"color:#fe8019\"\u003e*\u003c/span\u003ePreconditions, tryUpdate UpdateFunc, cachedExistingObject runtime.Object) \u003cspan style=\"color:#fabd2f\"\u003eerror\u003c/span\u003e\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eCount\u003c/span\u003e(key \u003cspan style=\"color:#fabd2f\"\u003estring\u003c/span\u003e) (\u003cspan style=\"color:#fabd2f\"\u003eint64\u003c/span\u003e, \u003cspan style=\"color:#fabd2f\"\u003eerror\u003c/span\u003e)\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003e在目录 \u003ccode\u003ek8s.io/apiserver/pkg/storage/etcd3\u003c/code\u003e 中的代码对 etcd 官方库进行了封装， 结构体 store 实现了该接口，以 Get 为例：\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -240,7 +243,8 @@ kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都
 
   <div>
     <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>kubernetes 的存储后端除了 etcd 也可以支持别的存储后端，但都需要实现 Interface 接口：</p>
 <ul>
 <li>Versioner： 资源对象的 metadata 操作（更新 resourceversion 和 selflink ）接口，结构体 <a href="https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/api_object_versioner.go#L30">APIObjectVersioner</a> 实现了该接口。</li>

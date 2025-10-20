@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之apiserver storage 的 cache 层实现分析 &middot; What a Life!</title>
 
@@ -92,7 +92,7 @@ apiserver storage 的 cache 层的设计有利于快速响应请求并返回所�
       },
       "datePublished": "2025-05-11T22:36:42+08:00",
       "dateModified": "2025-05-11T22:36:42+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eapiserver storage 的 cache 层的设计有利于快速响应请求并返回所需的数据。\u003c/p\u003e\n\u003cp\u003e结构体 cacher 实现了 底层存储接口\u003ca href=\"https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/interfaces.go#L159\"\u003eInterface\u003c/a\u003e。请参考\u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-etcd/\"\u003ekubernetes 源码分析之 apiserver storage etcd 层实现分析\u003c/a\u003e。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003eapiserver storage 的 cache 层的设计有利于快速响应请求并返回所需的数据。\u003c/p\u003e\n\u003cp\u003e结构体 cacher 实现了 底层存储接口\u003ca href=\"https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/interfaces.go#L159\"\u003eInterface\u003c/a\u003e。请参考\u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-etcd/\"\u003ekubernetes 源码分析之 apiserver storage etcd 层实现分析\u003c/a\u003e。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -243,7 +243,8 @@ apiserver storage 的 cache 层的设计有利于快速响应请求并返回所�
 
   <div>
     <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>apiserver storage 的 cache 层的设计有利于快速响应请求并返回所需的数据。</p>
 <p>结构体 cacher 实现了 底层存储接口<a href="https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/interfaces.go#L159">Interface</a>。请参考<a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-etcd/">kubernetes 源码分析之 apiserver storage etcd 层实现分析</a>。</p>
 <h2 id="实现">实现</h2>

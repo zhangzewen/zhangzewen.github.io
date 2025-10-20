@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections &middot; What a Life!</title>
 
@@ -262,7 +262,8 @@
 <li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></li>
 <li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></li>
 </ul>
-<p><strong>原文：<a href="https://blog.px.dev/ebpf-openssl-tracing/">Debugging with eBPF Part 3: Tracing SSL/TLS connections</a></strong></p></blockquote>
+<p><strong>原文：<a href="https://blog.px.dev/ebpf-openssl-tracing/">Debugging with eBPF Part 3: Tracing SSL/TLS connections</a></strong></p>
+</blockquote>
 <p>本文将演示如何使用eBPF跟踪通过TLS（或其前身SSL）运行的加密连接。TLS已成为保护微服务通信的标准，因此任何可用于生产环境的跟踪工具都应该能够处理加密连接。</p>
 <p>这篇文章是我们持续分享的系列之一，介绍如何使用eBPF在不重新编译或重新部署应用程序的情况下进行调试。如要更进一步了解eBPF，请查看：</p>
 <ul>

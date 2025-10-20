@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 apiserver Authentication &amp; Authoriztion &middot; What a Life!</title>
 
@@ -92,7 +92,7 @@ apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客�
       },
       "datePublished": "2025-04-14T22:36:42+08:00",
       "dateModified": "2025-04-14T22:36:42+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eapiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客户端的访问请求，其对接口请求访问提供了3种安全权限控制，每个请求都需要经过认证，授权以及准入控制器才有权限操作资源对象。\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e认证：针对请求的认证，确认是否具有访问 kubernetes 集群的权限。\u003c/li\u003e\n\u003cli\u003e授权：针对资源的授权，确认是否对资源具有相关权限。\u003c/li\u003e\n\u003cli\u003e准入控制器：在认证和授权之后，对象被持久化之前，拦截对 apiserver 的请求，拦截后的请求进入准入控制器中处理，对请求的资源对象进行自定义(校验，修改或者拒绝)等操作。\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003e\u003cimg src=\"/images/kubernetes/apiserver/access_control_01.svg\" alt=\"apiserver_access_control_01\"\u003e\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003eapiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客户端的访问请求，其对接口请求访问提供了3种安全权限控制，每个请求都需要经过认证，授权以及准入控制器才有权限操作资源对象。\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e认证：针对请求的认证，确认是否具有访问 kubernetes 集群的权限。\u003c/li\u003e\n\u003cli\u003e授权：针对资源的授权，确认是否对资源具有相关权限。\u003c/li\u003e\n\u003cli\u003e准入控制器：在认证和授权之后，对象被持久化之前，拦截对 apiserver 的请求，拦截后的请求进入准入控制器中处理，对请求的资源对象进行自定义(校验，修改或者拒绝)等操作。\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003e\u003cimg src=\"/images/kubernetes/apiserver/access_control_01.svg\" alt=\"apiserver_access_control_01\"\u003e\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -255,7 +255,8 @@ apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客�
 
   <div>
     <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>apiserver 作为 kubernetes 集群的请求入口，接收集群中组件与客户端的访问请求，其对接口请求访问提供了3种安全权限控制，每个请求都需要经过认证，授权以及准入控制器才有权限操作资源对象。</p>
 <ul>
 <li>认证：针对请求的认证，确认是否具有访问 kubernetes 集群的权限。</li>

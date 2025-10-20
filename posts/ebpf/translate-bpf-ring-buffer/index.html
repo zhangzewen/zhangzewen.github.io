@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>[译]BPF ring buffer &middot; What a Life!</title>
 
@@ -94,7 +94,7 @@ BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲
       },
       "datePublished": "2025-03-24T21:42:07+08:00",
       "dateModified": "2025-03-24T21:42:07+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e原文: \u003cstrong\u003e\u003ca href=\"https://nakryiko.com/posts/bpf-ringbuf/\"\u003eBPF ring buffer\u003c/a\u003e\u003c/strong\u003e\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eBPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲区（当前用于从内核向用户态发送数据的标准）的内存效率和事件重新排序问题，同时达到或超过了其性能。它提供了perfbuf兼容性以便于轻松迁移，但也有新的reserve/submit API，具有更好的可用性。此外，合成和实际基准测试都表明，在几乎所有情况下，考虑将其作为从BPF程序发送数据到用户态的默认选择。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e\u003cem\u003e\u003cstrong\u003e介于能力有限，翻译有不当之处，不吝赐教\u003c/strong\u003e\u003c/em\u003e\u003c/p\u003e\n\u003cp\u003e原文: \u003cstrong\u003e\u003ca href=\"https://nakryiko.com/posts/bpf-ringbuf/\"\u003eBPF ring buffer\u003c/a\u003e\u003c/strong\u003e\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003eBPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲区（当前用于从内核向用户态发送数据的标准）的内存效率和事件重新排序问题，同时达到或超过了其性能。它提供了perfbuf兼容性以便于轻松迁移，但也有新的reserve/submit API，具有更好的可用性。此外，合成和实际基准测试都表明，在几乎所有情况下，考虑将其作为从BPF程序发送数据到用户态的默认选择。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -255,7 +255,8 @@ BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲
   <div>
     <blockquote>
 <p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>原文: <strong><a href="https://nakryiko.com/posts/bpf-ringbuf/">BPF ring buffer</a></strong></p></blockquote>
+<p>原文: <strong><a href="https://nakryiko.com/posts/bpf-ringbuf/">BPF ring buffer</a></strong></p>
+</blockquote>
 <p>BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲区（当前用于从内核向用户态发送数据的标准）的内存效率和事件重新排序问题，同时达到或超过了其性能。它提供了perfbuf兼容性以便于轻松迁移，但也有新的reserve/submit API，具有更好的可用性。此外，合成和实际基准测试都表明，在几乎所有情况下，考虑将其作为从BPF程序发送数据到用户态的默认选择。</p>
 <h1 id="bpf-ringbuf-vs-bpf-perfbuf">BPF ringbuf vs BPF perfbuf</h1>
 <p>今天，每当一个BPF程序需要将收集到的数据发送到用户态进行后续处理和记录时，通常会使用BPF perf缓冲区（perfbuf）来实现这一点。Perfbuf是一个由每个CPU的循环缓冲区组成的集合，它允许在内核和用户态之间高效地交换数据。它在实践中表现得很好，但由于其每个CPU的设计，它有两个主要的缺点，这在实践中证明是不便的：内存使用效率低和事件重新排序。</p>

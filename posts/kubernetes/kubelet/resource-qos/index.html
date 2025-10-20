@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 Kubernetes Resource QoS Classes  &middot; What a Life!</title>
 
@@ -89,7 +89,7 @@ Kubernetes 根据 Pod 中 Containers Resource 的 request 和 limit 的值来定
       },
       "datePublished": "2025-02-10T09:43:31+08:00",
       "dateModified": "2025-02-10T09:43:31+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003eKubernetes 根据 Pod 中 Containers Resource 的 \u003ccode\u003erequest\u003c/code\u003e 和 \u003ccode\u003elimit\u003c/code\u003e 的值来定义 Pod 的 QoS Class。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003eKubernetes 根据 Pod 中 Containers Resource 的 \u003ccode\u003erequest\u003c/code\u003e 和 \u003ccode\u003elimit\u003c/code\u003e 的值来定义 Pod 的 QoS Class。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -243,7 +243,8 @@ Kubernetes 根据 Pod 中 Containers Resource 的 request 和 limit 的值来定
 
   <div>
     <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>Kubernetes 根据 Pod 中 Containers Resource 的 <code>request</code> 和 <code>limit</code> 的值来定义 Pod 的 QoS Class。</p>
 <h2 id="qosclass">QosClass</h2>
 <p>对于每一种 Resource 都可以将容器分为三中 QoS Classes: <strong>Guaranteed</strong>, <strong>Burstable</strong>, and <strong>Best-Effort</strong>，它们的QoS级别依次递减。</p>

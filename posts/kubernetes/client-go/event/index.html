@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>client-go 源码分析之 Event 机制 &middot; What a Life!</title>
 
@@ -89,7 +89,7 @@ kubernetes 的事件（Event）是一种资源对象，用于展示集群内发�
       },
       "datePublished": "2024-06-01T23:43:31+08:00",
       "dateModified": "2024-06-01T23:43:31+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 client-go release-1.25 分支\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ekubernetes 的事件（Event）是一种资源对象，用于展示集群内发生的情况，kubernetes 系统中的各个组件会将运行时发生的各种事件上报给 kubernetes apiserver。由于事件是一种资源，因此他们存储在 etcd 集群中。为了避免磁盘空间被填满，故强制执行保留策略：在最后一次的事件发生后，删除1小时之前发生的事件。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 client-go release-1.25 分支\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003ekubernetes 的事件（Event）是一种资源对象，用于展示集群内发生的情况，kubernetes 系统中的各个组件会将运行时发生的各种事件上报给 kubernetes apiserver。由于事件是一种资源，因此他们存储在 etcd 集群中。为了避免磁盘空间被填满，故强制执行保留策略：在最后一次的事件发生后，删除1小时之前发生的事件。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -246,7 +246,8 @@ kubernetes 的事件（Event）是一种资源对象，用于展示集群内发�
 
   <div>
     <blockquote>
-<p>本篇文章基于 client-go release-1.25 分支</p></blockquote>
+<p>本篇文章基于 client-go release-1.25 分支</p>
+</blockquote>
 <p>kubernetes 的事件（Event）是一种资源对象，用于展示集群内发生的情况，kubernetes 系统中的各个组件会将运行时发生的各种事件上报给 kubernetes apiserver。由于事件是一种资源，因此他们存储在 etcd 集群中。为了避免磁盘空间被填满，故强制执行保留策略：在最后一次的事件发生后，删除1小时之前发生的事件。</p>
 <p>在写 kubernetes controller 的时候经常会用到：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>  eventBroadcaster <span style="color:#fe8019">:=</span> record.<span style="color:#fabd2f">NewBroadcaster</span>()

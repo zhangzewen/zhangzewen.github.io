@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 kubelet pod lifecycle &middot; What a Life!</title>
 
@@ -89,7 +89,7 @@ kubelet pod liefcycle 的源码在 k8s.io/kubernetes/pkg/kubelet/lifecycle，其
       },
       "datePublished": "2025-07-27T22:44:45+08:00",
       "dateModified": "2025-07-27T22:44:45+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ekubelet pod liefcycle 的源码在 \u003ccode\u003ek8s.io/kubernetes/pkg/kubelet/lifecycle\u003c/code\u003e，其提供了接口用于 kubelet 上 pod的准入控制、同步、驱逐、运行前后执行函数功能。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003ekubelet pod liefcycle 的源码在 \u003ccode\u003ek8s.io/kubernetes/pkg/kubelet/lifecycle\u003c/code\u003e，其提供了接口用于 kubelet 上 pod的准入控制、同步、驱逐、运行前后执行函数功能。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -239,7 +239,8 @@ kubelet pod liefcycle 的源码在 k8s.io/kubernetes/pkg/kubelet/lifecycle，其
 
   <div>
     <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>kubelet pod liefcycle 的源码在 <code>k8s.io/kubernetes/pkg/kubelet/lifecycle</code>，其提供了接口用于 kubelet 上 pod的准入控制、同步、驱逐、运行前后执行函数功能。</p>
 <p><img src="/images/kubernetes/kubelet/kubelet_pod_lifecycle.png" alt="kubelet_pod_lifecycle.svg"></p>
 <h2 id="pod-准入控制">Pod 准入控制</h2>

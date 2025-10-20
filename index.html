@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>What a Life!</title>
 
@@ -181,7 +181,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 <code>k8s.io/kubernetes/pkg/controller/volume/attachdetach</code> 下：</p>
         </div>
 
@@ -200,7 +201,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建 PersistentVolumeController，NewController 的流程如下：</p>
         </div>
 
@@ -220,7 +222,8 @@
         <div>
           <blockquote>
 <p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>原文：<a href="https://nakryiko.com/posts/bpf-core-reference-guide/">BPF CO-RE reference guide</a></p></blockquote>
+<p>原文：<a href="https://nakryiko.com/posts/bpf-core-reference-guide/">BPF CO-RE reference guide</a></p>
+</blockquote>
 <h2 id="缺失的手册">缺失的手册</h2>
 <p>BPF CO-RE（编译一次-到处运行）是编写可移植BPF应用程序的现代方法，应用程序可以在不同的内核版本和配置上运行，而无需在目标机器上修改和编译运行时源代码。这与<a href="https://github.com/iovisor/bcc">BCC</a>框架提供的更传统的方法有很大的区别，在BCC框架中，BPF应用程序源代码编译被延迟到目标主机上，其携带了一个重量级的编译器工具链来实现这一点。请阅读<a href="https://zhangzewen.github.io/posts/ebpf/translate-bpf-portability-and-co-re/">[译]BPF CO-RE (Compile Once – Run Everywhere)</a>这篇文章，该文章介绍了 BPF CO-RE 的概念，并解释了为什么 BPF CO-RE对这些现实世界的 BPF 应用程序来说都是重要且必要的，以及在没有<a href="https://nakryiko.com/posts/btf-dedup/">内核BTF</a>的情况下变得困难的原因。</p>
         </div>
@@ -331,7 +334,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>kubelet pod liefcycle 的源码在 <code>k8s.io/kubernetes/pkg/kubelet/lifecycle</code>，其提供了接口用于 kubelet 上 pod的准入控制、同步、驱逐、运行前后执行函数功能。</p>
         </div>
 
@@ -350,7 +354,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>当 pod 被调度到某个节点，因资源不满足出现抢占现象，会触发对低优先级的 pod 的驱逐，被调度的 pod 称为 Critical Pod：</p>
         </div>
 

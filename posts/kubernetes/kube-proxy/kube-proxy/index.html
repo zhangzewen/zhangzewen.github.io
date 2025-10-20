@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 kube-proxy &middot; What a Life!</title>
 
@@ -89,7 +89,7 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
       },
       "datePublished": "2024-10-06T00:27:07+08:00",
       "dateModified": "2024-10-06T00:27:07+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ekube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部署在集群的每个节点之上，负责在其宿主节点上配置 iptables，ipvs等规则。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003ekube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部署在集群的每个节点之上，负责在其宿主节点上配置 iptables，ipvs等规则。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -237,7 +237,8 @@ kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部
 
   <div>
     <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>kube-proxy 是 kubernetes 集群 control plane 的主要组件之一，需要部署在集群的每个节点之上，负责在其宿主节点上配置 iptables，ipvs等规则。</p>
 <h2 id="kube-proxy-启动流程分析">kube-proxy 启动流程分析</h2>
 <p>kube-proxy 入口在 <code>cmd/kube-proxy/proxy.go</code>。首先，通过解析命令行参数完善 Options 结构体，然后就是对 Options 进行校验，随后就调用 Run 来启动 kube-proxy ：</p>

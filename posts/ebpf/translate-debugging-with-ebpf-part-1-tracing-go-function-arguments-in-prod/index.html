@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod &middot; What a Life!</title>
 
@@ -253,7 +253,8 @@
 <li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></li>
 <li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/">[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</a></li>
 </ul>
-<p>原文: <strong><a href="https://blog.px.dev/ebpf-function-tracing/">Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></strong></p></blockquote>
+<p>原文: <strong><a href="https://blog.px.dev/ebpf-function-tracing/">Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></strong></p>
+</blockquote>
 <p>本片文章是描述如何使用 eBPF 在生产环境中调试应用程序而无需重新编译/重新部署的系列文章中的第一篇。 这篇文章描述了如何使用 <a href="https://github.com/iovisor/gobpf">gobpf</a> 和 <strong>Uprobes</strong> 为 Go 应用程序构建函数参数跟踪器。 该技术还可以扩展到其他编译语言，例如 C++、Rust 等。本系列其余文章将讨论使用 eBPF 来跟踪 HTTP/gRPC 数据、SSL 等。</p>
 <p>在调试的过程中，我们通常对捕获程序运行时的状态信息更感兴趣。 这使我们能够检查应用程序正在做什么并找到代码中的bug。 观察状态的一种简单方法是使用调试器来捕获函数参数。 对于 Go 应用程序，我们经常使用 Delve 或 gdb。</p>
 <p>Delve 和 gdb 非常适合在开发环境中进行调试，但它们在生产环境中并不经常使用。 调试器强大的特性也可能使得它们并不适合在生产系统中使用。 例如调试器可能导致程序严重中断，甚至修改了程序状态，这可能导致生产环境下的软件的产生意外故障。</p>

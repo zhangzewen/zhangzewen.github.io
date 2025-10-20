@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 apiserver storage 通用实现 &middot; What a Life!</title>
 
@@ -13,7 +13,8 @@
   
   <meta itemprop="name" content="kubernetes 源码分析之 apiserver storage 通用实现">
   <meta itemprop="description" content="本篇文章基于 apiserver v0.25.1
-kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：">
+kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：
+type Storage interface { New() runtime.Object Destroy() } 根据操作资源的动作，如创建/删除/检索/监听等，又提供了一系列的接口如 Getter/Lister/Watcher 等。这些接口的定义可以在 /k8s.io/apiserver/pkg/registry/rest/rest.go 下找到。">
   <meta itemprop="datePublished" content="2025-05-11T22:36:42+08:00">
   <meta itemprop="dateModified" content="2025-05-11T22:36:42+08:00">
   <meta itemprop="wordCount" content="1749">
@@ -25,14 +26,16 @@ kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接�
   <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="kubernetes 源码分析之 apiserver storage 通用实现">
   <meta name="twitter:description" content="本篇文章基于 apiserver v0.25.1
-kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：">
+kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：
+type Storage interface { New() runtime.Object Destroy() } 根据操作资源的动作，如创建/删除/检索/监听等，又提供了一系列的接口如 Getter/Lister/Watcher 等。这些接口的定义可以在 /k8s.io/apiserver/pkg/registry/rest/rest.go 下找到。">
 
 
 <meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-generic/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes 源码分析之 apiserver storage 通用实现">
   <meta property="og:description" content="本篇文章基于 apiserver v0.25.1
-kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：">
+kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：
+type Storage interface { New() runtime.Object Destroy() } 根据操作资源的动作，如创建/删除/检索/监听等，又提供了一系列的接口如 Getter/Lister/Watcher 等。这些接口的定义可以在 /k8s.io/apiserver/pkg/registry/rest/rest.go 下找到。">
   <meta property="og:locale" content="zh_cn">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -89,7 +92,7 @@ kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接�
       },
       "datePublished": "2025-05-11T22:36:42+08:00",
       "dateModified": "2025-05-11T22:36:42+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003ekubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003ekubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：\u003c/p\u003e\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" style=\"color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;\"\u003e\u003ccode class=\"language-go\" data-lang=\"go\"\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\u003cspan style=\"color:#fe8019\"\u003etype\u003c/span\u003e Storage \u003cspan style=\"color:#fe8019\"\u003einterface\u003c/span\u003e {\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eNew\u003c/span\u003e() runtime.Object\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e\t\u003cspan style=\"color:#fabd2f\"\u003eDestroy\u003c/span\u003e()\n\u003c/span\u003e\u003c/span\u003e\u003cspan style=\"display:flex;\"\u003e\u003cspan\u003e}\n\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cp\u003e根据操作资源的动作，如创建/删除/检索/监听等，又提供了一系列的接口如 Getter/Lister/Watcher 等。这些接口的定义可以在 \u003ccode\u003e/k8s.io/apiserver/pkg/registry/rest/rest.go\u003c/code\u003e 下找到。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -242,7 +245,8 @@ kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接�
 
   <div>
     <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Storage <span style="color:#fe8019">interface</span> {
 </span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">New</span>() runtime.Object

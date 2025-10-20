@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses &middot; What a Life!</title>
 
@@ -257,7 +257,8 @@
 <li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></li>
 <li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/">[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</a></li>
 </ul>
-<p>原文：<a href="https://blog.px.dev/ebpf-http-tracing/">Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></p></blockquote>
+<p>原文：<a href="https://blog.px.dev/ebpf-http-tracing/">Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></p>
+</blockquote>
 <p>这是本系列帖子中的第二篇，我们将分享在不重新编译/部署应用程序的情况下使用eBPF进行调试。<a href="https://blog.px.dev/ebpf-function-tracing/">第一部分</a>简要介绍了eBPF，并演示了如何使用它来编写一个简单的函数参数跟踪器。在这篇第二篇文章中，我们将看看如何使用eBPF捕获HTTP 1.X流量。</p>
 <p>当处理分布式应用程序时，获得HTTP流量的观测性数据非常有价值。这些数据可以用于性能、功能和安全监控。许多应用程序通过利用中间件向应用程序的HTTP请求添加跟踪或日志记录来实现此目的。人们还可以利用流行的开源框架（如<a href="https://opentelemetry.io/">Open Telemetry</a>）来监控请求和相关上下文。在本文中，我们将介绍一种替代方法，利用eBPF捕获HTTP数据而无需手动添加监控工具。这种方法的一个优点是它始终有效，即使应用程序没有被专门监控也是如此。</p>
 <p>在本系列的<a href="https://blog.px.dev/ebpf-function-tracing/">第一部分</a>提供了更详细的eBPF概述，它允许您在某些触发事件上运行受限制的C代码。Kprobes 提供了一种跟踪内核API或内部机制的机制，而 uprobes则提供了拦截用户程序中特定指令的机制。由于应用程序通常位于Kernel系统API之上，如果我们捕获Kernel接口，则应该能够捕获所有入站和出站数据并重构HTTP请求。</p>

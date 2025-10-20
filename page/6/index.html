@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>What a Life!</title>
 
@@ -201,7 +201,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>Pod 是 kubernetes 里最小调度单元，一个 Pod 里面可以包含由多个容器。 这些容器之间通过 linux namespace 来共享资源以及和宿主节点环境隔离。Pod 里面最基础的容器是 pause 容器，它是 Pod 启动的时候，首先创建的容器，其他的业务容器都依赖该 pause 容器，毕竟它提供了可共享的 linux namspace。</p>
         </div>
 
@@ -220,7 +221,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>kubelet 的镜像管理实现在 <code>k8s.io/kubernetes/pkg/kubelet/image</code>目录下。镜像管理需要实现接口 ImageManager ：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// k8s.io/kubernetes/pkg/kubelet/images/image_manager.go</span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">type</span> ImageManager <span style="color:#fe8019">interface</span> {
@@ -244,7 +246,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <h2 id="基础-manager">基础 Manager</h2>
 <p>在阅读 kubelet 的源码中，有诸多 Manager：configmap manager，secret manager， pod manager 等，这些 manager 都和 pod 息息相关，在 kublet 的代码中专门抽象出了最基础的接口 Manager ：</p>
         </div>
@@ -264,7 +267,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p>kubelet 提供了驱逐和垃圾回收机制来保证节点健康，即节点资源不会被消耗殆尽。本片文章从源码角度来分析 kubelet 的垃圾回收功能，即清理不需要的容器和镜像。</p>
 <h2 id="启动切入点">启动切入点</h2>
 <p>垃圾回收是在 kubelet 对象初始化完成后启动的，在 createAndInitKubelet 方法中首先调用 NewMainKubelet 初始化 Kubelet 实例，随后调用 <code>Kubelet.StartGarbageCollection</code> 启动了 GarbageCollect。</p>
@@ -285,7 +289,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p><a href="https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/">上一篇文章</a> 分析了 kube-proxy 的主流程逻辑实现，本篇文章通过分析核心方法 syncProxyRules 来分析 kube-proxy 的 ipvs 模式的实现。</p>
         </div>
 
@@ -348,7 +353,8 @@
 
         <div>
           <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p></blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
 <p><a href="https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/">上一篇文章</a> 分析了 kube-proxy 的主流程逻辑实现，本片文章来分析 kube-proxy 的 iptables 模式实现。</p>
         </div>
 

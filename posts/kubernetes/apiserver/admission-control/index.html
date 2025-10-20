@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.0">
+  <meta name="generator" content="Hugo 0.151.2">
 
   <title>kubernetes 源码分析之 apiserver admission &middot; What a Life!</title>
 
@@ -89,7 +89,7 @@
       },
       "datePublished": "2025-04-14T22:36:42+08:00",
       "dateModified": "2025-04-14T22:36:42+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\u003c/blockquote\u003e\n\u003cp\u003e准入控制（ admission control ）会在请求经过\u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/apiserver/access-control/\"\u003e认证和授权\u003c/a\u003e前置检查后，资源对象被持久化（存储到 etcd ）前的最后一道防线，准入控制会对资源对象进行修改或者验证。apiserver 准入控制由一系列的插件组成，同时也提供了 webhook 准入控制插件支持用户自定义的准入控制插件来进行扩展。\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 apiserver v0.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003e准入控制（ admission control ）会在请求经过\u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/apiserver/access-control/\"\u003e认证和授权\u003c/a\u003e前置检查后，资源对象被持久化（存储到 etcd ）前的最后一道防线，准入控制会对资源对象进行修改或者验证。apiserver 准入控制由一系列的插件组成，同时也提供了 webhook 准入控制插件支持用户自定义的准入控制插件来进行扩展。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -243,7 +243,8 @@
 
   <div>
     <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p></blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
 <p>准入控制（ admission control ）会在请求经过<a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/access-control/">认证和授权</a>前置检查后，资源对象被持久化（存储到 etcd ）前的最后一道防线，准入控制会对资源对象进行修改或者验证。apiserver 准入控制由一系列的插件组成，同时也提供了 webhook 准入控制插件支持用户自定义的准入控制插件来进行扩展。</p>
 <h2 id="接口定义">接口定义</h2>
 <p>admission plugins 根据功能会实现如下接口：</p>
