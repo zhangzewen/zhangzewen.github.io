@@ -16,7 +16,7 @@
 PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建 PersistentVolumeController，NewController 的流程如下：">
   <meta itemprop="datePublished" content="2025-08-29T02:43:31+08:00">
   <meta itemprop="dateModified" content="2025-08-29T02:43:31+08:00">
-  <meta itemprop="wordCount" content="5862">
+  <meta itemprop="wordCount" content="5935">
   <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes,Csi">
 
@@ -265,7 +265,7 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 <p>PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建 PersistentVolumeController，NewController 的流程如下：</p>
 <ul>
 <li>初始化 eventRecorder， 创建 PersistentVolumeController 实例</li>
-<li>调用 <code>VolumePluginMgr.InitPlugins()</code> 方法 初始化存储插件，详细请查阅<a href="../kubelet/volude_plugins_manager.md">kubernetes 源码分析之 kubelet volume plugins manager</a>。</li>
+<li>调用 <code>VolumePluginMgr.InitPlugins()</code> 方法 初始化存储插件，详细请查阅<a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/volume_plugins_manager/">kubernetes 源码分析之 kubelet volume plugins manager</a>。</li>
 <li>开始创建 informer 监听集群内的资源，初始化了如下 informer
 <ul>
 <li>PersistentVolumeInformer</li>
@@ -470,8 +470,8 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 <p>syncVolume 的会根据不同情况做不同的逻辑：</p>
 <ul>
 <li>如果 pv 的 ClaimRef 有没有被赋值，则更新状态为Available。</li>
-<li>如果 pv 的 ClaimRef 被赋值，校验UID，UID为空说明 pv 绑定了 pvc，但是 pvc 却没有绑定 pv，需要重新设置 pv 的状态为Available。</li>
-<li>如果 pv 找到了对应的 pvc，比较UID是否相等，如果不相等，那么说明不是被绑定的那个 pvc，可以认为 pvc 是被删除了，那么需要更新释放pv，将 pv 的状态改为Released。</li>
+<li>如果 pv 的 ClaimRef 被赋值，校验UID，UID为空说明 pv 未绑定 pvc，需要设置 pv 的状态为Available。</li>
+<li>如果 根据 pv 的 ClaimRef 找到了对应的 pvc，比较UID是否相等，如果不相等，那么说明不是被绑定的那个 pvc，可以认为 pvc 是被删除了，那么需要更新释放pv，将 pv 的状态改为Released。</li>
 <li>检查 VolumeName 是否为空，这种情况是表明正在绑定中。</li>
 <li>如果 pvc 的 VolumeName 等于pv 的 name，说明已经绑定，更新状态为Bound；否则表示 pv 绑定到 pvc 上，但是 pvc 被绑定到其他 pv 上，检查是否是 dynamically provisioned 自动生成的，如果是的话就释放这个pv；如果是手动创建的 pv，那么调用 unbindVolume 进行解绑。</li>
 </ul>
@@ -518,7 +518,7 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 </span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;synchronizing PersistentVolume[%s]: volume is bound to claim %s&#34;</span>, volume.Name, <span style="color:#fabd2f">claimrefToClaimKey</span>(volume.Spec.ClaimRef))
 </span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Get the PVC by _name_</span>
 </span></span><span style="display:flex;"><span>		<span style="color:#fe8019">var</span> claim <span style="color:#fe8019">*</span>v1.PersistentVolumeClaim
-</span></span><span style="display:flex;"><span>        <span style="color:#fe8019">/</span>根据 pv 的 claimRef 获得 pvc
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 根据 pv 的 claimRef 获得 pvc</span>
 </span></span><span style="display:flex;"><span>		claimName <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">claimrefToClaimKey</span>(volume.Spec.ClaimRef)
 </span></span><span style="display:flex;"><span>		obj, found, err <span style="color:#fe8019">:=</span> ctrl.claims.<span style="color:#fabd2f">GetByKey</span>(claimName)
 </span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
@@ -1152,14 +1152,31 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 <ul>
 <li>检查 VolumeName 是否为空，如果为空，检查是否设置了延迟绑定。
 <ul>
-<li>匹配符合 pvc 要求的 pv，如果没有可用的PV，检查是否是 dynamically provisioned，如果是的话，异步创建 pv 后设置 pvc 状态为 Binding，然后等待下次循环再查找匹配的pv进行绑定。</li>
+<li>匹配符合 pvc 要求的 pv
+<ul>
+<li>如果没有可用的 pv，检查是否是设置了 storageclass，如果是的话即该 pv 需要动态创建，pv controller 通过更新pvc：
+<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span><span style="color:#928374;font-style:italic"># provisionClaim -&gt; provisionClaimOperation/provisionClaimOperationExternal -&gt; setClaimProvisioner</span>
+</span></span><span style="display:flex;"><span>.metadata.annotations<span style="color:#fe8019">[</span><span style="color:#b8bb26">&#34;volume.beta.kubernetes.io/storage-provisioner&#34;</span><span style="color:#fe8019">]</span>
+</span></span><span style="display:flex;"><span>.metadata.annotations<span style="color:#fe8019">[</span><span style="color:#b8bb26">&#34;volume.kubernetes.io/storage-provisioner&#34;</span><span style="color:#fe8019">]</span>
+</span></span></code></pre></div>来设置 provisioner，由 <a href="https://zhangzewen.github.io/posts/kubernetes/csi/external-provisioner/">external-provisioner</a> 创建 pv， 设置 pvc 状态为 Pending，然后等待下次循环再查找匹配的 pv 进行绑定。</li>
 <li>如果找到相匹配的 pv，那么调用 bind 方法执行绑定。</li>
+</ul>
+</li>
 </ul>
 </li>
 <li>检查 VolumeName 是否为空，如果不为空。
 <ul>
-<li>找到对应的 pv，如果 ClaimRef 字段为空，那么调用 bind 执行绑定操作。</li>
-<li>如果 ClaimRef 不为空，校验一下 pv 是否已绑定了别的 pvc，如果没有的话，执行绑定。</li>
+<li>找到对应的 pv
+<ul>
+<li>未找到 pv，则更新 pvc 的状态为 Pending，等待下次循环在查找匹配的 pv 进行绑定。</li>
+<li>找到 pv
+<ul>
+<li>如果 pv 的 ClaimRef 字段为空，说明 pv 目前的状态是可绑定的（Available），校验 pv 和 pvc 是否适合绑定，如果不适合，更新 pvc 的状态为 pending，如果合适，则调用 bind 进行绑定。</li>
+<li>如果 ClaimRef 不为空，校验一下 pv 是否已绑定了别的 pvc，如果没有的话，执行 bind 进行绑定。如果 pv 已经绑定了别的 pvc，如果是经过一个判断循环完成绑定的话（通过 <code>pv.kubernetes.io/bound-by-controller</code>），更新pvc 的状态为 Pending，否则返回错误。</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -1168,7 +1185,8 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
     <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">func</span> (ctrl <span style="color:#fe8019">*</span>PersistentVolumeController) <span style="color:#fabd2f">syncUnboundClaim</span>(ctx context.Context, claim <span style="color:#fe8019">*</span>v1.PersistentVolumeClaim) <span style="color:#fabd2f">error</span> {
 </span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// This is a new PVC that has not completed binding</span>
 </span></span><span style="display:flex;"><span>	<span style="color:#928374;font-style:italic">// OBSERVATION: pvc is &#34;Pending&#34;</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> claim.Spec.VolumeName <span style="color:#fe8019">==</span> <span style="color:#b8bb26">&#34;&#34;</span> {<span style="color:#8ec07c">//目前还有绑定PV， 这个时候的PVC的状态是pending的</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 目前还有绑定PV， 这个时候的PVC的状态是pending的</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> claim.Spec.VolumeName <span style="color:#fe8019">==</span> <span style="color:#b8bb26">&#34;&#34;</span> {
 </span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// User did not care which PV they get.</span>
 </span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 先看是不是WaitForFirstConsumer模式</span>
 </span></span><span style="display:flex;"><span>		delayBinding, err <span style="color:#fe8019">:=</span> storagehelpers.<span style="color:#fabd2f">IsDelayBindingMode</span>(claim, ctrl.classLister)
@@ -1177,13 +1195,15 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// [Unit test set 1]</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">//  根据 pvc 匹配到最合适的pv </span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 根据 pvc 匹配到最合适的pv </span>
 </span></span><span style="display:flex;"><span>		volume, err <span style="color:#fe8019">:=</span> ctrl.volumes.<span style="color:#fabd2f">findBestMatchForClaim</span>(claim, delayBinding)
-</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {<span style="color:#8ec07c">//出错了直接返回</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 出错了直接返回</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">2</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;synchronizing unbound PersistentVolumeClaim[%s]: Error finding PV for claim: %v&#34;</span>, <span style="color:#fabd2f">claimToClaimKey</span>(claim), err)
 </span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;error finding PV for claim %q: %w&#34;</span>, <span style="color:#fabd2f">claimToClaimKey</span>(claim), err)
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> volume <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {<span style="color:#8ec07c">//在目前此刻的系统中没有找到合适的PV</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 在目前此刻的 kubernetes 集群中没有找到合适的pv </span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> volume <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;synchronizing unbound PersistentVolumeClaim[%s]: no volume found&#34;</span>, <span style="color:#fabd2f">claimToClaimKey</span>(claim))
 </span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// No PV could be found</span>
 </span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// OBSERVATION: pvc is &#34;Pending&#34;, will retry</span>
@@ -1196,14 +1216,13 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>			<span style="color:#fe8019">switch</span> {
-</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 如果是 WaitForFirstConsumer 模式，且 pvc 的.metadata.ann[&#34;volume.kubernetes.io/selected-node&#34;]为空，说明还没有调度到pv和pvc绑定</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">//  这里会生成消息告知这个情况，并把可以调度的pv的name都列举出来</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 如果是 WaitForFirstConsumer 模式，且 pvc 的.metadata.ann[&#34;volume.kubernetes.io/selected-node&#34;]为空，说明还没有pod消费该pvc</span>
 </span></span><span style="display:flex;"><span>			<span style="color:#fe8019">case</span> delayBinding <span style="color:#fe8019">&amp;&amp;</span> !storagehelpers.<span style="color:#fabd2f">IsDelayBindingProvisioning</span>(claim):
 </span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> err = ctrl.<span style="color:#fabd2f">emitEventForUnboundDelayBindingClaim</span>(claim); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>					<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>				}
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// pvc 中定义了storageClass，就需要让storage provisiioner来创建一块volume了</span>
 </span></span><span style="display:flex;"><span>			<span style="color:#fe8019">case</span> storagehelpers.<span style="color:#fabd2f">GetPersistentVolumeClaimClass</span>(claim) <span style="color:#fe8019">!=</span> <span style="color:#b8bb26">&#34;&#34;</span>:
-</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// pvc 中定义了storageClass，就需要让storage provisiioner来创建一块volume了</span>
 </span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> err = ctrl.<span style="color:#fabd2f">provisionClaim</span>(ctx, claim); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>					<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>				}
@@ -1219,11 +1238,12 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 </span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
-</span></span><span style="display:flex;"><span>		} <span style="color:#fe8019">else</span> <span style="color:#928374;font-style:italic">/* pv != nil */</span> {<span style="color:#928374;font-style:italic">// 这里是找到了合适的PV了</span>
+</span></span><span style="display:flex;"><span>		} <span style="color:#fe8019">else</span> <span style="color:#928374;font-style:italic">/* pv != nil */</span> {<span style="color:#928374;font-style:italic">// 这里是找到了合适的pv</span>
 </span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// Found a PV for this claim</span>
 </span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// OBSERVATION: pvc is &#34;Pending&#34;, pv is &#34;Available&#34;</span>
 </span></span><span style="display:flex;"><span>			claimKey <span style="color:#fe8019">:=</span> <span style="color:#fabd2f">claimToClaimKey</span>(claim)
 </span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;synchronizing unbound PersistentVolumeClaim[%s]: volume %q found: %s&#34;</span>, claimKey, volume.Name, <span style="color:#fabd2f">getVolumeStatusForLogging</span>(volume))
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 调用 bind 执行绑定</span>
 </span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> err = ctrl.<span style="color:#fabd2f">bind</span>(volume, claim); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// On any error saving the volume or the claim, subsequent</span>
 </span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// syncClaim will finish the binding.</span>
@@ -1243,22 +1263,22 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 </span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// [Unit test set 2]</span>
 </span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// User asked for a specific PV.</span>
 </span></span><span style="display:flex;"><span>		klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;synchronizing unbound PersistentVolumeClaim[%s]: volume %q requested&#34;</span>, <span style="color:#fabd2f">claimToClaimKey</span>(claim), claim.Spec.VolumeName)
-</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 先在本地缓存中找PV</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 根据 volume 那么 查找 pv</span>
 </span></span><span style="display:flex;"><span>		obj, found, err <span style="color:#fe8019">:=</span> ctrl.volumes.store.<span style="color:#fabd2f">GetByKey</span>(claim.Spec.VolumeName)
 </span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 出错直接返回</span>
 </span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>		}
-</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !found {<span style="color:#928374;font-style:italic">// 本地缓存中没有</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> !found {<span style="color:#928374;font-style:italic">// 未找到</span>
 </span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// User asked for a PV that does not exist.</span>
 </span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// OBSERVATION: pvc is &#34;Pending&#34;</span>
 </span></span><span style="display:flex;"><span>			<span style="color:#928374;font-style:italic">// Retry later.</span>
 </span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;synchronizing unbound PersistentVolumeClaim[%s]: volume %q requested and not found, will try again next time&#34;</span>, <span style="color:#fabd2f">claimToClaimKey</span>(claim), claim.Spec.VolumeName)
-</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 更新PVC的phase为pending</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 更新pvc的状态为pending</span>
 </span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> _, err = ctrl.<span style="color:#fabd2f">updateClaimStatus</span>(claim, v1.ClaimPending, <span style="color:#fe8019">nil</span>); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>			}
-</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 返回nil表示稍后会重试</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#928374;font-style:italic">// 稍后重试</span>
 </span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>		} <span style="color:#fe8019">else</span> {
 </span></span><span style="display:flex;"><span>			volume, ok <span style="color:#fe8019">:=</span> obj.(<span style="color:#fe8019">*</span>v1.PersistentVolume)
@@ -1266,11 +1286,12 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 </span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span> fmt.<span style="color:#fabd2f">Errorf</span>(<span style="color:#b8bb26">&#34;cannot convert object from volume cache to volume %q!?: %+v&#34;</span>, claim.Spec.VolumeName, obj)
 </span></span><span style="display:flex;"><span>			}
 </span></span><span style="display:flex;"><span>			klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;synchronizing unbound PersistentVolumeClaim[%s]: volume %q requested and found: %s&#34;</span>, <span style="color:#fabd2f">claimToClaimKey</span>(claim), claim.Spec.VolumeName, <span style="color:#fabd2f">getVolumeStatusForLogging</span>(volume))
-</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> volume.Spec.ClaimRef <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {<span style="color:#928374;font-style:italic">// volume没有绑定其他的PVC，这不正好么</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#fe8019">if</span> volume.Spec.ClaimRef <span style="color:#fe8019">==</span> <span style="color:#fe8019">nil</span> {<span style="color:#928374;font-style:italic">// volume没有绑定其他的pvc,即可绑定</span>
 </span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// User asked for a PV that is not claimed</span>
 </span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// OBSERVATION: pvc is &#34;Pending&#34;, pv is &#34;Available&#34;</span>
 </span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;synchronizing unbound PersistentVolumeClaim[%s]: volume is unbound, binding&#34;</span>, <span style="color:#fabd2f">claimToClaimKey</span>(claim))
-</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// 再次检查PV是否满足PVC的描述要求如果不满足，PVC的phase还是pending，如果满足的话就调用bind把PVC和PV绑定起来</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// 检查pv是否满足pvc的描述要求</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// 如果不满足，pvc的状态为pending</span>
 </span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> err = <span style="color:#fabd2f">checkVolumeSatisfyClaim</span>(volume, claim); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>					klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;Can&#39;t bind the claim to volume %q: %v&#34;</span>, volume.Name, err)
 </span></span><span style="display:flex;"><span>					<span style="color:#928374;font-style:italic">// send an event</span>
@@ -1280,28 +1301,28 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 </span></span><span style="display:flex;"><span>					<span style="color:#fe8019">if</span> _, err = ctrl.<span style="color:#fabd2f">updateClaimStatus</span>(claim, v1.ClaimPending, <span style="color:#fe8019">nil</span>); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>						<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>					}
-</span></span><span style="display:flex;"><span>				} <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span> err = ctrl.<span style="color:#fabd2f">bind</span>(volume, claim); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
+</span></span><span style="display:flex;"><span>				} <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span> err = ctrl.<span style="color:#fabd2f">bind</span>(volume, claim); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {<span style="color:#8ec07c">//满足就调用bind执行绑定</span>
 </span></span><span style="display:flex;"><span>					<span style="color:#928374;font-style:italic">// On any error saving the volume or the claim, subsequent</span>
 </span></span><span style="display:flex;"><span>					<span style="color:#928374;font-style:italic">// syncClaim will finish the binding.</span>
 </span></span><span style="display:flex;"><span>					<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>				}
 </span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// OBSERVATION: pvc is &#34;Bound&#34;, pv is &#34;Bound&#34;</span>
 </span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
-</span></span><span style="display:flex;"><span>			} <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span> storagehelpers.<span style="color:#fabd2f">IsVolumeBoundToClaim</span>(volume, claim) {<span style="color:#928374;font-style:italic">// 看看PV是不是之前就绑定了该PVC</span>
+</span></span><span style="display:flex;"><span>			} <span style="color:#fe8019">else</span> <span style="color:#fe8019">if</span> storagehelpers.<span style="color:#fabd2f">IsVolumeBoundToClaim</span>(volume, claim) {<span style="color:#928374;font-style:italic">// 校验pv是不是已经绑定了该pvc，如果是就在执行一遍bind 进行绑定</span>
 </span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// User asked for a PV that is claimed by this PVC</span>
 </span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// OBSERVATION: pvc is &#34;Pending&#34;, pv is &#34;Bound&#34;</span>
 </span></span><span style="display:flex;"><span>				klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;synchronizing unbound PersistentVolumeClaim[%s]: volume already bound, finishing the binding&#34;</span>, <span style="color:#fabd2f">claimToClaimKey</span>(claim))
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// Finish the volume binding by adding claim UID.</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// 绑定了，那就在执行一次bind呗， 顶多更新点东西</span>
 </span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> err = ctrl.<span style="color:#fabd2f">bind</span>(volume, claim); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>					<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>				}
 </span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// OBSERVATION: pvc is &#34;Bound&#34;, pv is &#34;Bound&#34;</span>
 </span></span><span style="display:flex;"><span>				<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
-</span></span><span style="display:flex;"><span>			} <span style="color:#fe8019">else</span> {
+</span></span><span style="display:flex;"><span>			} <span style="color:#fe8019">else</span> { <span style="color:#928374;font-style:italic">// pv已经绑定了别的pvc</span>
 </span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// User asked for a PV that is claimed by someone else</span>
 </span></span><span style="display:flex;"><span>				<span style="color:#928374;font-style:italic">// OBSERVATION: pvc is &#34;Pending&#34;, pv is &#34;Bound&#34;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#928374;font-style:italic">// 判断是不是已经完成绑定了，即经过一个判断循环后完成的绑定，如果是更新 pvc 的状态为 pending</span>
 </span></span><span style="display:flex;"><span>				<span style="color:#fe8019">if</span> !metav1.<span style="color:#fabd2f">HasAnnotation</span>(claim.ObjectMeta, storagehelpers.AnnBoundByController) {
 </span></span><span style="display:flex;"><span>					klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;synchronizing unbound PersistentVolumeClaim[%s]: volume already bound to different claim by user, will retry later&#34;</span>, <span style="color:#fabd2f">claimToClaimKey</span>(claim))
 </span></span><span style="display:flex;"><span>					claimMsg <span style="color:#fe8019">:=</span> fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;volume %q already bound to a different claim.&#34;</span>, volume.Name)
@@ -1314,7 +1335,7 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 </span></span><span style="display:flex;"><span>				} <span style="color:#fe8019">else</span> {
 </span></span><span style="display:flex;"><span>					<span style="color:#928374;font-style:italic">// This should never happen because someone had to remove</span>
 </span></span><span style="display:flex;"><span>					<span style="color:#928374;font-style:italic">// AnnBindCompleted annotation on the claim.</span>
-</span></span><span style="display:flex;"><span>                    <span style="color:#928374;font-style:italic">// 到这里就是PV之前绑定的PVC和现在的PVC不一样，UID不一样的那种， 发信息，发日志</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#928374;font-style:italic">// 错误处理, 日志，生成event 资源对象</span>
 </span></span><span style="display:flex;"><span>					klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;synchronizing unbound PersistentVolumeClaim[%s]: volume already bound to different claim %q by controller, THIS SHOULD NEVER HAPPEN&#34;</span>, <span style="color:#fabd2f">claimToClaimKey</span>(claim), <span style="color:#fabd2f">claimrefToClaimKey</span>(volume.Spec.ClaimRef))
 </span></span><span style="display:flex;"><span>					claimMsg <span style="color:#fe8019">:=</span> fmt.<span style="color:#fabd2f">Sprintf</span>(<span style="color:#b8bb26">&#34;volume %q already bound to a different claim.&#34;</span>, volume.Name)
 </span></span><span style="display:flex;"><span>					ctrl.eventRecorder.<span style="color:#fabd2f">Event</span>(claim, v1.EventTypeWarning, events.FailedBinding, claimMsg)
@@ -1352,7 +1373,9 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 </ul>
 </li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// bind saves binding information both to the volume and the claim and marks</span>
+<details>
+    <summary>CLICK ME</summary>
+    <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// bind saves binding information both to the volume and the claim and marks</span>
 </span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// both objects as Bound. Volume is saved first.</span>
 </span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// It returns on first error, it&#39;s up to the caller to implement some retry</span>
 </span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// mechanism.</span>
@@ -1394,7 +1417,10 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 </span></span><span style="display:flex;"><span>    klog.<span style="color:#fabd2f">V</span>(<span style="color:#d3869b">4</span>).<span style="color:#fabd2f">Infof</span>(<span style="color:#b8bb26">&#34;claim %q status after binding: %s&#34;</span>, <span style="color:#fabd2f">claimToClaimKey</span>(claim), <span style="color:#fabd2f">getClaimStatusForLogging</span>(claim))
 </span></span><span style="display:flex;"><span>    <span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><h4 id="绑定完成syncboundclaim">绑定完成：syncBoundClaim</h4>
+</span></span></code></pre></div>
+</details>
+
+<h4 id="绑定完成syncboundclaim">绑定完成：syncBoundClaim</h4>
 <p>syncBoundClaim 主要是处理 pvc 已经绑定的各种异常情况，例如检查 VolumeName 字段是否为空，检查是否能找到对应的 pv，检查对应的 pv 是否已经绑定当前的 pvc，检查是否有多个 pvc 绑定到同一个 pv 上等等：
 <details>
     <summary>CLICK ME</summary>
@@ -1406,18 +1432,18 @@ PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 Pers
 </span></span><span style="display:flex;"><span>    <span style="color:#928374;font-style:italic">// 如果.spec.volumeName是空的，但是根据.metadata.annotations[&#34;pv.kubernetes.io/bind-completed&#34;]已经绑定了， 说明出错了</span>
 </span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> claim.Spec.VolumeName <span style="color:#fe8019">==</span> <span style="color:#b8bb26">&#34;&#34;</span> {
 </span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Claim was bound before but not any more.</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 以前被绑定过，但现在已经找不到对应的PV了，即数据丢失，需要更新状态</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#928374;font-style:italic">// 以前被绑定过，但现在已经找不到对应的pv了，即数据丢失，需要更新状态</span>
 </span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> _, err <span style="color:#fe8019">:=</span> ctrl.<span style="color:#fabd2f">updateClaimStatusWithEvent</span>(claim, v1.ClaimLost, <span style="color:#fe8019">nil</span>, v1.EventTypeWarning, <span style="color:#b8bb26">&#34;ClaimLost&#34;</span>, <span style="color:#b8bb26">&#34;Bound claim has lost reference to PersistentVolume. Data on the volume is lost!&#34;</span>); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>		}
 </span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> <span style="color:#fe8019">nil</span>
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//在本地caache中找到名字为claim.Spec.VolumeName的PV</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8ec07c">//在本地caache中找到名字为claim.Spec.VolumeName的pv</span>
 </span></span><span style="display:flex;"><span>	obj, found, err <span style="color:#fe8019">:=</span> ctrl.volumes.store.<span style="color:#fabd2f">GetByKey</span>(claim.Spec.VolumeName)
 </span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>		<span style="color:#fe8019">return</span> err
 </span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !found {<span style="color:#928374;font-style:italic">// pvc绑定到了一个不存在的PV</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#fe8019">if</span> !found {<span style="color:#928374;font-style:italic">// pvc绑定到了一个不存在的pv</span>
 </span></span><span style="display:flex;"><span>		<span style="color:#928374;font-style:italic">// Claim is bound to a non-existing volume.</span>
 </span></span><span style="display:flex;"><span>		<span style="color:#fe8019">if</span> _, err = ctrl.<span style="color:#fabd2f">updateClaimStatusWithEvent</span>(claim, v1.ClaimLost, <span style="color:#fe8019">nil</span>, v1.EventTypeWarning, <span style="color:#b8bb26">&#34;ClaimLost&#34;</span>, <span style="color:#b8bb26">&#34;Bound claim has lost its PersistentVolume. Data on the volume is lost!&#34;</span>); err <span style="color:#fe8019">!=</span> <span style="color:#fe8019">nil</span> {
 </span></span><span style="display:flex;"><span>			<span style="color:#fe8019">return</span> err
