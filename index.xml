@@ -13,7 +13,7 @@
       <link>https://zhangzewen.github.io/posts/kubernetes/controllers/volume_ad_controller/</link>
       <pubDate>Fri, 29 Aug 2025 02:43:31 +0800</pubDate>
       <guid>https://zhangzewen.github.io/posts/kubernetes/controllers/volume_ad_controller/</guid>
-      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 &lt;code&gt;k8s.io/kubernetes/pkg/controller/volume/attachdetach&lt;/code&gt; 下：&lt;/p&gt;</description>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;AttachDetach Controller 是 kubernetes controller-manager 的组件之一，其调协期望状态和实际状态通过 &lt;a href=&#34;https://zhangzewen.github.io/posts/kubernetes/kubelet/csi-volume-plugin/&#34;&gt;csi plugin&lt;/a&gt; 来创建/删除 AttchDetachment 资源异步对 volume 进行 Attach 和 Detach 操作。&lt;/p&gt;</description>
     </item>
     <item>
       <title>kubernetes 源码分析之 PV Controller</title>
@@ -240,11 +240,11 @@
       <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 apiserver v0.25.1&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;在 kube-apiserver 的实现过程中，相对 go-restful 还有个 NonGoRestfulMux，其实现在 &lt;code&gt;k8s.io/apiserver/pkg/server/mux&lt;/code&gt;：&lt;/p&gt;</description>
     </item>
     <item>
-      <title>三月份南太行穿越</title>
+      <title>南太行穿越</title>
       <link>https://zhangzewen.github.io/posts/life/nan_tai_hang/</link>
       <pubDate>Sun, 13 Apr 2025 14:54:32 +0800</pubDate>
       <guid>https://zhangzewen.github.io/posts/life/nan_tai_hang/</guid>
-      <description>&lt;p&gt;为了准备3月底的熊猫蜀道山比赛，3月份去了两次南太行，都是两天的行程。&lt;/p&gt;&#xA;&lt;p&gt;第一天的路线： 双底村—马武寨—抱犊村—西莲—隧道—锡崖沟—张沟。 全程39公里左右，爬升1500m - 1600m。&lt;/p&gt;&#xA;&lt;p&gt;双底村出来后红豆衫大峡谷，三月份的时候还是是枯水期，河床的石头很光滑，背阴处的冰瀑布还是很壮观的，就是有些脏。&lt;/p&gt;&#xA;&lt;p&gt;过了大峡谷就是一段爬升，应该有600-700左右，然后下到马武寨，从马武寨到老龙口整体下降趋势，很简单，只是刚开始会很泥泞，因为化冻。&lt;/p&gt;&#xA;&lt;p&gt;从老龙口到西莲这一段我觉得是精华所在， 这一段是沿着山边儿的小路切到西莲，路旁边就是悬崖，垂直的崖壁，感觉就是凭空拔地而起，一点都不拖泥带水，只要不是低着头往前冲，还是很安全的。一路跑跑停停，拍照，拍照，还是拍照。有很多突出来的平台，好多人都在那儿排队打卡，我只是看了眼就走了，有些恐高，无福消受。&lt;/p&gt;</description>
+      <description>&lt;p&gt;第一天的路线： 双底村—马武寨—抱犊村—西莲—隧道—锡崖沟—张沟。 全程39公里左右，爬升1500m - 1600m。&lt;/p&gt;&#xA;&lt;p&gt;双底村出来后红豆衫大峡谷，枯水期河床裸露出来，整一个乱石滩，冬季背阴处的冰瀑布还是很壮观的，就是有些脏。&lt;/p&gt;&#xA;&lt;p&gt;过了大峡谷就是一段爬升，应该有600-700左右，然后下到马武寨，从马武寨到老龙口整体下降趋势，人在峡谷里显得很渺小，一线天很壮观。&lt;/p&gt;&#xA;&lt;p&gt;从老龙口到西莲这一段是精华所在， 这一段是沿着山边儿的小路切到西莲，路旁边就是悬崖，垂直的崖壁，感觉就是凭空拔地而起，一点都不拖泥带水，只要不是低着头往前冲，还是很安全的。沿途有很多突出来的平台，可以拍照打卡。&lt;/p&gt;&#xA;&lt;p&gt;西莲是一个中途补给点，出西莲后到后静宫的这段也是可以坐车的。后静宫开始就要爬最后的一个坡儿了，也就 300M 左右的爬升，就是稍微有些陡，很多人都叫它绝望坡，绝望坡这个名字都泛滥成灾了。&lt;/p&gt;</description>
     </item>
     <item>
       <title>四川成都之行：熊猫蜀道山赛记</title>

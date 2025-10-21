@@ -13,10 +13,10 @@
   
   <meta itemprop="name" content="kubernetes 源码分析之 AttachDetach Controller ">
   <meta itemprop="description" content="本篇文章基于 Kubernetes v1.25.1
-AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 k8s.io/kubernetes/pkg/controller/volume/attachdetach 下：">
+AttachDetach Controller 是 kubernetes controller-manager 的组件之一，其调协期望状态和实际状态通过 csi plugin 来创建/删除 AttchDetachment 资源异步对 volume 进行 Attach 和 Detach 操作。">
   <meta itemprop="datePublished" content="2025-08-29T02:43:31+08:00">
   <meta itemprop="dateModified" content="2025-08-29T02:43:31+08:00">
-  <meta itemprop="wordCount" content="4324">
+  <meta itemprop="wordCount" content="4295">
   <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="源码分析,Kubernetes,Csi">
 
@@ -25,14 +25,14 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
   <meta name="twitter:image" content="https://zhangzewen.github.io/images/profile.png">
   <meta name="twitter:title" content="kubernetes 源码分析之 AttachDetach Controller ">
   <meta name="twitter:description" content="本篇文章基于 Kubernetes v1.25.1
-AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 k8s.io/kubernetes/pkg/controller/volume/attachdetach 下：">
+AttachDetach Controller 是 kubernetes controller-manager 的组件之一，其调协期望状态和实际状态通过 csi plugin 来创建/删除 AttchDetachment 资源异步对 volume 进行 Attach 和 Detach 操作。">
 
 
 <meta property="og:url" content="https://zhangzewen.github.io/posts/kubernetes/controllers/volume_ad_controller/">
   <meta property="og:site_name" content="What a Life!">
   <meta property="og:title" content="kubernetes 源码分析之 AttachDetach Controller ">
   <meta property="og:description" content="本篇文章基于 Kubernetes v1.25.1
-AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 k8s.io/kubernetes/pkg/controller/volume/attachdetach 下：">
+AttachDetach Controller 是 kubernetes controller-manager 的组件之一，其调协期望状态和实际状态通过 csi plugin 来创建/删除 AttchDetachment 资源异步对 volume 进行 Attach 和 Detach 操作。">
   <meta property="og:locale" content="zh_cn">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -90,7 +90,7 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
       },
       "datePublished": "2025-08-29T02:43:31+08:00",
       "dateModified": "2025-08-29T02:43:31+08:00",
-      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003eAttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 \u003ccode\u003ek8s.io/kubernetes/pkg/controller/volume/attachdetach\u003c/code\u003e 下：\u003c/p\u003e",
+      "description": "\u003cblockquote\u003e\n\u003cp\u003e本篇文章基于 Kubernetes v1.25.1\u003c/p\u003e\n\u003c/blockquote\u003e\n\u003cp\u003eAttachDetach Controller 是 kubernetes controller-manager 的组件之一，其调协期望状态和实际状态通过 \u003ca href=\"https://zhangzewen.github.io/posts/kubernetes/kubelet/csi-volume-plugin/\"\u003ecsi plugin\u003c/a\u003e 来创建/删除 AttchDetachment 资源异步对 volume 进行 Attach 和 Detach 操作。\u003c/p\u003e",
       "inLanguage": "zh-cn",
       "potentialAction": [
         {
@@ -268,21 +268,8 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
     <blockquote>
 <p>本篇文章基于 Kubernetes v1.25.1</p>
 </blockquote>
-<p>AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通过监听 AttchDetachment 资源的状态来进行 Attach 和 Detach 操作，并且维护和谐调(进行 Attach 和 Detach，以及修改 Node 资源的状态)实际状态和期望状态。源码在 <code>k8s.io/kubernetes/pkg/controller/volume/attachdetach</code> 下：</p>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>$ tree  .  -L  <span style="color:#d3869b">1</span>
-</span></span><span style="display:flex;"><span>.
-</span></span><span style="display:flex;"><span>├── attach_detach_controller_test.go
-</span></span><span style="display:flex;"><span>├── attach_detach_controller.go
-</span></span><span style="display:flex;"><span>├── cache
-</span></span><span style="display:flex;"><span>├── config
-</span></span><span style="display:flex;"><span>├── metrics
-</span></span><span style="display:flex;"><span>├── OWNERS
-</span></span><span style="display:flex;"><span>├── populator
-</span></span><span style="display:flex;"><span>├── reconciler
-</span></span><span style="display:flex;"><span>├── statusupdater
-</span></span><span style="display:flex;"><span>├── testing
-</span></span><span style="display:flex;"><span>└── utilshell
-</span></span></code></pre></div><p>AttachDetach Controller 维护着2份 Cache，一份是<a href="#%E6%9C%9F%E6%9C%9B%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">期望状态的Cache</a>, 其维护了 <code>node-&gt;volume-&gt;pod</code> 的信息。一份是<a href="#%E5%AE%9E%E9%99%85%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">实际状态Cache</a>，其维护着是 volume-&gt;node 的 attached 状态信息，以及是否 mount 的信息。</p>
+<p>AttachDetach Controller 是 kubernetes controller-manager 的组件之一，其调协期望状态和实际状态通过 <a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/csi-volume-plugin/">csi plugin</a> 来创建/删除 AttchDetachment 资源异步对 volume 进行 Attach 和 Detach 操作。</p>
+<p>AttachDetach Controller 维护着2份 Cache，一份是<a href="#%E6%9C%9F%E6%9C%9B%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">期望状态的Cache</a>, 其维护了 <code>node-&gt;volume-&gt;pod</code> 的信息。一份是<a href="#%E5%AE%9E%E9%99%85%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86">实际状态Cache</a>，其维护着是 volume-&gt;node 的 attached 状态信息，以及是否 mount 的信息。</p>
 <blockquote>
 <p>本片文章中的 期望状态即 DSW，际状态即 ASW。</p>
 </blockquote>
@@ -738,7 +725,8 @@ AttachDetach Controller 是 kubernetes controller-manager 的组件之一， 通
 <li>reconcile 是从 ASW 到 DSW 靠拢，可能需要 detach 操作。</li>
 <li>attachDesiredVolumes 是从 DSW 到 ASW 靠拢，可能需要 attach 操作。</li>
 <li>不管是 reconcile 还是 attachDesiredVolumes 在操作之前需要判断的 attach/detach 操作是否有正在 pending 的操作，如果有，需要忽略本次操作，以及在每次操作完成后需要更新 <code>node.Status.AttachedVolumes</code> 的状态。</li>
-<li>需要知道的是 attach/detach 的操作，是由 <a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/csi-volume-plugin/">csi volume plugin</a> 创建/删除 VolumeAttachment 资源来间接进行 attach/detach 操作。</li>
+<li>需要知道的是 attach/detach 的操作会分别调用<a href="#执行器">执行器</a>的 <code>AttachVolume/DetachVolume</code> 方法，但最终是由 <a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/csi-volume-plugin/">csi volume plugin</a> 创建/删除 VolumeAttachment 资源来间接进行 attach/detach 操作。
+<img src="/images/kubernetes/controllers/ad_controller_call_chain.png" alt=""></li>
 </ul>
 <p>如下是 reconcile 的代码，有详细的注释：</p>
 <details>
