@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.2">
+  <meta name="generator" content="Hugo 0.152.1">
 
   <title>What a Life!</title>
 
@@ -13,7 +13,7 @@
   
   <meta itemprop="name" content="What a Life!">
   <meta itemprop="description" content="Software Engineer">
-  <meta itemprop="datePublished" content="2025-08-29T02:43:31+08:00">
+  <meta itemprop="datePublished" content="2025-09-17T21:42:07+08:00">
   <meta itemprop="dateModified" content="2028-02-17T08:13:34+08:00">
   <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
 
@@ -77,7 +77,7 @@
       "about": {
          "@id": "https://zhangzewen.github.io/#author"
       },
-      "datePublished": "2025-08-29T02:43:31+08:00",
+      "datePublished": "2025-09-17T21:42:07+08:00",
       "dateModified": "2028-02-17T08:13:34+08:00",
       "description": "Software Engineer",
       "inLanguage": "zh-cn",
@@ -172,6 +172,87 @@
     <div class="posts">
       <article class="post">
         <h1 class="post-title">
+          <a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-cache/">kubernetes 源码分析之apiserver storage 的 cache 层实现分析</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-05-11T22:36:42&#43;0800">May 11, 2025</time> &middot; 9 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
+<p>apiserver storage 的 cache 层的设计有利于快速响应请求并返回所需的数据。</p>
+<p>结构体 cacher 实现了 底层存储接口<a href="https://github.com/kubernetes/apiserver/blob/d49d62dc4cb21b43114da162e2647915d5024a87/pkg/storage/interfaces.go#L159">Interface</a>。请参考<a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-etcd/">kubernetes 源码分析之 apiserver storage etcd 层实现分析</a>。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-cache/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/pleg/">kubernetes 源码分析之 kubelet pleg</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-05-06T01:27:07&#43;0800">May 6, 2025</time> &middot; 7 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
+<p>PLEG 是 &ldquo;Pod Lifecycle Event Generator&rdquo; 的缩写，监控运行在集群各个节点上的容器状态变化，并将这些变化事件推送给 kubelet，kubelet 处理后同步到 apiserver。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/pleg/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/probe-manager/">kubernetes 源码分析之 container 探针以及探针管理</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-04-22T21:27:07&#43;0800">Apr 22, 2025</time> &middot; 9 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
+<p>kubernetes 支持三种 container 探针：startupProbe、readinessProbe、livenessProbe。 livenessProbe 决定是否要重启容器，readinessProbe 确认是服务是否可用，startupProbe 是为了避免 container 启动时间过长使得 liveness 失败而造成无限重启的场景。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/probe-manager/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/admission-control/">kubernetes 源码分析之 apiserver admission</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-04-14T22:36:42&#43;0800">Apr 14, 2025</time> &middot; 5 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 apiserver v0.25.1</p>
+</blockquote>
+<p>准入控制（ admission control ）会在请求经过<a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/access-control/">认证和授权</a>前置检查后，资源对象被持久化（存储到 etcd ）前的最后一道防线，准入控制会对资源对象进行修改或者验证。apiserver 准入控制由一系列的插件组成，同时也提供了 webhook 准入控制插件支持用户自定义的准入控制插件来进行扩展。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/admission-control/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
           <a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/admission-webhook/">kubernetes 源码分析之 apiserver admission webhook</a>
         </h1>
 
@@ -259,27 +340,6 @@
       </article>
       <article class="post">
         <h1 class="post-title">
-          <a href="https://zhangzewen.github.io/posts/ebpf/translate-bpf-ring-buffer/">[译]BPF ring buffer</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-03-24T21:42:07&#43;0800">Mar 24, 2025</time> &middot; 5 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>原文: <strong><a href="https://nakryiko.com/posts/bpf-ringbuf/">BPF ring buffer</a></strong></p>
-</blockquote>
-<p>BPF 的一个全新数据结构 BPF 环形缓冲区，它解决了BPF perf缓冲区（当前用于从内核向用户态发送数据的标准）的内存效率和事件重新排序问题，同时达到或超过了其性能。它提供了perfbuf兼容性以便于轻松迁移，但也有新的reserve/submit API，具有更好的可用性。此外，合成和实际基准测试都表明，在几乎所有情况下，考虑将其作为从BPF程序发送数据到用户态的默认选择。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://zhangzewen.github.io/posts/ebpf/translate-bpf-ring-buffer/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
           <a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/">[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</a>
         </h1>
 
@@ -319,74 +379,6 @@
 
         <div class="read-more-link">
           <a href="https://zhangzewen.github.io/posts/cpp/deep_dive_into_type_traits_and_sfinae/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-03-13T21:03:01&#43;0800">Mar 13, 2025</time> &middot; 3 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>这是一个系列文章：</p>
-<ul>
-<li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></li>
-<li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/">[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</a></li>
-</ul>
-<p>原文：<a href="https://blog.px.dev/ebpf-http-tracing/">Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/pluginmanager/">kubernetes 源码分析之 kubelet plugin manager</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-03-11T00:43:31&#43;0800">Mar 11, 2025</time> &middot; 7 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 Kubernetes v1.25.1</p>
-</blockquote>
-<p>kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 的能力: CSI 和 Device。得益于 gRPC 和 Linux 的 inotify 实现了插件的动态管理。本片文章将详细讲解 kubelet 管理插件的逻辑，至于 CSI 和 Device 这两种类型的插件的详细内容，不在本片文章讨论范围之内，本片文章会在需要的地方提及一下，不会对理解本片文章造成困难。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/pluginmanager/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-03-09T15:03:00&#43;0800">Mar 9, 2025</time> &middot; 3 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>这是一个系列文章：</p>
-<ul>
-<li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></li>
-<li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/">[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</a></li>
-</ul>
-<p>原文: <strong><a href="https://blog.px.dev/ebpf-function-tracing/">Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></strong></p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">Read More</a>
         </div>
       </article>
   </div>

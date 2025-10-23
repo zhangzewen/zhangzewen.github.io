@@ -23,6 +23,13 @@
       <description>&lt;blockquote&gt;&#xA;&lt;p&gt;本篇文章基于 Kubernetes v1.25.1&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;PV Controller 的作用是 把 PVC 和 PV 绑定起来，其内部是通过 PersistentVolumeController 实现，通过 NewController 来创建 PersistentVolumeController，NewController 的流程如下：&lt;/p&gt;</description>
     </item>
     <item>
+      <title>kubernetes csi 之 external-attacher</title>
+      <link>https://zhangzewen.github.io/posts/kubernetes/csi/external-attacher/</link>
+      <pubDate>Sat, 02 Aug 2025 00:43:31 +0800</pubDate>
+      <guid>https://zhangzewen.github.io/posts/kubernetes/csi/external-attacher/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://github.com/kubernetes-csi/external-attacher.git&#34;&gt;external-attacher&lt;/a&gt; 通过监控 VolumeAttachment 资源的变化 通过 csi grpc 接口调用 csi driver 来执行 volume 的 Attach 和 Detach。&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>kubernetes csi 之 external-provisioner</title>
       <link>https://zhangzewen.github.io/posts/kubernetes/csi/external-provisioner/</link>
       <pubDate>Sat, 02 Aug 2025 00:43:31 +0800</pubDate>

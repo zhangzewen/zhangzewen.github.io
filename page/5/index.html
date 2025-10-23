@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.151.2">
+  <meta name="generator" content="Hugo 0.152.1">
 
   <title>What a Life!</title>
 
@@ -13,7 +13,7 @@
   
   <meta itemprop="name" content="What a Life!">
   <meta itemprop="description" content="Software Engineer">
-  <meta itemprop="datePublished" content="2025-08-29T02:43:31+08:00">
+  <meta itemprop="datePublished" content="2025-09-17T21:42:07+08:00">
   <meta itemprop="dateModified" content="2028-02-17T08:13:34+08:00">
   <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
 
@@ -77,7 +77,7 @@
       "about": {
          "@id": "https://zhangzewen.github.io/#author"
       },
-      "datePublished": "2025-08-29T02:43:31+08:00",
+      "datePublished": "2025-09-17T21:42:07+08:00",
       "dateModified": "2028-02-17T08:13:34+08:00",
       "description": "Software Engineer",
       "inLanguage": "zh-cn",
@@ -172,23 +172,70 @@
     <div class="posts">
       <article class="post">
         <h1 class="post-title">
-          <a href="https://zhangzewen.github.io/posts/ebpf/translate-lifetime-of-bpf-objects/">[译] Lifetime of BPF objects</a>
+          <a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a>
         </h1>
 
         <div class="post-date">
-          <time datetime="2025-03-04T21:42:07&#43;0800">Mar 4, 2025</time> &middot; 1 min read
+          <time datetime="2025-03-13T21:03:01&#43;0800">Mar 13, 2025</time> &middot; 3 min read
         </div>
 
         <div>
           <blockquote>
 <p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>原文链接: <a href="https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html">Lifetime of BPF objects</a></p>
-</blockquote>
-<p>BPF验证器保证程序本身能够被内核安全地执行，但为了安全地且无意外地使用整个BPF，用户需要理解 BPF 程序和 Maps 的生命周期。本文深入介绍了这些细节。</p>
+<p>这是一个系列文章：</p>
+<ul>
+<li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></li>
+<li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/">[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</a></li>
+</ul>
+<p>原文：<a href="https://blog.px.dev/ebpf-http-tracing/">Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></p>
         </div>
 
         <div class="read-more-link">
-          <a href="https://zhangzewen.github.io/posts/ebpf/translate-lifetime-of-bpf-objects/">Read More</a>
+          <a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/pluginmanager/">kubernetes 源码分析之 kubelet plugin manager</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-03-11T00:43:31&#43;0800">Mar 11, 2025</time> &middot; 7 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
+<p>kubernetes 的组件 kubelet 提供了两种类型的插件来扩展 kubernetes 的能力: CSI 和 Device。得益于 gRPC 和 Linux 的 inotify 实现了插件的动态管理。本片文章将详细讲解 kubelet 管理插件的逻辑，至于 CSI 和 Device 这两种类型的插件的详细内容，不在本片文章讨论范围之内，本片文章会在需要的地方提及一下，不会对理解本片文章造成困难。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/pluginmanager/">Read More</a>
+        </div>
+      </article>
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-03-09T15:03:00&#43;0800">Mar 9, 2025</time> &middot; 3 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
+<p>这是一个系列文章：</p>
+<ul>
+<li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-2-tracing-full-body-http-request-responses/">[译]Debugging with eBPF Part 2: Tracing full body HTTP request/responses</a></li>
+<li><a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-3-tracing-ssl-tls-connections/">[译]Debugging with eBPF Part 3: Tracing SSL/TLS connections</a></li>
+</ul>
+<p>原文: <strong><a href="https://blog.px.dev/ebpf-function-tracing/">Debugging with eBPF Part 1: Tracing Go function arguments in prod</a></strong></p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://zhangzewen.github.io/posts/ebpf/translate-debugging-with-ebpf-part-1-tracing-go-function-arguments-in-prod/">Read More</a>
         </div>
       </article>
       <article class="post">
@@ -364,27 +411,6 @@
       </article>
       <article class="post">
         <h1 class="post-title">
-          <a href="https://zhangzewen.github.io/posts/ebpf/translate-bpf-portability-and-co-re/">[译]BPF CO-RE (Compile Once – Run Everywhere)</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-02-17T08:13:34&#43;0800">Feb 17, 2025</time> &middot; 3 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p><em><strong>介于能力有限，翻译有不当之处，不吝赐教</strong></em></p>
-<p>原文：<a href="https://nakryiko.com/posts/bpf-portability-and-co-re/">BPF CO-RE (Compile Once – Run Everywhere)</a></p>
-</blockquote>
-<p>BPF应用程序的可移植性意味着什么？为什么在没有**BPF编译一次 - 到处运行（CO-RE）**的情况下实现这一点实际上很困难？在这篇文章中，我们将探讨编写可以在多个内核版本上运行的BPF程序的挑战，以及BPF CO-RE如何帮助解决这个问题。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://zhangzewen.github.io/posts/ebpf/translate-bpf-portability-and-co-re/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
           <a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/resource-qos/">kubernetes 源码分析之 Kubernetes Resource QoS Classes </a>
         </h1>
 
@@ -401,26 +427,6 @@
 
         <div class="read-more-link">
           <a href="https://zhangzewen.github.io/posts/kubernetes/kubelet/resource-qos/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-three/">Effective Modern C&#43;&#43; 读书笔记之第三章</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-02-07T18:34:41&#43;0800">Feb 7, 2025</time> &middot; 5 min read
-        </div>
-
-        <div>
-          <h2 id="item-7-区别和在声明和初始化变量时的不同">Item 7: 区别()和{}在声明和初始化变量时的不同</h2>
-<p>在<a href="https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-one/">Effective Modern C++ 读书笔记之第一章</a>关于<code>auto</code>的参数类型推导中，里面说到<code>auto</code>的类型推导中与模版参数类型推导唯一的不同之处：</p>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">auto</span> a <span style="color:#fe8019">=</span> {<span style="color:#d3869b">1</span>}; <span style="color:#928374;font-style:italic">// a 的类型为 std::initializer_list&lt;int&gt;
-</span></span></span></code></pre></div><p>在<code>C++11</code>中有四种声明变量的方式：</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-three/">Read More</a>
         </div>
       </article>
   </div>
