@@ -6,8 +6,15 @@
     <description>Recent content in Posts on What a Life!</description>
     <generator>Hugo</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Wed, 17 Sep 2025 21:42:07 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 05 Nov 2025 16:34:18 +0800</lastBuildDate>
     <atom:link href="https://zhangzewen.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>川西之行：2025 环四姑娘山超级越野赛</title>
+      <link>https://zhangzewen.github.io/posts/life/2025_siguniang/</link>
+      <pubDate>Wed, 05 Nov 2025 16:34:18 +0800</pubDate>
+      <guid>https://zhangzewen.github.io/posts/life/2025_siguniang/</guid>
+      <description>&lt;p&gt;当报名参加 2025 环四姑娘山超级越野赛 75KM 组别的时候，肯定是没有想过今年唯二的比赛以退赛作为结束。&lt;/p&gt;&#xA;&lt;p&gt;10 月 29 日下午 2 点坐上赛事提供的摆渡大巴车，当大巴驶进都江堰后，就可以近距离的欣赏险峻的苍翠群山，在翻越巴朗山之前都是在峡谷中行进，时而穿越呼呼作响的隧道，时而沿着奔流向下的河水逆向飞驰，中途休息了20分钟。当大巴沿着之字形的公路翻越巴郎山的时候，周围的墨绿逐渐隐没到了白色的浓雾中。在穿过巴郎山隧道后，一切赫然开朗，映入眼帘的是四姑娘山的秋天特有的黄色。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>[译] Lifetime of BPF objects</title>
       <link>https://zhangzewen.github.io/posts/ebpf/translate-lifetime-of-bpf-objects/</link>
