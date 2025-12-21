@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.152.2">
+  <meta name="generator" content="Hugo 0.153.1">
 
   <title>What a Life!</title>
 
@@ -13,8 +13,8 @@
   
   <meta itemprop="name" content="What a Life!">
   <meta itemprop="description" content="Software Engineer">
-  <meta itemprop="datePublished" content="2025-11-05T16:34:18+08:00">
-  <meta itemprop="dateModified" content="2028-10-15T21:43:33+08:00">
+  <meta itemprop="datePublished" content="2025-12-11T15:32:46+08:00">
+  <meta itemprop="dateModified" content="2025-12-11T15:32:46+08:00">
   <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
 
 
@@ -77,8 +77,8 @@
       "about": {
          "@id": "https://zhangzewen.github.io/#author"
       },
-      "datePublished": "2025-11-05T16:34:18+08:00",
-      "dateModified": "2028-10-15T21:43:33+08:00",
+      "datePublished": "2025-12-11T15:32:46+08:00",
+      "dateModified": "2025-12-11T15:32:46+08:00",
       "description": "Software Engineer",
       "inLanguage": "zh-cn",
       "potentialAction": [
@@ -170,6 +170,26 @@
 
   <main class="content container">
     <div class="posts">
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://zhangzewen.github.io/posts/kubernetes/kube-proxy/iptables/">kubernetes 源码分析之 kube-proxy iptables 模式</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2024-11-23T16:31:39&#43;0800">Nov 23, 2024</time> &middot; 7 min read
+        </div>
+
+        <div>
+          <blockquote>
+<p>本篇文章基于 Kubernetes v1.25.1</p>
+</blockquote>
+<p><a href="https://zhangzewen.github.io/posts/kubernetes/kube-proxy/kube-proxy/">上一篇文章</a> 分析了 kube-proxy 的主流程逻辑实现，本片文章来分析 kube-proxy 的 iptables 模式实现。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://zhangzewen.github.io/posts/kubernetes/kube-proxy/iptables/">Read More</a>
+        </div>
+      </article>
       <article class="post">
         <h1 class="post-title">
           <a href="https://zhangzewen.github.io/posts/life/2024_zhengzhou_marathon/">2024年11月03日郑州马拉松赛记</a>
@@ -385,26 +405,6 @@
 
         <div class="read-more-link">
           <a href="https://zhangzewen.github.io/posts/kubernetes/client-go/workqueue/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://zhangzewen.github.io/posts/kubernetes/client-go/event/">client-go 源码分析之 Event 机制</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2024-06-01T23:43:31&#43;0800">Jun 1, 2024</time> &middot; 6 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 client-go release-1.25 分支</p>
-</blockquote>
-<p>kubernetes 的事件（Event）是一种资源对象，用于展示集群内发生的情况，kubernetes 系统中的各个组件会将运行时发生的各种事件上报给 kubernetes apiserver。由于事件是一种资源，因此他们存储在 etcd 集群中。为了避免磁盘空间被填满，故强制执行保留策略：在最后一次的事件发生后，删除1小时之前发生的事件。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://zhangzewen.github.io/posts/kubernetes/client-go/event/">Read More</a>
         </div>
       </article>
   </div>

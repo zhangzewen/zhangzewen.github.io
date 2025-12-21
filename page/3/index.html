@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.152.2">
+  <meta name="generator" content="Hugo 0.153.1">
 
   <title>What a Life!</title>
 
@@ -13,8 +13,8 @@
   
   <meta itemprop="name" content="What a Life!">
   <meta itemprop="description" content="Software Engineer">
-  <meta itemprop="datePublished" content="2025-11-05T16:34:18+08:00">
-  <meta itemprop="dateModified" content="2028-10-15T21:43:33+08:00">
+  <meta itemprop="datePublished" content="2025-12-11T15:32:46+08:00">
+  <meta itemprop="dateModified" content="2025-12-11T15:32:46+08:00">
   <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
 
 
@@ -77,8 +77,8 @@
       "about": {
          "@id": "https://zhangzewen.github.io/#author"
       },
-      "datePublished": "2025-11-05T16:34:18+08:00",
-      "dateModified": "2028-10-15T21:43:33+08:00",
+      "datePublished": "2025-12-11T15:32:46+08:00",
+      "dateModified": "2025-12-11T15:32:46+08:00",
       "description": "Software Engineer",
       "inLanguage": "zh-cn",
       "potentialAction": [
@@ -170,6 +170,25 @@
 
   <main class="content container">
     <div class="posts">
+      <article class="post">
+        <h1 class="post-title">
+          <a href="https://zhangzewen.github.io/posts/kubernetes/cni/flannel-hostgw/">flannel 源码分析之 host-gw 模式</a>
+        </h1>
+
+        <div class="post-date">
+          <time datetime="2025-07-21T23:43:31&#43;0800">Jul 21, 2025</time> &middot; 4 min read
+        </div>
+
+        <div>
+          <p>flannel 的后端 host-gw 不涉及数据包的封包和解包，就是在宿主机上配置路由规则，把其它宿主机 ip 当成其上所有 pod 的下一跳。</p>
+<h2 id="注册和创建后端-host-gw-实例">注册和创建后端 host-gw 实例</h2>
+<p>结构体 HostgwBackend 实现了接口 Backend。</p>
+        </div>
+
+        <div class="read-more-link">
+          <a href="https://zhangzewen.github.io/posts/kubernetes/cni/flannel-hostgw/">Read More</a>
+        </div>
+      </article>
       <article class="post">
         <h1 class="post-title">
           <a href="https://zhangzewen.github.io/posts/kubernetes/cni/flannel-vxlan/">flannel 源码分析之 vxlan</a>
@@ -386,31 +405,6 @@ vxlan 注册到 flannel 的流程如下:</p>
 
         <div class="read-more-link">
           <a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-etcd/">Read More</a>
-        </div>
-      </article>
-      <article class="post">
-        <h1 class="post-title">
-          <a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-generic/">kubernetes 源码分析之 apiserver storage 通用实现</a>
-        </h1>
-
-        <div class="post-date">
-          <time datetime="2025-05-11T22:36:42&#43;0800">May 11, 2025</time> &middot; 9 min read
-        </div>
-
-        <div>
-          <blockquote>
-<p>本篇文章基于 apiserver v0.25.1</p>
-</blockquote>
-<p>kubernetes 的所有对外提供 RESTful api 的资源都需要实现基础接口 Storage：</p>
-<div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fe8019">type</span> Storage <span style="color:#fe8019">interface</span> {
-</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">New</span>() runtime.Object
-</span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">Destroy</span>()
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>根据操作资源的动作，如创建/删除/检索/监听等，又提供了一系列的接口如 Getter/Lister/Watcher 等。这些接口的定义可以在 <code>/k8s.io/apiserver/pkg/registry/rest/rest.go</code> 下找到。</p>
-        </div>
-
-        <div class="read-more-link">
-          <a href="https://zhangzewen.github.io/posts/kubernetes/apiserver/storage-generic/">Read More</a>
         </div>
       </article>
   </div>

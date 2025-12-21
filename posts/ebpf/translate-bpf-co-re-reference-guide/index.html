@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.152.2">
+  <meta name="generator" content="Hugo 0.153.1">
 
   <title>[译]BPF CO-RE reference guide &middot; What a Life!</title>
 
@@ -466,7 +466,7 @@
 </span></span></code></pre></div><p>声明后，<code>LINUX_KERNEL_VERSION</code> 以与内核本身完全相同的方式对正在运行的内核版本进行编码。这样的变量可以像任何其他变量一样使用：您可以与它进行比较、打印、记录并发送到用户态等。在所有这些情况下，BPF 验证器都知道其确切值，因此它可以检测死代码，就像上面描述的基于类型系统的检查一样。</p>
 <p>Libbpf 还提供了一个方便的 <code>KERNEL_VERSION(major, minor, patch)</code>宏，用于与<code>LINUX_KERNEL_VERSION</code>进行比较：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;bpf/bpf_helpers.h&gt;</span><span style="color:#8ec07c">
-</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span>
+</span></span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">extern</span> <span style="color:#fabd2f">int</span> LINUX_KERNEL_VERSION __kconfig;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>...

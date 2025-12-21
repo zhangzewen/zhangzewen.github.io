@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.152.2">
+  <meta name="generator" content="Hugo 0.153.1">
 
   <title>Effective Modern C&#43;&#43; 读书笔记之第四章 &middot; What a Life!</title>
 
@@ -278,109 +278,109 @@ class A { public: A() {std::cout &lt;&lt; &#34;Call A::A()&#34; &lt;&lt; std::en
 <p><code>std::weak_ptr</code>没有引用计数的概念，如其名，是一个弱指针。</p>
 <p>可以通过其成员函数<code>expired()</code>来判断其指向的是不是一个合法的对象，通过<code>lock()</code>来创建一个<code>std::shared_ptr</code>指向该对象。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">auto</span> spw <span style="color:#fe8019">=</span>                           <span style="color:#928374;font-style:italic">// after spw is constructed,
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>     std<span style="color:#fe8019">::</span>make_shared<span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&gt;</span>();    <span style="color:#928374;font-style:italic">// the pointed-to Widget&#39;s
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>																		<span style="color:#928374;font-style:italic">// ref count (RC) is 1. (See
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                    <span style="color:#928374;font-style:italic">// Item 21 for info on
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                    <span style="color:#928374;font-style:italic">// std::make_shared.)
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>std<span style="color:#fe8019">::</span>weak_ptr<span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&gt;</span> wpw(spw);     <span style="color:#928374;font-style:italic">// wpw points to same Widget
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                    <span style="color:#928374;font-style:italic">// as spw. RC remains 1
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span></span><span style="display:flex;"><span>     std<span style="color:#fe8019">::</span>make_shared<span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&gt;</span>();    <span style="color:#928374;font-style:italic">// the pointed-to Widget&#39;s
+</span></span></span><span style="display:flex;"><span>																		<span style="color:#928374;font-style:italic">// ref count (RC) is 1. (See
+</span></span></span><span style="display:flex;"><span>                                    <span style="color:#928374;font-style:italic">// Item 21 for info on
+</span></span></span><span style="display:flex;"><span>                                    <span style="color:#928374;font-style:italic">// std::make_shared.)
+</span></span></span><span style="display:flex;"><span>std<span style="color:#fe8019">::</span>weak_ptr<span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&gt;</span> wpw(spw);     <span style="color:#928374;font-style:italic">// wpw points to same Widget
+</span></span></span><span style="display:flex;"><span>                                    <span style="color:#928374;font-style:italic">// as spw. RC remains 1
+</span></span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>spw <span style="color:#fe8019">=</span> <span style="color:#fe8019">nullptr</span>;                      <span style="color:#928374;font-style:italic">// RC goes to 0, and the
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                    <span style="color:#928374;font-style:italic">// Widget is destroyed.
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                    <span style="color:#928374;font-style:italic">// wpw now dangles
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span></span><span style="display:flex;"><span>                                    <span style="color:#928374;font-style:italic">// Widget is destroyed.
+</span></span></span><span style="display:flex;"><span>                                    <span style="color:#928374;font-style:italic">// wpw now dangles
+</span></span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">if</span> (wpw.expired())                  <span style="color:#928374;font-style:italic">// if wpw doesn&#39;t point
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                    <span style="color:#928374;font-style:italic">// to an object...
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  
+</span></span></span><span style="display:flex;"><span>                                    <span style="color:#928374;font-style:italic">// to an object...
+</span></span></span><span style="display:flex;"><span>  
 </span></span><span style="display:flex;"><span>std<span style="color:#fe8019">::</span>shared_ptr<span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&gt;</span> spw1 <span style="color:#fe8019">=</span> wpw.lock(); <span style="color:#928374;font-style:italic">// if wpw&#39;s expired,
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                           <span style="color:#928374;font-style:italic">// spw1 is null  
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span></span><span style="display:flex;"><span>                                           <span style="color:#928374;font-style:italic">// spw1 is null  
+</span></span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>std<span style="color:#fe8019">::</span>shared_ptr<span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&gt;</span> spw3(wpw); <span style="color:#928374;font-style:italic">// if wpw&#39;s expired,
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                   <span style="color:#928374;font-style:italic">// throw std::bad_weak_ptr
+</span></span></span><span style="display:flex;"><span>                                   <span style="color:#928374;font-style:italic">// throw std::bad_weak_ptr
 </span></span></span></code></pre></div><p><code>std::weak_ptr</code>和<code>std::shared_ptr</code>组合使用，避免两个<code>std::shared_ptr</code>互相指向导致的引用计数永远不可能为0而回收不了内存空间以致内存泄漏。</p>
 <h2 id="item-21-优先使用stdmake_unique和stdmake_shared来创建智能指针避免使用new">Item 21: 优先使用std::make_unique和std::make_shared来创建智能指针，避免使用new</h2>
 <p>优先使用智能指针，这样可以借助引用计数和RAII 来帮助释放内存，减少编码以及异常的情况下，new和delete的逻辑不配对的情况导致内存泄漏。</p>
 <h2 id="item-22-在使用pimpl-idiom技巧时把特殊的成员函数实现放到cpp文件中">Item 22: 在使用Pimpl Idiom技巧时，把特殊的成员函数实现放到cpp文件中</h2>
 <p><code>Pimpl Idiom</code> 编程技巧， 减少头文件变动：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// widget.h
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">class</span> Widget {  <span style="color:#928374;font-style:italic">// still in header &#34;widget.h&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">public</span><span style="color:#fe8019">:</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">class</span> Widget {  <span style="color:#928374;font-style:italic">// still in header &#34;widget.h&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">public</span><span style="color:#fe8019">:</span>
 </span></span><span style="display:flex;"><span>   Widget();
 </span></span><span style="display:flex;"><span>  <span style="color:#fe8019">~</span>Widget();    <span style="color:#928374;font-style:italic">// dtor is needed—see below
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  ...
+</span></span></span><span style="display:flex;"><span>  ...
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">private</span><span style="color:#fe8019">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> Impl;  <span style="color:#928374;font-style:italic">// declare implementation struct
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  Impl <span style="color:#fe8019">*</span>pImpl;  <span style="color:#928374;font-style:italic">// and pointer to it
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span></span><span style="display:flex;"><span>  Impl <span style="color:#fe8019">*</span>pImpl;  <span style="color:#928374;font-style:italic">// and pointer to it
+</span></span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// widget.cpp  
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&#34;widget.h&#34;</span><span style="color:#8ec07c">                       </span><span style="color:#928374;font-style:italic">// in impl. file &#34;widget.cpp&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&#34;gadget.h&#34;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&#34;widget.h&#34;</span><span style="color:#8ec07c">                       </span><span style="color:#928374;font-style:italic">// in impl. file &#34;widget.cpp&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&#34;gadget.h&#34;</span><span style="color:#8ec07c">
 </span></span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;string&gt;</span><span style="color:#8ec07c">
 </span></span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;vector&gt;</span><span style="color:#8ec07c">
-</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span><span style="color:#fe8019">struct</span> Widget<span style="color:#fe8019">::</span>Impl {                     <span style="color:#928374;font-style:italic">// definition of Widget::Impl
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  std<span style="color:#fe8019">::</span>string name;                       <span style="color:#928374;font-style:italic">// with data members formerly
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  std<span style="color:#fe8019">::</span>vector<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">double</span><span style="color:#fe8019">&gt;</span> data;               <span style="color:#928374;font-style:italic">// in Widget
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  Gadget g1, g2, g3;
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> Widget<span style="color:#fe8019">::</span>Impl {                     <span style="color:#928374;font-style:italic">// definition of Widget::Impl
+</span></span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>string name;                       <span style="color:#928374;font-style:italic">// with data members formerly
+</span></span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>vector<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">double</span><span style="color:#fe8019">&gt;</span> data;               <span style="color:#928374;font-style:italic">// in Widget
+</span></span></span><span style="display:flex;"><span>  Gadget g1, g2, g3;
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>Widget<span style="color:#fe8019">::</span>Widget() <span style="color:#fe8019">:</span> pImpl(<span style="color:#fe8019">new</span> Impl) {}     <span style="color:#928374;font-style:italic">// allocate data members for
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                          <span style="color:#928374;font-style:italic">// this Widget object
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>Widget<span style="color:#fe8019">::~</span>Widget() { <span style="color:#fe8019">delete</span> pImpl; }       <span style="color:#928374;font-style:italic">// destroy data members for
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                          <span style="color:#928374;font-style:italic">// this object
+</span></span></span><span style="display:flex;"><span>                                          <span style="color:#928374;font-style:italic">// this Widget object
+</span></span></span><span style="display:flex;"><span>Widget<span style="color:#fe8019">::~</span>Widget() { <span style="color:#fe8019">delete</span> pImpl; }       <span style="color:#928374;font-style:italic">// destroy data members for
+</span></span></span><span style="display:flex;"><span>                                          <span style="color:#928374;font-style:italic">// this object
 </span></span></span></code></pre></div><p>这个 Item 说的意思是因为<code>std::unique_ptr</code>的 deleter的特殊性(使用的是默认的delete，所以编译其在生成代码的时候会使用static_cast进行类型转换)， 形如上面的代码，直接替换成<code>std::unique_ptr</code>会导致 <code>struct Impl</code>的类型不完整，所以会出错， 解决的办法是，在生成<code>std::unique_ptr&lt;Widget::Impl&gt;</code>的析构代码之前，确保<code>Widget::Impl</code>是一个完整的类型。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">class</span> Widget {        <span style="color:#928374;font-style:italic">// in &#34;widget.h&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">public</span><span style="color:#fe8019">:</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">public</span><span style="color:#fe8019">:</span>
 </span></span><span style="display:flex;"><span>	Widget();
 </span></span><span style="display:flex;"><span>  ...
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">private</span><span style="color:#fe8019">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> Impl;            
 </span></span><span style="display:flex;"><span>	std<span style="color:#fe8019">::</span>unique_ptr<span style="color:#fe8019">&lt;</span>Impl<span style="color:#fe8019">&gt;</span> pImpl;     <span style="color:#928374;font-style:italic">// use smart pointer
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>};                                 <span style="color:#928374;font-style:italic">// instead of raw pointer
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span></span><span style="display:flex;"><span>};                                 <span style="color:#928374;font-style:italic">// instead of raw pointer
+</span></span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&#34;widget.h&#34;</span><span style="color:#8ec07c">                </span><span style="color:#928374;font-style:italic">// in &#34;widget.cpp&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&#34;gadget.h&#34;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&#34;gadget.h&#34;</span><span style="color:#8ec07c">
 </span></span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;string&gt;</span><span style="color:#8ec07c">
 </span></span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;vector&gt;</span><span style="color:#8ec07c">
-</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span><span style="color:#fe8019">struct</span> Widget<span style="color:#fe8019">::</span>Impl {              <span style="color:#928374;font-style:italic">// as before
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>	std<span style="color:#fe8019">::</span>string name;
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> Widget<span style="color:#fe8019">::</span>Impl {              <span style="color:#928374;font-style:italic">// as before
+</span></span></span><span style="display:flex;"><span>	std<span style="color:#fe8019">::</span>string name;
 </span></span><span style="display:flex;"><span>	std<span style="color:#fe8019">::</span>vector<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">double</span><span style="color:#fe8019">&gt;</span> data;
 </span></span><span style="display:flex;"><span>	Gadget g1, g2, g3;
 </span></span><span style="display:flex;"><span>};   
 </span></span><span style="display:flex;"><span>Widget<span style="color:#fe8019">::</span>Widget()                        <span style="color:#928374;font-style:italic">// per Item 21, create
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>	<span style="color:#fe8019">:</span> pImpl(std<span style="color:#fe8019">::</span>make_unique<span style="color:#fe8019">&lt;</span>Impl<span style="color:#fe8019">&gt;</span>()) {}  <span style="color:#928374;font-style:italic">// std::unique_ptr
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                        <span style="color:#928374;font-style:italic">// via std::make_unique
+</span></span></span><span style="display:flex;"><span>	<span style="color:#fe8019">:</span> pImpl(std<span style="color:#fe8019">::</span>make_unique<span style="color:#fe8019">&lt;</span>Impl<span style="color:#fe8019">&gt;</span>()) {}  <span style="color:#928374;font-style:italic">// std::unique_ptr
+</span></span></span><span style="display:flex;"><span>                                        <span style="color:#928374;font-style:italic">// via std::make_unique
 </span></span></span></code></pre></div><p>看如下代码：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span> <span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&#34;widget.h&#34;</span><span style="color:#8ec07c">
-</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span> Widget w;                           <span style="color:#928374;font-style:italic">// error!
+</span></span></span><span style="display:flex;"><span> Widget w;                           <span style="color:#928374;font-style:italic">// error!
 </span></span></span></code></pre></div><p>正确的做法：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">class</span> Widget {    <span style="color:#928374;font-style:italic">// as before, in &#34;widget.h&#34; 
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">public</span><span style="color:#fe8019">:</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">public</span><span style="color:#fe8019">:</span>
 </span></span><span style="display:flex;"><span>Widget();
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">~</span>Widget();        <span style="color:#928374;font-style:italic">// declaration only
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>...
+</span></span></span><span style="display:flex;"><span>...
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">private</span><span style="color:#fe8019">:</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#fe8019">struct</span> Impl;    <span style="color:#928374;font-style:italic">// as before
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  std<span style="color:#fe8019">::</span>unique_ptr<span style="color:#fe8019">&lt;</span>Impl<span style="color:#fe8019">&gt;</span> pImpl;
+</span></span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>unique_ptr<span style="color:#fe8019">&lt;</span>Impl<span style="color:#fe8019">&gt;</span> pImpl;
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&#34;widget.h&#34;</span><span style="color:#8ec07c">        </span><span style="color:#928374;font-style:italic">// as before, in &#34;widget.cpp&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&#34;gadget.h&#34;</span><span style="color:#8ec07c">
+</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&#34;gadget.h&#34;</span><span style="color:#8ec07c">
 </span></span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;string&gt;</span><span style="color:#8ec07c">
 </span></span></span><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;vector&gt;</span><span style="color:#8ec07c">
-</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span><span style="color:#fe8019">struct</span> Widget<span style="color:#fe8019">::</span>Impl {      <span style="color:#928374;font-style:italic">// as before, definition of
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  std<span style="color:#fe8019">::</span>string name;        <span style="color:#928374;font-style:italic">// Widget::Impl
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  std<span style="color:#fe8019">::</span>vector<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">double</span><span style="color:#fe8019">&gt;</span> data;
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> Widget<span style="color:#fe8019">::</span>Impl {      <span style="color:#928374;font-style:italic">// as before, definition of
+</span></span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>string name;        <span style="color:#928374;font-style:italic">// Widget::Impl
+</span></span></span><span style="display:flex;"><span>  std<span style="color:#fe8019">::</span>vector<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">double</span><span style="color:#fe8019">&gt;</span> data;
 </span></span><span style="display:flex;"><span>  Gadget g1, g2, g3;
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>Widget<span style="color:#fe8019">::</span>Widget()               <span style="color:#928374;font-style:italic">// as before
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">:</span> pImpl(std<span style="color:#fe8019">::</span>make_unique<span style="color:#fe8019">&lt;</span>Impl<span style="color:#fe8019">&gt;</span>())
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">:</span> pImpl(std<span style="color:#fe8019">::</span>make_unique<span style="color:#fe8019">&lt;</span>Impl<span style="color:#fe8019">&gt;</span>())
 </span></span><span style="display:flex;"><span>{}
 </span></span><span style="display:flex;"><span>Widget<span style="color:#fe8019">::~</span>Widget()              <span style="color:#928374;font-style:italic">// ~Widget definition
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>{}
+</span></span></span><span style="display:flex;"><span>{}
 </span></span></code></pre></div>
   </div>
 

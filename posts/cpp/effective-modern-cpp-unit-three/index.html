@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.152.2">
+  <meta name="generator" content="Hugo 0.153.1">
 
   <title>Effective Modern C&#43;&#43; 读书笔记之第三章 &middot; What a Life!</title>
 
@@ -265,17 +265,17 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>Widget a{};
 </span></span></code></pre></div><p>关于<code>C++</code>变量的初始化化，可以看<a href="http://en.cppreference.com/w/cpp/language/initialization">c++ references Initialization</a>，里面对<code>C++</code>四种类型的初始化讲的很详细，这里就简单的提一下：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//通过 `{}` 来给非静态的成员变量提供默认初始化值
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">class</span> Widget {
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">class</span> Widget {
 </span></span><span style="display:flex;"><span>  ...
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">private</span><span style="color:#fe8019">:</span>
 </span></span><span style="display:flex;"><span>	<span style="color:#fabd2f">int</span> x{ <span style="color:#d3869b">0</span> };  <span style="color:#928374;font-style:italic">// fine, x&#39;s default value is 0
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">int</span> y <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;   <span style="color:#928374;font-style:italic">// also fine
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">int</span> <span style="color:#fabd2f">z</span>(<span style="color:#d3869b">0</span>);    <span style="color:#928374;font-style:italic">// error!
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>};
+</span></span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> y <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;   <span style="color:#928374;font-style:italic">// also fine
+</span></span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">int</span> <span style="color:#fabd2f">z</span>(<span style="color:#d3869b">0</span>);    <span style="color:#928374;font-style:italic">// error!
+</span></span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 对于不可拷贝赋值的对象，也可以通过`{}`进行赋值
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>std<span style="color:#fe8019">::</span>atomic<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span><span style="color:#fe8019">&gt;</span> ai1{ <span style="color:#d3869b">0</span> }; <span style="color:#928374;font-style:italic">// fine
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>std<span style="color:#fe8019">::</span>atomic<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span><span style="color:#fe8019">&gt;</span> ai2(<span style="color:#d3869b">0</span>); <span style="color:#928374;font-style:italic">// fine
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>std<span style="color:#fe8019">::</span>atomic<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span><span style="color:#fe8019">&gt;</span> ai3 <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>; <span style="color:#928374;font-style:italic">// error!
+</span></span></span><span style="display:flex;"><span>std<span style="color:#fe8019">::</span>atomic<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span><span style="color:#fe8019">&gt;</span> ai1{ <span style="color:#d3869b">0</span> }; <span style="color:#928374;font-style:italic">// fine
+</span></span></span><span style="display:flex;"><span>std<span style="color:#fe8019">::</span>atomic<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span><span style="color:#fe8019">&gt;</span> ai2(<span style="color:#d3869b">0</span>); <span style="color:#928374;font-style:italic">// fine
+</span></span></span><span style="display:flex;"><span>std<span style="color:#fe8019">::</span>atomic<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span><span style="color:#fe8019">&gt;</span> ai3 <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>; <span style="color:#928374;font-style:italic">// error!
 </span></span></span></code></pre></div><p>在这个<code>Item</code>里，主要讲了<code>list initialization</code>初始化中类的构造函数中<code>std::initializer_list</code>作为参数的特殊情况。在<code>Item 1</code>中，<code>auto</code>使用<code>{}</code>来进行初始化的时候，<code>auto</code>变量的类型会被推导为<code>std::initializer_list&lt;T&gt;</code>而不是<code>T</code>。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">class</span> Widget
 </span></span><span style="display:flex;"><span>{
@@ -285,9 +285,9 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
 </span></span><span style="display:flex;"><span>...
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>Widget <span style="color:#fabd2f">w1</span>(<span style="color:#d3869b">10</span>, <span style="color:#fabd2f">true</span>); <span style="color:#928374;font-style:italic">//调用第一个构造函数
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>Widget w2{<span style="color:#d3869b">10</span>, <span style="color:#fabd2f">true</span>}; <span style="color:#928374;font-style:italic">//同上
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>Widget <span style="color:#fabd2f">w3</span>(<span style="color:#d3869b">10</span>, <span style="color:#d3869b">5.0</span>); <span style="color:#928374;font-style:italic">//调用第二个构造函数
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>Widget w4{<span style="color:#d3869b">10</span>, <span style="color:#d3869b">5.0</span>}; <span style="color:#928374;font-style:italic">//同上
+</span></span></span><span style="display:flex;"><span>Widget w2{<span style="color:#d3869b">10</span>, <span style="color:#fabd2f">true</span>}; <span style="color:#928374;font-style:italic">//同上
+</span></span></span><span style="display:flex;"><span>Widget <span style="color:#fabd2f">w3</span>(<span style="color:#d3869b">10</span>, <span style="color:#d3869b">5.0</span>); <span style="color:#928374;font-style:italic">//调用第二个构造函数
+</span></span></span><span style="display:flex;"><span>Widget w4{<span style="color:#d3869b">10</span>, <span style="color:#d3869b">5.0</span>}; <span style="color:#928374;font-style:italic">//同上
 </span></span></span></code></pre></div><p>但是，如果构造函数里</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">class</span> Widget {
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">public</span><span style="color:#fe8019">:</span>
@@ -297,85 +297,85 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>Widget <span style="color:#fabd2f">w1</span>(<span style="color:#d3869b">10</span>, <span style="color:#fabd2f">true</span>);<span style="color:#928374;font-style:italic">//使用第一个构造函数
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>Widget w2{<span style="color:#d3869b">10</span>, <span style="color:#fabd2f">true</span>};<span style="color:#928374;font-style:italic">//使用第三个构造函数, 这里10 和 true 都隐式转换为long double
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>Widget <span style="color:#fabd2f">w3</span>(<span style="color:#d3869b">10.</span> <span style="color:#d3869b">5.0</span>); <span style="color:#928374;font-style:italic">//使用第二个构造函数
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>Widget w4{<span style="color:#d3869b">10.</span> <span style="color:#d3869b">5.0</span>}; <span style="color:#928374;font-style:italic">//使用第三个构造函数, 这里10 和 5.0都隐式转换为long double
+</span></span></span><span style="display:flex;"><span>Widget w2{<span style="color:#d3869b">10</span>, <span style="color:#fabd2f">true</span>};<span style="color:#928374;font-style:italic">//使用第三个构造函数, 这里10 和 true 都隐式转换为long double
+</span></span></span><span style="display:flex;"><span>Widget <span style="color:#fabd2f">w3</span>(<span style="color:#d3869b">10.</span> <span style="color:#d3869b">5.0</span>); <span style="color:#928374;font-style:italic">//使用第二个构造函数
+</span></span></span><span style="display:flex;"><span>Widget w4{<span style="color:#d3869b">10.</span> <span style="color:#d3869b">5.0</span>}; <span style="color:#928374;font-style:italic">//使用第三个构造函数, 这里10 和 5.0都隐式转换为long double
 </span></span></span></code></pre></div><h2 id="item-8-nullptr优先于0和null">Item 8: nullptr优先于0和NULL</h2>
 <p><code>0</code>和<code>NULL</code>在函数重载的时候容易引起歧义，<code>nullptr</code>则不会，<code>nullptr</code>其实是<code>std::nullptr_t</code>，其没有指针类型可以指向它，它可以隐式转换为任何类型的指针。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fabd2f">void</span> <span style="color:#fabd2f">f</span>(<span style="color:#fabd2f">int</span>);        <span style="color:#928374;font-style:italic">// three overloads of f
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fabd2f">void</span> <span style="color:#fabd2f">f</span>(<span style="color:#fabd2f">bool</span>);
+</span></span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> <span style="color:#fabd2f">f</span>(<span style="color:#fabd2f">bool</span>);
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> <span style="color:#fabd2f">f</span>(<span style="color:#fabd2f">void</span><span style="color:#fe8019">*</span>);
 </span></span><span style="display:flex;"><span>f(<span style="color:#d3869b">0</span>);               <span style="color:#928374;font-style:italic">// calls f(int), not f(void*) 
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(<span style="color:#fabd2f">NULL</span>);            <span style="color:#928374;font-style:italic">// might not compile, but typically calls   
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>							      <span style="color:#928374;font-style:italic">// f(int). Never calls f(void*)
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(<span style="color:#fe8019">nullptr</span>);         <span style="color:#928374;font-style:italic">// calls f(void*) overload
+</span></span></span><span style="display:flex;"><span>f(<span style="color:#fabd2f">NULL</span>);            <span style="color:#928374;font-style:italic">// might not compile, but typically calls   
+</span></span></span><span style="display:flex;"><span>							      <span style="color:#928374;font-style:italic">// f(int). Never calls f(void*)
+</span></span></span><span style="display:flex;"><span>f(<span style="color:#fe8019">nullptr</span>);         <span style="color:#928374;font-style:italic">// calls f(void*) overload
 </span></span></span></code></pre></div><p>而且在语义上更清晰：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">auto</span> result <span style="color:#fe8019">=</span> findRecord( <span style="color:#928374;font-style:italic">/* arguments */</span> );
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">if</span> (result <span style="color:#fe8019">==</span> <span style="color:#fe8019">nullptr</span>) { <span style="color:#928374;font-style:italic">//可以肯定是的result肯定是个指针类型的变量
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  ...
+</span></span></span><span style="display:flex;"><span>  ...
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><h2 id="item-9-using-优先于-typedef">Item 9: using 优先于 typedef</h2>
 <p>在 C++11 中的类型别名使用关键字<code>using</code>来实现，但是也同样支持<code>typedef</code> 这种 C++98/C的类型别名声明关键字。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">typedef</span> std<span style="color:#fe8019">::</span>unique_ptr<span style="color:#fe8019">&lt;</span>std<span style="color:#fe8019">::</span>unordered_map<span style="color:#fe8019">&lt;</span>std<span style="color:#fe8019">::</span>string, std<span style="color:#fe8019">::</span>string<span style="color:#fe8019">&gt;</span> <span style="color:#fe8019">&gt;</span> UPtrMapSS; <span style="color:#928374;font-style:italic">//c++98
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">using</span> UPtrMapSS <span style="color:#fe8019">=</span> std<span style="color:#fe8019">::</span>unique_ptr<span style="color:#fe8019">&lt;</span>std<span style="color:#fe8019">::</span>unordered_map<span style="color:#fe8019">&lt;</span>std<span style="color:#fe8019">::</span>string, std<span style="color:#fe8019">::</span>string<span style="color:#fe8019">&gt;&gt;</span>; <span style="color:#928374;font-style:italic">//c++11 and after
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">using</span> UPtrMapSS <span style="color:#fe8019">=</span> std<span style="color:#fe8019">::</span>unique_ptr<span style="color:#fe8019">&lt;</span>std<span style="color:#fe8019">::</span>unordered_map<span style="color:#fe8019">&lt;</span>std<span style="color:#fe8019">::</span>string, std<span style="color:#fe8019">::</span>string<span style="color:#fe8019">&gt;&gt;</span>; <span style="color:#928374;font-style:italic">//c++11 and after
 </span></span></span></code></pre></div><p><code>using</code>在支持模板上比<code>typedef</code>有天然的优势：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//使用using
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span> <span style="color:#928374;font-style:italic">// MyAllocList&lt;T&gt; 
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">using</span> MyAllocList <span style="color:#fe8019">=</span> std<span style="color:#fe8019">::</span>list<span style="color:#fe8019">&lt;</span>T, MyAlloc<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;&gt;</span>; <span style="color:#928374;font-style:italic">// is synonym for
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                              <span style="color:#928374;font-style:italic">// std::list&lt;T,
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                              <span style="color:#928374;font-style:italic">// MyAlloc&lt;T&gt;&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>MyAllocList<span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&gt;</span> lw;                       <span style="color:#928374;font-style:italic">// client code
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span> <span style="color:#928374;font-style:italic">// MyAllocList&lt;T&gt; 
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">using</span> MyAllocList <span style="color:#fe8019">=</span> std<span style="color:#fe8019">::</span>list<span style="color:#fe8019">&lt;</span>T, MyAlloc<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;&gt;</span>; <span style="color:#928374;font-style:italic">// is synonym for
+</span></span></span><span style="display:flex;"><span>                                              <span style="color:#928374;font-style:italic">// std::list&lt;T,
+</span></span></span><span style="display:flex;"><span>                                              <span style="color:#928374;font-style:italic">// MyAlloc&lt;T&gt;&gt;
+</span></span></span><span style="display:flex;"><span>MyAllocList<span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&gt;</span> lw;                       <span style="color:#928374;font-style:italic">// client code
 </span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//使用typedef
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>                           <span style="color:#928374;font-style:italic">// MyAllocList&lt;T&gt;::type 
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">struct</span> MyAllocList {                           <span style="color:#928374;font-style:italic">// is synonym for
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>	<span style="color:#fe8019">typedef</span> std<span style="color:#fe8019">::</span>list<span style="color:#fe8019">&lt;</span>T, MyAlloc<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;&gt;</span> type;       <span style="color:#928374;font-style:italic">// std::list&lt;T, 
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>};                                             <span style="color:#928374;font-style:italic">// MyAlloc&lt;T&gt;&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>MyAllocList<span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&gt;::</span>type lw;                  <span style="color:#928374;font-style:italic">// client code
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>                           <span style="color:#928374;font-style:italic">// MyAllocList&lt;T&gt;::type 
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">struct</span> MyAllocList {                           <span style="color:#928374;font-style:italic">// is synonym for
+</span></span></span><span style="display:flex;"><span>	<span style="color:#fe8019">typedef</span> std<span style="color:#fe8019">::</span>list<span style="color:#fe8019">&lt;</span>T, MyAlloc<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;&gt;</span> type;       <span style="color:#928374;font-style:italic">// std::list&lt;T, 
+</span></span></span><span style="display:flex;"><span>};                                             <span style="color:#928374;font-style:italic">// MyAlloc&lt;T&gt;&gt;
+</span></span></span><span style="display:flex;"><span>MyAllocList<span style="color:#fe8019">&lt;</span>Widget<span style="color:#fe8019">&gt;::</span>type lw;                  <span style="color:#928374;font-style:italic">// client code
 </span></span></span></code></pre></div><p>特别是模板套模板的时候，<code>using</code>比<code>typedef</code>有着更清晰的可读性：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 使用typedef
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">class</span> Widget {                          <span style="color:#928374;font-style:italic">// Widget&lt;T&gt; contains
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">private</span><span style="color:#fe8019">:</span>                                <span style="color:#928374;font-style:italic">// a MyAllocList&lt;T&gt;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>		<span style="color:#fe8019">typename</span> MyAllocList<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;::</span>type list; <span style="color:#928374;font-style:italic">// as a data member
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>    ... 
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">private</span><span style="color:#fe8019">:</span>                                <span style="color:#928374;font-style:italic">// a MyAllocList&lt;T&gt;
+</span></span></span><span style="display:flex;"><span>		<span style="color:#fe8019">typename</span> MyAllocList<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;::</span>type list; <span style="color:#928374;font-style:italic">// as a data member
+</span></span></span><span style="display:flex;"><span>    ... 
 </span></span><span style="display:flex;"><span>};
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//使用using
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">class</span> Widget {
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">private</span><span style="color:#fe8019">:</span>
 </span></span><span style="display:flex;"><span>	MyAllocList<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;</span> list;   <span style="color:#928374;font-style:italic">// no &#34;typename&#34;,
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>	... 									 <span style="color:#928374;font-style:italic">// no &#34;::type&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>};
+</span></span></span><span style="display:flex;"><span>	... 									 <span style="color:#928374;font-style:italic">// no &#34;::type&#34;
+</span></span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><h2 id="item-10-优先选择限制作用域的枚举类型">Item 10: 优先选择限制作用域的枚举类型</h2>
 <p>在 C++11 引入了限制作用域的枚举类型，形如<code>enum class</code>,  而传统的枚举(enum)使用枚举值是可以直接使用，是不需要枚举类型的名字来限制的：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 传统的枚举类型
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">enum</span> Color { black, white, red }; <span style="color:#928374;font-style:italic">// black, white, red are 
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                  <span style="color:#928374;font-style:italic">// in same scope as Color
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">auto</span> white <span style="color:#fe8019">=</span> <span style="color:#fabd2f">false</span>; <span style="color:#928374;font-style:italic">// error! white already 
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                    <span style="color:#928374;font-style:italic">// declared in this scope
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">enum</span> Color { black, white, red }; <span style="color:#928374;font-style:italic">// black, white, red are 
+</span></span></span><span style="display:flex;"><span>                                  <span style="color:#928374;font-style:italic">// in same scope as Color
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span> white <span style="color:#fe8019">=</span> <span style="color:#fabd2f">false</span>; <span style="color:#928374;font-style:italic">// error! white already 
+</span></span></span><span style="display:flex;"><span>                    <span style="color:#928374;font-style:italic">// declared in this scope
 </span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 限制作用域的枚举类型
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">enum</span> <span style="color:#fe8019">class</span> Color { black, white, red }; <span style="color:#928374;font-style:italic">// black, white, red
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                        <span style="color:#928374;font-style:italic">// are scoped to Color
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">auto</span> white <span style="color:#fe8019">=</span> <span style="color:#fabd2f">false</span>; <span style="color:#928374;font-style:italic">// fine, no other
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">enum</span> <span style="color:#fe8019">class</span> Color { black, white, red }; <span style="color:#928374;font-style:italic">// black, white, red
+</span></span></span><span style="display:flex;"><span>                                        <span style="color:#928374;font-style:italic">// are scoped to Color
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span> white <span style="color:#fe8019">=</span> <span style="color:#fabd2f">false</span>; <span style="color:#928374;font-style:italic">// fine, no other
 </span></span></span></code></pre></div><p>对于限制作用域的枚举类型，使用枚举值：<code>Color c = Color::white</code> 或者<code>auto c = Color::white</code>。</p>
 <p>其次，限制作用域的枚举类型是不允许隐式转换的：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 传统的枚举类型
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">enum</span> Color { black, white, red }; 
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">enum</span> Color { black, white, red }; 
 </span></span><span style="display:flex;"><span>Color c <span style="color:#fe8019">=</span> red;
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">if</span> (c <span style="color:#fe8019">&lt;</span> <span style="color:#d3869b">14.5</span>) { <span style="color:#928374;font-style:italic">//这个在编译的时候是不会报错的，先转换为整数，然后在转换为浮点数，隐式的
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>	...
+</span></span></span><span style="display:flex;"><span>	...
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// 限制作用域的枚举类型
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">enum</span> <span style="color:#fe8019">class</span> Color { black, white, red }; 
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">enum</span> <span style="color:#fe8019">class</span> Color { black, white, red }; 
 </span></span><span style="display:flex;"><span>Color c <span style="color:#fe8019">=</span> Color<span style="color:#fe8019">::</span>red;
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">if</span> (c <span style="color:#fe8019">&lt;</span> <span style="color:#d3869b">14.5</span>) {    <span style="color:#928374;font-style:italic">// ERROR!
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  ...
+</span></span></span><span style="display:flex;"><span>  ...
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>且限制作用域的枚举可以向前声明，但是传统的枚举是不行的：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">enum</span> Color;               <span style="color:#928374;font-style:italic">// error!
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">enum</span> <span style="color:#fe8019">class</span> Color;         <span style="color:#928374;font-style:italic">// fine
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">enum</span> <span style="color:#fe8019">class</span> Color;         <span style="color:#928374;font-style:italic">// fine
 </span></span></span></code></pre></div><p>限制作用域的枚举还可以指定底层数据类型：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">enum</span> <span style="color:#fe8019">class</span> Status<span style="color:#fe8019">:</span> std<span style="color:#fe8019">::</span><span style="color:#fabd2f">uint32_t</span> { good <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>, failed <span style="color:#fe8019">=</span> <span style="color:#d3869b">1</span>,
 </span></span><span style="display:flex;"><span>                                      incomplete <span style="color:#fe8019">=</span> <span style="color:#d3869b">100</span>,
@@ -407,8 +407,8 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> <span style="color:#fabd2f">f</span>(<span style="color:#fabd2f">char</span> param) <span style="color:#fe8019">=</span> <span style="color:#fe8019">delete</span>;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>f(<span style="color:#d3869b">10</span>); <span style="color:#928374;font-style:italic">//ok
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(<span style="color:#fabd2f">true</span>); <span style="color:#928374;font-style:italic">// error
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(<span style="color:#d3869b">4.0</span>); <span style="color:#928374;font-style:italic">//error
+</span></span></span><span style="display:flex;"><span>f(<span style="color:#fabd2f">true</span>); <span style="color:#928374;font-style:italic">// error
+</span></span></span><span style="display:flex;"><span>f(<span style="color:#d3869b">4.0</span>); <span style="color:#928374;font-style:italic">//error
 </span></span></span></code></pre></div><p>同理，也可以用在模版的偏特化上，使模版不能够推导某些传入的参数：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> processPointer(T ptr);
@@ -434,20 +434,20 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
 </span></span><span style="display:flex;"><span>  <span style="color:#fe8019">virtual</span> <span style="color:#fabd2f">void</span> <span style="color:#fabd2f">mf2</span>(<span style="color:#fabd2f">int</span> x) <span style="color:#fe8019">override</span>;
 </span></span><span style="display:flex;"><span>  <span style="color:#fe8019">virtual</span> <span style="color:#fabd2f">void</span> <span style="color:#fabd2f">mf3</span>() <span style="color:#fe8019">&amp;</span> <span style="color:#fe8019">override</span>; 
 </span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">void</span> <span style="color:#fabd2f">mf4</span>() <span style="color:#fe8019">const</span> <span style="color:#fe8019">override</span>;            <span style="color:#928374;font-style:italic">// adding &#34;virtual&#34; is OK,
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>};																			<span style="color:#928374;font-style:italic">// but not necessary
+</span></span></span><span style="display:flex;"><span>};																			<span style="color:#928374;font-style:italic">// but not necessary
 </span></span></span></code></pre></div><p>成员函数的引用限定符是<code>C++11</code>的一个特性：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">class</span> Widget {
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">public</span><span style="color:#fe8019">:</span>
 </span></span><span style="display:flex;"><span> <span style="color:#fabd2f">void</span> doWork() <span style="color:#fe8019">&amp;</span>; <span style="color:#928374;font-style:italic">// 只有*this是左值的时候该成员函数会被调用
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span> <span style="color:#fabd2f">void</span> <span style="color:#fabd2f">doWork</span>() <span style="color:#fe8019">&amp;&amp;</span>; <span style="color:#928374;font-style:italic">// 只有*this是右值的时候该成员函数会被调用
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>};
+</span></span></span><span style="display:flex;"><span> <span style="color:#fabd2f">void</span> <span style="color:#fabd2f">doWork</span>() <span style="color:#fe8019">&amp;&amp;</span>; <span style="color:#928374;font-style:italic">// 只有*this是右值的时候该成员函数会被调用
+</span></span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><h2 id="item-13-优先选择const_iterators">Item 13: 优先选择const_iterators</h2>
 <p>优先使用const_iterator而不是iterator。</p>
 <p>为了最大程度的代码通用，优先使用非成员版本的begin、end、rbegin等函数，而不是与之对应的成员函数。</p>
 <h2 id="item-14-不会引发异常的函数应声明为noexcept">Item 14: 不会引发异常的函数应声明为noexcept</h2>
 <p>以下是C++98和C++11中声明一个函数不会抛出异常办法：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fabd2f">int</span> <span style="color:#fabd2f">f</span>(<span style="color:#fabd2f">int</span> x) <span style="color:#fe8019">throw</span>(); <span style="color:#928374;font-style:italic">// no exceptions from f: C++98 style 
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fabd2f">int</span> <span style="color:#fabd2f">f</span>(<span style="color:#fabd2f">int</span> x) <span style="color:#fe8019">noexcept</span>; <span style="color:#928374;font-style:italic">// no exceptions from f: C++11 style
+</span></span></span><span style="display:flex;"><span><span style="color:#fabd2f">int</span> <span style="color:#fabd2f">f</span>(<span style="color:#fabd2f">int</span> x) <span style="color:#fe8019">noexcept</span>; <span style="color:#928374;font-style:italic">// no exceptions from f: C++11 style
 </span></span></span></code></pre></div><p>noexcept 是C++11新引入的关键字，给函数声明为noexcept的好处是：</p>
 <ul>
 <li>
@@ -474,14 +474,14 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
 </li>
 <li>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fabd2f">int</span> sz;                              <span style="color:#928374;font-style:italic">// non-constexpr variable
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>...
+</span></span></span><span style="display:flex;"><span>...
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">constexpr</span> <span style="color:#fe8019">auto</span> arraySize1 <span style="color:#fe8019">=</span> sz;      <span style="color:#928374;font-style:italic">// error! sz&#39;s value not
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                     <span style="color:#928374;font-style:italic">// known at compilation
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>std<span style="color:#fe8019">::</span>array<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span>, sz<span style="color:#fe8019">&gt;</span> data1;           <span style="color:#928374;font-style:italic">// error! same problem        
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">constexpr</span> <span style="color:#fe8019">auto</span> arraySize2 <span style="color:#fe8019">=</span> <span style="color:#d3869b">10</span>;      <span style="color:#928374;font-style:italic">// fine, 10 is a
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>															       <span style="color:#928374;font-style:italic">// compile-time constant
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>std<span style="color:#fe8019">::</span>array<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span>, arraySize2<span style="color:#fe8019">&gt;</span> data2;   <span style="color:#928374;font-style:italic">// fine, arraySize2
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                     <span style="color:#928374;font-style:italic">// is constexpr
+</span></span></span><span style="display:flex;"><span>                                     <span style="color:#928374;font-style:italic">// known at compilation
+</span></span></span><span style="display:flex;"><span>std<span style="color:#fe8019">::</span>array<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span>, sz<span style="color:#fe8019">&gt;</span> data1;           <span style="color:#928374;font-style:italic">// error! same problem        
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">constexpr</span> <span style="color:#fe8019">auto</span> arraySize2 <span style="color:#fe8019">=</span> <span style="color:#d3869b">10</span>;      <span style="color:#928374;font-style:italic">// fine, 10 is a
+</span></span></span><span style="display:flex;"><span>															       <span style="color:#928374;font-style:italic">// compile-time constant
+</span></span></span><span style="display:flex;"><span>std<span style="color:#fe8019">::</span>array<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span>, arraySize2<span style="color:#fe8019">&gt;</span> data2;   <span style="color:#928374;font-style:italic">// fine, arraySize2
+</span></span></span><span style="display:flex;"><span>                                     <span style="color:#928374;font-style:italic">// is constexpr
 </span></span></span></code></pre></div></li>
 </ul>
 <p>constexpr 函数：</p>
@@ -495,19 +495,19 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
 <li>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">constexpr</span>
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">int</span> <span style="color:#fabd2f">pow</span>(<span style="color:#fabd2f">int</span> base, <span style="color:#fabd2f">int</span> exp) <span style="color:#fe8019">noexcept</span>     <span style="color:#928374;font-style:italic">// pow&#39;s a constexpr func
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>{                                       <span style="color:#928374;font-style:italic">// that never throws
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  ...                                   <span style="color:#928374;font-style:italic">// impl is below
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>}
+</span></span></span><span style="display:flex;"><span>{                                       <span style="color:#928374;font-style:italic">// that never throws
+</span></span></span><span style="display:flex;"><span>  ...                                   <span style="color:#928374;font-style:italic">// impl is below
+</span></span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">constexpr</span> <span style="color:#fe8019">auto</span> numConds <span style="color:#fe8019">=</span> <span style="color:#d3869b">5</span>;            <span style="color:#928374;font-style:italic">// # of conditions
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>std<span style="color:#fe8019">::</span>array<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span>, pow(<span style="color:#d3869b">3</span>, numConds)<span style="color:#fe8019">&gt;</span> results; <span style="color:#928374;font-style:italic">// results has 
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                           <span style="color:#928374;font-style:italic">// 3^numConds
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                           <span style="color:#928374;font-style:italic">// elements
+</span></span></span><span style="display:flex;"><span>std<span style="color:#fe8019">::</span>array<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span>, pow(<span style="color:#d3869b">3</span>, numConds)<span style="color:#fe8019">&gt;</span> results; <span style="color:#928374;font-style:italic">// results has 
+</span></span></span><span style="display:flex;"><span>                                           <span style="color:#928374;font-style:italic">// 3^numConds
+</span></span></span><span style="display:flex;"><span>                                           <span style="color:#928374;font-style:italic">// elements
 </span></span></span></code></pre></div></li>
 <li>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">auto</span> base <span style="color:#fe8019">=</span> readFromDB(<span style="color:#b8bb26">&#34;base&#34;</span>);       <span style="color:#928374;font-style:italic">// get these values
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">auto</span> exp <span style="color:#fe8019">=</span> readFromDB(<span style="color:#b8bb26">&#34;exponent&#34;</span>);    <span style="color:#928374;font-style:italic">// at runtime
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">auto</span> baseToExp <span style="color:#fe8019">=</span> pow(base, exp);      <span style="color:#928374;font-style:italic">// call pow function
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                                      <span style="color:#928374;font-style:italic">// at runtime
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span> exp <span style="color:#fe8019">=</span> readFromDB(<span style="color:#b8bb26">&#34;exponent&#34;</span>);    <span style="color:#928374;font-style:italic">// at runtime
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span> baseToExp <span style="color:#fe8019">=</span> pow(base, exp);      <span style="color:#928374;font-style:italic">// call pow function
+</span></span></span><span style="display:flex;"><span>                                      <span style="color:#928374;font-style:italic">// at runtime
 </span></span></span></code></pre></div></li>
 </ul>
 <h2 id="item-16-使常量成员函数线程安全">Item 16: 使常量成员函数线程安全</h2>
@@ -518,8 +518,8 @@ auto a = {1}; // a 的类型为 std::initializer_list&lt;int&gt; 在C&#43;&#43;1
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">public</span><span style="color:#fe8019">:</span>
 </span></span><span style="display:flex;"><span>  ...
 </span></span><span style="display:flex;"><span>  Widget(Widget<span style="color:#fe8019">&amp;&amp;</span> rhs);              <span style="color:#928374;font-style:italic">// move constructor
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  Widget<span style="color:#fe8019">&amp;</span> <span style="color:#fe8019">operator</span><span style="color:#fe8019">=</span>(Widget<span style="color:#fe8019">&amp;&amp;</span> rhs);   <span style="color:#928374;font-style:italic">// move assignment operator
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  ...
+</span></span></span><span style="display:flex;"><span>  Widget<span style="color:#fe8019">&amp;</span> <span style="color:#fe8019">operator</span><span style="color:#fe8019">=</span>(Widget<span style="color:#fe8019">&amp;&amp;</span> rhs);   <span style="color:#928374;font-style:italic">// move assignment operator
+</span></span></span><span style="display:flex;"><span>  ...
 </span></span><span style="display:flex;"><span>};
 </span></span></code></pre></div><p>编译器自动生成规则：</p>
 <ul>

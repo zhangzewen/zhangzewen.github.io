@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.152.2">
+  <meta name="generator" content="Hugo 0.153.1">
 
   <title>Effective Modern C&#43;&#43; 读书笔记之第一章 &middot; What a Life!</title>
 
@@ -273,16 +273,16 @@ template&lt;typename T&gt; void f(ParamType param);// ParamType可以是T加上�
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> <span style="color:#fabd2f">int</span><span style="color:#fe8019">&amp;</span> rx <span style="color:#fe8019">=</span> x
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>f(x);  <span style="color:#928374;font-style:italic">// T =&gt; int , ParamType =&gt; int&amp;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(cx); <span style="color:#928374;font-style:italic">// T =&gt; const int, ParamType =&gt; const int&amp;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(rx); <span style="color:#928374;font-style:italic">// T =&gt; const int, ParamType =&gt; const int&amp;
+</span></span></span><span style="display:flex;"><span>f(cx); <span style="color:#928374;font-style:italic">// T =&gt; const int, ParamType =&gt; const int&amp;
+</span></span></span><span style="display:flex;"><span>f(rx); <span style="color:#928374;font-style:italic">// T =&gt; const int, ParamType =&gt; const int&amp;
 </span></span></span></code></pre></div><p>可以看到，即使<code>rx</code>的类型是引用，T也被推断为非引用。这是因为在类型推导期间忽略了<code>rx</code>的引性。
 如果把模板中的<code>T&amp;</code> 换成 <code>const T&amp;</code>：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> f(<span style="color:#fe8019">const</span> T<span style="color:#fe8019">&amp;</span> param);
 </span></span></code></pre></div><p>有如下：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>f(x);  <span style="color:#928374;font-style:italic">// T =&gt; int, ParamType =&gt; const int&amp;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(cx); <span style="color:#928374;font-style:italic">// T =&gt; int, ParamType =&gt; const int&amp;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(rx); <span style="color:#928374;font-style:italic">// T =&gt;int,  ParamType =&gt; const int&amp;
+</span></span></span><span style="display:flex;"><span>f(cx); <span style="color:#928374;font-style:italic">// T =&gt; int, ParamType =&gt; const int&amp;
+</span></span></span><span style="display:flex;"><span>f(rx); <span style="color:#928374;font-style:italic">// T =&gt;int,  ParamType =&gt; const int&amp;
 </span></span></span></code></pre></div><p>这时候<code>const</code>将会被忽略掉。</p>
 <h3 id="case-2-paramtype-是-universal-reference类型">Case 2: <code>ParamType</code> 是 <code>universal reference</code>类型</h3>
 <p>对于此类型的推导规则如下：</p>
@@ -295,9 +295,9 @@ template&lt;typename T&gt; void f(ParamType param);// ParamType可以是T加上�
 </span></span><span style="display:flex;"><span> <span style="color:#fabd2f">void</span> f(T<span style="color:#fe8019">&amp;&amp;</span> param);
 </span></span></code></pre></div><p>有如下:</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>f(x); <span style="color:#928374;font-style:italic">// x 是左值, T =&gt; int&amp;, ParamType =&gt; int&amp;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(cx); <span style="color:#928374;font-style:italic">// cx 是左值， T =&gt; const int&amp;, ParamType =&gt; const int&amp;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(rx); <span style="color:#928374;font-style:italic">// rx 是左值， T =&gt; const int&amp;, ParamType =&gt; const int&amp;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(<span style="color:#d3869b">27</span>); <span style="color:#928374;font-style:italic">// 27 是右值， T =&gt; int, ParamType =&gt; int&amp;&amp;
+</span></span></span><span style="display:flex;"><span>f(cx); <span style="color:#928374;font-style:italic">// cx 是左值， T =&gt; const int&amp;, ParamType =&gt; const int&amp;
+</span></span></span><span style="display:flex;"><span>f(rx); <span style="color:#928374;font-style:italic">// rx 是左值， T =&gt; const int&amp;, ParamType =&gt; const int&amp;
+</span></span></span><span style="display:flex;"><span>f(<span style="color:#d3869b">27</span>); <span style="color:#928374;font-style:italic">// 27 是右值， T =&gt; int, ParamType =&gt; int&amp;&amp;
 </span></span></span></code></pre></div><h3 id="case-3-paramtype-既不是指针又不是引用">Case 3: <code>ParamType</code> 既不是指针又不是引用</h3>
 <p>模板形如：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
@@ -309,8 +309,8 @@ template&lt;typename T&gt; void f(ParamType param);// ParamType可以是T加上�
 </ol>
 <p>如：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>f(x);  <span style="color:#928374;font-style:italic">// T =&gt; int, ParamType =&gt; int
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(cx); <span style="color:#928374;font-style:italic">// T =&gt; int, ParamType =&gt; int
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(rx); <span style="color:#928374;font-style:italic">// T =&gt; int, ParamType =&gt; int
+</span></span></span><span style="display:flex;"><span>f(cx); <span style="color:#928374;font-style:italic">// T =&gt; int, ParamType =&gt; int
+</span></span></span><span style="display:flex;"><span>f(rx); <span style="color:#928374;font-style:italic">// T =&gt; int, ParamType =&gt; int
 </span></span></span></code></pre></div><p>因为模板中是按值传入参数， 即复制，进入函数的参数在复制后和原来的参数无关了，所以 附加在参数上的 <code>const</code> 和 <code>volatile</code> 已经失去作用。但是需要注意的是，对于指针<code>const</code> 和 <code>volatile</code>等修饰是会保留的，
 毕竟操作的是内存，且<code>T</code>和 <code>ParamType</code>的推导结果都是一样的，如:</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fabd2f">int</span> x <span style="color:#fe8019">=</span> <span style="color:#d3869b">27</span>;
@@ -318,9 +318,9 @@ template&lt;typename T&gt; void f(ParamType param);// ParamType可以是T加上�
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">volatile</span> <span style="color:#fabd2f">int</span><span style="color:#fe8019">*</span> vx <span style="color:#fe8019">=</span> <span style="color:#fe8019">&amp;</span>x;
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> <span style="color:#fabd2f">int</span><span style="color:#fe8019">*</span> cx <span style="color:#fe8019">=</span> <span style="color:#fe8019">&amp;</span>x;
 </span></span><span style="display:flex;"><span>f(x);   <span style="color:#928374;font-style:italic">// T =&gt; int, ParamType =&gt; int
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(px);  <span style="color:#928374;font-style:italic">// T =&gt; int*, ParamType =&gt; int*
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(vx);  <span style="color:#928374;font-style:italic">// T =&gt; volatile int*, ParamType =&gt; volatile int*
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(cx);  <span style="color:#928374;font-style:italic">// T =&gt; const int*, ParamType =&gt; const int*
+</span></span></span><span style="display:flex;"><span>f(px);  <span style="color:#928374;font-style:italic">// T =&gt; int*, ParamType =&gt; int*
+</span></span></span><span style="display:flex;"><span>f(vx);  <span style="color:#928374;font-style:italic">// T =&gt; volatile int*, ParamType =&gt; volatile int*
+</span></span></span><span style="display:flex;"><span>f(cx);  <span style="color:#928374;font-style:italic">// T =&gt; const int*, ParamType =&gt; const int*
 </span></span></span></code></pre></div><p>数组在某种意义上是指针，但是又和指针有所不同，但是在作为参数传递到函数时，数组会退化成指针。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span> name [] <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;J. P. Briggs&#34;</span>;
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span><span style="color:#fe8019">*</span> ptrToName <span style="color:#fe8019">=</span> names;
@@ -328,7 +328,7 @@ template&lt;typename T&gt; void f(ParamType param);// ParamType可以是T加上�
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fabd2f">void</span> <span style="color:#fabd2f">f</span>(<span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span><span style="color:#fe8019">*</span> buf);
 </span></span><span style="display:flex;"><span>f(name);
 </span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//等价于
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(ptrToName)
+</span></span></span><span style="display:flex;"><span>f(ptrToName)
 </span></span></code></pre></div><p>如果有函数模版：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> f(T param);
@@ -351,9 +351,9 @@ template&lt;typename T&gt; void f(ParamType param);// ParamType可以是T加上�
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> f(T param);
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>f(target); <span style="color:#928374;font-style:italic">// ParamType 和 T 会被推导为 void(*)(const char* name);
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">///////////////
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> f(T<span style="color:#fe8019">&amp;</span> param);
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>f(target); <span style="color:#928374;font-style:italic">// ParamType被推导为 void (&amp;)(const char*), T 被推导为 void (const char*)
@@ -374,17 +374,17 @@ template&lt;typename T&gt; void f(ParamType param);// ParamType可以是T加上�
 </span></span><span style="display:flex;"><span>```cpp
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span> x <span style="color:#fe8019">=</span> <span style="color:#d3869b">27</span>;
 </span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//相当于
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> func_for_x(T param)
 </span></span><span style="display:flex;"><span>func_fo_x(<span style="color:#d3869b">27</span>);
 </span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">/////////////////////////
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">const</span> <span style="color:#fe8019">auto</span> cx <span style="color:#fe8019">=</span> x;
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> <span style="color:#fe8019">auto</span> cx <span style="color:#fe8019">=</span> x;
 </span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//相当于
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> func_fo_cx(<span style="color:#fe8019">const</span> T param)
 </span></span><span style="display:flex;"><span>func_for_cx(x);
 </span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic">//////////////////////
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">const</span> <span style="color:#fe8019">auto</span><span style="color:#fe8019">&amp;</span> rx <span style="color:#fe8019">=</span> x;
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> <span style="color:#fe8019">auto</span><span style="color:#fe8019">&amp;</span> rx <span style="color:#fe8019">=</span> x;
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> func_for_rx(<span style="color:#fe8019">const</span> T<span style="color:#fe8019">&amp;</span> param)
 </span></span><span style="display:flex;"><span>func_for_rx(x);
@@ -396,19 +396,19 @@ template&lt;typename T&gt; void f(ParamType param);// ParamType可以是T加上�
 这三种情况下的参数推导规则和<code>Item 1</code>中的三种情况下的推导规则相同，如：</li>
 </ol>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">auto</span> x <span style="color:#fe8019">=</span> <span style="color:#d3869b">27</span>;       <span style="color:#928374;font-style:italic">// case 3 x的类型是 int
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">const</span> <span style="color:#fe8019">auto</span> cx <span style="color:#fe8019">=</span> x; <span style="color:#928374;font-style:italic">// case 3, x的类型是 int
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">const</span> <span style="color:#fe8019">auto</span><span style="color:#fe8019">&amp;</span> rx <span style="color:#fe8019">=</span> x;<span style="color:#928374;font-style:italic">// case 1, x的类型是 int
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> <span style="color:#fe8019">auto</span> cx <span style="color:#fe8019">=</span> x; <span style="color:#928374;font-style:italic">// case 3, x的类型是 int
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> <span style="color:#fe8019">auto</span><span style="color:#fe8019">&amp;</span> rx <span style="color:#fe8019">=</span> x;<span style="color:#928374;font-style:italic">// case 1, x的类型是 int
+</span></span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span><span style="color:#fe8019">&amp;&amp;</span> uref1 <span style="color:#fe8019">=</span> x;  <span style="color:#928374;font-style:italic">// case 2 x是左值，uref1的类型是 int&amp;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">auto</span><span style="color:#fe8019">&amp;&amp;</span> uref2 <span style="color:#fe8019">=</span> cx; <span style="color:#928374;font-style:italic">// case 2 cx是左值，uref2的类型是 int&amp;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">auto</span><span style="color:#fe8019">&amp;&amp;</span> uref3 <span style="color:#fe8019">=</span> <span style="color:#d3869b">27</span>; <span style="color:#928374;font-style:italic">// case 3 27是右值，uref3的类型是 int&amp;&amp;
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span><span style="color:#fe8019">&amp;&amp;</span> uref2 <span style="color:#fe8019">=</span> cx; <span style="color:#928374;font-style:italic">// case 2 cx是左值，uref2的类型是 int&amp;
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span><span style="color:#fe8019">&amp;&amp;</span> uref3 <span style="color:#fe8019">=</span> <span style="color:#d3869b">27</span>; <span style="color:#928374;font-style:italic">// case 3 27是右值，uref3的类型是 int&amp;&amp;
 </span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">const</span> <span style="color:#fabd2f">char</span> name[] <span style="color:#fe8019">=</span> <span style="color:#b8bb26">&#34;R. N. Briggs&#34;</span>;
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span> arr1 <span style="color:#fe8019">=</span> name; <span style="color:#928374;font-style:italic">// arr1&#39;s type is const char*
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">auto</span><span style="color:#fe8019">&amp;</span> arr2 <span style="color:#fe8019">=</span> name;<span style="color:#928374;font-style:italic">// arr2&#39;s type is const char(&amp;)[13]
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span><span style="color:#fe8019">&amp;</span> arr2 <span style="color:#fe8019">=</span> name;<span style="color:#928374;font-style:italic">// arr2&#39;s type is const char(&amp;)[13]
+</span></span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">void</span> <span style="color:#fabd2f">someFunc</span>(<span style="color:#fabd2f">int</span>, <span style="color:#fabd2f">double</span>);
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span> func1 <span style="color:#fe8019">=</span> someFunc; <span style="color:#928374;font-style:italic">// func1&#39;s type is void(*)(int, double)
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">auto</span><span style="color:#fe8019">&amp;</span> func2 <span style="color:#fe8019">=</span> someFunc; <span style="color:#928374;font-style:italic">// func2&#39;s type is void(&amp;)(int, double)
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span><span style="color:#fe8019">&amp;</span> func2 <span style="color:#fe8019">=</span> someFunc; <span style="color:#928374;font-style:italic">// func2&#39;s type is void(&amp;)(int, double)
 </span></span></span></code></pre></div><p>虽然<code>auto</code>的类型推到和模板参数类型推导一一对应，但是 <code>auto</code>在下面的情况下使用的是<code>auto</code>自己的一套类型推到规则。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">auto</span> x2{<span style="color:#d3869b">27</span>};
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span> x3 <span style="color:#fe8019">=</span> {<span style="color:#d3869b">27</span>};
@@ -418,9 +418,9 @@ template&lt;typename T&gt; void f(ParamType param);// ParamType可以是T加上�
 <h2 id="item-3-理解decltype">Item 3: 理解decltype</h2>
 <p><code>decltype</code>是由<code>C++11</code>引入， <code>decltype</code>可以推断出变量或者表达式所属的数据类型。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">const</span> <span style="color:#fabd2f">int</span> i <span style="color:#fe8019">=</span> <span style="color:#d3869b">0</span>;  <span style="color:#928374;font-style:italic">// decltype(i) ==&gt; const int
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fabd2f">bool</span> <span style="color:#fabd2f">f</span>(<span style="color:#fe8019">const</span> Widget<span style="color:#fe8019">&amp;</span> w); <span style="color:#928374;font-style:italic">// decltype(w) ==&gt; const Widget&amp;, decltype(f) ==&gt; bool(const Widget&amp;)
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>Widget w; <span style="color:#928374;font-style:italic">// decltype(w) ==&gt; Widget
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>f(w); <span style="color:#928374;font-style:italic">// decltype(f(w)) ==&gt; bool
+</span></span></span><span style="display:flex;"><span><span style="color:#fabd2f">bool</span> <span style="color:#fabd2f">f</span>(<span style="color:#fe8019">const</span> Widget<span style="color:#fe8019">&amp;</span> w); <span style="color:#928374;font-style:italic">// decltype(w) ==&gt; const Widget&amp;, decltype(f) ==&gt; bool(const Widget&amp;)
+</span></span></span><span style="display:flex;"><span>Widget w; <span style="color:#928374;font-style:italic">// decltype(w) ==&gt; Widget
+</span></span></span><span style="display:flex;"><span>f(w); <span style="color:#928374;font-style:italic">// decltype(f(w)) ==&gt; bool
 </span></span></span></code></pre></div><p>在C++11中<code>decltype</code>主要用在返回值类型依赖输入的参数类型的函数模板中，例如</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> Container, <span style="color:#fe8019">typename</span> Index<span style="color:#fe8019">&gt;</span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span> authAndAccess(Container<span style="color:#fe8019">&amp;</span> c, Index i)
@@ -432,37 +432,37 @@ template&lt;typename T&gt; void f(ParamType param);// ParamType可以是T加上�
 </span></span></code></pre></div><p>在C++11中，上面的这段代码中的<code>auto</code>并不会进行类型推导，它只是表明该处使用的是C++11的<a href="https://en.cppreference.com/w/cpp/language/function">函数返回类型后置</a>语法。
 C++11允许推导只有单个返回语句的lambda表达式，而C++14将其扩展到所有lambda和所有函数，包括具有多个返回语句的函数。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> Container, <span style="color:#fe8019">typename</span> Index<span style="color:#fe8019">&gt;</span> <span style="color:#928374;font-style:italic">// C++14
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">auto</span> authAndAccess(Container<span style="color:#fe8019">&amp;</span> c, Index i)    <span style="color:#928374;font-style:italic">// not quite
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>{                                            <span style="color:#928374;font-style:italic">// correct
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  authenticateUser();
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span> authAndAccess(Container<span style="color:#fe8019">&amp;</span> c, Index i)    <span style="color:#928374;font-style:italic">// not quite
+</span></span></span><span style="display:flex;"><span>{                                            <span style="color:#928374;font-style:italic">// correct
+</span></span></span><span style="display:flex;"><span>  authenticateUser();
 </span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> c[i];                               <span style="color:#928374;font-style:italic">// return type deduced from c[i]
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>}
+</span></span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>场景如下：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#fe8019">::</span>deque<span style="color:#fe8019">&lt;</span><span style="color:#fabd2f">int</span><span style="color:#fe8019">&gt;</span> d;
 </span></span><span style="display:flex;"><span>...
 </span></span><span style="display:flex;"><span>authAndAccess(d, <span style="color:#d3869b">5</span>) <span style="color:#fe8019">=</span> <span style="color:#d3869b">10</span>; <span style="color:#928374;font-style:italic">// authenticate user, return d[5],
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                          <span style="color:#928374;font-style:italic">// then assign 10 to it;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                          <span style="color:#928374;font-style:italic">// this won&#39;t compile!
+</span></span></span><span style="display:flex;"><span>                          <span style="color:#928374;font-style:italic">// then assign 10 to it;
+</span></span></span><span style="display:flex;"><span>                          <span style="color:#928374;font-style:italic">// this won&#39;t compile!
 </span></span></span></code></pre></div><p>已知<code>c[5]</code>的类型是<code>int&amp;</code>, 但是根据上面的<code>auto</code>的推导逻辑，引用会被忽略掉， 所以才会导致<code>authAndAccess(d, 5) = 10</code>出错。正确的做法是：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> Container, <span style="color:#fe8019">typename</span> Index<span style="color:#fe8019">&gt;</span>   <span style="color:#928374;font-style:italic">// c++14;works
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">decltype</span>(<span style="color:#fe8019">auto</span>)                                 <span style="color:#928374;font-style:italic">// but still
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>authAndAccess(Container<span style="color:#fe8019">&amp;</span> c, Index i)           <span style="color:#928374;font-style:italic">// requires
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>{                                              <span style="color:#928374;font-style:italic">// refinment
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  authenticateUser();
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">decltype</span>(<span style="color:#fe8019">auto</span>)                                 <span style="color:#928374;font-style:italic">// but still
+</span></span></span><span style="display:flex;"><span>authAndAccess(Container<span style="color:#fe8019">&amp;</span> c, Index i)           <span style="color:#928374;font-style:italic">// requires
+</span></span></span><span style="display:flex;"><span>{                                              <span style="color:#928374;font-style:italic">// refinment
+</span></span></span><span style="display:flex;"><span>  authenticateUser();
 </span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> c[i];
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>同样，对于变量的初始化也适用：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>Widget w;
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">const</span> Widget<span style="color:#fe8019">&amp;</span> cw <span style="color:#fe8019">=</span> w;
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span> myWidget1 <span style="color:#fe8019">=</span> cw; <span style="color:#928374;font-style:italic">// auto type deduction:
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                     <span style="color:#928374;font-style:italic">// myWidget1&#39;s type is Widget
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">decltype</span>(<span style="color:#fe8019">auto</span>) myWidget2 <span style="color:#fe8019">=</span> cw; <span style="color:#928374;font-style:italic">// decltype type deduction:
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                               <span style="color:#928374;font-style:italic">// myWidget2&#39;s type is
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>                               <span style="color:#928374;font-style:italic">// const Widget&amp;
+</span></span></span><span style="display:flex;"><span>                     <span style="color:#928374;font-style:italic">// myWidget1&#39;s type is Widget
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">decltype</span>(<span style="color:#fe8019">auto</span>) myWidget2 <span style="color:#fe8019">=</span> cw; <span style="color:#928374;font-style:italic">// decltype type deduction:
+</span></span></span><span style="display:flex;"><span>                               <span style="color:#928374;font-style:italic">// myWidget2&#39;s type is
+</span></span></span><span style="display:flex;"><span>                               <span style="color:#928374;font-style:italic">// const Widget&amp;
 </span></span></span></code></pre></div><p>再次优化，使用移动语义来处理传入的容器参数，毕竟拷贝还是比较耗时间的，对于<code>std::forward</code>，
 可以查看<a href="https://zhangzewen.github.io/posts/cpp/effective-modern-cpp-unit-five/">Effective Modern C++ 读书笔记之第五章</a>来辅助对下面代码进行理解：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// for c++14
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> Container, <span style="color:#fe8019">typename</span> Index<span style="color:#fe8019">&gt;</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> Container, <span style="color:#fe8019">typename</span> Index<span style="color:#fe8019">&gt;</span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">decltype</span>(<span style="color:#fe8019">auto</span>)
 </span></span><span style="display:flex;"><span>authAndAccess(Container<span style="color:#fe8019">&amp;&amp;</span> c, Index i)
 </span></span><span style="display:flex;"><span>{
@@ -470,7 +470,7 @@ C++11允许推导只有单个返回语句的lambda表达式，而C++14将其扩�
 </span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> std<span style="color:#fe8019">::</span>forward<span style="color:#fe8019">&lt;</span>Container<span style="color:#fe8019">&gt;</span>(c)[i];
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#928374;font-style:italic">// for c++11
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> Container, <span style="color:#fe8019">typename</span> Index<span style="color:#fe8019">&gt;</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> Container, <span style="color:#fe8019">typename</span> Index<span style="color:#fe8019">&gt;</span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">auto</span>
 </span></span><span style="display:flex;"><span>authAndAccess(Container<span style="color:#fe8019">&amp;&amp;</span> c, Index i)
 </span></span><span style="display:flex;"><span>    <span style="color:#fe8019">-&gt;</span> <span style="color:#fe8019">decltype</span>(std<span style="color:#fe8019">::</span>forward<span style="color:#fe8019">&lt;</span>Container<span style="color:#fe8019">&gt;</span>(c)[i])
@@ -486,9 +486,9 @@ C++11允许推导只有单个返回语句的lambda表达式，而C++14将其扩�
 <li>
 <p>人为制造编译错误</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>       <span style="color:#928374;font-style:italic">// declaration only for TD;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span><span style="color:#fe8019">class</span> TD;                  <span style="color:#928374;font-style:italic">// TD == &#34;Type Displayer&#34;
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>TD<span style="color:#fe8019">&lt;</span><span style="color:#fe8019">decltype</span>(x)<span style="color:#fe8019">&gt;</span> xType;     <span style="color:#928374;font-style:italic">// elicit errors containing
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>TD<span style="color:#fe8019">&lt;</span><span style="color:#fe8019">decltype</span>(y)<span style="color:#fe8019">&gt;</span> yType;     <span style="color:#928374;font-style:italic">// x&#39;s and y&#39;s types
+</span></span></span><span style="display:flex;"><span><span style="color:#fe8019">class</span> TD;                  <span style="color:#928374;font-style:italic">// TD == &#34;Type Displayer&#34;
+</span></span></span><span style="display:flex;"><span>TD<span style="color:#fe8019">&lt;</span><span style="color:#fe8019">decltype</span>(x)<span style="color:#fe8019">&gt;</span> xType;     <span style="color:#928374;font-style:italic">// elicit errors containing
+</span></span></span><span style="display:flex;"><span>TD<span style="color:#fe8019">&lt;</span><span style="color:#fe8019">decltype</span>(y)<span style="color:#fe8019">&gt;</span> yType;     <span style="color:#928374;font-style:italic">// x&#39;s and y&#39;s types
 </span></span></span></code></pre></div><p>编译时出错信息：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>error: aggregate <span style="color:#b8bb26">&#39;TD&lt;int&gt; xType&#39;</span> has incomplete <span style="color:#fabd2f">type</span> and cannot be defined
 </span></span><span style="display:flex;"><span>error: aggregate <span style="color:#b8bb26">&#39;TD&lt;const int *&gt; yType&#39;</span> has incomplete <span style="color:#fabd2f">type</span> and cannot be defined 
@@ -496,20 +496,20 @@ C++11允许推导只有单个返回语句的lambda表达式，而C++14将其扩�
 <li>
 <p>运行时打印日志</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#fe8019">typeid</span>(x).name() <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#39;\n&#39;</span>; <span style="color:#928374;font-style:italic">// display types for
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#fe8019">typeid</span>(y).name() <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#39;\n&#39;</span>; <span style="color:#928374;font-style:italic">// x and y
+</span></span></span><span style="display:flex;"><span>std<span style="color:#fe8019">::</span>cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#fe8019">typeid</span>(y).name() <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#39;\n&#39;</span>; <span style="color:#928374;font-style:italic">// x and y
 </span></span></span></code></pre></div><p>除此之外，还可以借助<code>boost</code>库</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>   <span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;boost/type_index.hpp&gt;</span><span style="color:#8ec07c">
-</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span>   <span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
+</span></span></span><span style="display:flex;"><span>   <span style="color:#fe8019">template</span><span style="color:#fe8019">&lt;</span><span style="color:#fe8019">typename</span> T<span style="color:#fe8019">&gt;</span>
 </span></span><span style="display:flex;"><span>   <span style="color:#fabd2f">void</span> f(<span style="color:#fe8019">const</span> T<span style="color:#fe8019">&amp;</span> param)
 </span></span><span style="display:flex;"><span>   {
 </span></span><span style="display:flex;"><span>     <span style="color:#fe8019">using</span> std<span style="color:#fe8019">::</span>cout;
 </span></span><span style="display:flex;"><span>     <span style="color:#fe8019">using</span> boost<span style="color:#fe8019">::</span>typeindex<span style="color:#fe8019">::</span>type_id_with_cvr;
 </span></span><span style="display:flex;"><span>     <span style="color:#928374;font-style:italic">// show T
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>     cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;T = &#34;</span>
+</span></span></span><span style="display:flex;"><span>     cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;T = &#34;</span>
 </span></span><span style="display:flex;"><span>          <span style="color:#fe8019">&lt;&lt;</span> type_id_with_cvr<span style="color:#fe8019">&lt;</span>T<span style="color:#fe8019">&gt;</span>().pretty_name() <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#39;\n&#39;</span>;
 </span></span><span style="display:flex;"><span>          <span style="color:#928374;font-style:italic">// show param&#39;s type
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>     cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;param = &#34;</span>
+</span></span></span><span style="display:flex;"><span>     cout <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#34;param = &#34;</span>
 </span></span><span style="display:flex;"><span>          <span style="color:#fe8019">&lt;&lt;</span> type_id_with_cvr<span style="color:#fe8019">&lt;</span><span style="color:#fe8019">decltype</span>(param)<span style="color:#fe8019">&gt;</span>().pretty_name()
 </span></span><span style="display:flex;"><span>          <span style="color:#fe8019">&lt;&lt;</span> <span style="color:#b8bb26">&#39;\n&#39;</span>; ...
 </span></span><span style="display:flex;"><span>   }

@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="Hugo 0.152.2">
+  <meta name="generator" content="Hugo 0.153.1">
 
   <title>[译]Debugging with eBPF Part 1: Tracing Go function arguments in prod &middot; What a Life!</title>
 
@@ -305,12 +305,12 @@
 <p><img src="https://blog.px.dev/static/87301c7282e8f8270fee2afb9fe85c81/app-trace.svg" alt="Details of how a debug trap instruction is used call a BPF program"></p>
 <p>用于此例子的 BPF 功能相对简单； C代码如下所示。 我们注册这个函数，以便每次调用<code>main.computeE</code> 时都会调用它。 一旦它被调用，我们只需读取函数参数并写入 perf 缓冲区。 可以<a href="https://github.com/pixie-io/pixie-demos/blob/main/simple-gotracing/trace_example/trace.go">点击</a>查看完整的示例。</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#8ec07c">#include</span> <span style="color:#8ec07c;font-style:italic">&lt;uapi/linux/ptrace.h&gt;</span><span style="color:#8ec07c">
-</span></span></span><span style="display:flex;"><span><span style="color:#8ec07c"></span>
+</span></span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#fabd2f">BPF_PERF_OUTPUT</span>(trace);
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#fe8019">inline</span> <span style="color:#fabd2f">int</span> <span style="color:#fabd2f">computeECalled</span>(<span style="color:#fe8019">struct</span> pt_regs <span style="color:#fe8019">*</span>ctx) {
 </span></span><span style="display:flex;"><span>  <span style="color:#928374;font-style:italic">// The input argument is stored in ax.
-</span></span></span><span style="display:flex;"><span><span style="color:#928374;font-style:italic"></span>  <span style="color:#fabd2f">long</span> val <span style="color:#fe8019">=</span> ctx<span style="color:#fe8019">-&gt;</span>ax;
+</span></span></span><span style="display:flex;"><span>  <span style="color:#fabd2f">long</span> val <span style="color:#fe8019">=</span> ctx<span style="color:#fe8019">-&gt;</span>ax;
 </span></span><span style="display:flex;"><span>  trace.<span style="color:#fabd2f">perf_submit</span>(ctx, <span style="color:#fe8019">&amp;</span>val, <span style="color:#fe8019">sizeof</span>(val));
 </span></span><span style="display:flex;"><span>  <span style="color:#fe8019">return</span> <span style="color:#d3869b">0</span>;
 </span></span><span style="display:flex;"><span>}
