@@ -16,7 +16,7 @@
 lab3 是根据论文实现raft算法，该 lab 是后续 lab4，lab5的基础。在此 lab 中，需要实现选举，日志复制，状态存储和快照这四个部分，层层递进，逐渐实现一个可用的raft算法。">
   <meta itemprop="datePublished" content="2025-12-11T15:32:46+08:00">
   <meta itemprop="dateModified" content="2025-12-11T15:32:46+08:00">
-  <meta itemprop="wordCount" content="966">
+  <meta itemprop="wordCount" content="965">
   <meta itemprop="image" content="https://zhangzewen.github.io/images/profile.png">
   <meta itemprop="keywords" content="公开课,分布式系统,Raft">
 
@@ -458,7 +458,7 @@ than combining multiple activities into a single goroutine.</p>
 </ul>
 <p>Snapshot（即快照） 就是来解决此问题，lab 提供了如下接口：</p>
 <div class="highlight"><pre tabindex="0" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#fabd2f">Snapshot</span>(index <span style="color:#fabd2f">int</span>, snapshot []<span style="color:#fabd2f">byte</span>)
-</span></span></code></pre></div><p>其中的 index 是快照的时间点，在本 lab 中 是 logs 的下标，snapshot 是上层应用所做的快照，这个快照你可以理解为对<strong>包括 index 以及之前的日志</strong>进行压缩日志压缩，所以这个 snapshot 不需要考虑是怎么生成的，只需要要在修改 Part 3 的相关代码对其进行状态保存。 另外，InstallSnapshot 这个rpc 的调用和处理逻辑是和 AppendEntries 是相通的。 至此，这个部分的问题就演变为一个循环数组的问题。</p>
+</span></span></code></pre></div><p>其中的 index 是快照的时间点，在本 lab 中 是 logs 的下标，snapshot 是上层应用所做的快照，这个快照你可以理解为对<strong>包括 index 以及之前的日志</strong>进行压缩日志压缩，所以这个 snapshot 不需要考虑是怎么生成的，只需要要在修改 Part 3 的相关代码对其进行状态保存。 另外，InstallSnapshot 这个rpc 的调用和处理逻辑是和 AppendEntries 是相通的。</p>
 <p>还有就是何时调用 InstallSnapshot，在课件中给出了答案：</p>
 <blockquote>
 <p>problem: what if follower&rsquo;s log ends before leader&rsquo;s log starts?</p>
